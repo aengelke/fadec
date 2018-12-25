@@ -5,6 +5,10 @@
 #include <stddef.h>
 #include <stdint.h>
 
+#if defined(ARCH_X86_64) && __SIZEOF_POINTER__ < 8
+#error "Decoding x86-64 requires a 64-bit architecture"
+#endif
+
 #ifndef ssize_t
 #define ssize_t intptr_t
 #endif

@@ -1,0 +1,1 @@
+option('archmode', type: 'combo', choices: ['32', '64'])

@@ -29,14 +29,13 @@ if get_option('warning_level').to_int() >= 3
                         language: 'c')
 endif
 
-c_compiler = meson.get_compiler('c')
-pointer_size = c_compiler.sizeof('void*')
-if pointer_size == 4
+archmode = get_option('archmode')
+if archmode == '32'
   add_project_arguments(['-DARCH_386'], language: 'c')
-elif pointer_size == 8
+elif archmode == '64'
   add_project_arguments(['-DARCH_X86_64'], language: 'c')
 else
-  error('Invalid pointer size')
+  error('Invalid architecture mode')
 endif
 
 instr_data = custom_target('tables',
