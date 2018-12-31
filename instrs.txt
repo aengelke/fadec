@@ -1175,3 +1175,15 @@ df//7                 M     GP     -      -      -      FISTP_I64
 df//e0                O     GP16   -      -      -      FSTSW
 df//f0+               AO    FPU    FPU    -      -      FCOMIP
 df//f8+               AO    FPU    FPU    -      -      FUCOMIP
+#
+# Control Flow Enforcement
+F3.0f01//5            M     GP64   -      -      -      RSTORSSP
+F3.0f01//e8           NP    -      -      -      -      SETSSBSY
+F3.0f01//ea           NP    -      -      -      -      SAVEPREVSSP
+F3.0f1e//1            M     GP     -      -      -      RDSSP
+F3.0f1e//fa           NP    -      -      -      -      ENDBR64
+F3.0f1e//fb           NP    -      -      -      -      ENDBR32
+66.0f38f5             MR    GP     GP     -      -      WRUSS
+NP.0f38f6             MR    GP     GP     -      -      WRSS
+F3.0fae//5            M     GP     -      -      -      INCSSP INSTR_WIDTH
+F3.0fae//6            M     GP     -      -      -      CLRSSBSY
