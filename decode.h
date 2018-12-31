@@ -75,6 +75,8 @@ enum PrefixSet
     PREFIX_SEG_FS = 1 << 0,
     PREFIX_SEG_GS = 1 << 1,
     PREFIX_SEG_CS = 1 << 12,
+    PREFIX_SEG_DS = 1 << 17,
+    PREFIX_SEG_ES = 1 << 18,
     PREFIX_OPSZ = 1 << 2,
     PREFIX_ADDRSZ = 1 << 3,
     PREFIX_LOCK = 1 << 4,

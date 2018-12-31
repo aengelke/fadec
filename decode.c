@@ -65,6 +65,14 @@ decode_prefixes(const uint8_t* buffer, int len, PrefixSet* out_prefixes,
         {
             prefixes |= PREFIX_SEG_CS;
         }
+        else if (prefix == 0x26)
+        {
+            prefixes |= PREFIX_SEG_ES;
+        }
+        else if (prefix == 0x3E)
+        {
+            prefixes |= PREFIX_SEG_DS;
+        }
         else if (prefix == 0x64)
         {
             prefixes |= PREFIX_SEG_FS;
@@ -510,6 +518,18 @@ decode(const uint8_t* buffer, int len, Instr* instr)
     else if (prefixes & PREFIX_SEG_GS)
     {
         instr->segment = RI_GS;
+    }
+    else if (prefixes & PREFIX_SEG_CS)
+    {
+        instr->segment = RI_CS;
+    }
+    else if (prefixes & PREFIX_SEG_DS)
+    {
+        instr->segment = RI_DS;
+    }
+    else if (prefixes & PREFIX_SEG_ES)
+    {
+        instr->segment = RI_ES;
     }
     else
     {

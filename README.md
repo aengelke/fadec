@@ -14,5 +14,6 @@ Currently, decoding 32-bit assembly required the `ARCH_386` macro to be defined 
 - The layout of entries in the tables can be improved to improve usage of caches. (Help needed.)
 - Low test coverage. (Help needed.)
 - No benchmarking has been performed yet. (Help needed.)
+- Prefixes for indirect jumps and calls are not properly decoded, e.g. `notrack`, `bnd`. This requires additional information on the prefix ordering, which is currently not decoded. (Analysis of performance impact and help needed.)
 
 If you find any other issues, please report a bug. Or, even better, send a patch fixing the issue.
