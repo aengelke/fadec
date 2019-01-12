@@ -1,7 +1,8 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <sys/mman.h>
+#include <inttypes.h>
+#include <time.h>
 
 #include <decode.h>
 
@@ -11,62 +12,74 @@ uint8_t
 parse_nibble(const char nibble)
 {
     if (nibble >= '0' && nibble <= '9')
-    {
         return nibble - '0';
-    }
     else if (nibble >= 'a' && nibble <= 'f')
-    {
         return nibble - 'a' + 10;
-    }
     else if (nibble >= 'A' && nibble <= 'F')
-    {
         return nibble - 'A' + 10;
-    }
-    else
-    {
-        printf("Invalid hexadecimal number: %x\n", nibble);
-        exit(1);
-        return 0;
-    }
+    printf("Invalid hexadecimal number: %x\n", nibble);
+    exit(1);
 }
 
 int
 main(int argc, char** argv)
 {
-    if (argc != 2)
+    if (argc != 2 && argc != 3)
     {
-        printf("usage: %s [instruction bytes]\n", argv[0]);
+        printf("usage: %s [instruction bytes] ([repetitions])\n", argv[0]);
         return -1;
     }
 
-    void* code = mmap((void*) 0x1238000, 0x2000, PROT_READ|PROT_WRITE,
-                      MAP_PRIVATE|MAP_ANONYMOUS|MAP_FIXED, -1, 0);
-
-    uint8_t* current_code = code;
+    // Avoid allocation by transforming hex to binary in-place.
+    uint8_t* code = (uint8_t*) argv[1];
+    uint8_t* code_end = code;
     char* hex = argv[1];
-    for (; *hex && *(hex + 1); hex += 2, current_code++)
-    {
-        *current_code = (parse_nibble(hex[0]) << 4) | parse_nibble(hex[1]);
-    }
+    for (; *hex; hex += 2, code_end++)
+        *code_end = (parse_nibble(hex[0]) << 4) | parse_nibble(hex[1]);
 
-    size_t length = (size_t) current_code - (size_t) code;
+    size_t length = (size_t) (code_end - code);
+
+    size_t repetitions = 1;
+    if (argc >= 3)
+        repetitions = strtoul(argv[2], NULL, 0);
+
+    struct timespec time_start;
+    struct timespec time_end;
 
     Instr instr;
-    int result = decode(code, length, &instr);
-    if (result < 0)
-    {
-        puts("Decode failed.");
-        return -1;
-    }
-    else if ((size_t) result != length)
-    {
-        printf("Decode used %u bytes, not %u.\n", (unsigned int) result, (unsigned int) length);
-        return -1;
-    }
 
-    char buffer[128];
-    instr_format(&instr, buffer);
-    puts(buffer);
+    __asm__ volatile("" : : : "memory");
+    clock_gettime(CLOCK_MONOTONIC, &time_start);
+    for (size_t i = 0; i < repetitions; i++)
+    {
+        size_t current_off = 0;
+        while (current_off != length)
+        {
+            size_t remaining = length - current_off;
+            int retval = decode(code + current_off, remaining, &instr);
+            if (retval < 0)
+                goto fail;
+            current_off += retval;
+        }
+    }
+    clock_gettime(CLOCK_MONOTONIC, &time_end);
+    __asm__ volatile("" : : : "memory");
+
+    char format_buffer[128];
+    instr_format(&instr, format_buffer);
+    printf("%s\n", format_buffer);
+
+    if (repetitions > 1)
+    {
+        uint64_t nsecs = 1000000000ull * (time_end.tv_sec - time_start.tv_sec) +
+                                        (time_end.tv_nsec - time_start.tv_nsec);
+
+        printf("%" PRIu64 " ns\n", nsecs);
+    }
 
     return 0;
+
+fail:
+    puts("Decoding failed.");
+    return 1;
 }
