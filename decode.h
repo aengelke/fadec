@@ -145,6 +145,5 @@ typedef struct Instr Instr;
 
 int decode(const uint8_t* buffer, int len, DecodeMode mode, Instr* out_instr);
 void instr_format(const Instr* instr, char buffer[128]);
-void instr_print(const Instr* instr) __attribute__((deprecated));
 
 #endif
