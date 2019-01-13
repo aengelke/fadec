@@ -456,40 +456,19 @@ decode(const uint8_t* buffer, int len, DecodeMode mode, Instr* instr)
         instr->segment = RI_DS;
     }
 
-    uint8_t op_size_log = 0;
+    uint8_t op_size = 0;
     if (desc->gp_size_8)
-    {
-        op_size_log = 1;
-    }
+        op_size = 1;
     else if (mode == DECODE_64 && (prefixes & PREFIX_REXW))
-    {
-        op_size_log = 4;
-    }
+        op_size = 8;
     else if (prefixes & PREFIX_OPSZ)
-    {
-        op_size_log = 2;
-    }
-#if defined(ARCH_X86_64)
+        op_size = 2;
     else if (mode == DECODE_64 && desc->gp_size_def64)
-    {
-        op_size_log = 4;
-    }
-#endif
+        op_size = 8;
     else
-    {
-        op_size_log = 3;
-    }
+        op_size = 4;
 
-    uint8_t op_size = (1 << op_size_log) >> 1;
-
-    if (UNLIKELY(desc->gp_instr_width))
-    {
-        instr->width = op_size_log;
-    }
-    else
-    {
-        instr->width = 0;
-    }
+    instr->op_size = UNLIKELY(desc->gp_instr_width) ? op_size : 0;
 
     uint8_t vec_size = 16;
     if (prefixes & PREFIX_VEXL)
@@ -498,11 +477,10 @@ decode(const uint8_t* buffer, int len, DecodeMode mode, Instr* instr)
     }
 
     // Compute address size.
-    uint8_t addr_size_log = mode == DECODE_64 ? 4 : 3;
+    uint8_t addr_size = mode == DECODE_64 ? 8 : 4;
     if (prefixes & PREFIX_ADDRSZ)
-        addr_size_log -= 1;
-    instr->addr_size = addr_size_log;
-    uint8_t addr_size = (1 << addr_size_log) >> 1;
+        addr_size >>= 1;
+    instr->addr_size = addr_size;
 
     uint8_t operand_sizes[4] = {
         0, 1 << desc->gp_fixed_operand_size, op_size, vec_size
