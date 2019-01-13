@@ -2,7 +2,13 @@
 test_driver = executable('test_driver', 'driver.c',
                          dependencies: libx86decode,
                          c_args: ['-D_GNU_SOURCE'])
-test_args = [files('test.py'), test_driver, archmode]
+test_args = [files('test.py'), test_driver]
+if decode_32
+  test_args += ['--32']
+endif
+if decode_64
+  test_args += ['--64']
+endif
 
 
 ## Test cases

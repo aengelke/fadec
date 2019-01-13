@@ -1,1 +1,1 @@
-option('archmode', type: 'combo', choices: ['32', '64'])
+option('archmode', type: 'combo', choices: ['both', 'only32', 'only64'])

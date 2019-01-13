@@ -24,24 +24,40 @@ parse_nibble(const char nibble)
 int
 main(int argc, char** argv)
 {
-    if (argc != 2 && argc != 3)
+    if (argc != 3 && argc != 4)
     {
-        printf("usage: %s [instruction bytes] ([repetitions])\n", argv[0]);
+        printf("usage: %s [mode] [instruction bytes] ([repetitions])\n", argv[0]);
         return -1;
     }
 
+    DecodeMode mode;
+    size_t mode_input = strtoul(argv[1], NULL, 0);
+    if (mode_input == 32)
+    {
+        mode = DECODE_32;
+    }
+    else if (mode_input == 64)
+    {
+        mode = DECODE_64;
+    }
+    else
+    {
+        printf("Unknown decode mode\n");
+        return 1;
+    }
+
     // Avoid allocation by transforming hex to binary in-place.
-    uint8_t* code = (uint8_t*) argv[1];
+    uint8_t* code = (uint8_t*) argv[2];
     uint8_t* code_end = code;
-    char* hex = argv[1];
+    char* hex = argv[2];
     for (; *hex; hex += 2, code_end++)
         *code_end = (parse_nibble(hex[0]) << 4) | parse_nibble(hex[1]);
 
     size_t length = (size_t) (code_end - code);
 
     size_t repetitions = 1;
-    if (argc >= 3)
-        repetitions = strtoul(argv[2], NULL, 0);
+    if (argc >= 4)
+        repetitions = strtoul(argv[3], NULL, 0);
 
     struct timespec time_start;
     struct timespec time_end;
@@ -56,7 +72,7 @@ main(int argc, char** argv)
         while (current_off != length)
         {
             size_t remaining = length - current_off;
-            int retval = decode(code + current_off, remaining, &instr);
+            int retval = decode(code + current_off, remaining, mode, &instr);
             if (retval < 0)
                 goto fail;
             current_off += retval;

@@ -1,8 +1,6 @@
 # libx86decode
 
-A fast and lightweight decoder for x86 and x86-64. *This is not a disassembler, it does not intend to procude valid assembly.* To meet the goal of speed, lookup tables are used to map the opcode the (internal) description of the instruction encoding. This table currently has a size of roughly 21 kiB.
-
-Currently, decoding 32-bit assembly required the `ARCH_386` macro to be defined and  is only tested when compiling as 32-bit binary. Decoding of 64-bit instruction requires the macro `ARCH_X86_64` and is only supported in 64-bit mode. This restriction might change in future.
+A fast and lightweight decoder for x86 and x86-64. *This is not a disassembler, it does not intend to produce valid assembly.* To meet the goal of speed, lookup tables are used to map the opcode the (internal) description of the instruction encoding. This table currently has a size of roughly 21 kiB.
 
 ### Known issues
 - An implicit `FWAIT` in FPU instructions is decoded as a separate instruction. For example, the instruction `FINIT` is decoded as an `FWAIT` followed by an `FINIT` where as `FNINIT` is decoded as a plain `FINIT` instruction.

@@ -29,13 +29,21 @@ if get_option('warning_level').to_int() >= 3
                         language: 'c')
 endif
 
+decode_32 = false
+decode_64 = false
+
 archmode = get_option('archmode')
-if archmode == '32'
+if archmode == 'only32' or archmode == 'both'
   add_project_arguments(['-DARCH_386'], language: 'c')
-elif archmode == '64'
+  decode_32 = true
+endif
+if archmode == 'only64' or archmode == 'both'
   add_project_arguments(['-DARCH_X86_64'], language: 'c')
-else
-  error('Invalid architecture mode')
+  decode_64 = true
+endif
+
+if not decode_32 and not decode_64
+  error('no architecture mode')
 endif
 
 instr_data = custom_target('tables',

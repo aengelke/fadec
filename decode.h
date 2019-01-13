@@ -5,10 +5,6 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#if defined(ARCH_X86_64) && __SIZEOF_POINTER__ < 8
-#error "Decoding x86-64 requires a 64-bit architecture"
-#endif
-
 #ifndef ssize_t
 #define ssize_t intptr_t
 #endif
@@ -21,6 +17,13 @@ enum
 };
 #undef DECODE_TABLE_MNEMONICS
 #undef MNEMONIC
+
+enum DecodeMode {
+    DECODE_64 = 0,
+    DECODE_32 = 1,
+};
+
+typedef enum DecodeMode DecodeMode;
 
 enum RegIndex {
     RI_AL = 0,
@@ -40,7 +43,6 @@ enum RegIndex {
     RI_BP,
     RI_SI,
     RI_DI,
-#if defined(ARCH_X86_64)
     RI_R8,
     RI_R9,
     RI_R10,
@@ -49,12 +51,9 @@ enum RegIndex {
     RI_R13,
     RI_R14,
     RI_R15,
-#endif
 
     // EIP cannot be encoded in Protected/Compatibility Mode
-#if defined(ARCH_X86_64)
     RI_IP = 0x10,
-#endif
 
     RI_ES = 0,
     RI_CS,
@@ -82,13 +81,11 @@ enum PrefixSet
     PREFIX_LOCK = 1 << 4,
     PREFIX_REPNZ = 1 << 5,
     PREFIX_REP = 1 << 6,
-#if defined(ARCH_X86_64)
     PREFIX_REX = 1 << 7,
     PREFIX_REXB = 1 << 8,
     PREFIX_REXX = 1 << 9,
     PREFIX_REXR = 1 << 10,
     PREFIX_REXW = 1 << 11,
-#endif
     PREFIX_ESC_NONE = 0 << 13,
     PREFIX_ESC_0F = 1 << 13,
     PREFIX_ESC_0F38 = 2 << 13,
@@ -144,12 +141,9 @@ typedef struct Instr Instr;
 #define INSTR_HAS_REPNZ(instr) ((instr)->prefixes & PREFIX_REPNZ)
 #define INSTR_HAS_LOCK(instr) ((instr)->prefixes & PREFIX_LOCK)
 #define INSTR_HAS_ADDRSZ(instr) ((instr)->prefixes & PREFIX_ADDRSZ)
-
-#if defined(ARCH_X86_64)
 #define INSTR_HAS_REX(instr) ((instr)->prefixes & PREFIX_REX)
-#endif
 
-int decode(const uint8_t* buffer, int len, Instr* out_instr);
+int decode(const uint8_t* buffer, int len, DecodeMode mode, Instr* out_instr);
 void instr_format(const Instr* instr, char buffer[128]);
 void instr_print(const Instr* instr) __attribute__((deprecated));
 

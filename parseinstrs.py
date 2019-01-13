@@ -261,14 +261,10 @@ def bytes_to_table(data):
     return "\n".join(hexdata[i:i+80] for i in range(0, len(hexdata), 80))
 
 template = """// Auto-generated file -- do not modify!
-#if defined(DECODE_TABLE_DATA)
-#if defined(ARCH_386)
+#if defined(DECODE_TABLE_DATA_32)
 {hex_table32}
-#elif defined(ARCH_X86_64)
+#elif defined(DECODE_TABLE_DATA_64)
 {hex_table64}
-#else
-#error "unknown architecture"
-#endif
 #elif defined(DECODE_TABLE_MNEMONICS)
 {mnemonic_list}
 #elif defined(DECODE_TABLE_STRTAB1)

@@ -5,14 +5,28 @@
 #include <decode.h>
 
 
+#if defined(ARCH_X86_64) && __SIZEOF_POINTER__ < 8
+#error "Decoding x86-64 requires a 64-bit architecture"
+#endif
+
 #define LIKELY(x) __builtin_expect((x), 1)
 #define UNLIKELY(x) __builtin_expect((x), 0)
 
-#define DECODE_TABLE_DATA
-static const uint8_t _decode_table[] = {
+#if defined(ARCH_386)
+#define DECODE_TABLE_DATA_32
+static const uint8_t _decode_table32[] = {
 #include <decode-table.inc>
 };
-#undef DECODE_TABLE_DATA
+#undef DECODE_TABLE_DATA_32
+#endif
+
+#if defined(ARCH_X86_64)
+#define DECODE_TABLE_DATA_64
+static const uint8_t _decode_table64[] = {
+#include <decode-table.inc>
+};
+#undef DECODE_TABLE_DATA_64
+#endif
 
 
 #define ENTRY_NONE 0
@@ -52,8 +66,8 @@ static const uint8_t _decode_table[] = {
 
 static
 int
-decode_prefixes(const uint8_t* buffer, int len, PrefixSet* out_prefixes,
-                uint8_t* out_vex_operand)
+decode_prefixes(const uint8_t* buffer, int len, DecodeMode mode,
+                PrefixSet* out_prefixes, uint8_t* out_vex_operand)
 {
     int off = 0;
     PrefixSet prefixes = 0;
@@ -102,7 +116,7 @@ decode_prefixes(const uint8_t* buffer, int len, PrefixSet* out_prefixes,
             prefixes |= PREFIX_REP;
         }
 #if defined(ARCH_X86_64)
-        else if (LIKELY(prefix >= 0x40 && prefix <= 0x4F))
+        else if (mode == DECODE_64 && LIKELY(prefix >= 0x40 && prefix <= 0x4F))
         {
             prefixes |= PREFIX_REX;
             if (prefix & 0x1)
@@ -134,7 +148,7 @@ decode_prefixes(const uint8_t* buffer, int len, PrefixSet* out_prefixes,
                 return -1;
             }
 #if defined(ARCH_386)
-            if ((buffer[off + 1] & 0xc0) != 0xc0)
+            if (mode == DECODE_32 && (buffer[off + 1] & 0xc0) != 0xc0)
             {
                 break;
             }
@@ -144,15 +158,15 @@ decode_prefixes(const uint8_t* buffer, int len, PrefixSet* out_prefixes,
 
             prefixes |= PREFIX_VEX;
 #if defined(ARCH_X86_64)
-            if ((byte2 & 0x80) == 0)
+            if (mode == DECODE_64 && (byte2 & 0x80) == 0)
             {
                 prefixes |= PREFIX_REXR;
             }
-            if ((byte2 & 0x40) == 0)
+            if (mode == DECODE_64 && (byte2 & 0x40) == 0)
             {
                 prefixes |= PREFIX_REXX;
             }
-            if ((byte2 & 0x20) == 0)
+            if (mode == DECODE_64 && (byte2 & 0x20) == 0)
             {
                 prefixes |= PREFIX_REXB;
             }
@@ -172,7 +186,7 @@ decode_prefixes(const uint8_t* buffer, int len, PrefixSet* out_prefixes,
             // SDM Vol 2A 2-16 (Dec. 2016)
             // - "In 32-bit modes, VEX.W is silently ignored."
             // - VEX.W either replaces REX.W, is don't care or is reserved.
-            if (byte3 & 0x80)
+            if (mode == DECODE_64 && (byte3 & 0x80))
             {
                 prefixes |= PREFIX_REXW;
             }
@@ -198,7 +212,7 @@ decode_prefixes(const uint8_t* buffer, int len, PrefixSet* out_prefixes,
                 return -1;
             }
 #if defined(ARCH_386)
-            if ((buffer[off + 1] & 0xc0) != 0xc0)
+            if (mode == DECODE_32 && (buffer[off + 1] & 0xc0) != 0xc0)
             {
                 break;
             }
@@ -207,7 +221,7 @@ decode_prefixes(const uint8_t* buffer, int len, PrefixSet* out_prefixes,
 
             prefixes |= PREFIX_VEX | PREFIX_ESC_0F;
 #if defined(ARCH_X86_64)
-            if ((byte & 0x80) == 0)
+            if (mode == DECODE_64 && (byte & 0x80) == 0)
             {
                 prefixes |= PREFIX_REXR;
             }
@@ -246,7 +260,7 @@ decode_prefixes(const uint8_t* buffer, int len, PrefixSet* out_prefixes,
 
 static
 int
-decode_modrm(const uint8_t* buffer, int len, Instr* instr,
+decode_modrm(const uint8_t* buffer, int len, DecodeMode mode, Instr* instr,
              struct Operand* out_o1, struct Operand* out_o2)
 {
     int off = 0;
@@ -336,10 +350,11 @@ decode_modrm(const uint8_t* buffer, int len, Instr* instr,
         if (mod == 0 && rm == 5)
         {
 #if defined(ARCH_X86_64)
-            out_o1->reg = RI_IP;
-#else
-            out_o1->reg = REG_NONE;
+            if (mode == DECODE_64)
+                out_o1->reg = RI_IP;
+            else
 #endif
+                out_o1->reg = REG_NONE;
             return off;
         }
 
@@ -402,8 +417,23 @@ struct InstrDesc
 #define DESC_IMM_BYTE(desc) (((desc)->immediate >> 7) & 1)
 
 int
-decode(const uint8_t* buffer, int len, Instr* instr)
+decode(const uint8_t* buffer, int len, DecodeMode mode, Instr* instr)
 {
+    const uint8_t* decode_table = NULL;
+
+    // Ensure that we can actually handle the decode request
+#if defined(ARCH_386)
+    if (mode == DECODE_32)
+        decode_table = _decode_table32;
+#endif
+#if defined(ARCH_X86_64)
+    if (mode == DECODE_64)
+        decode_table = _decode_table64;
+#endif
+
+    if (decode_table == NULL)
+        return -2;
+
     int retval;
     int off = 0;
     uint8_t vex_operand = 0;
@@ -411,27 +441,28 @@ decode(const uint8_t* buffer, int len, Instr* instr)
 
     __builtin_memset(instr->operands, 0, sizeof(instr->operands));
 
-    retval = decode_prefixes(buffer + off, len - off, &prefixes, &vex_operand);
+    retval = decode_prefixes(buffer + off, len - off, mode, &prefixes,
+                             &vex_operand);
     if (UNLIKELY(retval < 0 || off + retval >= len))
     {
         return -1;
     }
     off += retval;
 
-    uint16_t* table = (uint16_t*) _decode_table;
+    const uint16_t* table = (uint16_t*) decode_table;
     uint32_t kind = ENTRY_TABLE256;
 
     if (UNLIKELY(prefixes & PREFIX_ESC_MASK))
     {
         uint32_t escape = prefixes & PREFIX_ESC_MASK;
-        table = (uint16_t*) &_decode_table[table[0x0F] & ~7];
+        table = (uint16_t*) &decode_table[table[0x0F] & ~7];
         if (escape == PREFIX_ESC_0F38)
         {
-            table = (uint16_t*) &_decode_table[table[0x38] & ~7];
+            table = (uint16_t*) &decode_table[table[0x38] & ~7];
         }
         else if (escape == PREFIX_ESC_0F3A)
         {
-            table = (uint16_t*) &_decode_table[table[0x3A] & ~7];
+            table = (uint16_t*) &decode_table[table[0x3A] & ~7];
         }
     }
 
@@ -497,7 +528,7 @@ decode(const uint8_t* buffer, int len, Instr* instr)
         }
 
         kind = entry & ENTRY_MASK;
-        table = (uint16_t*) &_decode_table[entry & ~7];
+        table = (uint16_t*) &decode_table[entry & ~7];
     } while (LIKELY(off < len));
 
     if (UNLIKELY(kind != ENTRY_INSTR))
@@ -552,7 +583,7 @@ decode(const uint8_t* buffer, int len, Instr* instr)
         op_size = 2;
     }
 #if defined(ARCH_X86_64)
-    else if (desc->gp_size_def64)
+    else if (mode == DECODE_64 && desc->gp_size_def64)
     {
         op_size = 8;
     }
@@ -603,7 +634,7 @@ decode(const uint8_t* buffer, int len, Instr* instr)
         {
             operand2 = &instr->operands[DESC_MODREG_IDX(desc)];
         }
-        retval = decode_modrm(buffer + off, len - off, instr,
+        retval = decode_modrm(buffer + off, len - off, mode, instr,
                               operand1, operand2);
 
         if (UNLIKELY(retval < 0))
@@ -649,19 +680,26 @@ decode(const uint8_t* buffer, int len, Instr* instr)
         instr->scale = 0;
         // TODO: Address size overrides
 #if defined(ARCH_386)
-        if (UNLIKELY(off + 4 > len))
+        if (mode == DECODE_32)
         {
-            return -1;
+            if (UNLIKELY(off + 4 > len))
+            {
+                return -1;
+            }
+            instr->disp = LOAD_LE_4(&buffer[off]);
+            off += 4;
         }
-        instr->disp = LOAD_LE_4(&buffer[off]);
-        off += 4;
-#else
-        if (UNLIKELY(off + 8 > len))
+#endif
+#if defined(ARCH_X86_64)
+        if (mode == DECODE_64)
         {
-            return -1;
+            if (UNLIKELY(off + 8 > len))
+            {
+                return -1;
+            }
+            instr->disp = LOAD_LE_8(&buffer[off]);
+            off += 8;
         }
-        instr->disp = LOAD_LE_8(&buffer[off]);
-        off += 8;
 #endif
     }
     else if (UNLIKELY(imm_control != 0))
