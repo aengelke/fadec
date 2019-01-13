@@ -193,8 +193,7 @@ class Table:
         self.mnemonics = set()
         self.instrs = {}
 
-    def compile(self):
-        mnemonics = sorted(list(self.mnemonics))
+    def compile(self, mnemonics_lut):
         offsets = {}
         currentOffset = 0
         stats = defaultdict(int)
@@ -214,7 +213,7 @@ class Table:
                 data += b"\0" * (offsets[name] - len(data))
             assert len(data) == offsets[name]
             if kind == EntryKind.INSTR:
-                mnemonicIdx = mnemonics.index(value[0])
+                mnemonicIdx = mnemonics_lut[value[0]]
                 data += struct.pack("<HL", mnemonicIdx, value[1])
             else: # Table
                 # count = sum(1 for x in value if x is not None)
@@ -227,8 +226,8 @@ class Table:
                         value = 0
                     data += struct.pack("<H", value)
 
-        print("%d bytes, %d mnemonics"%(len(data),len(mnemonics)), stats)
-        return data, mnemonics
+        print("%d bytes" % len(data), stats)
+        return data
 
     def add_opcode(self, opcode, instrData):
         opcode = list(opcode) + [(None, None)]
@@ -257,32 +256,29 @@ class Table:
             self.data[name] = EntryKind.INSTR, instrData
             self.instrs[instrData] = name
 
-def generate_cpp_table(table):
-    compiled, mnemonics = table.compile()
+def bytes_to_table(data):
+    hexdata = ",".join("0x{:02x}".format(byte) for byte in data)
+    return "\n".join(hexdata[i:i+80] for i in range(0, len(hexdata), 80))
 
-    hexdata = ",".join("0x{:02x}".format(byte) for byte in compiled)
-    compiled_hex = "\n".join(hexdata[i:i+80] for i in range(0, len(hexdata), 80))
-
-    mnemonic_tab = [0]
-    for name in mnemonics:
-        mnemonic_tab.append(mnemonic_tab[-1] + len(name) + 1)
-    mnemonic_cstr = '"' + "\\0".join(mnemonics) + '"'
-
-    file = ""
-    file += "#if defined(DECODE_TABLE_DATA)\n"
-    file += compiled_hex + "\n"
-    file += "#elif defined(DECODE_TABLE_MNEMONICS)\n"
-    for value, name in enumerate(mnemonics):
-        file += "MNEMONIC({}, {})\n".format(name, value)
-    file += "#elif defined(DECODE_TABLE_STRTAB1)\n"
-    file += mnemonic_cstr + "\n"
-    file += "#elif defined(DECODE_TABLE_STRTAB2)\n"
-    file += ",".join(str(off) for off in mnemonic_tab) + "\n"
-    file += "#else\n"
-    file += "#error \"unspecified decode table\"\n"
-    file += "#endif\n"
-
-    return file
+template = """// Auto-generated file -- do not modify!
+#if defined(DECODE_TABLE_DATA)
+#if defined(ARCH_386)
+{hex_table32}
+#elif defined(ARCH_X86_64)
+{hex_table64}
+#else
+#error "unknown architecture"
+#endif
+#elif defined(DECODE_TABLE_MNEMONICS)
+{mnemonic_list}
+#elif defined(DECODE_TABLE_STRTAB1)
+{mnemonic_cstr}
+#elif defined(DECODE_TABLE_STRTAB2)
+{mnemonic_offsets}
+#else
+#error "unspecified decode table"
+#endif
+"""
 
 if __name__ == "__main__":
     entries = defaultdict(list)
@@ -293,6 +289,7 @@ if __name__ == "__main__":
                 for opcode in parse_opcode(opcode_string):
                     entries[opcode].append(desc)
 
+    mnemonics = set()
     table32 = Table()
     table64 = Table()
     masks = "ONLY64", "ONLY32"
@@ -302,15 +299,24 @@ if __name__ == "__main__":
             parsed = [desc for desc in parsed if desc is not None]
             assert len(parsed) <= 1
             if parsed:
+                mnemonics.add(parsed[0][0])
                 table.add_opcode(opcode, parsed[0])
 
-    tableFile2 = ""
-    tableFile2 += "#if defined(ARCH_386)\n"
-    tableFile2 += generate_cpp_table(table32)
-    tableFile2 += "#elif defined(ARCH_X86_64)\n"
-    tableFile2 += generate_cpp_table(table64)
-    tableFile2 += "#else\n"
-    tableFile2 += "#error \"unknown architecture\"\n"
-    tableFile2 += "#endif\n"
+    mnemonics = sorted(mnemonics)
+    mnemonics_lut = {name: mnemonics.index(name) for name in mnemonics}
+
+    mnemonic_tab = [0]
+    for name in mnemonics:
+        mnemonic_tab.append(mnemonic_tab[-1] + len(name) + 1)
+    mnemonic_cstr = '"' + "\\0".join(mnemonics) + '"'
+
+    file = template.format(
+        hex_table32=bytes_to_table(table32.compile(mnemonics_lut)),
+        hex_table64=bytes_to_table(table64.compile(mnemonics_lut)),
+        mnemonic_list="\n".join("MNEMONIC(%s,%d)"%entry for entry in mnemonics_lut.items()),
+        mnemonic_cstr=mnemonic_cstr,
+        mnemonic_offsets=",".join(str(off) for off in mnemonic_tab),
+    )
+
     with open(sys.argv[2], "w") as f:
-        f.write(tableFile2)
+        f.write(file)
