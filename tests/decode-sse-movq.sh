@@ -1,1 +1,1 @@
-decode f30f7e5c2408 "[SSE_MOVQ_X2X REG8:3 MEM8:4:0x8]"
+decode f30f7e5c2408 [SSE_MOVQ_X2X reg8:r3 mem8:r4+0x8]
