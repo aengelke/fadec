@@ -81,181 +81,83 @@ decode_prefixes(const uint8_t* buffer, int len, DecodeMode mode,
     while (LIKELY(off < len))
     {
         uint8_t prefix = buffer[off];
-        if (prefix == 0x2E)
+        switch (prefix)
         {
-            prefixes |= PREFIX_SEG_CS;
-        }
-        else if (prefix == 0x26)
-        {
-            prefixes |= PREFIX_SEG_ES;
-        }
-        else if (prefix == 0x3E)
-        {
-            prefixes |= PREFIX_SEG_DS;
-        }
-        else if (prefix == 0x64)
-        {
-            prefixes |= PREFIX_SEG_FS;
-        }
-        else if (prefix == 0x65)
-        {
-            prefixes |= PREFIX_SEG_GS;
-        }
-        else if (prefix == 0x66)
-        {
-            prefixes |= PREFIX_OPSZ;
-        }
-        else if (prefix == 0x67)
-        {
-            prefixes |= PREFIX_ADDRSZ;
-        }
-        else if (prefix == 0xF0)
-        {
-            prefixes |= PREFIX_LOCK;
-        }
-        else if (prefix == 0xF2)
-        {
-            prefixes |= PREFIX_REPNZ;
-        }
-        else if (prefix == 0xF3)
-        {
-            prefixes |= PREFIX_REP;
-        }
+        default: goto out;
+        case 0x2e: prefixes |= PREFIX_SEG_CS; off++; break;
+        case 0x26: prefixes |= PREFIX_SEG_ES; off++; break;
+        case 0x3e: prefixes |= PREFIX_SEG_DS; off++; break;
+        case 0x64: prefixes |= PREFIX_SEG_FS; off++; break;
+        case 0x65: prefixes |= PREFIX_SEG_GS; off++; break;
+        case 0x66: prefixes |= PREFIX_OPSZ;   off++; break;
+        case 0x67: prefixes |= PREFIX_ADDRSZ; off++; break;
+        case 0xf0: prefixes |= PREFIX_LOCK;   off++; break;
+        case 0xf2: prefixes |= PREFIX_REPNZ;  off++; break;
+        case 0xf3: prefixes |= PREFIX_REP;    off++; break;
 #if defined(ARCH_X86_64)
-        else if (mode == DECODE_64 && LIKELY(prefix >= 0x40 && prefix <= 0x4F))
-        {
-            prefixes |= PREFIX_REX;
-            if (prefix & 0x1)
+        case 0x40: case 0x41: case 0x42: case 0x43: case 0x44: case 0x45:
+        case 0x46: case 0x47: case 0x48: case 0x49: case 0x4a: case 0x4b:
+        case 0x4c: case 0x4d: case 0x4e: case 0x4f:
+            if (mode == DECODE_64)
             {
-                prefixes |= PREFIX_REXB;
+                prefixes |= PREFIX_REX;
+                prefixes |= prefix & 0x1 ? PREFIX_REXB : 0;
+                prefixes |= prefix & 0x2 ? PREFIX_REXX : 0;
+                prefixes |= prefix & 0x4 ? PREFIX_REXR : 0;
+                prefixes |= prefix & 0x8 ? PREFIX_REXW : 0;
+                off++;
             }
-            if (prefix & 0x2)
-            {
-                prefixes |= PREFIX_REXX;
-            }
-            if (prefix & 0x4)
-            {
-                prefixes |= PREFIX_REXR;
-            }
-            if (prefix & 0x8)
-            {
-                prefixes |= PREFIX_REXW;
-            }
-            // REX prefix is the last prefix.
-            off++;
-            break;
-        }
+            // If in 64-bit mode, the REX prefix is always the last prefix. In
+            // 32-bit mode these are regular opcodes, so exit without consuming.
+            goto out;
 #endif
-        else if (UNLIKELY(prefix == 0xc4))
-        {
-            // 3-byte VEX
-            if (UNLIKELY(off + 2 >= len))
-            {
+        case 0xc4: case 0xc5: // VEX
+            if (UNLIKELY(off + 1 >= len))
                 return -1;
-            }
-#if defined(ARCH_386)
-            if (mode == DECODE_32 && (buffer[off + 1] & 0xc0) != 0xc0)
-            {
-                break;
-            }
-#endif
-            uint8_t byte2 = buffer[off + 1];
-            uint8_t byte3 = buffer[off + 2];
+            uint8_t byte = buffer[off + 1];
+            if (mode == DECODE_32 && (byte & 0xc0) != 0xc0)
+                goto out;
 
             prefixes |= PREFIX_VEX;
-#if defined(ARCH_X86_64)
-            if (mode == DECODE_64 && (byte2 & 0x80) == 0)
+            prefixes |= byte & 0x80 ? 0 : PREFIX_REXR;
+            if (prefix == 0xc4) // 3-byte VEX
             {
-                prefixes |= PREFIX_REXR;
-            }
-            if (mode == DECODE_64 && (byte2 & 0x40) == 0)
-            {
-                prefixes |= PREFIX_REXX;
-            }
-            if (mode == DECODE_64 && (byte2 & 0x20) == 0)
-            {
-                prefixes |= PREFIX_REXB;
-            }
-#endif
-            switch (byte2 & 0x1f)
-            {
+                prefixes |= byte & 0x80 ? 0 : PREFIX_REXR;
+                prefixes |= byte & 0x40 ? 0 : PREFIX_REXX;
+                // SDM Vol 2A 2-15 (Dec. 2016): Ignored in 32-bit mode
+                prefixes |= mode == DECODE_64 || (byte & 0x20) ? 0 : PREFIX_REXB;
+                switch (byte & 0x1f)
+                {
                 case 0x01: prefixes |= PREFIX_ESC_0F; break;
                 case 0x02: prefixes |= PREFIX_ESC_0F38; break;
                 case 0x03: prefixes |= PREFIX_ESC_0F3A; break;
                 default: return -1;
-            }
-            if (byte3 & 0x04)
-            {
-                prefixes |= PREFIX_VEXL;
-            }
-#if defined(ARCH_X86_64)
-            // SDM Vol 2A 2-16 (Dec. 2016)
-            // - "In 32-bit modes, VEX.W is silently ignored."
-            // - VEX.W either replaces REX.W, is don't care or is reserved.
-            if (mode == DECODE_64 && (byte3 & 0x80))
-            {
-                prefixes |= PREFIX_REXW;
-            }
-#endif
-            *out_vex_operand = ((byte3 & 0x78) >> 3) ^ 0xf;
-            switch (byte3 & 0x03)
-            {
-                case 1: prefixes |= PREFIX_OPSZ; break;
-                case 2: prefixes |= PREFIX_REP; break;
-                case 3: prefixes |= PREFIX_REPNZ; break;
-                default: break;
-            }
+                }
 
-            // VEX prefix is always the last prefix.
-            off += 3;
-            break;
-        }
-        else if (UNLIKELY(prefix == 0xc5))
-        {
-            // 2-byte VEX
-            if (UNLIKELY(off + 1 >= len))
-            {
-                return -1;
+                // Load third byte of VEX prefix
+                if (UNLIKELY(off + 2 >= len))
+                    return -1;
+                byte = buffer[off + 2];
+                // SDM Vol 2A 2-16 (Dec. 2016)
+                // - "In 32-bit modes, VEX.W is silently ignored."
+                // - VEX.W either replaces REX.W, is don't care or is reserved.
+                prefixes |= mode == DECODE_64 && (byte & 0x80) ? PREFIX_REXW : 0;
             }
-#if defined(ARCH_386)
-            if (mode == DECODE_32 && (buffer[off + 1] & 0xc0) != 0xc0)
-            {
-                break;
-            }
-#endif
-            uint8_t byte = buffer[off + 1];
-
-            prefixes |= PREFIX_VEX | PREFIX_ESC_0F;
-#if defined(ARCH_X86_64)
-            if (mode == DECODE_64 && (byte & 0x80) == 0)
-            {
-                prefixes |= PREFIX_REXR;
-            }
-#endif
-            if (byte & 0x04)
-            {
-                prefixes |= PREFIX_VEXL;
-            }
+            else // 2-byte VEX
+                prefixes |= PREFIX_ESC_0F;
+            prefixes |= byte & 0x04 ? PREFIX_VEXL : 0;
+            prefixes |= (byte & 0x03) == 1 ? PREFIX_OPSZ : 0;
+            prefixes |= (byte & 0x03) == 2 ? PREFIX_REP : 0;
+            prefixes |= (byte & 0x03) == 3 ? PREFIX_REPNZ : 0;
             *out_vex_operand = ((byte & 0x78) >> 3) ^ 0xf;
-            switch (byte & 0x03)
-            {
-                case 1: prefixes |= PREFIX_OPSZ; break;
-                case 2: prefixes |= PREFIX_REP; break;
-                case 3: prefixes |= PREFIX_REPNZ; break;
-                default: break;
-            }
 
             // VEX prefix is always the last prefix.
-            off += 2;
-            break;
+            off += prefix == 0xc4 ? 3 : 2;
+            goto out;
         }
-        else
-        {
-            break;
-        }
-        off++;
     }
 
+out:
     if (out_prefixes != NULL)
     {
         *out_prefixes = prefixes;
