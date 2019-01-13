@@ -61,13 +61,16 @@ enum RegIndex {
     RI_DS,
     RI_FS,
     RI_GS,
+
+    // No register specified
+    RI_NONE = 0x3f
 };
 
 typedef uint8_t Reg;
 
 #define reg_index(reg) (reg)
 #define reg_is_none(reg) ((reg) == REG_NONE)
-#define REG_NONE (0x3f)
+#define REG_NONE RI_NONE
 
 enum
 {
