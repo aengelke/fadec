@@ -70,6 +70,34 @@ static const uint8_t _decode_table64[] = {
                         ((size_t) ((uint8_t*) buf)[7] << 56))
 #endif
 
+enum PrefixSet
+{
+    PREFIX_LOCK = INSTR_FLAG_LOCK,
+    PREFIX_REP = INSTR_FLAG_REP,
+    PREFIX_REPNZ = INSTR_FLAG_REPNZ,
+    PREFIX_REX = INSTR_FLAG_REX,
+    PREFIX_VEXL = INSTR_FLAG_VEXL,
+    PREFIX_SEG_FS = 1 << 8,
+    PREFIX_SEG_GS = 1 << 9,
+    PREFIX_SEG_CS = 1 << 10,
+    PREFIX_SEG_DS = 1 << 11,
+    PREFIX_SEG_ES = 1 << 12,
+    PREFIX_OPSZ = 1 << 13,
+    PREFIX_ADDRSZ = 1 << 14,
+    PREFIX_REXB = 1 << 15,
+    PREFIX_REXX = 1 << 16,
+    PREFIX_REXR = 1 << 17,
+    PREFIX_REXW = 1 << 18,
+    PREFIX_ESC_NONE = 0 << 19,
+    PREFIX_ESC_0F = 1 << 19,
+    PREFIX_ESC_0F38 = 2 << 19,
+    PREFIX_ESC_0F3A = 3 << 19,
+    PREFIX_ESC_MASK = 3 << 19,
+    PREFIX_VEX = 1 << 21,
+};
+
+typedef enum PrefixSet PrefixSet;
+
 static
 int
 decode_prefixes(const uint8_t* buffer, int len, DecodeMode mode,
@@ -171,7 +199,7 @@ out:
 static
 int
 decode_modrm(const uint8_t* buffer, int len, DecodeMode mode, Instr* instr,
-             struct Operand* out_o1, struct Operand* out_o2)
+             PrefixSet prefixes, struct Operand* out_o1, struct Operand* out_o2)
 {
     int off = 0;
 
@@ -190,7 +218,7 @@ decode_modrm(const uint8_t* buffer, int len, DecodeMode mode, Instr* instr,
     {
         uint8_t reg_idx = mod_reg;
 #if defined(ARCH_X86_64)
-        reg_idx += instr->prefixes & PREFIX_REXR ? 8 : 0;
+        reg_idx += prefixes & PREFIX_REXR ? 8 : 0;
 #endif
         out_o2->type = OT_REG;
         out_o2->reg = reg_idx;
@@ -200,7 +228,7 @@ decode_modrm(const uint8_t* buffer, int len, DecodeMode mode, Instr* instr,
     {
         uint8_t reg_idx = rm;
 #if defined(ARCH_X86_64)
-        reg_idx += instr->prefixes & PREFIX_REXB ? 8 : 0;
+        reg_idx += prefixes & PREFIX_REXB ? 8 : 0;
 #endif
         out_o1->type = OT_REG;
         out_o1->reg = reg_idx;
@@ -222,7 +250,7 @@ decode_modrm(const uint8_t* buffer, int len, DecodeMode mode, Instr* instr,
         scale = ((sib & 0xc0) >> 6) + 1;
         idx = (sib & 0x38) >> 3;
 #if defined(ARCH_X86_64)
-        idx += instr->prefixes & PREFIX_REXX ? 8 : 0;
+        idx += prefixes & PREFIX_REXX ? 8 : 0;
 #endif
         base = sib & 0x07;
     }
@@ -270,7 +298,7 @@ decode_modrm(const uint8_t* buffer, int len, DecodeMode mode, Instr* instr,
 
         uint8_t reg_idx = rm;
 #if defined(ARCH_X86_64)
-        reg_idx += instr->prefixes & PREFIX_REXB ? 8 : 0;
+        reg_idx += prefixes & PREFIX_REXB ? 8 : 0;
 #endif
         out_o1->reg = reg_idx;
         return off;
@@ -293,7 +321,7 @@ decode_modrm(const uint8_t* buffer, int len, DecodeMode mode, Instr* instr,
     {
         uint8_t reg_idx = base;
 #if defined(ARCH_X86_64)
-        reg_idx += instr->prefixes & PREFIX_REXB ? 8 : 0;
+        reg_idx += prefixes & PREFIX_REXB ? 8 : 0;
 #endif
         out_o1->reg = reg_idx;
     }
@@ -428,7 +456,9 @@ decode(const uint8_t* buffer, int len, DecodeMode mode, Instr* instr)
     struct InstrDesc* desc = (struct InstrDesc*) table;
 
     instr->type = desc->type;
-    instr->prefixes = prefixes;
+    instr->flags = prefixes & 0x7f;
+    if (mode == DECODE_64)
+        instr->flags |= INSTR_FLAG_64;
     instr->address = (uintptr_t) buffer;
 
     if (prefixes & PREFIX_SEG_FS)
@@ -508,7 +538,7 @@ decode(const uint8_t* buffer, int len, DecodeMode mode, Instr* instr)
         {
             operand2 = &instr->operands[DESC_MODREG_IDX(desc)];
         }
-        retval = decode_modrm(buffer + off, len - off, mode, instr,
+        retval = decode_modrm(buffer + off, len - off, mode, instr, prefixes,
                               operand1, operand2);
 
         if (UNLIKELY(retval < 0))

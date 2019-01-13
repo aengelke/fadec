@@ -69,33 +69,15 @@ typedef uint8_t Reg;
 #define reg_is_none(reg) ((reg) == REG_NONE)
 #define REG_NONE (0x3f)
 
-enum PrefixSet
+enum
 {
-    PREFIX_SEG_FS = 1 << 0,
-    PREFIX_SEG_GS = 1 << 1,
-    PREFIX_SEG_CS = 1 << 12,
-    PREFIX_SEG_DS = 1 << 17,
-    PREFIX_SEG_ES = 1 << 18,
-    PREFIX_OPSZ = 1 << 2,
-    PREFIX_ADDRSZ = 1 << 3,
-    PREFIX_LOCK = 1 << 4,
-    PREFIX_REPNZ = 1 << 5,
-    PREFIX_REP = 1 << 6,
-    PREFIX_REX = 1 << 7,
-    PREFIX_REXB = 1 << 8,
-    PREFIX_REXX = 1 << 9,
-    PREFIX_REXR = 1 << 10,
-    PREFIX_REXW = 1 << 11,
-    PREFIX_ESC_NONE = 0 << 13,
-    PREFIX_ESC_0F = 1 << 13,
-    PREFIX_ESC_0F38 = 2 << 13,
-    PREFIX_ESC_0F3A = 3 << 13,
-    PREFIX_ESC_MASK = 3 << 13,
-    PREFIX_VEX = 1 << 15,
-    PREFIX_VEXL = 1 << 16,
+    INSTR_FLAG_LOCK = 1 << 0,
+    INSTR_FLAG_REP = 1 << 1,
+    INSTR_FLAG_REPNZ = 1 << 2,
+    INSTR_FLAG_REX = 1 << 3,
+    INSTR_FLAG_VEXL = 1 << 4,
+    INSTR_FLAG_64 = 1 << 7,
 };
-
-typedef enum PrefixSet PrefixSet;
 
 enum OperandType
 {
@@ -116,6 +98,7 @@ struct Instr
 {
     uint16_t type;
     struct Operand operands[4];
+    uint8_t flags;
     uint8_t segment;
     uint8_t op_size;
     uint8_t addr_size;
@@ -126,7 +109,6 @@ struct Instr
     uint8_t scale : 3;
     uint8_t sreg : 5;
 
-    PrefixSet prefixes;
     size_t immediate;
     intptr_t disp;
 
@@ -139,11 +121,12 @@ typedef struct Instr Instr;
 #define INSTR_SEGMENT(instr) ((instr)->segment)
 #define INSTR_WIDTH(instr) ((instr)->op_size)
 #define INSTR_ADDRSZ(instr) ((instr)->addr_size)
-#define INSTR_HAS_REP(instr) ((instr)->prefixes & PREFIX_REP)
-#define INSTR_HAS_REPNZ(instr) ((instr)->prefixes & PREFIX_REPNZ)
-#define INSTR_HAS_LOCK(instr) ((instr)->prefixes & PREFIX_LOCK)
-#define INSTR_HAS_ADDRSZ(instr) ((instr)->prefixes & PREFIX_ADDRSZ)
-#define INSTR_HAS_REX(instr) ((instr)->prefixes & PREFIX_REX)
+#define INSTR_IS64(instr) ((instr)->flags & INSTR_FLAG_64)
+#define INSTR_HAS_REP(instr) ((instr)->flags & INSTR_FLAG_REP)
+#define INSTR_HAS_REPNZ(instr) ((instr)->flags & INSTR_FLAG_REPNZ)
+#define INSTR_HAS_LOCK(instr) ((instr)->flags & INSTR_FLAG_LOCK)
+#define INSTR_HAS_REX(instr) ((instr)->flags & INSTR_FLAG_REX)
+#define INSTR_HAS_VEXL(instr) ((instr)->flags & INSTR_FLAG_VEXL)
 
 int decode(const uint8_t* buffer, int len, DecodeMode mode, Instr* out_instr);
 void instr_format(const Instr* instr, char buffer[128]);
