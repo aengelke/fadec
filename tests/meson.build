@@ -1,6 +1,4 @@
 
-sh = find_program('sh')
-
 cases = [
   ['enter', 'decode-enter.sh'],
   ['imul', 'decode-imul.sh'],
@@ -15,8 +13,8 @@ cases = [
 test_driver = executable('test_driver', 'driver.c',
                          dependencies: libx86decode,
                          c_args: ['-D_GNU_SOURCE'])
-test_args = files('common.sh') + [test_driver.full_path(), get_option('archmode')]
+test_args = files('test.py') + [test_driver.full_path(), get_option('archmode')]
 
 foreach case : cases
-  test(case[0], sh, args: test_args + files(case[1]))
+  test(case[0], python3, args: test_args + files(case[1]))
 endforeach
