@@ -138,10 +138,12 @@ decode_prefixes(const uint8_t* buffer, int len, DecodeMode mode,
                 if (UNLIKELY(off + 2 >= len))
                     return -1;
                 byte = buffer[off + 2];
-                // SDM Vol 2A 2-16 (Dec. 2016)
+                // SDM Vol 2A 2-16 (Dec. 2016) says that:
                 // - "In 32-bit modes, VEX.W is silently ignored."
                 // - VEX.W either replaces REX.W, is don't care or is reserved.
-                prefixes |= mode == DECODE_64 && (byte & 0x80) ? PREFIX_REXW : 0;
+                // This is actually incorrect, there are instructions that
+                // use VEX.W as an opcode extension even in 32-bit mode.
+                prefixes |= byte & 0x80 ? PREFIX_REXW : 0;
             }
             else // 2-byte VEX
                 prefixes |= PREFIX_ESC_0F;
@@ -459,12 +461,10 @@ decode(const uint8_t* buffer, int len, DecodeMode mode, Instr* instr)
     {
         op_size_log = 1;
     }
-#if defined(ARCH_X86_64)
-    else if (prefixes & PREFIX_REXW)
+    else if (mode == DECODE_64 && (prefixes & PREFIX_REXW))
     {
         op_size_log = 4;
     }
-#endif
     else if (prefixes & PREFIX_OPSZ)
     {
         op_size_log = 2;
@@ -609,7 +609,8 @@ decode(const uint8_t* buffer, int len, DecodeMode mode, Instr* instr)
             imm_size = 2;
         }
 #if defined(ARCH_X86_64)
-        else if (prefixes & PREFIX_REXW && instr->type == IT_MOVABS_IMM)
+        else if (mode == DECODE_64 && (prefixes & PREFIX_REXW) &&
+                 instr->type == IT_MOVABS_IMM)
         {
             imm_size = 8;
         }
