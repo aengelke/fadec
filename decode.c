@@ -610,6 +610,13 @@ decode(const uint8_t* buffer, int len, DecodeMode mode, Instr* instr)
         vec_size = 32;
     }
 
+    // Compute address size.
+    uint8_t addr_size_log = mode == DECODE_64 ? 4 : 3;
+    if (prefixes & PREFIX_ADDRSZ)
+        addr_size_log -= 1;
+    instr->addr_size = addr_size_log;
+    uint8_t addr_size = (1 << addr_size_log) >> 1;
+
     uint8_t operand_sizes[4] = {
         0, 1 << desc->gp_fixed_operand_size, op_size, vec_size
     };
@@ -680,29 +687,20 @@ decode(const uint8_t* buffer, int len, DecodeMode mode, Instr* instr)
         operand->reg = REG_NONE;
         operand->size = op_size;
         instr->scale = 0;
-        // TODO: Address size overrides
+
+        if (UNLIKELY(off + addr_size > len))
+            return -1;
 #if defined(ARCH_386)
-        if (mode == DECODE_32)
-        {
-            if (UNLIKELY(off + 4 > len))
-            {
-                return -1;
-            }
+        if (addr_size == 2)
+            instr->disp = LOAD_LE_2(&buffer[off]);
+#endif
+        if (addr_size == 4)
             instr->disp = LOAD_LE_4(&buffer[off]);
-            off += 4;
-        }
-#endif
 #if defined(ARCH_X86_64)
-        if (mode == DECODE_64)
-        {
-            if (UNLIKELY(off + 8 > len))
-            {
-                return -1;
-            }
+        if (addr_size == 8)
             instr->disp = LOAD_LE_8(&buffer[off]);
-            off += 8;
-        }
 #endif
+        off += addr_size;
     }
     else if (UNLIKELY(imm_control != 0))
     {
