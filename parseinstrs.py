@@ -190,14 +190,15 @@ class Table:
     def __init__(self):
         self.data = OrderedDict()
         self.data["root"] = (EntryKind.TABLE256, [None] * 256)
-        self.mnemonics = set()
         self.instrs = {}
 
     def compile(self, mnemonics_lut):
         offsets = {}
+        annotations = {}
         currentOffset = 0
         stats = defaultdict(int)
         for name, (kind, _) in self.data.items():
+            annotations[currentOffset] = "%s(%d)" % (name, kind.value)
             offsets[name] = currentOffset
             stats[kind] += 1
             if kind.table_length:
@@ -227,16 +228,16 @@ class Table:
                     data += struct.pack("<H", value)
 
         print("%d bytes" % len(data), stats)
-        return data
+        return data, annotations
 
     def add_opcode(self, opcode, instrData):
         opcode = list(opcode) + [(None, None)]
         opcode = [(opcode[i+1][0], opcode[i][1]) for i in range(len(opcode)-1)]
 
-        name, table = ">", self.data["root"]
+        name, table = "", self.data["root"]
         for kind, byte in opcode[:-1]:
             if table[1][byte] is None:
-                name += "_{:02x}".format(byte)
+                name += "{:02x}".format(byte)
                 self.data[name] = kind, [None] * kind.table_length
                 table[1][byte] = name
             else:
@@ -250,15 +251,19 @@ class Table:
         if instrData in self.instrs:
             table[1][opcode[-1][1]] = self.instrs[instrData]
         else:
-            name += "_l{:02x}".format(opcode[-1][1])
+            name += "{:02x}/{}".format(opcode[-1][1], instrData[0])
             table[1][opcode[-1][1]] = name
-            self.mnemonics.add(instrData[0])
             self.data[name] = EntryKind.INSTR, instrData
             self.instrs[instrData] = name
 
-def bytes_to_table(data):
+def wrap(string):
+    return "\n".join(string[i:i+80] for i in range(0, len(string), 80))
+
+def bytes_to_table(data, notes):
     hexdata = ",".join("0x{:02x}".format(byte) for byte in data)
-    return "\n".join(hexdata[i:i+80] for i in range(0, len(hexdata), 80))
+    offs = [0] + sorted(notes.keys()) + [len(data)]
+    return "\n".join(wrap(hexdata[p*5:c*5]) + "\n//%04x "%c + notes.get(c, "")
+                     for p, c in zip(offs, offs[1:]))
 
 template = """// Auto-generated file -- do not modify!
 #if defined(DECODE_TABLE_DATA_32)
@@ -307,8 +312,8 @@ if __name__ == "__main__":
     mnemonic_cstr = '"' + "\\0".join(mnemonics) + '"'
 
     file = template.format(
-        hex_table32=bytes_to_table(table32.compile(mnemonics_lut)),
-        hex_table64=bytes_to_table(table64.compile(mnemonics_lut)),
+        hex_table32=bytes_to_table(*table32.compile(mnemonics_lut)),
+        hex_table64=bytes_to_table(*table64.compile(mnemonics_lut)),
         mnemonic_list="\n".join("MNEMONIC(%s,%d)"%entry for entry in mnemonics_lut.items()),
         mnemonic_cstr=mnemonic_cstr,
         mnemonic_offsets=",".join(str(off) for off in mnemonic_tab),
