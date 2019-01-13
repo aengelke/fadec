@@ -14,6 +14,8 @@ endif
 ## Test cases
 
 testcases = [
+  ['prefixes', 'prefixes.txt'],
+
   ['enter', 'decode-enter.sh'],
   ['imul', 'decode-imul.sh'],
   ['inc', 'decode-inc.sh'],
