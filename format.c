@@ -83,10 +83,10 @@ instr_format(const Instr* instr, char buffer[128])
         *(cur++) = *(mnemonic++);
     }
 
-    if (instr->width != 0)
+    if (INSTR_WIDTH(instr))
     {
         *(cur++) = '_';
-        instr_format_decimal(&cur, instr->width);
+        instr_format_decimal(&cur, INSTR_WIDTH(instr));
     }
 
     for (int i = 0; i < 4; i++)

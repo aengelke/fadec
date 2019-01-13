@@ -567,35 +567,37 @@ decode(const uint8_t* buffer, int len, DecodeMode mode, Instr* instr)
         instr->segment = RI_DS;
     }
 
-    uint8_t op_size = 0;
+    uint8_t op_size_log = 0;
     if (desc->gp_size_8)
     {
-        op_size = 1;
+        op_size_log = 1;
     }
 #if defined(ARCH_X86_64)
     else if (prefixes & PREFIX_REXW)
     {
-        op_size = 8;
+        op_size_log = 4;
     }
 #endif
     else if (prefixes & PREFIX_OPSZ)
     {
-        op_size = 2;
+        op_size_log = 2;
     }
 #if defined(ARCH_X86_64)
     else if (mode == DECODE_64 && desc->gp_size_def64)
     {
-        op_size = 8;
+        op_size_log = 4;
     }
 #endif
     else
     {
-        op_size = 4;
+        op_size_log = 3;
     }
+
+    uint8_t op_size = (1 << op_size_log) >> 1;
 
     if (UNLIKELY(desc->gp_instr_width))
     {
-        instr->width = op_size;
+        instr->width = op_size_log;
     }
     else
     {

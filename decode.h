@@ -117,7 +117,7 @@ struct Instr
     uint16_t type;
     struct Operand operands[4];
     uint8_t segment : 3;
-    uint8_t width : 5;
+    uint8_t width : 3;
 
     /**
      * Encoded as 1 << (scale - 1)  **or**  no scaled register at all if zero.
@@ -136,7 +136,7 @@ struct Instr
 typedef struct Instr Instr;
 
 #define INSTR_SEGMENT(instr) ((instr)->segment)
-#define INSTR_WIDTH(instr) ((instr)->width)
+#define INSTR_WIDTH(instr) ((1 << (instr)->width) >> 1)
 #define INSTR_HAS_REP(instr) ((instr)->prefixes & PREFIX_REP)
 #define INSTR_HAS_REPNZ(instr) ((instr)->prefixes & PREFIX_REPNZ)
 #define INSTR_HAS_LOCK(instr) ((instr)->prefixes & PREFIX_LOCK)
