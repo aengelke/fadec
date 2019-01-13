@@ -38,6 +38,12 @@ static const uint8_t _decode_table64[] = {
 #define ENTRY_MASK 7
 #define ENTRY_IS_TABLE(kind) ((kind) >= ENTRY_TABLE256)
 
+#define ENTRY_UNPACK(table,kind,decode_table,entry) do { \
+            uint16_t entry_copy = entry; \
+            table = (uint16_t*) &(decode_table)[entry_copy & ~7]; \
+            kind = entry_copy & ENTRY_MASK; \
+        } while (0)
+
 #define INSTR_ENC_ADDR 0x08
 #define INSTR_ENC_IMM 0x10
 #define INSTR_ENC_MODRM 0x80
@@ -466,70 +472,49 @@ decode(const uint8_t* buffer, int len, DecodeMode mode, Instr* instr)
         }
     }
 
-    do
+    // First walk through full-byte opcodes. We do at most three iterations.
+    while (kind == ENTRY_TABLE256 && LIKELY(off < len))
+        ENTRY_UNPACK(table, kind, decode_table, table[buffer[off++]]);
+
+    // Then, walk through ModR/M-encoded opcode extensions.
+    if ((kind == ENTRY_TABLE8 || kind == ENTRY_TABLE72) && LIKELY(off < len))
     {
         uint16_t entry = 0;
-        if (kind == ENTRY_TABLE256)
+        if (kind == ENTRY_TABLE72 && (buffer[off] & 0xc0) == 0xc0)
         {
-            entry = table[buffer[off++]];
-        }
-        else if (kind == ENTRY_TABLE8)
-        {
-            entry = table[(buffer[off] >> 3) & 7];
-        }
-        else if (kind == ENTRY_TABLE72)
-        {
-            if ((buffer[off] & 0xc0) == 0xc0)
-            {
-                entry = table[buffer[off] - 0xb8];
-                if ((entry & ENTRY_MASK) != ENTRY_NONE)
-                {
-                    off++;
-                }
-                else
-                {
-                    entry = table[(buffer[off] >> 3) & 7];
-                }
-            }
+            entry = table[buffer[off] - 0xb8];
+            if ((entry & ENTRY_MASK) != ENTRY_NONE)
+                off++;
             else
-            {
                 entry = table[(buffer[off] >> 3) & 7];
-            }
-        }
-        else if (kind == ENTRY_TABLE_PREFIX)
-        {
-            uint8_t index = 0;
-            if (prefixes & PREFIX_OPSZ)
-            {
-                index = 1;
-            }
-            else if (prefixes & PREFIX_REP)
-            {
-                index = 2;
-            }
-            else if (prefixes & PREFIX_REPNZ)
-            {
-                index = 3;
-            }
-#if defined(ARCH_X86_64)
-            index |= prefixes & PREFIX_REXW ? (1 << 2) : 0;
-#endif
-            index |= prefixes & PREFIX_VEX ? (1 << 3) : 0;
-            // If a prefix is mandatory and used as opcode extension, it has no
-            // further effect on the instruction. This is especially important
-            // for the 0x66 prefix, which could otherwise override the operand
-            // size of general purpose registers.
-            prefixes &= ~(PREFIX_OPSZ | PREFIX_REPNZ | PREFIX_REP);
-            entry = table[index];
         }
         else
-        {
-            break;
-        }
+            entry = table[(buffer[off] >> 3) & 7];
 
-        kind = entry & ENTRY_MASK;
-        table = (uint16_t*) &decode_table[entry & ~7];
-    } while (LIKELY(off < len));
+        ENTRY_UNPACK(table, kind, decode_table, entry);
+    }
+
+    // Finally, handle mandatory prefixes (which behave like an opcode ext.).
+    if (kind == ENTRY_TABLE_PREFIX)
+    {
+        uint8_t index = 0;
+        if (prefixes & PREFIX_OPSZ)
+            index = 1;
+        else if (prefixes & PREFIX_REP)
+            index = 2;
+        else if (prefixes & PREFIX_REPNZ)
+            index = 3;
+#if defined(ARCH_X86_64)
+        index |= prefixes & PREFIX_REXW ? (1 << 2) : 0;
+#endif
+        index |= prefixes & PREFIX_VEX ? (1 << 3) : 0;
+        // If a prefix is mandatory and used as opcode extension, it has no
+        // further effect on the instruction. This is especially important
+        // for the 0x66 prefix, which could otherwise override the operand
+        // size of general purpose registers.
+        prefixes &= ~(PREFIX_OPSZ | PREFIX_REPNZ | PREFIX_REP);
+        ENTRY_UNPACK(table, kind, decode_table, table[index]);
+    }
 
     if (UNLIKELY(kind != ENTRY_INSTR))
     {
