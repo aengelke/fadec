@@ -358,7 +358,8 @@ struct InstrDesc
 #define DESC_IMM_BYTE(desc) (((desc)->immediate >> 7) & 1)
 
 int
-decode(const uint8_t* buffer, int len, DecodeMode mode, Instr* instr)
+decode(const uint8_t* buffer, int len, DecodeMode mode, uintptr_t address,
+       Instr* instr)
 {
     const uint8_t* decode_table = NULL;
 
@@ -453,7 +454,7 @@ decode(const uint8_t* buffer, int len, DecodeMode mode, Instr* instr)
     instr->flags = prefixes & 0x7f;
     if (mode == DECODE_64)
         instr->flags |= INSTR_FLAG_64;
-    instr->address = (uintptr_t) buffer;
+    instr->address = address;
 
     uint8_t op_size = 0;
     if (desc->gp_size_8)
@@ -630,7 +631,7 @@ decode(const uint8_t* buffer, int len, DecodeMode mode, Instr* instr)
 
         if (imm_control == 4)
         {
-            instr->immediate += (uintptr_t) buffer + off;
+            instr->immediate += instr->address + off;
         }
 
         struct Operand* operand = &instr->operands[DESC_IMM_IDX(desc)];

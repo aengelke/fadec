@@ -131,7 +131,8 @@ typedef struct Instr Instr;
 #define INSTR_HAS_REX(instr) ((instr)->flags & INSTR_FLAG_REX)
 #define INSTR_HAS_VEXL(instr) ((instr)->flags & INSTR_FLAG_VEXL)
 
-int decode(const uint8_t* buffer, int len, DecodeMode mode, Instr* out_instr);
+int decode(const uint8_t* buffer, int len, DecodeMode mode, uintptr_t address,
+           Instr* out_instr);
 void instr_format(const Instr* instr, char buffer[128]);
 
 #endif
