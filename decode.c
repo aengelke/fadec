@@ -570,6 +570,8 @@ decode(const uint8_t* buffer, int len, DecodeMode mode, uintptr_t address,
     }
     else if (UNLIKELY(imm_control != 0))
     {
+        struct Operand* operand = &instr->operands[DESC_IMM_IDX(desc)];
+
         uint8_t imm_size;
         if (DESC_IMM_BYTE(desc))
         {
@@ -583,6 +585,14 @@ decode(const uint8_t* buffer, int len, DecodeMode mode, uintptr_t address,
         {
             imm_size = 3;
         }
+#if defined(ARCH_X86_64)
+        else if (mode == DECODE_64 && UNLIKELY(imm_control == 4))
+        {
+            // Jumps are always 8 or 32 bit on x86-64.
+            imm_size = 4;
+            operand->size = 8;
+        }
+#endif
         else if (prefixes & PREFIX_OPSZ)
         {
             imm_size = 2;
@@ -634,7 +644,6 @@ decode(const uint8_t* buffer, int len, DecodeMode mode, uintptr_t address,
             instr->immediate += instr->address + off;
         }
 
-        struct Operand* operand = &instr->operands[DESC_IMM_IDX(desc)];
         if (UNLIKELY(imm_control == 5))
         {
             operand->type = OT_REG;

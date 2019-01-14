@@ -19,6 +19,7 @@ testcases = [
   ['enter', 'decode-enter.sh'],
   ['imul', 'decode-imul.sh'],
   ['inc', 'decode-inc.sh'],
+  ['jmp', 'decode-jmp.txt'],
   ['movsx', 'decode-movsx.sh'],
   ['ret', 'decode-ret.sh'],
 

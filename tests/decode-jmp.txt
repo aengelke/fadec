@@ -1,0 +1,4 @@
+decode32 e900000000                     [JMP imm4:0x1234005]
+decode32 66e90100                       [JMP imm2:0x4005]
+decode64 e900000000                     [JMP imm8:0x1234005]
+decode64 66e900000000                   [JMP imm8:0x1234006]
