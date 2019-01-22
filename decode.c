@@ -373,7 +373,7 @@ decode(const uint8_t* buffer, int len, DecodeMode mode, uintptr_t address,
         decode_table = _decode_table64;
 #endif
 
-    if (decode_table == NULL)
+    if (UNLIKELY(decode_table == NULL))
         return -2;
 
     int retval;
@@ -468,7 +468,7 @@ decode(const uint8_t* buffer, int len, DecodeMode mode, uintptr_t address,
     else
         op_size = 4;
 
-    instr->op_size = UNLIKELY(desc->gp_instr_width) ? op_size : 0;
+    instr->op_size = desc->gp_instr_width ? op_size : 0;
 
     uint8_t vec_size = 16;
     if (prefixes & PREFIX_VEXL)
@@ -493,7 +493,7 @@ decode(const uint8_t* buffer, int len, DecodeMode mode, uintptr_t address,
         instr->operands[i].size = operand_sizes[enc_size];
     }
 
-    if (UNLIKELY(DESC_HAS_IMPLICIT(desc)))
+    if (DESC_HAS_IMPLICIT(desc))
     {
         struct Operand* operand = &instr->operands[DESC_IMPLICIT_IDX(desc)];
         operand->type = OT_REG;
@@ -519,7 +519,7 @@ decode(const uint8_t* buffer, int len, DecodeMode mode, uintptr_t address,
 
         off += retval;
     }
-    else if (UNLIKELY(DESC_HAS_MODREG(desc)))
+    else if (DESC_HAS_MODREG(desc))
     {
         // If there is no ModRM, but a Mod-Reg, its opcode-encoded.
         struct Operand* operand = &instr->operands[DESC_MODREG_IDX(desc)];
@@ -539,14 +539,14 @@ decode(const uint8_t* buffer, int len, DecodeMode mode, uintptr_t address,
     }
 
     uint32_t imm_control = DESC_IMM_CONTROL(desc);
-    if (UNLIKELY(imm_control == 1))
+    if (imm_control == 1)
     {
         struct Operand* operand = &instr->operands[DESC_IMM_IDX(desc)];
         operand->type = OT_IMM;
         operand->size = 1;
         instr->immediate = 1;
     }
-    else if (UNLIKELY(imm_control == 2))
+    else if (imm_control == 2)
     {
         struct Operand* operand = &instr->operands[DESC_IMM_IDX(desc)];
         operand->type = OT_MEM;
@@ -568,7 +568,7 @@ decode(const uint8_t* buffer, int len, DecodeMode mode, uintptr_t address,
 #endif
         off += addr_size;
     }
-    else if (UNLIKELY(imm_control != 0))
+    else if (imm_control != 0)
     {
         struct Operand* operand = &instr->operands[DESC_IMM_IDX(desc)];
 
