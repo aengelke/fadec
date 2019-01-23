@@ -266,15 +266,15 @@ def bytes_to_table(data, notes):
                      for p, c in zip(offs, offs[1:]))
 
 template = """// Auto-generated file -- do not modify!
-#if defined(DECODE_TABLE_DATA_32)
+#if defined(FD_DECODE_TABLE_DATA_32)
 {hex_table32}
-#elif defined(DECODE_TABLE_DATA_64)
+#elif defined(FD_DECODE_TABLE_DATA_64)
 {hex_table64}
-#elif defined(DECODE_TABLE_MNEMONICS)
+#elif defined(FD_DECODE_TABLE_MNEMONICS)
 {mnemonic_list}
-#elif defined(DECODE_TABLE_STRTAB1)
+#elif defined(FD_DECODE_TABLE_STRTAB1)
 {mnemonic_cstr}
-#elif defined(DECODE_TABLE_STRTAB2)
+#elif defined(FD_DECODE_TABLE_STRTAB2)
 {mnemonic_offsets}
 #else
 #error "unspecified decode table"
@@ -314,7 +314,7 @@ if __name__ == "__main__":
     file = template.format(
         hex_table32=bytes_to_table(*table32.compile(mnemonics_lut)),
         hex_table64=bytes_to_table(*table64.compile(mnemonics_lut)),
-        mnemonic_list="\n".join("MNEMONIC(%s,%d)"%entry for entry in mnemonics_lut.items()),
+        mnemonic_list="\n".join("FD_MNEMONIC(%s,%d)"%entry for entry in mnemonics_lut.items()),
         mnemonic_cstr=mnemonic_cstr,
         mnemonic_offsets=",".join(str(off) for off in mnemonic_tab),
     )

@@ -2,7 +2,7 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#include <decode.h>
+#include <fadec.h>
 
 
 #if defined(ARCH_X86_64) && __SIZEOF_POINTER__ < 8
@@ -13,21 +13,27 @@
 #define UNLIKELY(x) __builtin_expect((x), 0)
 
 #if defined(ARCH_386)
-#define DECODE_TABLE_DATA_32
+#define FD_DECODE_TABLE_DATA_32
 static const uint8_t _decode_table32[] = {
 #include <decode-table.inc>
 };
-#undef DECODE_TABLE_DATA_32
+#undef FD_DECODE_TABLE_DATA_32
 #endif
 
 #if defined(ARCH_X86_64)
-#define DECODE_TABLE_DATA_64
+#define FD_DECODE_TABLE_DATA_64
 static const uint8_t _decode_table64[] = {
 #include <decode-table.inc>
 };
-#undef DECODE_TABLE_DATA_64
+#undef FD_DECODE_TABLE_DATA_64
 #endif
 
+enum DecodeMode {
+    DECODE_64 = 0,
+    DECODE_32 = 1,
+};
+
+typedef enum DecodeMode DecodeMode;
 
 #define ENTRY_NONE 0
 #define ENTRY_INSTR 1
@@ -72,11 +78,11 @@ static const uint8_t _decode_table64[] = {
 
 enum PrefixSet
 {
-    PREFIX_LOCK = INSTR_FLAG_LOCK,
-    PREFIX_REP = INSTR_FLAG_REP,
-    PREFIX_REPNZ = INSTR_FLAG_REPNZ,
-    PREFIX_REX = INSTR_FLAG_REX,
-    PREFIX_VEXL = INSTR_FLAG_VEXL,
+    PREFIX_LOCK = FD_FLAG_LOCK,
+    PREFIX_REP = FD_FLAG_REP,
+    PREFIX_REPNZ = FD_FLAG_REPNZ,
+    PREFIX_REX = FD_FLAG_REX,
+    PREFIX_VEXL = FD_FLAG_VEXL,
     PREFIX_OPSZ = 1 << 13,
     PREFIX_ADDRSZ = 1 << 14,
     PREFIX_REXB = 1 << 15,
@@ -104,7 +110,7 @@ decode_prefixes(const uint8_t* buffer, int len, DecodeMode mode,
 
     uint8_t rep = 0;
     *out_mandatory = 0;
-    *out_segment = RI_NONE;
+    *out_segment = FD_REG_NONE;
 
     while (LIKELY(off < len))
     {
@@ -113,11 +119,11 @@ decode_prefixes(const uint8_t* buffer, int len, DecodeMode mode,
         {
         default: goto out;
         // From segment overrides, the last one wins.
-        case 0x26: *out_segment = RI_ES; off++; break;
-        case 0x2e: *out_segment = RI_CS; off++; break;
-        case 0x3e: *out_segment = RI_DS; off++; break;
-        case 0x64: *out_segment = RI_FS; off++; break;
-        case 0x65: *out_segment = RI_GS; off++; break;
+        case 0x26: *out_segment = FD_REG_ES; off++; break;
+        case 0x2e: *out_segment = FD_REG_CS; off++; break;
+        case 0x3e: *out_segment = FD_REG_DS; off++; break;
+        case 0x64: *out_segment = FD_REG_FS; off++; break;
+        case 0x65: *out_segment = FD_REG_GS; off++; break;
         case 0x67: prefixes |= PREFIX_ADDRSZ; off++; break;
         case 0xf0: prefixes |= PREFIX_LOCK;   off++; break;
         case 0x66: prefixes |= PREFIX_OPSZ;   off++; break;
@@ -201,8 +207,8 @@ out:
 
 static
 int
-decode_modrm(const uint8_t* buffer, int len, DecodeMode mode, Instr* instr,
-             PrefixSet prefixes, struct Operand* out_o1, struct Operand* out_o2)
+decode_modrm(const uint8_t* buffer, int len, DecodeMode mode, FdInstr* instr,
+             PrefixSet prefixes, FdOp* out_o1, FdOp* out_o2)
 {
     int off = 0;
 
@@ -223,7 +229,7 @@ decode_modrm(const uint8_t* buffer, int len, DecodeMode mode, Instr* instr,
 #if defined(ARCH_X86_64)
         reg_idx += prefixes & PREFIX_REXR ? 8 : 0;
 #endif
-        out_o2->type = OT_REG;
+        out_o2->type = FD_OP_REG;
         out_o2->reg = reg_idx;
     }
 
@@ -233,7 +239,7 @@ decode_modrm(const uint8_t* buffer, int len, DecodeMode mode, Instr* instr,
 #if defined(ARCH_X86_64)
         reg_idx += prefixes & PREFIX_REXB ? 8 : 0;
 #endif
-        out_o1->type = OT_REG;
+        out_o1->type = FD_OP_REG;
         out_o1->reg = reg_idx;
         return off;
     }
@@ -250,7 +256,7 @@ decode_modrm(const uint8_t* buffer, int len, DecodeMode mode, Instr* instr,
         }
 
         uint8_t sib = buffer[off++];
-        scale = ((sib & 0xc0) >> 6) + 1;
+        scale = (sib & 0xc0) >> 6;
         idx = (sib & 0x38) >> 3;
 #if defined(ARCH_X86_64)
         idx += prefixes & PREFIX_REXX ? 8 : 0;
@@ -283,19 +289,20 @@ decode_modrm(const uint8_t* buffer, int len, DecodeMode mode, Instr* instr,
         instr->disp = 0;
     }
 
-    out_o1->type = OT_MEM;
-    instr->scale = scale;
+    out_o1->type = FD_OP_MEM;
+    instr->idx_scale = scale;
 
-    if (scale == 0)
+    // If there was no SIB byte.
+    if (rm != 4)
     {
         if (mod == 0 && rm == 5)
         {
 #if defined(ARCH_X86_64)
             if (mode == DECODE_64)
-                out_o1->reg = RI_IP;
+                out_o1->reg = FD_REG_IP;
             else
 #endif
-                out_o1->reg = REG_NONE;
+                out_o1->reg = FD_REG_NONE;
             return off;
         }
 
@@ -304,21 +311,22 @@ decode_modrm(const uint8_t* buffer, int len, DecodeMode mode, Instr* instr,
         reg_idx += prefixes & PREFIX_REXB ? 8 : 0;
 #endif
         out_o1->reg = reg_idx;
+        instr->idx_reg = FD_REG_NONE;
         return off;
     }
 
     if (idx == 4)
     {
-        instr->scale = 0;
+        instr->idx_reg = FD_REG_NONE;
     }
     else
     {
-        instr->sreg = idx;
+        instr->idx_reg = idx;
     }
 
     if (base == 5 && mod == 0)
     {
-        out_o1->reg = REG_NONE;
+        out_o1->reg = FD_REG_NONE;
     }
     else
     {
@@ -358,10 +366,14 @@ struct InstrDesc
 #define DESC_IMM_BYTE(desc) (((desc)->immediate >> 7) & 1)
 
 int
-decode(const uint8_t* buffer, int len, DecodeMode mode, uintptr_t address,
-       Instr* instr)
+fd_decode(const uint8_t* buffer, size_t len_sz, int mode_int, uintptr_t address,
+          FdInstr* instr)
 {
     const uint8_t* decode_table = NULL;
+
+    int len = len_sz > 15 ? 15 : len_sz;
+    DecodeMode mode = mode_int == 32 ? DECODE_32 :
+                      mode_int == 64 ? DECODE_64 : -1;
 
     // Ensure that we can actually handle the decode request
 #if defined(ARCH_386)
@@ -453,7 +465,7 @@ decode(const uint8_t* buffer, int len, DecodeMode mode, uintptr_t address,
     instr->type = desc->type;
     instr->flags = prefixes & 0x7f;
     if (mode == DECODE_64)
-        instr->flags |= INSTR_FLAG_64;
+        instr->flags |= FD_FLAG_64;
     instr->address = address;
 
     uint8_t op_size = 0;
@@ -468,7 +480,7 @@ decode(const uint8_t* buffer, int len, DecodeMode mode, uintptr_t address,
     else
         op_size = 4;
 
-    instr->op_size = desc->gp_instr_width ? op_size : 0;
+    instr->operandsz = desc->gp_instr_width ? op_size : 0;
 
     uint8_t vec_size = 16;
     if (prefixes & PREFIX_VEXL)
@@ -480,7 +492,7 @@ decode(const uint8_t* buffer, int len, DecodeMode mode, uintptr_t address,
     uint8_t addr_size = mode == DECODE_64 ? 8 : 4;
     if (prefixes & PREFIX_ADDRSZ)
         addr_size >>= 1;
-    instr->addr_size = addr_size;
+    instr->addrsz = addr_size;
 
     uint8_t operand_sizes[4] = {
         0, 1 << desc->gp_fixed_operand_size, op_size, vec_size
@@ -495,16 +507,16 @@ decode(const uint8_t* buffer, int len, DecodeMode mode, uintptr_t address,
 
     if (DESC_HAS_IMPLICIT(desc))
     {
-        struct Operand* operand = &instr->operands[DESC_IMPLICIT_IDX(desc)];
-        operand->type = OT_REG;
+        FdOp* operand = &instr->operands[DESC_IMPLICIT_IDX(desc)];
+        operand->type = FD_OP_REG;
         operand->reg = 0;
     }
 
     if (DESC_HAS_MODRM(desc))
     {
-        struct Operand* operand1 = &instr->operands[DESC_MODRM_IDX(desc)];
+        FdOp* operand1 = &instr->operands[DESC_MODRM_IDX(desc)];
 
-        struct Operand* operand2 = NULL;
+        FdOp* operand2 = NULL;
         if (DESC_HAS_MODREG(desc))
         {
             operand2 = &instr->operands[DESC_MODREG_IDX(desc)];
@@ -522,37 +534,37 @@ decode(const uint8_t* buffer, int len, DecodeMode mode, uintptr_t address,
     else if (DESC_HAS_MODREG(desc))
     {
         // If there is no ModRM, but a Mod-Reg, its opcode-encoded.
-        struct Operand* operand = &instr->operands[DESC_MODREG_IDX(desc)];
+        FdOp* operand = &instr->operands[DESC_MODREG_IDX(desc)];
         uint8_t reg_idx = buffer[off - 1] & 7;
 #if defined(ARCH_X86_64)
         reg_idx += prefixes & PREFIX_REXB ? 8 : 0;
 #endif
-        operand->type = OT_REG;
+        operand->type = FD_OP_REG;
         operand->reg = reg_idx;
     }
 
     if (UNLIKELY(DESC_HAS_VEXREG(desc)))
     {
-        struct Operand* operand = &instr->operands[DESC_VEXREG_IDX(desc)];
-        operand->type = OT_REG;
+        FdOp* operand = &instr->operands[DESC_VEXREG_IDX(desc)];
+        operand->type = FD_OP_REG;
         operand->reg = vex_operand;
     }
 
     uint32_t imm_control = DESC_IMM_CONTROL(desc);
     if (imm_control == 1)
     {
-        struct Operand* operand = &instr->operands[DESC_IMM_IDX(desc)];
-        operand->type = OT_IMM;
+        FdOp* operand = &instr->operands[DESC_IMM_IDX(desc)];
+        operand->type = FD_OP_IMM;
         operand->size = 1;
-        instr->immediate = 1;
+        instr->imm = 1;
     }
     else if (imm_control == 2)
     {
-        struct Operand* operand = &instr->operands[DESC_IMM_IDX(desc)];
-        operand->type = OT_MEM;
-        operand->reg = REG_NONE;
+        FdOp* operand = &instr->operands[DESC_IMM_IDX(desc)];
+        operand->type = FD_OP_MEM;
+        operand->reg = FD_REG_NONE;
         operand->size = op_size;
-        instr->scale = 0;
+        instr->idx_reg = FD_REG_NONE;
 
         if (UNLIKELY(off + addr_size > len))
             return -1;
@@ -570,18 +582,18 @@ decode(const uint8_t* buffer, int len, DecodeMode mode, uintptr_t address,
     }
     else if (imm_control != 0)
     {
-        struct Operand* operand = &instr->operands[DESC_IMM_IDX(desc)];
+        FdOp* operand = &instr->operands[DESC_IMM_IDX(desc)];
 
         uint8_t imm_size;
         if (DESC_IMM_BYTE(desc))
         {
             imm_size = 1;
         }
-        else if (UNLIKELY(instr->type == IT_RET_IMM))
+        else if (UNLIKELY(instr->type == FDI_RET_IMM))
         {
             imm_size = 2;
         }
-        else if (UNLIKELY(instr->type == IT_ENTER))
+        else if (UNLIKELY(instr->type == FDI_ENTER))
         {
             imm_size = 3;
         }
@@ -599,7 +611,7 @@ decode(const uint8_t* buffer, int len, DecodeMode mode, uintptr_t address,
         }
 #if defined(ARCH_X86_64)
         else if (mode == DECODE_64 && (prefixes & PREFIX_REXW) &&
-                 instr->type == IT_MOVABS_IMM)
+                 instr->type == FDI_MOVABS_IMM)
         {
             imm_size = 8;
         }
@@ -616,42 +628,42 @@ decode(const uint8_t* buffer, int len, DecodeMode mode, uintptr_t address,
 
         if (imm_size == 1)
         {
-            instr->immediate = (int8_t) LOAD_LE_1(&buffer[off]);
+            instr->imm = (int8_t) LOAD_LE_1(&buffer[off]);
         }
         else if (imm_size == 2)
         {
-            instr->immediate = (int16_t) LOAD_LE_2(&buffer[off]);
+            instr->imm = (int16_t) LOAD_LE_2(&buffer[off]);
         }
         else if (imm_size == 3)
         {
-            instr->immediate = LOAD_LE_2(&buffer[off]);
-            instr->immediate |= LOAD_LE_1(&buffer[off + 2]) << 16;
+            instr->imm = LOAD_LE_2(&buffer[off]);
+            instr->imm |= LOAD_LE_1(&buffer[off + 2]) << 16;
         }
         else if (imm_size == 4)
         {
-            instr->immediate = (int32_t) LOAD_LE_4(&buffer[off]);
+            instr->imm = (int32_t) LOAD_LE_4(&buffer[off]);
         }
 #if defined(ARCH_X86_64)
         else if (imm_size == 8)
         {
-            instr->immediate = (int64_t) LOAD_LE_8(&buffer[off]);
+            instr->imm = (int64_t) LOAD_LE_8(&buffer[off]);
         }
 #endif
         off += imm_size;
 
         if (imm_control == 4)
         {
-            instr->immediate += instr->address + off;
+            instr->imm += instr->address + off;
         }
 
         if (UNLIKELY(imm_control == 5))
         {
-            operand->type = OT_REG;
-            operand->reg = (instr->immediate & 0xf0) >> 4;
+            operand->type = FD_OP_REG;
+            operand->reg = (instr->imm & 0xf0) >> 4;
         }
         else
         {
-            operand->type = OT_IMM;
+            operand->type = FD_OP_IMM;
         }
     }
 
