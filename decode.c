@@ -229,7 +229,7 @@ decode_modrm(const uint8_t* buffer, int len, DecodeMode mode, FdInstr* instr,
 #if defined(ARCH_X86_64)
         reg_idx += prefixes & PREFIX_REXR ? 8 : 0;
 #endif
-        out_o2->type = FD_OP_REG;
+        out_o2->type = FD_OT_REG;
         out_o2->reg = reg_idx;
     }
 
@@ -239,7 +239,7 @@ decode_modrm(const uint8_t* buffer, int len, DecodeMode mode, FdInstr* instr,
 #if defined(ARCH_X86_64)
         reg_idx += prefixes & PREFIX_REXB ? 8 : 0;
 #endif
-        out_o1->type = FD_OP_REG;
+        out_o1->type = FD_OT_REG;
         out_o1->reg = reg_idx;
         return off;
     }
@@ -289,7 +289,7 @@ decode_modrm(const uint8_t* buffer, int len, DecodeMode mode, FdInstr* instr,
         instr->disp = 0;
     }
 
-    out_o1->type = FD_OP_MEM;
+    out_o1->type = FD_OT_MEM;
     instr->idx_scale = scale;
 
     // If there was no SIB byte.
@@ -508,7 +508,7 @@ fd_decode(const uint8_t* buffer, size_t len_sz, int mode_int, uintptr_t address,
     if (DESC_HAS_IMPLICIT(desc))
     {
         FdOp* operand = &instr->operands[DESC_IMPLICIT_IDX(desc)];
-        operand->type = FD_OP_REG;
+        operand->type = FD_OT_REG;
         operand->reg = 0;
     }
 
@@ -539,14 +539,14 @@ fd_decode(const uint8_t* buffer, size_t len_sz, int mode_int, uintptr_t address,
 #if defined(ARCH_X86_64)
         reg_idx += prefixes & PREFIX_REXB ? 8 : 0;
 #endif
-        operand->type = FD_OP_REG;
+        operand->type = FD_OT_REG;
         operand->reg = reg_idx;
     }
 
     if (UNLIKELY(DESC_HAS_VEXREG(desc)))
     {
         FdOp* operand = &instr->operands[DESC_VEXREG_IDX(desc)];
-        operand->type = FD_OP_REG;
+        operand->type = FD_OT_REG;
         operand->reg = vex_operand;
     }
 
@@ -554,14 +554,14 @@ fd_decode(const uint8_t* buffer, size_t len_sz, int mode_int, uintptr_t address,
     if (imm_control == 1)
     {
         FdOp* operand = &instr->operands[DESC_IMM_IDX(desc)];
-        operand->type = FD_OP_IMM;
+        operand->type = FD_OT_IMM;
         operand->size = 1;
         instr->imm = 1;
     }
     else if (imm_control == 2)
     {
         FdOp* operand = &instr->operands[DESC_IMM_IDX(desc)];
-        operand->type = FD_OP_MEM;
+        operand->type = FD_OT_MEM;
         operand->reg = FD_REG_NONE;
         operand->size = op_size;
         instr->idx_reg = FD_REG_NONE;
@@ -658,12 +658,12 @@ fd_decode(const uint8_t* buffer, size_t len_sz, int mode_int, uintptr_t address,
 
         if (UNLIKELY(imm_control == 5))
         {
-            operand->type = FD_OP_REG;
+            operand->type = FD_OT_REG;
             operand->reg = (instr->imm & 0xf0) >> 4;
         }
         else
         {
-            operand->type = FD_OP_IMM;
+            operand->type = FD_OT_IMM;
         }
     }
 

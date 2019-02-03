@@ -43,10 +43,10 @@ enum {
 };
 
 typedef enum {
-    FD_OP_NONE = 0,
-    FD_OP_REG = 1,
-    FD_OP_IMM = 2,
-    FD_OP_MEM = 3,
+    FD_OT_NONE = 0,
+    FD_OT_REG = 1,
+    FD_OT_IMM = 2,
+    FD_OT_MEM = 3,
 } FdOpType;
 
 typedef struct {
@@ -144,12 +144,12 @@ void fd_format(const FdInstr* instr, char* buf, size_t len);
  * purpose register with an index in the range 4-7, it needs to be determined
  * explicitly whether a high-byte register is accessed (using FD_OP_REG_HIGH).
  * If that is the case, the index needs to be decreased by 4.
- * Only valid if  FD_OP_TYPE == FD_OP_REG  **/
+ * Only valid if  FD_OP_TYPE == FD_OT_REG  **/
 #define FD_OP_REG(instr,idx) ((FdReg) (instr)->operands[idx].reg)
 /** Returns whether the accessed register is a actually high-byte register when
  * used on a general purpose instruction. In that case, the register index has
  * to be decreased by 4.
- * Only valid if  FD_OP_TYPE == FD_OP_REG  and the operand refers to a general
+ * Only valid if  FD_OP_TYPE == FD_OT_REG  and the operand refers to a general
  * purpose register (depends on the instruction type) **/
 #define FD_OP_REG_HIGH(instr,idx) ( \
             (instr)->operands[idx].size == 1 && \
@@ -160,23 +160,23 @@ void fd_format(const FdInstr* instr, char* buf, size_t len);
  * if the memory operand has no base register. This is the only case where the
  * 64-bit register RIP can be returned, in which case the operand also has no
  * scaled index register.
- * Only valid if  FD_OP_TYPE == FD_OP_MEM  **/
+ * Only valid if  FD_OP_TYPE == FD_OT_MEM  **/
 #define FD_OP_BASE(instr,idx) ((FdReg) (instr)->operands[idx].reg)
 /** Gets the index of the index register from a memory operand, or FD_REG_NONE,
  * if the memory operand has no scaled index register.
- * Only valid if  FD_OP_TYPE == FD_OP_MEM  **/
+ * Only valid if  FD_OP_TYPE == FD_OT_MEM  **/
 #define FD_OP_INDEX(instr,idx) ((FdReg) (instr)->idx_reg)
 /** Gets the scale of the index register from a memory operand when existent.
  * This does /not/ return the scale in an absolute value but returns the amount
  * of bits the index register is shifted to the left (i.e. the value in in the
  * range 0-3). The actual scale can be computed easily using  1<<FD_OP_SCALE.
- * Only valid if  FD_OP_TYPE == FD_OP_MEM  and  FD_OP_INDEX != FD_REG_NONE **/
+ * Only valid if  FD_OP_TYPE == FD_OT_MEM  and  FD_OP_INDEX != FD_REG_NONE **/
 #define FD_OP_SCALE(instr,idx) ((instr)->idx_scale)
 /** Gets the sign-extended displacement of a memory operand.
- * Only valid if  FD_OP_TYPE == FD_OP_MEM  **/
+ * Only valid if  FD_OP_TYPE == FD_OT_MEM  **/
 #define FD_OP_DISP(instr,idx) ((instr)->disp)
 /** Gets the (sign-extended) encoded constant for an immediate operand.
- * Only valid if  FD_OP_TYPE == FD_OP_IMM  **/
+ * Only valid if  FD_OP_TYPE == FD_OT_IMM  **/
 #define FD_OP_IMM(instr,idx) ((instr)->imm)
 
 #endif

@@ -52,7 +52,7 @@ fd_format(const FdInstr* instr, char* buffer, size_t len)
     for (int i = 0; i < 4; i++)
     {
         FdOpType op_type = FD_OP_TYPE(instr, i);
-        if (op_type == FD_OP_NONE)
+        if (op_type == FD_OT_NONE)
             break;
 
         const char* op_type_name = "reg\0imm\0mem" + op_type * 4 - 4;
@@ -64,13 +64,13 @@ fd_format(const FdInstr* instr, char* buffer, size_t len)
         bool has_base;
         bool has_idx;
         bool has_disp;
-        case FD_OP_REG:
+        case FD_OT_REG:
             if (FD_OP_REG_HIGH(instr, i))
                 FMT_CONCAT(buf, end, "r%uh", FD_OP_REG(instr, i) - 4);
             else
                 FMT_CONCAT(buf, end, "r%u", FD_OP_REG(instr, i));
             break;
-        case FD_OP_IMM:
+        case FD_OT_IMM:
             immediate = FD_OP_IMM(instr, i);
             if (FD_OP_SIZE(instr, i) == 1)
                 immediate &= 0xff;
@@ -80,7 +80,7 @@ fd_format(const FdInstr* instr, char* buffer, size_t len)
                 immediate &= 0xffffffff;
             FMT_CONCAT(buf, end, "0x%lx", immediate);
             break;
-        case FD_OP_MEM:
+        case FD_OT_MEM:
             has_base = FD_OP_BASE(instr, i) != FD_REG_NONE;
             has_idx = FD_OP_INDEX(instr, i) != FD_REG_NONE;
             has_disp = FD_OP_DISP(instr, i) != 0;
@@ -102,7 +102,7 @@ fd_format(const FdInstr* instr, char* buffer, size_t len)
             else if (has_disp || (!has_base && !has_idx))
                 FMT_CONCAT(buf, end, "0x%lx", FD_OP_DISP(instr, i));
             break;
-        case FD_OP_NONE:
+        case FD_OT_NONE:
         default:
             break;
         }
