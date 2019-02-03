@@ -295,6 +295,7 @@ decode_modrm(const uint8_t* buffer, int len, DecodeMode mode, FdInstr* instr,
     // If there was no SIB byte.
     if (rm != 4)
     {
+        instr->idx_reg = FD_REG_NONE;
         if (mod == 0 && rm == 5)
         {
 #if defined(ARCH_X86_64)
@@ -311,7 +312,6 @@ decode_modrm(const uint8_t* buffer, int len, DecodeMode mode, FdInstr* instr,
         reg_idx += prefixes & PREFIX_REXB ? 8 : 0;
 #endif
         out_o1->reg = reg_idx;
-        instr->idx_reg = FD_REG_NONE;
         return off;
     }
 
