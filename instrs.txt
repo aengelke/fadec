@@ -1066,9 +1066,9 @@ d9//0                 M     FPU    -      -      -      FLD_F32
 d9//2                 M     FPU    -      -      -      FST_F32
 d9//3                 M     FPU    -      -      -      FSTP_F32
 d9//4                 M     GP     -      -      -      FLDENV
-d9//5                 M     GP     -      -      -      FLDCW
+d9//5                 M     GP16   -      -      -      FLDCW
 d9//6                 M     GP     -      -      -      FSTENV
-d9//7                 M     GP     -      -      -      FSTCW
+d9//7                 M     GP16   -      -      -      FSTCW
 d9//c8+               O     FPU    -      -      -      FXCH
 d9//d0                NP    -      -      -      -      FNOP
 d9//e0                NP    -      -      -      -      FCHS
@@ -1140,7 +1140,7 @@ dd//2                 M     FPU    -      -      -      FST_F64
 dd//3                 M     FPU    -      -      -      FSTP_F64
 dd//4                 M     GP     -      -      -      FRSTOR
 dd//6                 M     GP     -      -      -      FSAVE
-dd//7                 M     GP     -      -      -      FSTSW
+dd//7                 M     GP16   -      -      -      FSTSW
 dd//c0+               O     FPU    -      -      -      FFREE
 dd//d0+               O     FPU    -      -      -      FST
 dd//d8+               O     FPU    -      -      -      FSTP
