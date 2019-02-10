@@ -390,14 +390,14 @@ ff/6                  M     GP     -      -      -      PUSH DEF64
 0f9d                  M     GP8    -      -      -      SETGE
 0f9e                  M     GP8    -      -      -      SETLE
 0f9f                  M     GP8    -      -      -      SETG
-0fa0                  NP    -      -      -      -      PUSH_FS DEF64
-0fa1                  NP    -      -      -      -      POP_FS DEF64
+0fa0                  NP    -      -      -      -      PUSH_FS DEF64 INSTR_WIDTH
+0fa1                  NP    -      -      -      -      POP_FS DEF64 INSTR_WIDTH
 0fa2                  NP    -      -      -      -      CPUID
 0fa3                  MR    GP     GP     -      -      BT
 0fa4                  MRI   GP     GP     IMM8   -      SHLD_IMM IMM_8
 0fa5                  MR    GP     GP     -      -      SHLD_CL
-0fa8                  NP    -      -      -      -      PUSH_GS DEF64
-0fa9                  NP    -      -      -      -      POP_GS DEF64
+0fa8                  NP    -      -      -      -      PUSH_GS DEF64 INSTR_WIDTH
+0fa9                  NP    -      -      -      -      POP_GS DEF64 INSTR_WIDTH
 # 0faa RSM
 0fab                  MR    GP     GP     -      -      BTS
 0fac                  MRI   GP     GP     IMM8   -      SHRD_IMM IMM_8
@@ -410,10 +410,10 @@ ff/6                  M     GP     -      -      -      PUSH DEF64
 0fb7                  RM    GP     GP16   -      -      MOVZX
 F3.0fb8               RM    GP     GP     -      -      POPCNT
 0fb9                  RM    GP     GP     -      -      UD1
-0fba/4                MI    GP     IMM8   -      -      BT IMM_8
-0fba/5                MI    GP     IMM8   -      -      BTS IMM_8
-0fba/6                MI    GP     IMM8   -      -      BTR IMM_8
-0fba/7                MI    GP     IMM8   -      -      BTC IMM_8
+0fba/4                MI    GP     IMM8   -      -      BT_IMM IMM_8
+0fba/5                MI    GP     IMM8   -      -      BTS_IMM IMM_8
+0fba/6                MI    GP     IMM8   -      -      BTR_IMM IMM_8
+0fba/7                MI    GP     IMM8   -      -      BTC_IMM IMM_8
 0fbb                  MR    GP     GP     -      -      BTC
 0fbc                  RM    GP     GP     -      -      BSF_TZCNT
 0fbd                  RM    GP     GP     -      -      BSR_LZCNT
@@ -426,10 +426,8 @@ NP.0fc3               MR    GP     GP     -      -      MOVNTI
 0fc8+                 O     GP     -      -      -      BSWAP
 0fff                  NP    -      -      -      -      UD0
 #
-NP.0f38f0             RM    GP     GP     -      -      MOVBE
-66.0f38f0             RM    GP16   GP16   -      -      MOVBE
-NP.0f38f1             MR    GP     GP     -      -      MOVBE
-66.0f38f1             MR    GP16   GP16   -      -      MOVBE
+0f38f0                RM    GP     GP     -      -      MOVBE_CRC32
+0f38f1                MR    GP     GP     -      -      MOVBE_CRC32
 #
 # SSE
 NP.0f10               RM    XMM    XMM    -      -      SSE_MOVUPS
@@ -1085,7 +1083,7 @@ d9//ec                NP    -      -      -      -      FLDLG2
 d9//ed                NP    -      -      -      -      FLDLN2
 d9//ee                NP    -      -      -      -      FLDZ
 d9//f0                NP    -      -      -      -      F2XM1
-d9//f1                NP    -      -      -          -      FYL2X
+d9//f1                NP    -      -      -      -      FYL2X
 d9//f2                NP    -      -      -      -      FPTAN
 d9//f3                NP    -      -      -      -      FPATAN
 d9//f4                NP    -      -      -      -      FXTRACT
