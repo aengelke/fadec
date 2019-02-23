@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 
 from binascii import unhexlify
-from collections import OrderedDict, defaultdict
+from collections import OrderedDict, defaultdict, namedtuple
 from copy import copy
 from enum import Enum, IntEnum
 from itertools import accumulate
@@ -91,29 +91,30 @@ OPKIND_LOOKUP = {
     "FPU": (0, 0),
 }
 
-def parse_desc(desc, ignore_flag):
-    desc = desc.split()
-    if ignore_flag in desc[6:]:
-        return None
+class InstrDesc(namedtuple("InstrDesc", "mnemonic,flags,encoding")):
+    __slots__ = ()
+    @classmethod
+    def parse(cls, desc):
+        desc = desc.split()
 
-    fixed_opsz = set()
-    opsizes = 0
-    for i, opkind in enumerate(desc[1:5]):
-        enc_size, fixed_size = OPKIND_LOOKUP[opkind]
-        if enc_size == 1: fixed_opsz.add(fixed_size)
-        opsizes |= enc_size << 2 * i
+        fixed_opsz = set()
+        opsizes = 0
+        for i, opkind in enumerate(desc[1:5]):
+            enc_size, fixed_size = OPKIND_LOOKUP[opkind]
+            if enc_size == 1: fixed_opsz.add(fixed_size)
+            opsizes |= enc_size << 2 * i
 
-    flags = copy(ENCODINGS[desc[0]])
-    flags.operand_sizes = opsizes
-    if fixed_opsz: flags.gp_fixed_operand_size = next(iter(fixed_opsz))
+        flags = copy(ENCODINGS[desc[0]])
+        flags.operand_sizes = opsizes
+        if fixed_opsz: flags.gp_fixed_operand_size = next(iter(fixed_opsz))
 
-    # Miscellaneous Flags
-    if "DEF64" in desc[6:]:       flags.gp_size_def64 = 1
-    if "SIZE_8" in desc[6:]:      flags.gp_size_8 = 1
-    if "INSTR_WIDTH" in desc[6:]: flags.gp_instr_width = 1
-    if "IMM_8" in desc[6:]:       flags.imm_byte = 1
+        # Miscellaneous Flags
+        if "DEF64" in desc[6:]:       flags.gp_size_def64 = 1
+        if "SIZE_8" in desc[6:]:      flags.gp_size_8 = 1
+        if "INSTR_WIDTH" in desc[6:]: flags.gp_instr_width = 1
+        if "IMM_8" in desc[6:]:       flags.imm_byte = 1
 
-    return desc[5], flags._encode()
+        return cls(desc[5], frozenset(desc[6:]), flags._encode())
 
 class EntryKind(Enum):
     NONE = 0
@@ -303,7 +304,7 @@ if __name__ == "__main__":
             if line and line[0] != "#":
                 opcode_string, desc = tuple(line.split(maxsplit=1))
                 for opcode in parse_opcode(opcode_string):
-                    entries[opcode].append(desc)
+                    entries[opcode].append(InstrDesc.parse(desc))
 
     mnemonics = set()
     table32 = Table()
@@ -311,12 +312,11 @@ if __name__ == "__main__":
     masks = "ONLY64", "ONLY32"
     for opcode, descs in entries.items():
         for table, ignore_mask in zip((table32, table64), masks):
-            parsed = [parse_desc(desc, ignore_mask) for desc in descs]
-            parsed = [desc for desc in parsed if desc is not None]
+            parsed = [desc for desc in descs if ignore_mask not in desc.flags]
             assert len(parsed) <= 1
             if parsed:
-                mnemonics.add(parsed[0][0])
-                table.add_opcode(opcode, parsed[0])
+                mnemonics.add(parsed[0].mnemonic)
+                table.add_opcode(opcode, (parsed[0].mnemonic, parsed[0].encoding))
 
     table32.deduplicate()
     table64.deduplicate()
