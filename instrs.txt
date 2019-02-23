@@ -461,8 +461,8 @@ F3.0f2a               RM    XMM32  GP     -      -      SSE_CVTSI2SS
 F2.0f2a               RM    XMM64  GP     -      -      SSE_CVTSI2SD
 NP.0f2b               MR    XMM    XMM    -      -      SSE_MOVNTPS
 66.0f2b               MR    XMM    XMM    -      -      SSE_MOVNTPD
-F3.0f2c               RM    GP     XMM32  -      -      SSE_CVTSS2SI
-F2.0f2c               RM    GP     XMM64  -      -      SSE_CVTSD2SI
+F3.0f2c               RM    GP     XMM32  -      -      SSE_CVTTSS2SI
+F2.0f2c               RM    GP     XMM64  -      -      SSE_CVTTSD2SI
 F3.0f2d               RM    GP     XMM32  -      -      SSE_CVTSS2SI
 F2.0f2d               RM    GP     XMM64  -      -      SSE_CVTSD2SI
 NP.0f2e               RM    XMM32  XMM32  -      -      SSE_UCOMISS
