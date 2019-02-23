@@ -1,12 +1,12 @@
 #!/usr/bin/python3
 
+import argparse
 from binascii import unhexlify
-from collections import OrderedDict, defaultdict, namedtuple
+from collections import OrderedDict, defaultdict, namedtuple, Counter
 from copy import copy
 from enum import Enum, IntEnum
 from itertools import accumulate
 import struct
-import sys
 
 def bitstruct(name, fields):
     names, sizes = zip(*(field.split(":") for field in fields))
@@ -126,15 +126,33 @@ class EntryKind(Enum):
     TABLE72 = 4
     TABLE_PREFIX = 5
 
+class TrieEntry(namedtuple("TrieEntry", "kind,items,payload")):
+    __slots__ = ()
+    TABLE_LENGTH = {
+        EntryKind.TABLE256: 256,
+        EntryKind.TABLE8: 8,
+        EntryKind.TABLE72: 72,
+        EntryKind.TABLE_PREFIX: 16
+    }
+    @classmethod
+    def table(cls, kind):
+        return cls(kind, [None] * cls.TABLE_LENGTH[kind], b"")
+    @classmethod
+    def instr(cls, payload):
+        return cls(EntryKind.INSTR, [], payload)
+
     @property
-    def table_length(self):
-        return {
-            EntryKind.INSTR: 0,
-            EntryKind.TABLE256: 256,
-            EntryKind.TABLE8: 8,
-            EntryKind.TABLE72: 72,
-            EntryKind.TABLE_PREFIX: 16
-        }[self]
+    def encode_length(self):
+        return len(self.payload) + 2 * len(self.items)
+    def encode(self, encode_item):
+        enc_items = (encode_item(item) if item else 0 for item in self.items)
+        return self.payload + struct.pack("<%dH"%len(self.items), *enc_items)
+
+    def readonly(self):
+        return TrieEntry(self.kind, tuple(self.items), self.payload)
+    def map(self, mapping):
+        mapped_items = (mapping.get(v, v) for v in self.items)
+        return TrieEntry(self.kind, tuple(mapped_items), self.payload)
 
 import re
 opcode_regex = re.compile(r"^(?P<prefixes>(?P<vex>VEX\.)?(?P<legacy>NP|66|F2|F3)\.(?P<rexw>W[01]\.)?(?P<vexl>L[01]\.)?)?(?P<opcode>(?:[0-9a-f]{2})+)(?P<modrm>//?[0-7]|//[c-f][0-9a-f])?(?P<extended>\+)?$")
@@ -193,49 +211,36 @@ class Table:
     def __init__(self, root_count=1):
         self.data = OrderedDict()
         for i in range(root_count):
-            self.data["root%d"%i] = (EntryKind.TABLE256, [None] * 256)
+            self.data["root%d"%i] = TrieEntry.table(EntryKind.TABLE256)
+        self.offsets = {}
+        self.annotations = {}
 
-    def compile(self, mnemonics_lut):
-        offsets = {}
-        annotations = {}
-        currentOffset = 0
-        stats = defaultdict(int)
-        for name, (kind, _) in self.data.items():
-            annotations[currentOffset] = "%s(%d)" % (name, kind.value)
-            offsets[name] = currentOffset
-            stats[kind] += 1
-            if kind.table_length:
-                currentOffset += kind.table_length * 2
+    def add_opcode(self, opcode, instr_encoding, root_idx=0):
+        opcode = list(opcode) + [(None, None)]
+        opcode = [(opcode[i+1][0], opcode[i][1]) for i in range(len(opcode)-1)]
+
+        name, table = "t%d"%root_idx, self.data["root%d"%root_idx]
+        for kind, byte in opcode[:-1]:
+            if table.items[byte] is None:
+                name += "{:02x}".format(byte)
+                self.data[name] = TrieEntry.table(kind)
+                table.items[byte] = name
             else:
-                currentOffset += 6
-            currentOffset = (currentOffset + 7) & ~7
-            assert currentOffset < 0x10000
+                name = table.items[byte]
+            table = self.data[name]
+            assert table.kind == kind
 
-        data = b""
-        for name, (kind, value) in self.data.items():
-            if len(data) < offsets[name]:
-                data += b"\0" * (offsets[name] - len(data))
-            assert len(data) == offsets[name]
-            if kind == EntryKind.INSTR:
-                data += value
-            else: # Table
-                # count = sum(1 for x in value if x is not None)
-                # print("Table of kind", kind, "with %d/%d entries"%(count, kind.table_length))
-                for i, entry in enumerate(value):
-                    if entry is not None:
-                        targetKind, _ = self.data[entry]
-                        value = (offsets[entry] & ~7) | targetKind.value
-                    else:
-                        value = 0
-                    data += struct.pack("<H", value)
+        # An opcode can occur once only.
+        assert table.items[opcode[-1][1]] is None
 
-        print("%d bytes" % len(data), stats)
-        return data, annotations
+        name += "{:02x}/{}".format(opcode[-1][1], "??")
+        table.items[opcode[-1][1]] = name
+        self.data[name] = TrieEntry.instr(instr_encoding)
 
     def deduplicate(self):
         # Make values hashable
-        for n, (k, v) in self.data.items():
-            self.data[n] = k, (v if k == EntryKind.INSTR else tuple(v))
+        for name, entry in self.data.items():
+            self.data[name] = entry.readonly()
         synonyms = True
         while synonyms:
             entries = {} # Mapping from entry to name
@@ -245,33 +250,33 @@ class Table:
                     synonyms[name] = entries[entry]
                 else:
                     entries[entry] = name
-            for name, (kind, value) in self.data.items():
-                if kind != EntryKind.INSTR:
-                    self.data[name] = kind, tuple(synonyms.get(v, v) for v in value)
+            for name, entry in self.data.items():
+                self.data[name] = entry.map(synonyms)
             for key in synonyms:
                 del self.data[key]
 
-    def add_opcode(self, opcode, instr_encoding, root_idx=0):
-        opcode = list(opcode) + [(None, None)]
-        opcode = [(opcode[i+1][0], opcode[i][1]) for i in range(len(opcode)-1)]
+    def calc_offsets(self):
+        current = 0
+        for name, entry in self.data.items():
+            self.annotations[current] = "%s(%d)" % (name, entry.kind.value)
+            self.offsets[name] = current
+            current += (entry.encode_length + 7) & ~7
+        assert current < 0x10000
 
-        name, table = "t%d"%root_idx, self.data["root%d"%root_idx]
-        for kind, byte in opcode[:-1]:
-            if table[1][byte] is None:
-                name += "{:02x}".format(byte)
-                self.data[name] = kind, [None] * kind.table_length
-                table[1][byte] = name
-            else:
-                name = table[1][byte]
-            table = self.data[name]
-            assert table[0] == kind
+    def encode_item(self, name):
+        return self.offsets[name] | self.data[name].kind.value
 
-        # An opcode can occur once only.
-        assert table[1][opcode[-1][1]] is None
+    def compile(self):
+        self.calc_offsets()
+        ordered = sorted((off, self.data[k]) for k, off in self.offsets.items())
 
-        name += "{:02x}/{}".format(opcode[-1][1], "??")
-        table[1][opcode[-1][1]] = name
-        self.data[name] = EntryKind.INSTR, instr_encoding
+        data = b""
+        for off, entry in ordered:
+            data += b"\x00" * (off - len(data)) + entry.encode(self.encode_item)
+
+        stats = dict(Counter(entry.kind for entry in self.data.values()))
+        print("%d bytes" % len(data), stats)
+        return data, self.annotations
 
 def wrap(string):
     return "\n".join(string[i:i+80] for i in range(0, len(string), 80))
@@ -299,13 +304,17 @@ template = """// Auto-generated file -- do not modify!
 """
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument("table", type=argparse.FileType('r'))
+    parser.add_argument("output", type=argparse.FileType('w'))
+    args = parser.parse_args()
+
     entries = []
-    with open(sys.argv[1], "r") as f:
-        for line in f.read().splitlines():
-            if line and line[0] != "#":
-                opcode_string, desc = tuple(line.split(maxsplit=1))
-                for opcode in parse_opcode(opcode_string):
-                    entries.append((opcode, InstrDesc.parse(desc)))
+    for line in args.table.read().splitlines():
+        if not line or line[0] == "#": continue
+        opcode_string, desc = tuple(line.split(maxsplit=1))
+        for opcode in parse_opcode(opcode_string):
+            entries.append((opcode, InstrDesc.parse(desc)))
 
     mnemonics = sorted({desc.mnemonic for _, desc in entries})
     mnemonics_lut = {name: mnemonics.index(name) for name in mnemonics}
@@ -328,12 +337,10 @@ if __name__ == "__main__":
     mnemonic_cstr = '"' + "\\0".join(mnemonics) + '"'
 
     file = template.format(
-        hex_table32=bytes_to_table(*table32.compile(mnemonics_lut)),
-        hex_table64=bytes_to_table(*table64.compile(mnemonics_lut)),
+        hex_table32=bytes_to_table(*table32.compile()),
+        hex_table64=bytes_to_table(*table64.compile()),
         mnemonic_list="\n".join("FD_MNEMONIC(%s,%d)"%entry for entry in mnemonics_lut.items()),
         mnemonic_cstr=mnemonic_cstr,
         mnemonic_offsets=",".join(str(off) for off in mnemonic_tab),
     )
-
-    with open(sys.argv[2], "w") as f:
-        f.write(file)
+    args.output.write(file)
