@@ -12,21 +12,16 @@
 #define LIKELY(x) __builtin_expect((x), 1)
 #define UNLIKELY(x) __builtin_expect((x), 0)
 
-#if defined(ARCH_386)
-#define FD_DECODE_TABLE_DATA_32
-static const uint8_t _decode_table32[] = {
+#define FD_DECODE_TABLE_DATA
+static const uint8_t _decode_table[] = {
 #include <decode-table.inc>
 };
-#undef FD_DECODE_TABLE_DATA_32
-#endif
+#undef FD_DECODE_TABLE_DATA
 
-#if defined(ARCH_X86_64)
-#define FD_DECODE_TABLE_DATA_64
-static const uint8_t _decode_table64[] = {
+// Defines FD_TABLE_OFFSET_32 and FD_TABLE_OFFSET_64, if available
+#define FD_DECODE_TABLE_DEFINES
 #include <decode-table.inc>
-};
-#undef FD_DECODE_TABLE_DATA_64
-#endif
+#undef FD_DECODE_TABLE_DEFINES
 
 enum DecodeMode {
     DECODE_64 = 0,
@@ -369,7 +364,7 @@ int
 fd_decode(const uint8_t* buffer, size_t len_sz, int mode_int, uintptr_t address,
           FdInstr* instr)
 {
-    const uint8_t* decode_table = NULL;
+    const uint16_t* table = NULL;
 
     int len = len_sz > 15 ? 15 : len_sz;
     DecodeMode mode = mode_int == 32 ? DECODE_32 :
@@ -378,14 +373,14 @@ fd_decode(const uint8_t* buffer, size_t len_sz, int mode_int, uintptr_t address,
     // Ensure that we can actually handle the decode request
 #if defined(ARCH_386)
     if (mode == DECODE_32)
-        decode_table = _decode_table32;
+        table = (uint16_t*) &_decode_table[FD_TABLE_OFFSET_32];
 #endif
 #if defined(ARCH_X86_64)
     if (mode == DECODE_64)
-        decode_table = _decode_table64;
+        table = (uint16_t*) &_decode_table[FD_TABLE_OFFSET_64];
 #endif
 
-    if (UNLIKELY(decode_table == NULL))
+    if (UNLIKELY(table == NULL))
         return -2;
 
     int retval;
@@ -402,26 +397,25 @@ fd_decode(const uint8_t* buffer, size_t len_sz, int mode_int, uintptr_t address,
     }
     off += retval;
 
-    const uint16_t* table = (uint16_t*) decode_table;
     uint32_t kind = ENTRY_TABLE256;
 
     if (UNLIKELY(prefixes & PREFIX_ESC_MASK))
     {
         uint32_t escape = prefixes & PREFIX_ESC_MASK;
-        table = (uint16_t*) &decode_table[table[0x0F] & ~7];
+        table = (uint16_t*) &_decode_table[table[0x0F] & ~7];
         if (escape == PREFIX_ESC_0F38)
         {
-            table = (uint16_t*) &decode_table[table[0x38] & ~7];
+            table = (uint16_t*) &_decode_table[table[0x38] & ~7];
         }
         else if (escape == PREFIX_ESC_0F3A)
         {
-            table = (uint16_t*) &decode_table[table[0x3A] & ~7];
+            table = (uint16_t*) &_decode_table[table[0x3A] & ~7];
         }
     }
 
     // First walk through full-byte opcodes. We do at most three iterations.
     while (kind == ENTRY_TABLE256 && LIKELY(off < len))
-        ENTRY_UNPACK(table, kind, decode_table, table[buffer[off++]]);
+        ENTRY_UNPACK(table, kind, _decode_table, table[buffer[off++]]);
 
     // Then, walk through ModR/M-encoded opcode extensions.
     if ((kind == ENTRY_TABLE8 || kind == ENTRY_TABLE72) && LIKELY(off < len))
@@ -438,7 +432,7 @@ fd_decode(const uint8_t* buffer, size_t len_sz, int mode_int, uintptr_t address,
         else
             entry = table[(buffer[off] >> 3) & 7];
 
-        ENTRY_UNPACK(table, kind, decode_table, entry);
+        ENTRY_UNPACK(table, kind, _decode_table, entry);
     }
 
     // Finally, handle mandatory prefixes (which behave like an opcode ext.).
@@ -452,7 +446,7 @@ fd_decode(const uint8_t* buffer, size_t len_sz, int mode_int, uintptr_t address,
         // for the 0x66 prefix, which could otherwise override the operand
         // size of general purpose registers.
         prefixes &= ~(PREFIX_OPSZ | PREFIX_REPNZ | PREFIX_REP);
-        ENTRY_UNPACK(table, kind, decode_table, table[index]);
+        ENTRY_UNPACK(table, kind, _decode_table, table[index]);
     }
 
     if (UNLIKELY(kind != ENTRY_INSTR))

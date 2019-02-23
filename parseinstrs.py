@@ -210,6 +210,7 @@ def parse_opcode(opcode_string):
 class Table:
     def __init__(self, root_count=1):
         self.data = OrderedDict()
+        self.roots = ["root%d"%i for i in range(root_count)]
         for i in range(root_count):
             self.data["root%d"%i] = TrieEntry.table(EntryKind.TABLE256)
         self.offsets = {}
@@ -276,7 +277,7 @@ class Table:
 
         stats = dict(Counter(entry.kind for entry in self.data.values()))
         print("%d bytes" % len(data), stats)
-        return data, self.annotations
+        return data, self.annotations, [self.offsets[k] for k in self.roots]
 
 def wrap(string):
     return "\n".join(string[i:i+80] for i in range(0, len(string), 80))
@@ -288,16 +289,16 @@ def bytes_to_table(data, notes):
                      for p, c in zip(offs, offs[1:]))
 
 template = """// Auto-generated file -- do not modify!
-#if defined(FD_DECODE_TABLE_DATA_32)
-{hex_table32}
-#elif defined(FD_DECODE_TABLE_DATA_64)
-{hex_table64}
+#if defined(FD_DECODE_TABLE_DATA)
+{hex_table}
 #elif defined(FD_DECODE_TABLE_MNEMONICS)
 {mnemonic_list}
 #elif defined(FD_DECODE_TABLE_STRTAB1)
 {mnemonic_cstr}
 #elif defined(FD_DECODE_TABLE_STRTAB2)
 {mnemonic_offsets}
+#elif defined(FD_DECODE_TABLE_DEFINES)
+{defines}
 #else
 #error "unspecified decode table"
 #endif
@@ -305,6 +306,8 @@ template = """// Auto-generated file -- do not modify!
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
+    parser.add_argument("--32", dest="modes", action="append_const", const=32)
+    parser.add_argument("--64", dest="modes", action="append_const", const=64)
     parser.add_argument("table", type=argparse.FileType('r'))
     parser.add_argument("output", type=argparse.FileType('w'))
     args = parser.parse_args()
@@ -319,28 +322,28 @@ if __name__ == "__main__":
     mnemonics = sorted({desc.mnemonic for _, desc in entries})
     mnemonics_lut = {name: mnemonics.index(name) for name in mnemonics}
 
-    table32 = Table()
-    table64 = Table()
-    masks = "ONLY64", "ONLY32"
+    modes = [32, 64]
+    table = Table(root_count=len(args.modes))
     for opcode, desc in entries:
-        if "ONLY64" not in desc.flags:
-            table32.add_opcode(opcode, desc.encode(mnemonics_lut))
-        if "ONLY32" not in desc.flags:
-            table64.add_opcode(opcode, desc.encode(mnemonics_lut))
+        for i, mode in enumerate(args.modes):
+            if "ONLY%d"%(96-mode) not in desc.flags:
+                table.add_opcode(opcode, desc.encode(mnemonics_lut), i)
 
-    table32.deduplicate()
-    table64.deduplicate()
+    table.deduplicate()
+    table_data, annotations, root_offsets = table.compile()
 
     mnemonic_tab = [0]
     for name in mnemonics:
         mnemonic_tab.append(mnemonic_tab[-1] + len(name) + 1)
     mnemonic_cstr = '"' + "\\0".join(mnemonics) + '"'
 
+    defines = ["FD_TABLE_OFFSET_%d %d"%k for k in zip(args.modes, root_offsets)]
+
     file = template.format(
-        hex_table32=bytes_to_table(*table32.compile()),
-        hex_table64=bytes_to_table(*table64.compile()),
+        hex_table=bytes_to_table(table_data, annotations),
         mnemonic_list="\n".join("FD_MNEMONIC(%s,%d)"%entry for entry in mnemonics_lut.items()),
         mnemonic_cstr=mnemonic_cstr,
         mnemonic_offsets=",".join(str(off) for off in mnemonic_tab),
+        defines="\n".join("#define " + line for line in defines),
     )
     args.output.write(file)

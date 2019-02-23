@@ -46,8 +46,15 @@ if not decode_32 and not decode_64
   error('no architecture mode')
 endif
 
+generate_args = []
+if decode_32
+  generate_args += ['--32']
+endif
+if decode_64
+  generate_args += ['--64']
+endif
 instr_data = custom_target('tables',
-                           command: [python3, '@INPUT0@', '@INPUT1@', '@OUTPUT@'],
+                           command: [python3, '@INPUT0@', '@INPUT1@', '@OUTPUT@'] + generate_args,
                            input: files('parseinstrs.py', 'instrs.txt'),
                            output: ['decode-table.inc'])
 
