@@ -299,25 +299,25 @@ template = """// Auto-generated file -- do not modify!
 """
 
 if __name__ == "__main__":
-    entries = defaultdict(list)
+    entries = []
     with open(sys.argv[1], "r") as f:
         for line in f.read().splitlines():
             if line and line[0] != "#":
                 opcode_string, desc = tuple(line.split(maxsplit=1))
                 for opcode in parse_opcode(opcode_string):
-                    entries[opcode].append(InstrDesc.parse(desc))
+                    entries.append((opcode, InstrDesc.parse(desc)))
 
-    mnemonics = sorted({desc.mnemonic for descs in entries.values() for desc in descs})
+    mnemonics = sorted({desc.mnemonic for _, desc in entries})
     mnemonics_lut = {name: mnemonics.index(name) for name in mnemonics}
+
     table32 = Table()
     table64 = Table()
     masks = "ONLY64", "ONLY32"
-    for opcode, descs in entries.items():
-        for desc in descs:
-            if "ONLY64" not in desc.flags:
-                table32.add_opcode(opcode, desc.encode(mnemonics_lut))
-            if "ONLY32" not in desc.flags:
-                table64.add_opcode(opcode, desc.encode(mnemonics_lut))
+    for opcode, desc in entries:
+        if "ONLY64" not in desc.flags:
+            table32.add_opcode(opcode, desc.encode(mnemonics_lut))
+        if "ONLY32" not in desc.flags:
+            table64.add_opcode(opcode, desc.encode(mnemonics_lut))
 
     table32.deduplicate()
     table64.deduplicate()
