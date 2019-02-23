@@ -115,6 +115,8 @@ class InstrDesc(namedtuple("InstrDesc", "mnemonic,flags,encoding")):
         if "IMM_8" in desc[6:]:       flags.imm_byte = 1
 
         return cls(desc[5], frozenset(desc[6:]), flags._encode())
+    def encode(self, mnemonics_lut):
+        return struct.pack("<HL", mnemonics_lut[self.mnemonic], self.encoding)
 
 class EntryKind(Enum):
     NONE = 0
@@ -215,8 +217,7 @@ class Table:
                 data += b"\0" * (offsets[name] - len(data))
             assert len(data) == offsets[name]
             if kind == EntryKind.INSTR:
-                mnemonicIdx = mnemonics_lut[value[0]]
-                data += struct.pack("<HL", mnemonicIdx, value[1])
+                data += value
             else: # Table
                 # count = sum(1 for x in value if x is not None)
                 # print("Table of kind", kind, "with %d/%d entries"%(count, kind.table_length))
@@ -234,7 +235,7 @@ class Table:
     def deduplicate(self):
         # Make values hashable
         for n, (k, v) in self.data.items():
-            self.data[n] = k, tuple(v)
+            self.data[n] = k, (v if k == EntryKind.INSTR else tuple(v))
         synonyms = True
         while synonyms:
             entries = {} # Mapping from entry to name
@@ -250,7 +251,7 @@ class Table:
             for key in synonyms:
                 del self.data[key]
 
-    def add_opcode(self, opcode, instrData, root_idx=0):
+    def add_opcode(self, opcode, instr_encoding, root_idx=0):
         opcode = list(opcode) + [(None, None)]
         opcode = [(opcode[i+1][0], opcode[i][1]) for i in range(len(opcode)-1)]
 
@@ -268,9 +269,9 @@ class Table:
         # An opcode can occur once only.
         assert table[1][opcode[-1][1]] is None
 
-        name += "{:02x}/{}".format(opcode[-1][1], instrData[0])
+        name += "{:02x}/{}".format(opcode[-1][1], "??")
         table[1][opcode[-1][1]] = name
-        self.data[name] = EntryKind.INSTR, instrData
+        self.data[name] = EntryKind.INSTR, instr_encoding
 
 def wrap(string):
     return "\n".join(string[i:i+80] for i in range(0, len(string), 80))
@@ -306,23 +307,20 @@ if __name__ == "__main__":
                 for opcode in parse_opcode(opcode_string):
                     entries[opcode].append(InstrDesc.parse(desc))
 
-    mnemonics = set()
+    mnemonics = sorted({desc.mnemonic for descs in entries.values() for desc in descs})
+    mnemonics_lut = {name: mnemonics.index(name) for name in mnemonics}
     table32 = Table()
     table64 = Table()
     masks = "ONLY64", "ONLY32"
     for opcode, descs in entries.items():
-        for table, ignore_mask in zip((table32, table64), masks):
-            parsed = [desc for desc in descs if ignore_mask not in desc.flags]
-            assert len(parsed) <= 1
-            if parsed:
-                mnemonics.add(parsed[0].mnemonic)
-                table.add_opcode(opcode, (parsed[0].mnemonic, parsed[0].encoding))
+        for desc in descs:
+            if "ONLY64" not in desc.flags:
+                table32.add_opcode(opcode, desc.encode(mnemonics_lut))
+            if "ONLY32" not in desc.flags:
+                table64.add_opcode(opcode, desc.encode(mnemonics_lut))
 
     table32.deduplicate()
     table64.deduplicate()
-
-    mnemonics = sorted(mnemonics)
-    mnemonics_lut = {name: mnemonics.index(name) for name in mnemonics}
 
     mnemonic_tab = [0]
     for name in mnemonics:
