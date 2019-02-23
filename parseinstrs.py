@@ -191,7 +191,6 @@ class Table:
         self.data = OrderedDict()
         for i in range(root_count):
             self.data["root%d"%i] = (EntryKind.TABLE256, [None] * 256)
-        self.instrs = {}
 
     def compile(self, mnemonics_lut):
         offsets = {}
@@ -231,6 +230,25 @@ class Table:
         print("%d bytes" % len(data), stats)
         return data, annotations
 
+    def deduplicate(self):
+        # Make values hashable
+        for n, (k, v) in self.data.items():
+            self.data[n] = k, tuple(v)
+        synonyms = True
+        while synonyms:
+            entries = {} # Mapping from entry to name
+            synonyms = {} # Mapping from name to unique name
+            for name, entry in self.data.items():
+                if entry in entries:
+                    synonyms[name] = entries[entry]
+                else:
+                    entries[entry] = name
+            for name, (kind, value) in self.data.items():
+                if kind != EntryKind.INSTR:
+                    self.data[name] = kind, tuple(synonyms.get(v, v) for v in value)
+            for key in synonyms:
+                del self.data[key]
+
     def add_opcode(self, opcode, instrData, root_idx=0):
         opcode = list(opcode) + [(None, None)]
         opcode = [(opcode[i+1][0], opcode[i][1]) for i in range(len(opcode)-1)]
@@ -249,13 +267,9 @@ class Table:
         # An opcode can occur once only.
         assert table[1][opcode[-1][1]] is None
 
-        if instrData in self.instrs:
-            table[1][opcode[-1][1]] = self.instrs[instrData]
-        else:
-            name += "{:02x}/{}".format(opcode[-1][1], instrData[0])
-            table[1][opcode[-1][1]] = name
-            self.data[name] = EntryKind.INSTR, instrData
-            self.instrs[instrData] = name
+        name += "{:02x}/{}".format(opcode[-1][1], instrData[0])
+        table[1][opcode[-1][1]] = name
+        self.data[name] = EntryKind.INSTR, instrData
 
 def wrap(string):
     return "\n".join(string[i:i+80] for i in range(0, len(string), 80))
@@ -303,6 +317,9 @@ if __name__ == "__main__":
             if parsed:
                 mnemonics.add(parsed[0][0])
                 table.add_opcode(opcode, parsed[0])
+
+    table32.deduplicate()
+    table64.deduplicate()
 
     mnemonics = sorted(mnemonics)
     mnemonics_lut = {name: mnemonics.index(name) for name in mnemonics}
