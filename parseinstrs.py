@@ -187,9 +187,10 @@ def parse_opcode(opcode_string):
     return [common_prefix + ((last_type, last_index + i),) for i in range(8)]
 
 class Table:
-    def __init__(self):
+    def __init__(self, root_count=1):
         self.data = OrderedDict()
-        self.data["root"] = (EntryKind.TABLE256, [None] * 256)
+        for i in range(root_count):
+            self.data["root%d"%i] = (EntryKind.TABLE256, [None] * 256)
         self.instrs = {}
 
     def compile(self, mnemonics_lut):
@@ -230,11 +231,11 @@ class Table:
         print("%d bytes" % len(data), stats)
         return data, annotations
 
-    def add_opcode(self, opcode, instrData):
+    def add_opcode(self, opcode, instrData, root_idx=0):
         opcode = list(opcode) + [(None, None)]
         opcode = [(opcode[i+1][0], opcode[i][1]) for i in range(len(opcode)-1)]
 
-        name, table = "", self.data["root"]
+        name, table = "t%d"%root_idx, self.data["root%d"%root_idx]
         for kind, byte in opcode[:-1]:
             if table[1][byte] is None:
                 name += "{:02x}".format(byte)
