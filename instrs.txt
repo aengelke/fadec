@@ -798,6 +798,7 @@ VEX.66.0f6b           RVM   XMM    XMM    XMM    -      VPACKSSDW
 VEX.66.0f6c           RVM   XMM    XMM    XMM    -      VPUNPCKLQDQ
 VEX.66.0f6d           RVM   XMM    XMM    XMM    -      VPUNPCKHQDQ
 VEX.66.W0.L0.0f6e     RM    XMM32  GP     -      -      VMOVD_G2X
+VEX.66.W1.L0.0f6e     RM    XMM32  GP     -      -      VMOVD_G2X ONLY32
 VEX.66.W1.L0.0f6e     RM    XMM64  GP     -      -      VMOVQ_G2X ONLY64
 VEX.66.0f6f           RM    XMM    XMM    -      -      VMOVDQA
 VEX.F3.0f6f           RM    XMM    XMM    -      -      VMOVDQU
@@ -823,6 +824,7 @@ VEX.F2.0f7c           RVM   XMM    XMM    XMM    -      VHADDPS
 VEX.66.0f7d           RVM   XMM    XMM    XMM    -      VHSUBPD
 VEX.F2.0f7d           RVM   XMM    XMM    XMM    -      VHSUBPS
 VEX.66.W0.L0.0f7e     MR    GP     XMM32  -      -      VMOVD_X2G
+VEX.66.W1.L0.0f7e     MR    GP     XMM32  -      -      VMOVQ_X2G ONLY32
 VEX.66.W1.L0.0f7e     MR    GP     XMM64  -      -      VMOVQ_X2G ONLY64
 VEX.F3.L0.0f7e        RM    XMM64  XMM64  -      -      VMOVQ_X2X
 VEX.66.0f7f           MR    XMM    XMM    -      -      VMOVDQA
