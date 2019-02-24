@@ -41,7 +41,8 @@ if __name__ == "__main__":
     test_modes = frozenset(args.test_modes if args.test_modes else [32, 64])
 
     for file in args.cases:
-        cases = [tuple(ln.strip().split(maxsplit=2)) for ln in file.readlines()]
+        cases = [tuple(ln.strip().split(maxsplit=2)) for ln in file.readlines()
+                 if ln and ln[0] != "#"]
         for op, code, expected in cases:
             case_modes = {"decode":{32,64},"decode32":{32},"decode64":{64}}[op]
             if not case_modes & test_modes: continue

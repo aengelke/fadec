@@ -15,6 +15,7 @@ endif
 
 testcases = [
   ['prefixes', 'prefixes.txt'],
+  ['modrm', 'modrm.txt'],
 
   ['enter', 'decode-enter.sh'],
   ['imul', 'decode-imul.sh'],
