@@ -1,53 +1,53 @@
-00                    MR    GP     GP     -      -      ADD SIZE_8
-01                    MR    GP     GP     -      -      ADD
+00                    MR    GP     GP     -      -      ADD SIZE_8 LOCK
+01                    MR    GP     GP     -      -      ADD LOCK
 02                    RM    GP     GP     -      -      ADD SIZE_8
 03                    RM    GP     GP     -      -      ADD
 04                    IA    GP     IMM    -      -      ADD_IMM SIZE_8 IMM_8
 05                    IA    GP     IMM    -      -      ADD_IMM
 06                    NP    -      -      -      -      PUSH_ES ONLY32
 07                    NP    -      -      -      -      POP_ES ONLY32
-08                    MR    GP     GP     -      -      OR SIZE_8
-09                    MR    GP     GP     -      -      OR
+08                    MR    GP     GP     -      -      OR SIZE_8 LOCK
+09                    MR    GP     GP     -      -      OR LOCK
 0a                    RM    GP     GP     -      -      OR SIZE_8
 0b                    RM    GP     GP     -      -      OR
 0c                    IA    GP     IMM    -      -      OR_IMM SIZE_8 IMM_8
 0d                    IA    GP     IMM    -      -      OR_IMM
 0e                    NP    -      -      -      -      PUSH_CS ONLY32
 #0f    escape opcode
-10                    MR    GP     GP     -      -      ADC SIZE_8
-11                    MR    GP     GP     -      -      ADC
+10                    MR    GP     GP     -      -      ADC SIZE_8 LOCK
+11                    MR    GP     GP     -      -      ADC LOCK
 12                    RM    GP     GP     -      -      ADC SIZE_8
 13                    RM    GP     GP     -      -      ADC
 14                    IA    GP     IMM    -      -      ADC_IMM SIZE_8 IMM_8
 15                    IA    GP     IMM    -      -      ADC_IMM
 16                    NP    -      -      -      -      PUSH_SS ONLY32
 17                    NP    -      -      -      -      POP_SS ONLY32
-18                    MR    GP     GP     -      -      SBB SIZE_8
-19                    MR    GP     GP     -      -      SBB
+18                    MR    GP     GP     -      -      SBB SIZE_8 LOCK
+19                    MR    GP     GP     -      -      SBB LOCK
 1a                    RM    GP     GP     -      -      SBB SIZE_8
 1b                    RM    GP     GP     -      -      SBB
 1c                    IA    GP     IMM    -      -      SBB_IMM SIZE_8 IMM_8
 1d                    IA    GP     IMM    -      -      SBB_IMM
 1e                    NP    -      -      -      -      PUSH_DS ONLY32
 1f                    NP    -      -      -      -      POP_DS ONLY32
-20                    MR    GP     GP     -      -      AND SIZE_8
-21                    MR    GP     GP     -      -      AND
+20                    MR    GP     GP     -      -      AND SIZE_8 LOCK
+21                    MR    GP     GP     -      -      AND LOCK
 22                    RM    GP     GP     -      -      AND SIZE_8
 23                    RM    GP     GP     -      -      AND
 24                    IA    GP     IMM    -      -      AND_IMM SIZE_8 IMM_8
 25                    IA    GP     IMM    -      -      AND_IMM
 #26    SEG=ES prefix
 27                    NP    -      -      -      -      DAA ONLY32
-28                    MR    GP     GP     -      -      SUB SIZE_8
-29                    MR    GP     GP     -      -      SUB
+28                    MR    GP     GP     -      -      SUB SIZE_8 LOCK
+29                    MR    GP     GP     -      -      SUB LOCK
 2a                    RM    GP     GP     -      -      SUB SIZE_8
 2b                    RM    GP     GP     -      -      SUB
 2c                    IA    GP     IMM    -      -      SUB_IMM SIZE_8 IMM_8
 2d                    IA    GP     IMM    -      -      SUB_IMM
 #2e    SEG=CS prefix
 2f                    NP    -      -      -      -      DAS ONLY32
-30                    MR    GP     GP     -      -      XOR SIZE_8
-31                    MR    GP     GP     -      -      XOR
+30                    MR    GP     GP     -      -      XOR SIZE_8 LOCK
+31                    MR    GP     GP     -      -      XOR LOCK
 32                    RM    GP     GP     -      -      XOR SIZE_8
 33                    RM    GP     GP     -      -      XOR
 34                    IA    GP     IMM    -      -      XOR_IMM SIZE_8 IMM_8
@@ -99,42 +99,42 @@
 7d                    D     IMM    -      -      -      JGE DEF64 IMM_8
 7e                    D     IMM    -      -      -      JLE DEF64 IMM_8
 7f                    D     IMM    -      -      -      JG DEF64 IMM_8
-80/0                  MI    GP     IMM    -      -      ADD_IMM IMM_8 SIZE_8
-80/1                  MI    GP     IMM    -      -      OR_IMM IMM_8 SIZE_8
-80/2                  MI    GP     IMM    -      -      ADC_IMM IMM_8 SIZE_8
-80/3                  MI    GP     IMM    -      -      SBB_IMM IMM_8 SIZE_8
-80/4                  MI    GP     IMM    -      -      AND_IMM IMM_8 SIZE_8
-80/5                  MI    GP     IMM    -      -      SUB_IMM IMM_8 SIZE_8
-80/6                  MI    GP     IMM    -      -      XOR_IMM IMM_8 SIZE_8
+80/0                  MI    GP     IMM    -      -      ADD_IMM IMM_8 SIZE_8 LOCK
+80/1                  MI    GP     IMM    -      -      OR_IMM IMM_8 SIZE_8 LOCK
+80/2                  MI    GP     IMM    -      -      ADC_IMM IMM_8 SIZE_8 LOCK
+80/3                  MI    GP     IMM    -      -      SBB_IMM IMM_8 SIZE_8 LOCK
+80/4                  MI    GP     IMM    -      -      AND_IMM IMM_8 SIZE_8 LOCK
+80/5                  MI    GP     IMM    -      -      SUB_IMM IMM_8 SIZE_8 LOCK
+80/6                  MI    GP     IMM    -      -      XOR_IMM IMM_8 SIZE_8 LOCK
 80/7                  MI    GP     IMM    -      -      CMP_IMM IMM_8 SIZE_8
-81/0                  MI    GP     IMM    -      -      ADD_IMM
-81/1                  MI    GP     IMM    -      -      OR_IMM
-81/2                  MI    GP     IMM    -      -      ADC_IMM
-81/3                  MI    GP     IMM    -      -      SBB_IMM
-81/4                  MI    GP     IMM    -      -      AND_IMM
-81/5                  MI    GP     IMM    -      -      SUB_IMM
-81/6                  MI    GP     IMM    -      -      XOR_IMM
+81/0                  MI    GP     IMM    -      -      ADD_IMM LOCK
+81/1                  MI    GP     IMM    -      -      OR_IMM LOCK
+81/2                  MI    GP     IMM    -      -      ADC_IMM LOCK
+81/3                  MI    GP     IMM    -      -      SBB_IMM LOCK
+81/4                  MI    GP     IMM    -      -      AND_IMM LOCK
+81/5                  MI    GP     IMM    -      -      SUB_IMM LOCK
+81/6                  MI    GP     IMM    -      -      XOR_IMM LOCK
 81/7                  MI    GP     IMM    -      -      CMP_IMM
-82/0                  MI    GP     IMM    -      -      ADD_IMM ONLY32 IMM_8 SIZE_8
-82/1                  MI    GP     IMM    -      -      OR_IMM ONLY32 IMM_8 SIZE_8
-82/2                  MI    GP     IMM    -      -      ADC_IMM ONLY32 IMM_8 SIZE_8
-82/3                  MI    GP     IMM    -      -      SBB_IMM ONLY32 IMM_8 SIZE_8
-82/4                  MI    GP     IMM    -      -      AND_IMM ONLY32 IMM_8 SIZE_8
-82/5                  MI    GP     IMM    -      -      SUB_IMM ONLY32 IMM_8 SIZE_8
-82/6                  MI    GP     IMM    -      -      XOR_IMM ONLY32 IMM_8 SIZE_8
+82/0                  MI    GP     IMM    -      -      ADD_IMM ONLY32 IMM_8 SIZE_8 LOCK
+82/1                  MI    GP     IMM    -      -      OR_IMM ONLY32 IMM_8 SIZE_8 LOCK
+82/2                  MI    GP     IMM    -      -      ADC_IMM ONLY32 IMM_8 SIZE_8 LOCK
+82/3                  MI    GP     IMM    -      -      SBB_IMM ONLY32 IMM_8 SIZE_8 LOCK
+82/4                  MI    GP     IMM    -      -      AND_IMM ONLY32 IMM_8 SIZE_8 LOCK
+82/5                  MI    GP     IMM    -      -      SUB_IMM ONLY32 IMM_8 SIZE_8 LOCK
+82/6                  MI    GP     IMM    -      -      XOR_IMM ONLY32 IMM_8 SIZE_8 LOCK
 82/7                  MI    GP     IMM    -      -      CMP_IMM ONLY32 IMM_8 SIZE_8
-83/0                  MI    GP     IMM    -      -      ADD_IMM IMM_8
-83/1                  MI    GP     IMM    -      -      OR_IMM IMM_8
-83/2                  MI    GP     IMM    -      -      ADC_IMM IMM_8
-83/3                  MI    GP     IMM    -      -      SBB_IMM IMM_8
-83/4                  MI    GP     IMM    -      -      AND_IMM IMM_8
-83/5                  MI    GP     IMM    -      -      SUB_IMM IMM_8
-83/6                  MI    GP     IMM    -      -      XOR_IMM IMM_8
+83/0                  MI    GP     IMM    -      -      ADD_IMM IMM_8 LOCK
+83/1                  MI    GP     IMM    -      -      OR_IMM IMM_8 LOCK
+83/2                  MI    GP     IMM    -      -      ADC_IMM IMM_8 LOCK
+83/3                  MI    GP     IMM    -      -      SBB_IMM IMM_8 LOCK
+83/4                  MI    GP     IMM    -      -      AND_IMM IMM_8 LOCK
+83/5                  MI    GP     IMM    -      -      SUB_IMM IMM_8 LOCK
+83/6                  MI    GP     IMM    -      -      XOR_IMM IMM_8 LOCK
 83/7                  MI    GP     IMM    -      -      CMP_IMM IMM_8
 84                    MR    GP     GP     -      -      TEST SIZE_8
 85                    MR    GP     GP     -      -      TEST
-86                    MR    GP     GP     -      -      XCHG SIZE_8
-87                    MR    GP     GP     -      -      XCHG
+86                    MR    GP     GP     -      -      XCHG SIZE_8 LOCK
+87                    MR    GP     GP     -      -      XCHG LOCK
 88                    MR    GP     GP     -      -      MOV SIZE_8
 89                    MR    GP     GP     -      -      MOV
 8a                    RM    GP     GP     -      -      MOV SIZE_8
@@ -265,15 +265,15 @@ ef                    NP    -      -      -      -      OUT INSTR_WIDTH
 f4                    NP    -      -      -      -      HLT
 f5                    NP    -      -      -      -      CMC
 f6/0                  MI    GP     IMM    -      -      TEST_IMM SIZE_8 IMM_8
-f6/2                  M     GP     -      -      -      NOT SIZE_8
-f6/3                  M     GP     -      -      -      NEG SIZE_8
+f6/2                  M     GP     -      -      -      NOT SIZE_8 LOCK
+f6/3                  M     GP     -      -      -      NEG SIZE_8 LOCK
 f6/4                  M     GP     -      -      -      MUL SIZE_8
 f6/5                  M     GP     -      -      -      IMUL SIZE_8
 f6/6                  M     GP     -      -      -      DIV SIZE_8
 f6/7                  M     GP     -      -      -      IDIV SIZE_8
 f7/0                  MI    GP     IMM    -      -      TEST_IMM
-f7/2                  M     GP     -      -      -      NOT
-f7/3                  M     GP     -      -      -      NEG
+f7/2                  M     GP     -      -      -      NOT LOCK
+f7/3                  M     GP     -      -      -      NEG LOCK
 f7/4                  M     GP     -      -      -      MUL
 f7/5                  M     GP     -      -      -      IMUL
 f7/6                  M     GP     -      -      -      DIV
@@ -284,10 +284,10 @@ fa                    NP    -      -      -      -      CLI
 fb                    NP    -      -      -      -      STI
 fc                    NP    -      -      -      -      CLD
 fd                    NP    -      -      -      -      STD
-fe/0                  M     GP     -      -      -      INC SIZE_8
-fe/1                  M     GP     -      -      -      DEC SIZE_8
-ff/0                  M     GP     -      -      -      INC
-ff/1                  M     GP     -      -      -      DEC
+fe/0                  M     GP     -      -      -      INC SIZE_8 LOCK
+fe/1                  M     GP     -      -      -      DEC SIZE_8 LOCK
+ff/0                  M     GP     -      -      -      INC LOCK
+ff/1                  M     GP     -      -      -      DEC LOCK
 ff/2                  M     GP     -      -      -      CALL_IND DEF64
 #ff/3 CALLf TODO
 ff/4                  M     GP     -      -      -      JMP_IND DEF64
@@ -399,30 +399,30 @@ ff/6                  M     GP     -      -      -      PUSH DEF64
 0fa8                  NP    -      -      -      -      PUSH_GS DEF64 INSTR_WIDTH
 0fa9                  NP    -      -      -      -      POP_GS DEF64 INSTR_WIDTH
 # 0faa RSM
-0fab                  MR    GP     GP     -      -      BTS
+0fab                  MR    GP     GP     -      -      BTS LOCK
 0fac                  MRI   GP     GP     IMM8   -      SHRD_IMM IMM_8
 0fad                  MR    GP     GP     -      -      SHRD_CL
 0faf                  RM    GP     GP     -      -      IMUL2
-0fb0                  MR    GP     GP     -      -      CMPXCHG SIZE_8
-0fb1                  MR    GP     GP     -      -      CMPXCHG
-0fb3                  MR    GP     GP     -      -      BTR
+0fb0                  MR    GP     GP     -      -      CMPXCHG SIZE_8 LOCK
+0fb1                  MR    GP     GP     -      -      CMPXCHG LOCK
+0fb3                  MR    GP     GP     -      -      BTR LOCK
 0fb6                  RM    GP     GP8    -      -      MOVZX
 0fb7                  RM    GP     GP16   -      -      MOVZX
 F3.0fb8               RM    GP     GP     -      -      POPCNT
 0fb9                  RM    GP     GP     -      -      UD1
 0fba/4                MI    GP     IMM8   -      -      BT_IMM IMM_8
-0fba/5                MI    GP     IMM8   -      -      BTS_IMM IMM_8
-0fba/6                MI    GP     IMM8   -      -      BTR_IMM IMM_8
-0fba/7                MI    GP     IMM8   -      -      BTC_IMM IMM_8
-0fbb                  MR    GP     GP     -      -      BTC
+0fba/5                MI    GP     IMM8   -      -      BTS_IMM IMM_8 LOCK
+0fba/6                MI    GP     IMM8   -      -      BTR_IMM IMM_8 LOCK
+0fba/7                MI    GP     IMM8   -      -      BTC_IMM IMM_8 LOCK
+0fbb                  MR    GP     GP     -      -      BTC LOCK
 0fbc                  RM    GP     GP     -      -      BSF_TZCNT
 0fbd                  RM    GP     GP     -      -      BSR_LZCNT
 0fbe                  RM    GP     GP8    -      -      MOVSX
 0fbf                  RM    GP     GP16   -      -      MOVSX
-0fc0                  MR    GP     GP     -      -      XADD SIZE_8
-0fc1                  MR    GP     GP     -      -      XADD
+0fc0                  MR    GP     GP     -      -      XADD SIZE_8 LOCK
+0fc1                  MR    GP     GP     -      -      XADD LOCK
 NP.0fc3               MR    GP     GP     -      -      MOVNTI
-0fc7//1               M     GP     -      -      -      CMPXCHGD
+0fc7//1               M     GP     -      -      -      CMPXCHGD LOCK
 0fc8+                 O     GP     -      -      -      BSWAP
 0fff                  NP    -      -      -      -      UD0
 #
