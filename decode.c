@@ -84,11 +84,6 @@ enum PrefixSet
     PREFIX_REXX = 1 << 16,
     PREFIX_REXR = 1 << 17,
     PREFIX_REXW = 1 << 18,
-    PREFIX_ESC_NONE = 0 << 19,
-    PREFIX_ESC_0F = 1 << 19,
-    PREFIX_ESC_0F38 = 2 << 19,
-    PREFIX_ESC_0F3A = 3 << 19,
-    PREFIX_ESC_MASK = 3 << 19,
     PREFIX_VEX = 1 << 21,
 };
 
@@ -98,7 +93,8 @@ static
 int
 decode_prefixes(const uint8_t* buffer, int len, DecodeMode mode,
                 PrefixSet* out_prefixes, uint8_t* out_mandatory,
-                uint8_t* out_segment, uint8_t* out_vex_operand)
+                uint8_t* out_segment, uint8_t* out_vex_operand,
+                int* out_opcode_escape)
 {
     int off = 0;
     PrefixSet prefixes = 0;
@@ -106,6 +102,7 @@ decode_prefixes(const uint8_t* buffer, int len, DecodeMode mode,
     uint8_t rep = 0;
     *out_mandatory = 0;
     *out_segment = FD_REG_NONE;
+    *out_opcode_escape = -1;
 
     while (LIKELY(off < len))
     {
@@ -158,13 +155,7 @@ decode_prefixes(const uint8_t* buffer, int len, DecodeMode mode,
                 prefixes |= byte & 0x40 ? 0 : PREFIX_REXX;
                 // SDM Vol 2A 2-15 (Dec. 2016): Ignored in 32-bit mode
                 prefixes |= mode == DECODE_64 || (byte & 0x20) ? 0 : PREFIX_REXB;
-                switch (byte & 0x1f)
-                {
-                case 0x01: prefixes |= PREFIX_ESC_0F; break;
-                case 0x02: prefixes |= PREFIX_ESC_0F38; break;
-                case 0x03: prefixes |= PREFIX_ESC_0F3A; break;
-                default: return -1;
-                }
+                *out_opcode_escape = (byte & 0x1f);
 
                 // Load third byte of VEX prefix
                 if (UNLIKELY(off + 2 >= len))
@@ -178,7 +169,7 @@ decode_prefixes(const uint8_t* buffer, int len, DecodeMode mode,
                 prefixes |= byte & 0x80 ? PREFIX_REXW : 0;
             }
             else // 2-byte VEX
-                prefixes |= PREFIX_ESC_0F;
+                *out_opcode_escape = 1;
             prefixes |= byte & 0x04 ? PREFIX_VEXL : 0;
             *out_mandatory = byte & 0x03;
             *out_vex_operand = ((byte & 0x78) >> 3) ^ 0xf;
@@ -343,10 +334,12 @@ fd_decode(const uint8_t* buffer, size_t len_sz, int mode_int, uintptr_t address,
     int off = 0;
     uint8_t vex_operand = 0;
     uint8_t mandatory_prefix;
+    int opcode_escape;
     PrefixSet prefixes = 0;
 
     retval = decode_prefixes(buffer + off, len - off, mode, &prefixes,
-                             &mandatory_prefix, &instr->segment, &vex_operand);
+                             &mandatory_prefix, &instr->segment, &vex_operand,
+                             &opcode_escape);
     if (UNLIKELY(retval < 0 || off + retval >= len))
     {
         return -1;
@@ -355,23 +348,23 @@ fd_decode(const uint8_t* buffer, size_t len_sz, int mode_int, uintptr_t address,
 
     uint32_t kind = ENTRY_TABLE256;
 
-    if (UNLIKELY(prefixes & PREFIX_ESC_MASK))
+    // "Legacy" walk through table and escape opcodes
+    if (LIKELY(opcode_escape < 0))
+        while (kind == ENTRY_TABLE256 && LIKELY(off < len))
+            ENTRY_UNPACK(table, kind, _decode_table, table[buffer[off++]]);
+    // VEX/EVEX compact escapes; the prefix precedes the single opcode byte
+    else if (opcode_escape == 1 || opcode_escape == 2 || opcode_escape == 3)
     {
-        uint32_t escape = prefixes & PREFIX_ESC_MASK;
-        table = (uint16_t*) &_decode_table[table[0x0F] & ~7];
-        if (escape == PREFIX_ESC_0F38)
-        {
-            table = (uint16_t*) &_decode_table[table[0x38] & ~7];
-        }
-        else if (escape == PREFIX_ESC_0F3A)
-        {
-            table = (uint16_t*) &_decode_table[table[0x3A] & ~7];
-        }
+        ENTRY_UNPACK(table, kind, _decode_table, table[0x0F]);
+        if (opcode_escape == 2)
+            ENTRY_UNPACK(table, kind, _decode_table, table[0x38]);
+        if (opcode_escape == 3)
+            ENTRY_UNPACK(table, kind, _decode_table, table[0x3A]);
+        if (LIKELY(off < len))
+            ENTRY_UNPACK(table, kind, _decode_table, table[buffer[off++]]);
     }
-
-    // First walk through full-byte opcodes. We do at most three iterations.
-    while (kind == ENTRY_TABLE256 && LIKELY(off < len))
-        ENTRY_UNPACK(table, kind, _decode_table, table[buffer[off++]]);
+    else
+        return -1;
 
     // Then, walk through ModR/M-encoded opcode extensions.
     if ((kind == ENTRY_TABLE8 || kind == ENTRY_TABLE72) && LIKELY(off < len))
