@@ -78,14 +78,14 @@ enum PrefixSet
     PREFIX_REP = FD_FLAG_REP,
     PREFIX_REPNZ = FD_FLAG_REPNZ,
     PREFIX_REX = FD_FLAG_REX,
-    PREFIX_VEXL = FD_FLAG_VEXL,
     PREFIX_OPSZ = 1 << 13,
     PREFIX_ADDRSZ = 1 << 14,
     PREFIX_REXB = 1 << 15,
     PREFIX_REXX = 1 << 16,
     PREFIX_REXR = 1 << 17,
     PREFIX_REXW = 1 << 18,
-    PREFIX_VEX = 1 << 21,
+    PREFIX_VEXL = 1 << 19,
+    PREFIX_VEX = 1 << 20,
 };
 
 typedef enum PrefixSet PrefixSet;

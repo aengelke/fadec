@@ -38,7 +38,6 @@ enum {
     FD_FLAG_REP = 1 << 1,
     FD_FLAG_REPNZ = 1 << 2,
     FD_FLAG_REX = 1 << 3,
-    FD_FLAG_VEXL = 1 << 4,
     FD_FLAG_64 = 1 << 7,
 };
 
@@ -124,8 +123,6 @@ void fd_format(const FdInstr* instr, char* buf, size_t len);
 /** Indicates whether the instruction was encoded with a LOCK prefix. Note that
  * it is not checked whether the LOCK prefix is valid for the instruction. **/
 #define FD_HAS_LOCK(instr) ((instr)->flags & FD_FLAG_LOCK)
-/** Indicates whether the instruction was encoded with a VEX.L prefix. **/
-#define FD_HAS_VEXL(instr) ((instr)->flags & FD_FLAG_VEXL)
 #define FD_IS64(instr) ((instr)->flags & FD_FLAG_64)
 
 /** Gets the type of an operand at the given index. **/
