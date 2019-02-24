@@ -241,15 +241,12 @@ decode_modrm(const uint8_t* buffer, int len, DecodeMode mode, FdInstr* instr,
 
     // SIB byte
     uint8_t scale = 0;
-    uint8_t idx = 0;
-    uint8_t base = 0;
+    uint8_t idx = 4;
+    uint8_t base = rm;
     if (rm == 4)
     {
         if (UNLIKELY(off >= len))
-        {
             return -1;
-        }
-
         uint8_t sib = buffer[off++];
         scale = (sib & 0xc0) >> 6;
         idx = (sib & 0x38) >> 3;
@@ -259,77 +256,35 @@ decode_modrm(const uint8_t* buffer, int len, DecodeMode mode, FdInstr* instr,
         base = sib & 0x07;
     }
 
+    out_o1->type = FD_OT_MEM;
+    instr->idx_scale = scale;
+    instr->idx_reg = idx == 4 ? FD_REG_NONE : idx;
+
+    // RIP-relative addressing only if SIB-byte is absent
+    if (mod == 0 && rm == 5 && mode == DECODE_64)
+        out_o1->reg = FD_REG_IP;
+    else if (mod == 0 && base == 5)
+        out_o1->reg = FD_REG_NONE;
+    else
+        out_o1->reg = base + (prefixes & PREFIX_REXB ? 8 : 0);
+
     if (mod == 1)
     {
         if (UNLIKELY(off + 1 > len))
-        {
             return -1;
-        }
-
         instr->disp = (int8_t) LOAD_LE_1(&buffer[off]);
         off += 1;
     }
-    else if (mod == 2 || (mod == 0 && (rm == 5 || base == 5)))
+    else if (mod == 2 || (mod == 0 && base == 5))
     {
         if (UNLIKELY(off + 4 > len))
-        {
             return -1;
-        }
-
         instr->disp = (int32_t) LOAD_LE_4(&buffer[off]);
         off += 4;
     }
     else
     {
         instr->disp = 0;
-    }
-
-    out_o1->type = FD_OT_MEM;
-    instr->idx_scale = scale;
-
-    // If there was no SIB byte.
-    if (rm != 4)
-    {
-        instr->idx_reg = FD_REG_NONE;
-        if (mod == 0 && rm == 5)
-        {
-#if defined(ARCH_X86_64)
-            if (mode == DECODE_64)
-                out_o1->reg = FD_REG_IP;
-            else
-#endif
-                out_o1->reg = FD_REG_NONE;
-            return off;
-        }
-
-        uint8_t reg_idx = rm;
-#if defined(ARCH_X86_64)
-        reg_idx += prefixes & PREFIX_REXB ? 8 : 0;
-#endif
-        out_o1->reg = reg_idx;
-        return off;
-    }
-
-    if (idx == 4)
-    {
-        instr->idx_reg = FD_REG_NONE;
-    }
-    else
-    {
-        instr->idx_reg = idx;
-    }
-
-    if (base == 5 && mod == 0)
-    {
-        out_o1->reg = FD_REG_NONE;
-    }
-    else
-    {
-        uint8_t reg_idx = base;
-#if defined(ARCH_X86_64)
-        reg_idx += prefixes & PREFIX_REXB ? 8 : 0;
-#endif
-        out_o1->reg = reg_idx;
     }
 
     return off;
