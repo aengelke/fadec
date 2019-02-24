@@ -5,7 +5,7 @@ from binascii import unhexlify
 from collections import OrderedDict, defaultdict, namedtuple, Counter
 from copy import copy
 from enum import Enum, IntEnum
-from itertools import accumulate
+from itertools import accumulate, product
 import struct
 
 def bitstruct(name, fields):
@@ -127,6 +127,7 @@ class EntryKind(Enum):
     TABLE8 = 3
     TABLE72 = 4
     TABLE_PREFIX = 5
+    TABLE_VEX = 6
 
 class TrieEntry(namedtuple("TrieEntry", "kind,items,payload")):
     __slots__ = ()
@@ -134,7 +135,8 @@ class TrieEntry(namedtuple("TrieEntry", "kind,items,payload")):
         EntryKind.TABLE256: 256,
         EntryKind.TABLE8: 8,
         EntryKind.TABLE72: 72,
-        EntryKind.TABLE_PREFIX: 16
+        EntryKind.TABLE_PREFIX: 8,
+        EntryKind.TABLE_VEX: 4,
     }
     @classmethod
     def table(cls, kind):
@@ -186,18 +188,19 @@ def parse_opcode(opcode_string):
         assert not extended
 
         legacy = {"NP": 0, "66": 1, "F3": 2, "F2": 3}[match.group("legacy")]
-        entry = legacy | ((1 << 3) if match.group("vex") else 0)
+        entry = legacy | ((1 << 2) if match.group("vex") else 0)
+        opcode.append((EntryKind.TABLE_PREFIX, entry))
 
-        if match.group("vexl"):
-            print("ignored mandatory VEX.L prefix for:", opcode_string)
+        if not match.group("vexl") and not match.group("rexw"):
+            return [tuple(opcode)]
 
         rexw = match.group("rexw")
-        if not rexw:
-            return [tuple(opcode) + ((EntryKind.TABLE_PREFIX, entry),),
-                    tuple(opcode) + ((EntryKind.TABLE_PREFIX, entry | (1 << 2)),)]
+        rexw = [0, 1<<0] if not rexw else [1<<0] if "W1" in rexw else [0]
+        vexl = match.group("vexl")
+        vexl = [0, 1<<1] if not vexl else [1<<1] if "L1" in vexl else [0]
 
-        entry |= (1 << 2) if "W1" in rexw else 0
-        return [tuple(opcode) + ((EntryKind.TABLE_PREFIX, entry),)]
+        entries = list(map(sum, product(rexw, vexl)))
+        return [tuple(opcode) + ((EntryKind.TABLE_VEX, k),) for k in entries]
 
     if not extended:
         return [tuple(opcode)]

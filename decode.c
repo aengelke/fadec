@@ -36,6 +36,7 @@ typedef enum DecodeMode DecodeMode;
 #define ENTRY_TABLE8 3
 #define ENTRY_TABLE72 4
 #define ENTRY_TABLE_PREFIX 5
+#define ENTRY_TABLE_VEX 6
 #define ENTRY_MASK 7
 #define ENTRY_IS_TABLE(kind) ((kind) >= ENTRY_TABLE256)
 
@@ -384,17 +385,26 @@ fd_decode(const uint8_t* buffer, size_t len_sz, int mode_int, uintptr_t address,
         ENTRY_UNPACK(table, kind, _decode_table, entry);
     }
 
-    // Finally, handle mandatory prefixes (which behave like an opcode ext.).
+    // Handle mandatory prefixes (which behave like an opcode ext.).
     if (kind == ENTRY_TABLE_PREFIX)
     {
         uint8_t index = mandatory_prefix;
-        index |= prefixes & PREFIX_REXW ? (1 << 2) : 0;
-        index |= prefixes & PREFIX_VEX ? (1 << 3) : 0;
+        index |= prefixes & PREFIX_VEX ? (1 << 2) : 0;
         // If a prefix is mandatory and used as opcode extension, it has no
         // further effect on the instruction. This is especially important
         // for the 0x66 prefix, which could otherwise override the operand
         // size of general purpose registers.
         prefixes &= ~(PREFIX_OPSZ | PREFIX_REPNZ | PREFIX_REP);
+        ENTRY_UNPACK(table, kind, _decode_table, table[index]);
+    }
+
+    // For VEX prefix, we have to distinguish between VEX.W and VEX.L which may
+    // be part of the opcode.
+    if (kind == ENTRY_TABLE_VEX)
+    {
+        uint8_t index = 0;
+        index |= prefixes & PREFIX_REXW ? (1 << 0) : 0;
+        index |= prefixes & PREFIX_VEXL ? (1 << 1) : 0;
         ENTRY_UNPACK(table, kind, _decode_table, table[index]);
     }
 
