@@ -11,7 +11,7 @@ Fadec is a fast and lightweight decoder for x86-32 and x86-64. To meet the goal 
 > A: Because I needed to embed a small and fast decoder in a project which didn't link against a libc.
 
 - **Small size:** the compiled library uses only 40 kiB and the main decode routine is only a few hundreds lines of code.
-- **Performance:** Fadec is significantly times faster than libopcodes or Capstone due to the absence of high-level abstractions and the small lookup table.
+- **Performance:** Fadec is significantly faster than libopcodes or Capstone due to the absence of high-level abstractions and the small lookup table.
 - **Almost no dependencies:** the formatter only uses the function `snprintf`, the decoder itself has no dependencies, making it suitable for environments without a full libc or `malloc`-style memory allocation.
 - **Correctness:** even corner cases should be handled correctly (if not, that's a bug), e.g., the order of prefixes, the presence of the `lock` prefix, or properly handling VEX.W in 32-bit mode.
 
