@@ -818,7 +818,8 @@ VEX.66.0f73/7         VMI   XMM    XMM    IMM8   -      VPSLLDQ IMM_8
 VEX.66.0f74           RVM   XMM    XMM    XMM    -      VPCMPEQB
 VEX.66.0f75           RVM   XMM    XMM    XMM    -      VPCMPEQW
 VEX.66.0f76           RVM   XMM    XMM    XMM    -      VPCMPEQD
-VEX.NP.0f77           NP    -      -      -      -      VZERO
+VEX.NP.L0.0f77        NP    -      -      -      -      VZEROUPPER
+VEX.NP.L1.0f77        NP    -      -      -      -      VZEROALL
 VEX.66.0f7c           RVM   XMM    XMM    XMM    -      VHADDPD
 VEX.F2.0f7c           RVM   XMM    XMM    XMM    -      VHADDPS
 VEX.66.0f7d           RVM   XMM    XMM    XMM    -      VHSUBPD
