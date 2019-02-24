@@ -682,15 +682,15 @@ F2.0ff0               RM    XMM    XMM    -      -      SSE_LDDQU
 66.0f3a0d             RMI   XMM    XMM    IMM    -      SSE_BLENDPD SIZE_8 IMM_8
 66.0f3a0e             RMI   XMM    XMM    IMM    -      SSE_PBLENDW SIZE_8 IMM_8
 66.0f3a0f             RMI   XMM    XMM    IMM    -      SSE_PALIGNR SIZE_8 IMM_8
-66.0f3a14             MRI   GP8    XMM    IMM    -      SSE_PEXTRB SIZE_8 IMM_8
-66.0f3a15             MRI   GP16   XMM    IMM    -      SSE_PEXTRW SIZE_8 IMM_8
-66.W0.0f3a16          MRI   GP     XMM    IMM    -      SSE_PEXTRD SIZE_8 IMM_8
-66.W1.0f3a16          MRI   GP     XMM    IMM    -      SSE_PEXTRQ SIZE_8 IMM_8
-66.0f3a17             MRI   GP32   XMM    IMM    -      SSE_EXTRACTPS SIZE_8 IMM_8
-66.0f3a20             RMI   XMM    GP8    IMM    -      SSE_PINSRB SIZE_8 IMM_8
+66.0f3a14             MRI   GP8    XMM    IMM    -      SSE_PEXTRB IMM_8
+66.0f3a15             MRI   GP16   XMM    IMM    -      SSE_PEXTRW IMM_8
+66.W0.0f3a16          MRI   GP     XMM    IMM    -      SSE_PEXTRD IMM_8
+66.W1.0f3a16          MRI   GP     XMM    IMM    -      SSE_PEXTRQ IMM_8
+66.0f3a17             MRI   GP32   XMM    IMM    -      SSE_EXTRACTPS IMM_8
+66.0f3a20             RMI   XMM    GP8    IMM    -      SSE_PINSRB IMM_8
 66.0f3a21             RMI   XMM    XMM32  IMM    -      SSE_INSERTPS SIZE_8 IMM_8
-66.W0.0f3a22          RMI   XMM    GP     IMM    -      SSE_PINSRD SIZE_8 IMM_8
-66.W1.0f3a22          RMI   XMM    GP     IMM    -      SSE_PINSRQ SIZE_8 IMM_8
+66.W0.0f3a22          RMI   XMM    GP     IMM    -      SSE_PINSRD IMM_8
+66.W1.0f3a22          RMI   XMM    GP     IMM    -      SSE_PINSRQ IMM_8
 66.0f3a40             RMI   XMM    XMM    IMM    -      SSE_DPPS SIZE_8 IMM_8
 66.0f3a41             RMI   XMM    XMM    IMM    -      SSE_DPPD SIZE_8 IMM_8
 66.0f3a42             RMI   XMM    XMM    IMM    -      SSE_MPSADBW SIZE_8 IMM_8
