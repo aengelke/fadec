@@ -194,8 +194,8 @@ c1/7                  MI    GP     IMM    -      -      SAR_IMM IMM_8
 # RET_IMM immediate size handled in code
 c2                    I     IMM16  -      -      -      RET_IMM DEF64 INSTR_WIDTH
 c3                    NP    -      -      -      -      RET DEF64 INSTR_WIDTH
-c4                    RM    GP     GP     -      -      LES ONLY32
-c5                    RM    GP     GP     -      -      LDS ONLY32
+c4                    RM    GP     MEMZ   -      -      LES ONLY32
+c5                    RM    GP     MEMZ   -      -      LDS ONLY32
 c6//0                 MI    GP     IMM    -      -      MOV_IMM SIZE_8 IMM_8
 c6//f8                I     IMM    -      -      -      XABORT IMM_8
 c7//0                 MI    GP     IMM    -      -      MOV_IMM
@@ -293,19 +293,19 @@ ff/2                  M     GP     -      -      -      CALL_IND DEF64
 ff/4                  M     GP     -      -      -      JMP_IND DEF64
 #ff/5 JMPf TODO
 ff/6                  M     GP     -      -      -      PUSH DEF64
-0f00/0                M     GP     -      -      -      SLDT
-0f00/1                M     GP     -      -      -      STR
-0f00/2                M     GP     -      -      -      LLDT
-0f00/3                M     GP     -      -      -      LTR
+0f00/0                M     GP16   -      -      -      SLDT
+0f00/1                M     GP16   -      -      -      STR
+0f00/2                M     GP16   -      -      -      LLDT
+0f00/3                M     GP16   -      -      -      LTR
 0f00/4                M     GP     -      -      -      VERR
 0f00/5                M     GP     -      -      -      VERW
-0f01//0               M     GP     -      -      -      SGDT
-0f01//1               M     GP     -      -      -      SIDT
-0f01//2               M     GP     -      -      -      LGDT
-0f01//3               M     GP     -      -      -      LIDT
-0f01//4               M     GP     -      -      -      SMSW
-0f01//6               M     GP     -      -      -      LMSW
-0f01//7               M     GP     -      -      -      INVLPG
+0f01//0               M     MEMZ   -      -      -      SGDT
+0f01//1               M     MEMZ   -      -      -      SIDT
+0f01//2               M     MEMZ   -      -      -      LGDT
+0f01//3               M     MEMZ   -      -      -      LIDT
+0f01//4               M     GP16   -      -      -      SMSW INSTR_WIDTH
+0f01//6               M     GP16   -      -      -      LMSW
+0f01//7               M     GP     -      -      -      INVLPG SIZE_8
 0f01//c8              NP    -      -      -      -      MONITOR
 0f01//c9              NP    -      -      -      -      MWAIT
 0f01//ca              NP    -      -      -      -      CLAC
@@ -422,7 +422,7 @@ F3.0fb8               RM    GP     GP     -      -      POPCNT
 0fc0                  MR    GP     GP     -      -      XADD SIZE_8 LOCK
 0fc1                  MR    GP     GP     -      -      XADD LOCK
 NP.0fc3               MR    GP     GP     -      -      MOVNTI
-0fc7//1               M     GP     -      -      -      CMPXCHGD LOCK
+0fc7//1               M     MEMZ   -      -      -      CMPXCHGD LOCK
 0fc8+                 O     GP     -      -      -      BSWAP
 0fff                  NP    -      -      -      -      UD0
 #
@@ -561,10 +561,10 @@ F2.0f7d               RM    XMM    XMM    -      -      SSE_HSUBPS
 F3.0f7e               RM    XMM64  XMM64  -      -      SSE_MOVQ_X2X
 66.0f7f               MR    XMM    XMM    -      -      SSE_MOVDQA
 F3.0f7f               MR    XMM    XMM    -      -      SSE_MOVDQU
-NP.0fae//0            M     GP     -      -      -      FXSAVE
-NP.0fae//1            M     GP     -      -      -      FXRSTOR
-NP.0fae//2            M     GP     -      -      -      LDMXCSR
-NP.0fae//3            M     GP     -      -      -      STMXCSR
+NP.0fae//0            M     MEMZ   -      -      -      FXSAVE
+NP.0fae//1            M     MEMZ   -      -      -      FXRSTOR
+NP.0fae//2            M     GP32   -      -      -      LDMXCSR
+NP.0fae//3            M     GP32   -      -      -      STMXCSR
 NP.0fae//e8           NP    -      -      -      -      LFENCE
 NP.0fae//f0           NP    -      -      -      -      MFENCE
 NP.0fae//f8           NP    -      -      -      -      SFENCE
@@ -1068,9 +1068,9 @@ d8//f8+               AO    FPU    FPU    -      -      FDIVR
 d9//0                 M     FPU    -      -      -      FLD_F32
 d9//2                 M     FPU    -      -      -      FST_F32
 d9//3                 M     FPU    -      -      -      FSTP_F32
-d9//4                 M     GP     -      -      -      FLDENV
+d9//4                 M     MEMZ   -      -      -      FLDENV
 d9//5                 M     GP16   -      -      -      FLDCW
-d9//6                 M     GP     -      -      -      FSTENV
+d9//6                 M     MEMZ   -      -      -      FSTENV
 d9//7                 M     GP16   -      -      -      FSTCW
 d9//c8+               O     FPU    -      -      -      FXCH
 d9//d0                NP    -      -      -      -      FNOP
@@ -1114,7 +1114,8 @@ da//c8+               O     FPU    -      -      -      FCMOVE
 da//d0+               O     FPU    -      -      -      FCMOVBE
 da//d8+               O     FPU    -      -      -      FCMOVU
 da//e9                NP    -      -      -      -      FUCOMPP
-db//0+                M     FPU    -      -      -      FILD_I32
+db//0                 M     FPU    -      -      -      FILD_I32
+db//5                 M     FPU    -      -      -      FLD_F80
 db//c0+               O     FPU    -      -      -      FCMOVNB
 db//c8+               O     FPU    -      -      -      FCMOVNE
 db//d0+               O     FPU    -      -      -      FCMOVNBE
@@ -1141,12 +1142,12 @@ dd//0                 M     FPU    -      -      -      FLD_F64
 dd//1                 M     FPU    -      -      -      FISTTP_I64
 dd//2                 M     FPU    -      -      -      FST_F64
 dd//3                 M     FPU    -      -      -      FSTP_F64
-dd//4                 M     GP     -      -      -      FRSTOR
-dd//6                 M     GP     -      -      -      FSAVE
+dd//4                 M     MEMZ   -      -      -      FRSTOR
+dd//6                 M     MEMZ   -      -      -      FSAVE
 dd//7                 M     GP16   -      -      -      FSTSW
 dd//c0+               O     FPU    -      -      -      FFREE
 dd//d0+               O     FPU    -      -      -      FST
-dd//d8+               O     FPU    -      -      -      FSTP
+dd//d8+               O     MEMZ   -      -      -      FSTP_F80
 dd//e0+               O     FPU    -      -      -      FUCOM
 dd//e8+               O     FPU    -      -      -      FUCOMP
 de//0                 M     FPU    -      -      -      FIADD_I16
@@ -1168,9 +1169,9 @@ df//0                 M     FPU    -      -      -      FILD_I16
 df//1                 M     FPU    -      -      -      FISTTP_I16
 df//2                 M     FPU    -      -      -      FIST_I16
 df//3                 M     FPU    -      -      -      FISTP_I16
-df//4                 M     GP     -      -      -      FBLD
+df//4                 M     MEMZ   -      -      -      FBLD
 df//5                 M     GP     -      -      -      FILD_I64
-df//6                 M     GP     -      -      -      FBSTP
+df//6                 M     MEMZ   -      -      -      FBSTP
 df//7                 M     GP     -      -      -      FISTP_I64
 # FSTSW AX
 df//e0                O     GP16   -      -      -      FSTSW

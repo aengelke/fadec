@@ -90,6 +90,7 @@ OPKIND_LOOKUP = {
     "XMM256": (1, 5),
     "SREG": (0, 0),
     "FPU": (0, 0),
+    "MEMZ": (0, 0),
 }
 
 class InstrDesc(namedtuple("InstrDesc", "mnemonic,flags,encoding")):
