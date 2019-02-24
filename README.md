@@ -4,17 +4,18 @@ Fadec is a fast and lightweight decoder for x86-32 and x86-64. To meet the goal 
 
 *Note: This is not a disassembler, it does not intend to produce valid assembly.*
 
-### Key features
+## Key features
 
-**Q: Why not just just use any other decoder available out there?**
-A: Because I needed to embed a small and fast decoder in a project which didn't link against a libc.
+> **Q: Why not just just use any other decoder available out there?**
+>
+> A: Because I needed to embed a small and fast decoder in a project which didn't link against a libc.
 
 - **Small size:** the compiled library uses only 40 kiB and the main decode routine is only a few hundreds lines of code.
 - **Performance:** Fadec is significantly times faster than libopcodes or Capstone due to the absence of high-level abstractions and the small lookup table.
 - **Almost no dependencies:** the formatter only uses the function `snprintf`, the decoder itself has no dependencies, making it suitable for environments without a full libc or `malloc`-style memory allocation.
 - **Correctness:** even corner cases should be handled correctly (if not, that's a bug), e.g., the order of prefixes, the presence of the `lock` prefix, or properly handling VEX.W in 32-bit mode.
 
-### Basic Usage
+## Basic Usage
 ```c
 FdInstr instr;
 // Decode from buffer in 64-bit mode and virtual address 0x401000
@@ -23,7 +24,7 @@ int ret = fd_decode(buffer, sizeof(buffer), 64, 0x401000, &instr);
 // Relevant properties of instructions can now be queries using the FD_* macros.
 ```
 
-### Intended differences
+## Intended differences to other decoders
 To achieve higher performance, minor differences to other decoders exist, requiring special handling.
 
 - The registers `ah`/... and `spl`/... have the same number (as in machine code). Distinguishing them is possible using `FD_OP_REG_HIGH`.
@@ -38,7 +39,7 @@ To achieve higher performance, minor differences to other decoders exist, requir
 - The instructions `bsf`/`tzcnt` and `bsr`/`lzcnt` can only be distinguished by the presence of a `rep` prefix (matching the machine code encoding). Note that on older processors `tzcnt`/`lzcnt` are executed as plain `rep bsf`/`rep bsr`.
 - The instructions `movbe`/`crc32` can only be distinguished by the presence of a `repnz` prefix.
 
-### Known issues
+## Known issues
 - MMX instructions are not supported yet.
 - The AVX VSIB encoding is not supported yet, all instructions using this will result in a decode error.
 - The EVEX prefix (AVX-512) is not supported (yet).
