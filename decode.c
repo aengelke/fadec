@@ -39,9 +39,9 @@ typedef enum DecodeMode DecodeMode;
 #define ENTRY_TABLE_VEX 6
 #define ENTRY_MASK 7
 
-#define ENTRY_UNPACK(table,kind,decode_table,entry) do { \
+#define ENTRY_UNPACK(table,kind,entry) do { \
             uint16_t entry_copy = entry; \
-            table = (uint16_t*) &(decode_table)[entry_copy & ~7]; \
+            table = (uint16_t*) &_decode_table[entry_copy & ~7]; \
             kind = entry_copy & ENTRY_MASK; \
         } while (0)
 
@@ -323,9 +323,7 @@ fd_decode(const uint8_t* buffer, size_t len_sz, int mode_int, uintptr_t address,
                              &mandatory_prefix, &instr->segment, &vex_operand,
                              &opcode_escape);
     if (UNLIKELY(retval < 0 || off + retval >= len))
-    {
         return -1;
-    }
     off += retval;
 
     uint32_t kind = ENTRY_TABLE256;
@@ -333,17 +331,17 @@ fd_decode(const uint8_t* buffer, size_t len_sz, int mode_int, uintptr_t address,
     // "Legacy" walk through table and escape opcodes
     if (LIKELY(opcode_escape < 0))
         while (kind == ENTRY_TABLE256 && LIKELY(off < len))
-            ENTRY_UNPACK(table, kind, _decode_table, table[buffer[off++]]);
+            ENTRY_UNPACK(table, kind, table[buffer[off++]]);
     // VEX/EVEX compact escapes; the prefix precedes the single opcode byte
     else if (opcode_escape == 1 || opcode_escape == 2 || opcode_escape == 3)
     {
-        ENTRY_UNPACK(table, kind, _decode_table, table[0x0F]);
+        ENTRY_UNPACK(table, kind, table[0x0F]);
         if (opcode_escape == 2)
-            ENTRY_UNPACK(table, kind, _decode_table, table[0x38]);
+            ENTRY_UNPACK(table, kind, table[0x38]);
         if (opcode_escape == 3)
-            ENTRY_UNPACK(table, kind, _decode_table, table[0x3A]);
+            ENTRY_UNPACK(table, kind, table[0x3A]);
         if (LIKELY(off < len))
-            ENTRY_UNPACK(table, kind, _decode_table, table[buffer[off++]]);
+            ENTRY_UNPACK(table, kind, table[buffer[off++]]);
     }
     else
         return -1;
@@ -363,7 +361,7 @@ fd_decode(const uint8_t* buffer, size_t len_sz, int mode_int, uintptr_t address,
         else
             entry = table[(buffer[off] >> 3) & 7];
 
-        ENTRY_UNPACK(table, kind, _decode_table, entry);
+        ENTRY_UNPACK(table, kind, entry);
     }
 
     // Handle mandatory prefixes (which behave like an opcode ext.).
@@ -376,7 +374,7 @@ fd_decode(const uint8_t* buffer, size_t len_sz, int mode_int, uintptr_t address,
         // for the 0x66 prefix, which could otherwise override the operand
         // size of general purpose registers.
         prefixes &= ~(PREFIX_OPSZ | PREFIX_REPNZ | PREFIX_REP);
-        ENTRY_UNPACK(table, kind, _decode_table, table[index]);
+        ENTRY_UNPACK(table, kind, table[index]);
     }
 
     // For VEX prefix, we have to distinguish between VEX.W and VEX.L which may
@@ -386,13 +384,11 @@ fd_decode(const uint8_t* buffer, size_t len_sz, int mode_int, uintptr_t address,
         uint8_t index = 0;
         index |= prefixes & PREFIX_REXW ? (1 << 0) : 0;
         index |= prefixes & PREFIX_VEXL ? (1 << 1) : 0;
-        ENTRY_UNPACK(table, kind, _decode_table, table[index]);
+        ENTRY_UNPACK(table, kind, table[index]);
     }
 
     if (UNLIKELY(kind != ENTRY_INSTR))
-    {
         return -1;
-    }
 
     struct InstrDesc* desc = (struct InstrDesc*) table;
 
@@ -418,9 +414,7 @@ fd_decode(const uint8_t* buffer, size_t len_sz, int mode_int, uintptr_t address,
 
     uint8_t vec_size = 16;
     if (prefixes & PREFIX_VEXL)
-    {
         vec_size = 32;
-    }
 
     // Compute address size.
     uint8_t addr_size = mode == DECODE_64 ? 8 : 4;
@@ -449,20 +443,14 @@ fd_decode(const uint8_t* buffer, size_t len_sz, int mode_int, uintptr_t address,
     if (DESC_HAS_MODRM(desc))
     {
         FdOp* operand1 = &instr->operands[DESC_MODRM_IDX(desc)];
-
         FdOp* operand2 = NULL;
         if (DESC_HAS_MODREG(desc))
-        {
             operand2 = &instr->operands[DESC_MODREG_IDX(desc)];
-        }
+
         retval = decode_modrm(buffer + off, len - off, mode, instr, prefixes,
                               operand1, operand2);
-
         if (UNLIKELY(retval < 0))
-        {
             return -1;
-        }
-
         off += retval;
     }
     else if (DESC_HAS_MODREG(desc))
@@ -520,73 +508,51 @@ fd_decode(const uint8_t* buffer, size_t len_sz, int mode_int, uintptr_t address,
 
         uint8_t imm_size;
         if (DESC_IMM_BYTE(desc))
-        {
             imm_size = 1;
-        }
         else if (UNLIKELY(instr->type == FDI_RET_IMM))
-        {
             imm_size = 2;
-        }
         else if (UNLIKELY(instr->type == FDI_ENTER))
-        {
             imm_size = 3;
-        }
 #if defined(ARCH_X86_64)
         else if (mode == DECODE_64 && UNLIKELY(imm_control == 4))
-        {
             // Jumps are always 8 or 32 bit on x86-64.
             imm_size = 4;
-            operand->size = 8;
-        }
 #endif
         else if (prefixes & PREFIX_OPSZ)
-        {
             imm_size = 2;
-        }
 #if defined(ARCH_X86_64)
         else if (mode == DECODE_64 && (prefixes & PREFIX_REXW) &&
                  instr->type == FDI_MOVABS_IMM)
-        {
             imm_size = 8;
-        }
 #endif
         else
-        {
             imm_size = 4;
-        }
 
         if (UNLIKELY(off + imm_size > len))
-        {
             return -1;
-        }
 
         if (imm_size == 1)
-        {
             instr->imm = (int8_t) LOAD_LE_1(&buffer[off]);
-        }
         else if (imm_size == 2)
-        {
             instr->imm = (int16_t) LOAD_LE_2(&buffer[off]);
-        }
         else if (imm_size == 3)
-        {
             instr->imm = LOAD_LE_3(&buffer[off]);
-        }
         else if (imm_size == 4)
-        {
             instr->imm = (int32_t) LOAD_LE_4(&buffer[off]);
-        }
 #if defined(ARCH_X86_64)
         else if (imm_size == 8)
-        {
             instr->imm = (int64_t) LOAD_LE_8(&buffer[off]);
-        }
 #endif
         off += imm_size;
 
         if (imm_control == 4)
         {
             instr->imm += instr->address + off;
+#if defined(ARCH_X86_64)
+            // On x86-64, jumps always have an operand size of 64 bit.
+            if (mode == DECODE_64)
+                operand->size = 8;
+#endif
         }
 
         if (UNLIKELY(imm_control == 5))
