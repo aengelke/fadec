@@ -38,21 +38,12 @@ typedef enum DecodeMode DecodeMode;
 #define ENTRY_TABLE_PREFIX 5
 #define ENTRY_TABLE_VEX 6
 #define ENTRY_MASK 7
-#define ENTRY_IS_TABLE(kind) ((kind) >= ENTRY_TABLE256)
 
 #define ENTRY_UNPACK(table,kind,decode_table,entry) do { \
             uint16_t entry_copy = entry; \
             table = (uint16_t*) &(decode_table)[entry_copy & ~7]; \
             kind = entry_copy & ENTRY_MASK; \
         } while (0)
-
-#define INSTR_ENC_ADDR 0x08
-#define INSTR_ENC_IMM 0x10
-#define INSTR_ENC_MODRM 0x80
-#define INSTR_ENC_MODRM_BOTH 0x40
-#define INSTR_ENC_FLIP 0x20
-#define INSTR_ENC_OPCODE 0x40
-#define INSTR_ENC_IMPLICIT_REG 0x04
 
 #define LOAD_LE_1(buf) (((size_t) ((uint8_t*) buf)[0]))
 #define LOAD_LE_2(buf) (((size_t) ((uint8_t*) buf)[0]) | \
