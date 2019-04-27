@@ -38,6 +38,7 @@ InstrFlags = bitstruct("InstrFlags", [
     "gp_instr_width:1",
     "gp_fixed_operand_size:3",
     "lock:1",
+    "vsib:1",
 ])
 assert InstrFlags._encode_size <= 32
 
@@ -116,6 +117,7 @@ class InstrDesc(namedtuple("InstrDesc", "mnemonic,flags,encoding")):
         if "INSTR_WIDTH" in desc[6:]: flags.gp_instr_width = 1
         if "IMM_8" in desc[6:]:       flags.imm_byte = 1
         if "LOCK" in desc[6:]:        flags.lock = 1
+        if "VSIB" in desc[6:]:        flags.vsib = 1
 
         return cls(desc[5], frozenset(desc[6:]), flags._encode())
     def encode(self, mnemonics_lut):

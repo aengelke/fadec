@@ -1,4 +1,5 @@
 
+#include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
 
@@ -176,7 +177,7 @@ out:
 static
 int
 decode_modrm(const uint8_t* buffer, int len, DecodeMode mode, FdInstr* instr,
-             PrefixSet prefixes, FdOp* out_o1, FdOp* out_o2)
+             PrefixSet prefixes, bool vsib, FdOp* out_o1, FdOp* out_o2)
 {
     int off = 0;
 
@@ -231,7 +232,7 @@ decode_modrm(const uint8_t* buffer, int len, DecodeMode mode, FdInstr* instr,
 
     out_o1->type = FD_OT_MEM;
     instr->idx_scale = scale;
-    instr->idx_reg = idx == 4 ? FD_REG_NONE : idx;
+    instr->idx_reg = !vsib && idx == 4 ? FD_REG_NONE : idx;
 
     // RIP-relative addressing only if SIB-byte is absent
     if (mod == 0 && rm == 5 && mode == DECODE_64)
@@ -275,6 +276,7 @@ struct InstrDesc
     uint8_t gp_instr_width : 1;
     uint8_t gp_fixed_operand_size : 3;
     uint8_t lock : 1;
+    uint8_t vsib : 1;
 } __attribute__((packed));
 
 #define DESC_HAS_MODRM(desc) (((desc)->operand_indices & (3 << 0)) != 0)
@@ -448,7 +450,7 @@ fd_decode(const uint8_t* buffer, size_t len_sz, int mode_int, uintptr_t address,
             operand2 = &instr->operands[DESC_MODREG_IDX(desc)];
 
         retval = decode_modrm(buffer + off, len - off, mode, instr, prefixes,
-                              operand1, operand2);
+                              desc->vsib, operand1, operand2);
         if (UNLIKELY(retval < 0))
             return -1;
         off += retval;
