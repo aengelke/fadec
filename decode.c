@@ -45,22 +45,12 @@ typedef enum DecodeMode DecodeMode;
             kind = entry_copy & ENTRY_MASK; \
         } while (0)
 
-#define LOAD_LE_1(buf) (((size_t) ((uint8_t*) buf)[0]))
-#define LOAD_LE_2(buf) (((size_t) ((uint8_t*) buf)[0]) | \
-                        ((size_t) ((uint8_t*) buf)[1] << 8))
-#define LOAD_LE_4(buf) (((size_t) ((uint8_t*) buf)[0]) | \
-                        ((size_t) ((uint8_t*) buf)[1] << 8) | \
-                        ((size_t) ((uint8_t*) buf)[2] << 16) | \
-                        ((size_t) ((uint8_t*) buf)[3] << 24))
+#define LOAD_LE_1(buf) ((size_t) *(uint8_t*) (buf))
+#define LOAD_LE_2(buf) (LOAD_LE_1(buf) | LOAD_LE_1((uint8_t*) (buf) + 1)<<8)
+#define LOAD_LE_3(buf) (LOAD_LE_2(buf) | LOAD_LE_1((uint8_t*) (buf) + 2)<<16)
+#define LOAD_LE_4(buf) (LOAD_LE_2(buf) | LOAD_LE_2((uint8_t*) (buf) + 2)<<16)
 #if defined(ARCH_X86_64)
-#define LOAD_LE_8(buf) (((size_t) ((uint8_t*) buf)[0]) | \
-                        ((size_t) ((uint8_t*) buf)[1] << 8) | \
-                        ((size_t) ((uint8_t*) buf)[2] << 16) | \
-                        ((size_t) ((uint8_t*) buf)[3] << 24) | \
-                        ((size_t) ((uint8_t*) buf)[4] << 32) | \
-                        ((size_t) ((uint8_t*) buf)[5] << 40) | \
-                        ((size_t) ((uint8_t*) buf)[6] << 48) | \
-                        ((size_t) ((uint8_t*) buf)[7] << 56))
+#define LOAD_LE_8(buf) (LOAD_LE_4(buf) | LOAD_LE_4((uint8_t*) (buf) + 4)<<32)
 #endif
 
 enum PrefixSet
@@ -580,8 +570,7 @@ fd_decode(const uint8_t* buffer, size_t len_sz, int mode_int, uintptr_t address,
         }
         else if (imm_size == 3)
         {
-            instr->imm = LOAD_LE_2(&buffer[off]);
-            instr->imm |= LOAD_LE_1(&buffer[off + 2]) << 16;
+            instr->imm = LOAD_LE_3(&buffer[off]);
         }
         else if (imm_size == 4)
         {
