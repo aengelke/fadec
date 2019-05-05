@@ -1166,7 +1166,11 @@ da//d0+               O     FPU    -      -      -      FCMOVBE
 da//d8+               O     FPU    -      -      -      FCMOVU
 da//e9                NP    -      -      -      -      FUCOMPP
 db//0                 M     FPU    -      -      -      FILD_I32
+db//1                 M     FPU    -      -      -      FISTTP_I32
+db//2                 M     FPU    -      -      -      FIST_I32
+db//3                 M     FPU    -      -      -      FISTP_I32
 db//5                 M     FPU    -      -      -      FLD_F80
+db//7                 M     FPU    -      -      -      FSTP_F80
 db//c0+               O     FPU    -      -      -      FCMOVNB
 db//c8+               O     FPU    -      -      -      FCMOVNE
 db//d0+               O     FPU    -      -      -      FCMOVNBE
