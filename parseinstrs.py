@@ -16,11 +16,12 @@ def bitstruct(name, fields):
         def __init__(self, **kwargs):
             for name in names:
                 setattr(self, name, kwargs.get(name, 0))
-        def _encode(self):
-            return sum((getattr(self, name) & ((1 << size) - 1)) << offset
-                for name, size, offset in zip(names, sizes, offsets))
+        def _encode(self, length):
+            enc = 0
+            for name, size, offset in zip(names, sizes, offsets):
+                enc += (getattr(self, name) & ((1 << size) - 1)) << offset
+            return enc.to_bytes(length, "little")
     __class.__name__ = name
-    __class._encode_size = offsets[-1]
     return __class
 
 InstrFlags = bitstruct("InstrFlags", [
@@ -40,7 +41,6 @@ InstrFlags = bitstruct("InstrFlags", [
     "lock:1",
     "vsib:1",
 ])
-assert InstrFlags._encode_size <= 32
 
 ENCODINGS = {
     "NP": InstrFlags(),
@@ -119,9 +119,9 @@ class InstrDesc(namedtuple("InstrDesc", "mnemonic,flags,encoding")):
         if "LOCK" in desc[6:]:        flags.lock = 1
         if "VSIB" in desc[6:]:        flags.vsib = 1
 
-        return cls(desc[5], frozenset(desc[6:]), flags._encode())
+        return cls(desc[5], frozenset(desc[6:]), flags._encode(6))
     def encode(self, mnemonics_lut):
-        return struct.pack("<HL", mnemonics_lut[self.mnemonic], self.encoding)
+        return struct.pack("<H", mnemonics_lut[self.mnemonic]) + self.encoding
 
 class EntryKind(Enum):
     NONE = 0
