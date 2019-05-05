@@ -48,10 +48,36 @@ typedef enum {
     FD_OT_MEM = 3,
 } FdOpType;
 
+typedef enum {
+    /** Register type is encoded in mnemonic **/
+    FD_RT_IMP = 0,
+    /** Low general purpose register **/
+    FD_RT_GPL = 1,
+    /** High-byte general purpose register **/
+    FD_RT_GPH = 2,
+    /** Segment register **/
+    FD_RT_SEG = 3,
+    /** FPU register ST(n) **/
+    FD_RT_FPU = 4,
+    /** MMX register MMn **/
+    FD_RT_MMX = 5,
+    /** Vector (SSE/AVX) register XMMn/YMMn/ZMMn **/
+    FD_RT_VEC = 6,
+    /** Vector mask (AVX-512) register Kn **/
+    FD_RT_MASK = 7,
+    /** Bound register BNDn **/
+    FD_RT_BND = 8,
+    /** Control Register CRn **/
+    FD_RT_CR = 9,
+    /** Debug Register DRn **/
+    FD_RT_DR = 10,
+} FdRegType;
+
 typedef struct {
     uint8_t type;
     uint8_t size;
     int8_t reg;
+    uint8_t misc;
 } FdOp;
 
 typedef struct {
@@ -137,22 +163,18 @@ void fd_format(const FdInstr* instr, char* buf, size_t len);
 #define FD_OP_SIZE(instr,idx) ((instr)->operands[idx].size)
 /** Gets the accessed register index of a register operand. Note that /only/ the
  * index is returned, no further interpretation of the index (which depends on
- * the instruction type) is done. When an instruction accesses an 8-bit general
- * purpose register with an index in the range 4-7, it needs to be determined
- * explicitly whether a high-byte register is accessed (using FD_OP_REG_HIGH).
- * If that is the case, the index needs to be decreased by 4.
+ * the instruction type) is done. The register type can be fetches using
+ * FD_OP_REG_TYPE, e.g. for distinguishing high-byte registers.
  * Only valid if  FD_OP_TYPE == FD_OT_REG  **/
 #define FD_OP_REG(instr,idx) ((FdReg) (instr)->operands[idx].reg)
-/** Returns whether the accessed register is a actually high-byte register when
- * used on a general purpose instruction. In that case, the register index has
- * to be decreased by 4.
- * Only valid if  FD_OP_TYPE == FD_OT_REG  and the operand refers to a general
- * purpose register (depends on the instruction type) **/
-#define FD_OP_REG_HIGH(instr,idx) ( \
-            (instr)->operands[idx].size == 1 && \
-            (instr)->operands[idx].reg >= 4 && \
-            ((instr)->flags & FD_FLAG_REX) == 0 \
-        )
+/** Gets the type of the accessed register.
+ * Only valid if  FD_OP_TYPE == FD_OT_REG  **/
+#define FD_OP_REG_TYPE(instr,idx) ((FdRegType) (instr)->operands[idx].misc)
+/** DEPRECATED: use FD_OP_REG_TYPE() == FD_RT_GPH instead.
+ * Returns whether the accessed register is a high-byte register. In that case,
+ * the register index has to be decreased by 4.
+ * Only valid if  FD_OP_TYPE == FD_OT_REG  **/
+#define FD_OP_REG_HIGH(instr,idx) (FD_OP_REG_TYPE(instr,idx) == FD_RT_GPH)
 /** Gets the index of the base register from a memory operand, or FD_REG_NONE,
  * if the memory operand has no base register. This is the only case where the
  * 64-bit register RIP can be returned, in which case the operand also has no

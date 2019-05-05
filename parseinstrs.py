@@ -40,6 +40,7 @@ InstrFlags = bitstruct("InstrFlags", [
     "gp_fixed_operand_size:3",
     "lock:1",
     "vsib:1",
+    "reg_types:16",
 ])
 
 ENCODINGS = {
@@ -72,26 +73,28 @@ ENCODINGS = {
 }
 
 OPKIND_LOOKUP = {
-    "-": (0, 0),
-    "IMM": (2, 0),
-    "IMM8": (1, 0),
-    "IMM16": (1, 1),
-    "IMM32": (1, 2),
-    "GP": (2, 0),
-    "GP8": (1, 0),
-    "GP16": (1, 1),
-    "GP32": (1, 2),
-    "GP64": (1, 3),
-    "XMM": (3, 0),
-    "XMM8": (1, 0),
-    "XMM16": (1, 1),
-    "XMM32": (1, 2),
-    "XMM64": (1, 3),
-    "XMM128": (1, 4),
-    "XMM256": (1, 5),
-    "SREG": (0, 0),
-    "FPU": (0, 0),
-    "MEMZ": (0, 0),
+    # sizeidx (0, fixedsz, opsz, vecsz), fixedsz (log2), regtype
+    "-": (0, 0, 0),
+    "IMM": (2, 0, 0),
+    "IMM8": (1, 0, 0),
+    "IMM16": (1, 1, 0),
+    "IMM32": (1, 2, 0),
+    "GP": (2, 0, 1),
+    "GP8": (1, 0, 1),
+    "GP16": (1, 1, 1),
+    "GP32": (1, 2, 1),
+    "GP64": (1, 3, 1),
+    "XMM": (3, 0, 6),
+    "XMM8": (1, 0, 6),
+    "XMM16": (1, 1, 6),
+    "XMM32": (1, 2, 6),
+    "XMM64": (1, 3, 6),
+    "XMM128": (1, 4, 6),
+    "XMM256": (1, 5, 6),
+    "SREG": (0, 0, 3),
+    "FPU": (0, 0, 4),
+    "MEMZ": (0, 0, 0),
+    "BND": (0, 0, 0),
 }
 
 class InstrDesc(namedtuple("InstrDesc", "mnemonic,flags,encoding")):
@@ -102,13 +105,16 @@ class InstrDesc(namedtuple("InstrDesc", "mnemonic,flags,encoding")):
 
         fixed_opsz = set()
         opsizes = 0
+        reg_types = 0
         for i, opkind in enumerate(desc[1:5]):
-            enc_size, fixed_size = OPKIND_LOOKUP[opkind]
+            enc_size, fixed_size, reg_type = OPKIND_LOOKUP[opkind]
             if enc_size == 1: fixed_opsz.add(fixed_size)
             opsizes |= enc_size << 2 * i
+            reg_types |= reg_type << 4 * i
 
         flags = copy(ENCODINGS[desc[0]])
         flags.operand_sizes = opsizes
+        flags.reg_types = reg_types
         if fixed_opsz: flags.gp_fixed_operand_size = next(iter(fixed_opsz))
 
         # Miscellaneous Flags

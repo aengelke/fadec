@@ -277,6 +277,7 @@ struct InstrDesc
     uint8_t gp_fixed_operand_size : 3;
     uint8_t lock : 1;
     uint8_t vsib : 1;
+    uint16_t reg_types;
 } __attribute__((packed));
 
 #define DESC_HAS_MODRM(desc) (((desc)->operand_indices & (3 << 0)) != 0)
@@ -572,6 +573,17 @@ fd_decode(const uint8_t* buffer, size_t len_sz, int mode_int, uintptr_t address,
         return -1;
     if ((prefixes & PREFIX_LOCK) && instr->operands[0].type != FD_OT_MEM)
         return -1;
+
+    for (int i = 0; i < 4; i++)
+    {
+        if (instr->operands[i].type != FD_OT_REG)
+            continue;
+        uint32_t reg_type = (desc->reg_types >> 4 * i) & 0xf;
+        if (reg_type == FD_RT_GPL && !(prefixes & PREFIX_REX) &&
+            instr->operands[i].size == 1 && instr->operands[i].reg >= 4)
+            reg_type = FD_RT_GPH;
+        instr->operands[i].misc = reg_type;
+    }
 
     instr->size = off;
 
