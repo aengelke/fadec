@@ -442,8 +442,8 @@ NP.0f12               RM    XMM    XMM64  -      -      SSE_MOVLPS
 66.0f12               RM    XMM    XMM64  -      -      SSE_MOVLPD
 F3.0f12               RM    XMM    XMM    -      -      SSE_MOVSLDUP
 F2.0f12               RM    XMM    XMM64  -      -      SSE_MOVDDUP
-NP.0f13               RM    XMM64  XMM    -      -      SSE_MOVLPS
-66.0f13               RM    XMM64  XMM    -      -      SSE_MOVLPD
+NP.0f13               MR    XMM64  XMM    -      -      SSE_MOVLPS
+66.0f13               MR    XMM64  XMM    -      -      SSE_MOVLPD
 NP.0f14               RM    XMM    XMM    -      -      SSE_UNPACKLPS
 66.0f14               RM    XMM    XMM    -      -      SSE_UNPACKLPD
 NP.0f15               RM    XMM    XMM    -      -      SSE_UNPACKHPS
@@ -451,8 +451,8 @@ NP.0f15               RM    XMM    XMM    -      -      SSE_UNPACKHPS
 NP.0f16               RM    XMM    XMM64  -      -      SSE_MOVHPS
 66.0f16               RM    XMM    XMM64  -      -      SSE_MOVHPD
 F3.0f16               RM    XMM    XMM    -      -      SSE_MOVSHDUP
-NP.0f17               RM    XMM64  XMM    -      -      SSE_MOVHPS
-66.0f17               RM    XMM64  XMM    -      -      SSE_MOVHPD
+NP.0f17               MR    XMM64  XMM    -      -      SSE_MOVHPS
+66.0f17               MR    XMM64  XMM    -      -      SSE_MOVHPD
 NP.0f28               RM    XMM    XMM    -      -      SSE_MOVAPS
 66.0f28               RM    XMM    XMM    -      -      SSE_MOVAPD
 NP.0f29               MR    XMM    XMM    -      -      SSE_MOVAPS
@@ -720,8 +720,8 @@ VEX.NP.L0.0f12        RVM   XMM    XMM    XMM64  -      VMOVLPS
 VEX.66.L0.0f12        RVM   XMM    XMM    XMM64  -      VMOVLPD
 VEX.F2.0f12           RM    XMM    XMM    -      -      VMOVDDUP
 VEX.F3.0f12           RM    XMM    XMM    -      -      VMOVSLDUP
-VEX.NP.L0.0f13        RM    XMM64  XMM    -      -      VMOVLPS
-VEX.66.L0.0f13        RM    XMM64  XMM    -      -      VMOVLPD
+VEX.NP.L0.0f13        MR    XMM64  XMM    -      -      VMOVLPS
+VEX.66.L0.0f13        MR    XMM64  XMM    -      -      VMOVLPD
 VEX.NP.0f14           RVM   XMM    XMM    XMM    -      VUNPACKLPS
 VEX.66.0f14           RVM   XMM    XMM    XMM    -      VUNPACKLPD
 VEX.NP.0f15           RVM   XMM    XMM    XMM    -      VUNPACKHPS
@@ -729,8 +729,8 @@ VEX.66.0f15           RVM   XMM    XMM    XMM    -      VUNPACKHPD
 VEX.NP.L0.0f16        RVM   XMM    XMM    XMM64  -      VMOVHPS
 VEX.66.L0.0f16        RVM   XMM    XMM    XMM64  -      VMOVHPD
 VEX.F3.0f16           RM    XMM    XMM    -      -      VMOVSHDUP
-VEX.NP.L0.0f17        RM    XMM64  XMM    -      -      VMOVHPS
-VEX.66.L0.0f17        RM    XMM64  XMM    -      -      VMOVHPD
+VEX.NP.L0.0f17        MR    XMM64  XMM    -      -      VMOVHPS
+VEX.66.L0.0f17        MR    XMM64  XMM    -      -      VMOVHPD
 VEX.NP.0f28           RM    XMM    XMM    -      -      VMOVAPS
 VEX.66.0f28           RM    XMM    XMM    -      -      VMOVAPD
 VEX.NP.0f29           MR    XMM    XMM    -      -      VMOVAPS
