@@ -69,3 +69,10 @@ fadec = declare_dependency(link_with: libfadec,
 subdir('tests')
 
 install_headers('fadec.h')
+
+pkg = import('pkgconfig')
+pkg.generate(libraries: libfadec,
+             version: '0.1',
+             name: 'fadec',
+             filebase: 'fadec',
+             description: 'Fast Decoder for x86-32 and x86-64')
