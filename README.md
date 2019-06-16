@@ -24,6 +24,22 @@ int ret = fd_decode(buffer, sizeof(buffer), 64, 0x401000, &instr);
 // Relevant properties of instructions can now be queries using the FD_* macros.
 ```
 
+## API
+
+The API consists of two functions to decode and format instructions, as well as several accessor macros (see [fadec.h](fadec.h)). Direct access of the `FdInstr` structure is not recommended.
+
+- `int fd_decode(const uint8_t* buf, size_t len, int mode, uintptr_t address, FdInstr* out_instr)`
+    - Decode a single instruction
+    - Return value: number of bytes used, or a negative value in case of an error.
+    - `buf`/`len`: buffer containing instruction bytes. At most 15 bytes will be read. If the instruction is longer than `len`, an error value is returned.
+    - `mode`: architecture mode, either `32` or `64`.
+    - `address`: virtual address of the decoded instruction. This is used for computing jump targets and segment-offset-relative memory operations (MOV with moffs* encoding) and stored in the instruction.
+    - `out_instr`: Pointer to the instruction buffer, might get written partially in case of an error.
+- `void fd_format(const FdInstr* instr, char* buf, size_t len)`
+    - Format a single instruction to a human-readable format.
+    - `instr`: decoded instruction.
+    - `buf`/`len`: buffer for formatted instruction string
+
 ## Intended differences to other decoders
 To achieve higher performance, minor differences to other decoders exist, requiring special handling.
 
@@ -41,7 +57,6 @@ To achieve higher performance, minor differences to other decoders exist, requir
 
 ## Known issues
 - MMX instructions are not supported yet.
-- The AVX VSIB encoding is not supported yet, all instructions using this will result in a decode error.
 - The EVEX prefix (AVX-512) is not supported (yet).
 - The layout of entries in the tables can be improved to improve usage of caches. (Help needed.)
 - No Python API.
