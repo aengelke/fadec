@@ -56,11 +56,16 @@ endif
 instr_data = custom_target('tables',
                            command: [python3, '@INPUT0@', '@INPUT1@', '@OUTPUT@'] + generate_args,
                            input: files('parseinstrs.py', 'instrs.txt'),
-                           output: ['fadec-decode-table.inc'])
+                           output: ['fadec-decode-table.inc'],
+                           install: true,
+                           install_dir: get_option('includedir'))
 
-libfadec = static_library('fadec', 'decode.c', 'format.c', instr_data)
+libfadec = static_library('fadec', 'decode.c', 'format.c', instr_data,
+                          install: true)
 fadec = declare_dependency(link_with: libfadec,
                            include_directories: include_directories('.'),
                            sources: instr_data)
 
 subdir('tests')
+
+install_headers('fadec.h')
