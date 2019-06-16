@@ -1,6 +1,6 @@
 
 test_driver = executable('test_driver', 'driver.c',
-                         dependencies: libx86decode,
+                         dependencies: fadec,
                          c_args: ['-D_GNU_SOURCE'])
 test_args = [files('test.py'), test_driver]
 if decode_32

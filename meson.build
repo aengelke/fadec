@@ -1,4 +1,4 @@
-project('libx86decode', ['c'], default_options: ['warning_level=3', 'c_std=c99'])
+project('fadec', ['c'], default_options: ['warning_level=3', 'c_std=c99'])
 
 python3 = find_program('python3')
 
@@ -58,9 +58,9 @@ instr_data = custom_target('tables',
                            input: files('parseinstrs.py', 'instrs.txt'),
                            output: ['decode-table.inc'])
 
-libdecode = static_library('x86decode', 'decode.c', 'format.c', instr_data)
-libx86decode = declare_dependency(link_with: libdecode,
-                                  include_directories: include_directories('.'),
-                                  sources: instr_data)
+libfadec = static_library('fadec', 'decode.c', 'format.c', instr_data)
+fadec = declare_dependency(link_with: libfadec,
+                           include_directories: include_directories('.'),
+                           sources: instr_data)
 
 subdir('tests')
