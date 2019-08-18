@@ -14,7 +14,7 @@
 #define UNLIKELY(x) __builtin_expect((x), 0)
 
 #define FD_DECODE_TABLE_DATA
-static const uint8_t _decode_table[] = {
+static __attribute__((aligned(16))) const uint8_t _decode_table[] = {
 #include <fadec-decode-table.inc>
 };
 #undef FD_DECODE_TABLE_DATA
@@ -42,7 +42,7 @@ typedef enum DecodeMode DecodeMode;
 
 #define ENTRY_UNPACK(table,kind,entry) do { \
             uint16_t entry_copy = entry; \
-            table = (uint16_t*) &_decode_table[entry_copy & ~7]; \
+            table = &((uint16_t*) _decode_table)[(entry_copy & ~7) >> 1]; \
             kind = entry_copy & ENTRY_MASK; \
         } while (0)
 
@@ -305,11 +305,11 @@ fd_decode(const uint8_t* buffer, size_t len_sz, int mode_int, uintptr_t address,
     // Ensure that we can actually handle the decode request
 #if defined(ARCH_386)
     if (mode == DECODE_32)
-        table = (uint16_t*) &_decode_table[FD_TABLE_OFFSET_32];
+        table = &((uint16_t*) _decode_table)[FD_TABLE_OFFSET_32 >> 1];
 #endif
 #if defined(ARCH_X86_64)
     if (mode == DECODE_64)
-        table = (uint16_t*) &_decode_table[FD_TABLE_OFFSET_64];
+        table = &((uint16_t*) _decode_table)[FD_TABLE_OFFSET_64 >> 1];
 #endif
 
     if (UNLIKELY(table == NULL))

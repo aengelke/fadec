@@ -55,7 +55,7 @@ fd_format(const FdInstr* instr, char* buffer, size_t len)
         if (op_type == FD_OT_NONE)
             break;
 
-        const char* op_type_name = "reg\0imm\0mem" + op_type * 4 - 4;
+        const char* op_type_name = &"reg\0imm\0mem"[op_type * 4] - 4;
         FMT_CONCAT(buf, end, " %s%u:", op_type_name, FD_OP_SIZE(instr, i));
 
         switch (op_type)
