@@ -14,6 +14,7 @@ if get_option('warning_level').to_int() >= 3
                          '-Wcast-align',
                          '-Wwrite-strings',
                          '-Winline',
+                         '-Wformat',
                          '-Wformat-nonliteral',
                          '-Wformat-security',
                          '-Wswitch-default',
