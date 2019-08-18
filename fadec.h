@@ -5,6 +5,10 @@
 #include <stddef.h>
 #include <stdint.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef enum {
     FD_REG_R0 = 0, FD_REG_R1, FD_REG_R2, FD_REG_R3,
     FD_REG_R4, FD_REG_R5, FD_REG_R6, FD_REG_R7,
@@ -197,5 +201,9 @@ void fd_format(const FdInstr* instr, char* buf, size_t len);
 /** Gets the (sign-extended) encoded constant for an immediate operand.
  * Only valid if  FD_OP_TYPE == FD_OT_IMM  **/
 #define FD_OP_IMM(instr,idx) ((instr)->imm)
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif
