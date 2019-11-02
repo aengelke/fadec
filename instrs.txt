@@ -434,7 +434,7 @@ RF3.0fbd              RM    GP     GP     -      -      LZCNT
 0fbf                  RM    GP     GP16   -      -      MOVSX
 0fc0                  MR    GP     GP     -      -      XADD SIZE_8 LOCK
 0fc1                  MR    GP     GP     -      -      XADD LOCK
-NP.0fc3               MR    GP     GP     -      -      MOVNTI
+NP.0fc3               MR    GP     GP     -      -      MOVNTI MUSTMEM
 0fc7//1               M     MEMZ   -      -      -      CMPXCHGD LOCK MUSTMEM
 0fc8+                 O     GP     -      -      -      BSWAP
 0fff                  RM    GP     GP     -      -      UD0
@@ -457,8 +457,8 @@ NP.0f12               RM    XMM    XMM64  -      -      SSE_MOVLPS
 66.0f12               RM    XMM    XMM64  -      -      SSE_MOVLPD
 F3.0f12               RM    XMM    XMM    -      -      SSE_MOVSLDUP
 F2.0f12               RM    XMM    XMM64  -      -      SSE_MOVDDUP
-NP.0f13               MR    XMM64  XMM    -      -      SSE_MOVLPS
-66.0f13               MR    XMM64  XMM    -      -      SSE_MOVLPD
+NP.0f13               MR    XMM64  XMM    -      -      SSE_MOVLPS MUSTMEM
+66.0f13               MR    XMM64  XMM    -      -      SSE_MOVLPD MUSTMEM
 NP.0f14               RM    XMM    XMM    -      -      SSE_UNPACKLPS
 66.0f14               RM    XMM    XMM    -      -      SSE_UNPACKLPD
 NP.0f15               RM    XMM    XMM    -      -      SSE_UNPACKHPS
@@ -466,8 +466,8 @@ NP.0f15               RM    XMM    XMM    -      -      SSE_UNPACKHPS
 NP.0f16               RM    XMM    XMM64  -      -      SSE_MOVHPS
 66.0f16               RM    XMM    XMM64  -      -      SSE_MOVHPD
 F3.0f16               RM    XMM    XMM    -      -      SSE_MOVSHDUP
-NP.0f17               MR    XMM64  XMM    -      -      SSE_MOVHPS
-66.0f17               MR    XMM64  XMM    -      -      SSE_MOVHPD
+NP.0f17               MR    XMM64  XMM    -      -      SSE_MOVHPS MUSTMEM
+66.0f17               MR    XMM64  XMM    -      -      SSE_MOVHPD MUSTMEM
 NP.0f28               RM    XMM    XMM    -      -      SSE_MOVAPS
 66.0f28               RM    XMM    XMM    -      -      SSE_MOVAPD
 NP.0f29               MR    XMM    XMM    -      -      SSE_MOVAPS
@@ -554,16 +554,16 @@ F3.0f6f               RM    XMM    XMM    -      -      SSE_MOVDQU
 66.0f70               RMI   XMM    XMM    IMM8   -      SSE_PSHUFD IMM_8
 F3.0f70               RMI   XMM    XMM    IMM8   -      SSE_PSHUFHW IMM_8
 F2.0f70               RMI   XMM    XMM    IMM8   -      SSE_PSHUFLW IMM_8
-66.0f71/2             MI    XMM    IMM8   -      -      SSE_PSRLW IMM_8
-66.0f71/4             MI    XMM    IMM8   -      -      SSE_PSRAW IMM_8
-66.0f71/6             MI    XMM    IMM8   -      -      SSE_PSLLW IMM_8
-66.0f72/2             MI    XMM    IMM8   -      -      SSE_PSRLD IMM_8
-66.0f72/4             MI    XMM    IMM8   -      -      SSE_PSRAD IMM_8
-66.0f72/6             MI    XMM    IMM8   -      -      SSE_PSLLD IMM_8
-66.0f73/2             MI    XMM    IMM8   -      -      SSE_PSRLQ IMM_8
-66.0f73/3             MI    XMM    IMM8   -      -      SSE_PSRLDQ IMM_8
-66.0f73/6             MI    XMM    IMM8   -      -      SSE_PSLLQ IMM_8
-66.0f73/7             MI    XMM    IMM8   -      -      SSE_PSLLDQ IMM_8
+66.0f71/2             MI    XMM    IMM8   -      -      SSE_PSRLW IMM_8 NOMEM
+66.0f71/4             MI    XMM    IMM8   -      -      SSE_PSRAW IMM_8 NOMEM
+66.0f71/6             MI    XMM    IMM8   -      -      SSE_PSLLW IMM_8 NOMEM
+66.0f72/2             MI    XMM    IMM8   -      -      SSE_PSRLD IMM_8 NOMEM
+66.0f72/4             MI    XMM    IMM8   -      -      SSE_PSRAD IMM_8 NOMEM
+66.0f72/6             MI    XMM    IMM8   -      -      SSE_PSLLD IMM_8 NOMEM
+66.0f73/2             MI    XMM    IMM8   -      -      SSE_PSRLQ IMM_8 NOMEM
+66.0f73/3             MI    XMM    IMM8   -      -      SSE_PSRLDQ IMM_8 NOMEM
+66.0f73/6             MI    XMM    IMM8   -      -      SSE_PSLLQ IMM_8 NOMEM
+66.0f73/7             MI    XMM    IMM8   -      -      SSE_PSLLDQ IMM_8 NOMEM
 66.0f74               RM    XMM    XMM    -      -      SSE_PCMPEQB
 66.0f75               RM    XMM    XMM    -      -      SSE_PCMPEQW
 66.0f76               RM    XMM    XMM    -      -      SSE_PCMPEQD
@@ -578,8 +578,8 @@ F3.0f7e               RM    XMM64  XMM64  -      -      SSE_MOVQ_X2X
 F3.0f7f               MR    XMM    XMM    -      -      SSE_MOVDQU
 NP.0fae//0            M     MEMZ   -      -      -      FXSAVE MUSTMEM
 NP.0fae//1            M     MEMZ   -      -      -      FXRSTOR MUSTMEM
-NP.0fae//2            M     GP32   -      -      -      LDMXCSR
-NP.0fae//3            M     GP32   -      -      -      STMXCSR
+NP.0fae//2            M     GP32   -      -      -      LDMXCSR MUSTMEM
+NP.0fae//3            M     GP32   -      -      -      STMXCSR MUSTMEM
 NP.0fae//e8           NP    -      -      -      -      LFENCE
 NP.0fae//f0           NP    -      -      -      -      MFENCE
 NP.0fae//f8           NP    -      -      -      -      SFENCE
@@ -588,7 +588,7 @@ NP.0fc2               RMI   XMM    XMM    IMM8   -      SSE_CMPPS IMM_8
 F3.0fc2               RMI   XMM    XMM    IMM8   -      SSE_CMPSS IMM_8
 F2.0fc2               RMI   XMM    XMM    IMM8   -      SSE_CMPSD IMM_8
 66.0fc4               RMI   XMM    GP     IMM8   -      SSE_PINSRW IMM_8
-66.0fc5               RMI   GP     XMM    IMM8   -      SSE_PEXTRW IMM_8
+66.0fc5               RMI   GP     XMM    IMM8   -      SSE_PEXTRW IMM_8 NOMEM
 NP.0fc6               RMI   XMM    XMM    IMM8   -      SSE_SHUFPS IMM_8
 66.0fc6               RMI   XMM    XMM    IMM8   -      SSE_SHUFPD IMM_8
 66.0fd0               RM    XMM    XMM    -      -      SSE_ADDSUBPD
