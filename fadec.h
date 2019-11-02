@@ -103,6 +103,12 @@ typedef struct {
     uintptr_t address;
 } FdInstr;
 
+typedef enum {
+    FD_ERR_UD = -1,
+    FD_ERR_INTERNAL = -2,
+    FD_ERR_PARTIAL = -3,
+} FdErr;
+
 
 /** Decode an instruction.
  * \param buf Buffer for instruction bytes.

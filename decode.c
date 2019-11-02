@@ -127,17 +127,17 @@ decode_prefixes(const uint8_t* buffer, int len, DecodeMode mode,
 #endif
         case 0xc4: case 0xc5: // VEX
             if (UNLIKELY(off + 1 >= len))
-                return -1;
+                return FD_ERR_PARTIAL;
             uint8_t byte = buffer[off + 1];
             if (mode == DECODE_32 && (byte & 0xc0) != 0xc0)
                 goto out;
 
             // VEX + 66/F2/F3/LOCK will #UD.
             if (prefixes & (PREFIX_REP|PREFIX_REPNZ|PREFIX_OPSZ|PREFIX_LOCK))
-                return -1;
+                return FD_ERR_UD;
             // VEX + REX will #UD.
             if (rex_prefix)
-                return -1;
+                return FD_ERR_UD;
 
             prefixes |= PREFIX_VEX;
             prefixes |= byte & 0x80 ? 0 : PREFIX_REXR;
@@ -151,7 +151,7 @@ decode_prefixes(const uint8_t* buffer, int len, DecodeMode mode,
 
                 // Load third byte of VEX prefix
                 if (UNLIKELY(off + 2 >= len))
-                    return -1;
+                    return FD_ERR_PARTIAL;
                 byte = buffer[off + 2];
                 // SDM Vol 2A 2-16 (Dec. 2016) says that:
                 // - "In 32-bit modes, VEX.W is silently ignored."
@@ -233,7 +233,7 @@ decode_modrm(const uint8_t* buffer, int len, DecodeMode mode, FdInstr* instr,
     if (rm == 4)
     {
         if (UNLIKELY(off >= len))
-            return -1;
+            return FD_ERR_PARTIAL;
         uint8_t sib = buffer[off++];
         scale = (sib & 0xc0) >> 6;
         idx = (sib & 0x38) >> 3;
@@ -258,14 +258,14 @@ decode_modrm(const uint8_t* buffer, int len, DecodeMode mode, FdInstr* instr,
     if (mod == 1)
     {
         if (UNLIKELY(off + 1 > len))
-            return -1;
+            return FD_ERR_PARTIAL;
         instr->disp = (int8_t) LOAD_LE_1(&buffer[off]);
         off += 1;
     }
     else if (mod == 2 || (mod == 0 && base == 5))
     {
         if (UNLIKELY(off + 4 > len))
-            return -1;
+            return FD_ERR_PARTIAL;
         instr->disp = (int32_t) LOAD_LE_4(&buffer[off]);
         off += 4;
     }
@@ -326,7 +326,7 @@ fd_decode(const uint8_t* buffer, size_t len_sz, int mode_int, uintptr_t address,
 #endif
 
     if (UNLIKELY(table == NULL))
-        return -2;
+        return FD_ERR_INTERNAL;
 
     int retval;
     int off = 0;
@@ -338,8 +338,10 @@ fd_decode(const uint8_t* buffer, size_t len_sz, int mode_int, uintptr_t address,
     retval = decode_prefixes(buffer + off, len - off, mode, &prefixes,
                              &mandatory_prefix, &instr->segment, &vex_operand,
                              &opcode_escape);
-    if (UNLIKELY(retval < 0 || off + retval >= len))
-        return -1;
+    if (UNLIKELY(retval < 0))
+        return retval;
+    if (UNLIKELY(off + retval >= len))
+        return FD_ERR_PARTIAL;
     off += retval;
 
     uint32_t kind = ENTRY_TABLE256;
@@ -360,7 +362,7 @@ fd_decode(const uint8_t* buffer, size_t len_sz, int mode_int, uintptr_t address,
             ENTRY_UNPACK(table, kind, table[buffer[off++]]);
     }
     else
-        return -1;
+        return FD_ERR_UD;
 
     // Then, walk through ModR/M-encoded opcode extensions.
     if ((kind == ENTRY_TABLE8 || kind == ENTRY_TABLE72) && LIKELY(off < len))
@@ -394,7 +396,7 @@ fd_decode(const uint8_t* buffer, size_t len_sz, int mode_int, uintptr_t address,
     }
     else if (prefixes & PREFIX_VEX)
     {
-        return -1;
+        return FD_ERR_UD;
     }
 
     if (kind == ENTRY_TABLE_PREFIX_REP)
@@ -416,7 +418,7 @@ fd_decode(const uint8_t* buffer, size_t len_sz, int mode_int, uintptr_t address,
     }
 
     if (UNLIKELY(kind != ENTRY_INSTR))
-        return -1;
+        return FD_ERR_UD;
 
     struct InstrDesc* desc = (struct InstrDesc*) table;
 
@@ -478,7 +480,7 @@ fd_decode(const uint8_t* buffer, size_t len_sz, int mode_int, uintptr_t address,
         retval = decode_modrm(buffer + off, len - off, mode, instr, prefixes,
                               desc->vsib, operand1, operand2);
         if (UNLIKELY(retval < 0))
-            return -1;
+            return retval;
         off += retval;
     }
     else if (DESC_HAS_MODREG(desc))
@@ -501,7 +503,7 @@ fd_decode(const uint8_t* buffer, size_t len_sz, int mode_int, uintptr_t address,
     }
     else if (vex_operand != 0)
     {
-        return -1;
+        return FD_ERR_UD;
     }
 
     uint32_t imm_control = DESC_IMM_CONTROL(desc);
@@ -521,7 +523,7 @@ fd_decode(const uint8_t* buffer, size_t len_sz, int mode_int, uintptr_t address,
         instr->idx_reg = FD_REG_NONE;
 
         if (UNLIKELY(off + addr_size > len))
-            return -1;
+            return FD_ERR_PARTIAL;
 #if defined(ARCH_386)
         if (addr_size == 2)
             instr->disp = LOAD_LE_2(&buffer[off]);
@@ -561,7 +563,7 @@ fd_decode(const uint8_t* buffer, size_t len_sz, int mode_int, uintptr_t address,
             imm_size = 4;
 
         if (UNLIKELY(off + imm_size > len))
-            return -1;
+            return FD_ERR_PARTIAL;
 
         if (imm_size == 1)
             instr->imm = (int8_t) LOAD_LE_1(&buffer[off]);
@@ -599,16 +601,16 @@ fd_decode(const uint8_t* buffer, size_t len_sz, int mode_int, uintptr_t address,
     }
 
     if ((prefixes & PREFIX_LOCK) && !desc->lock)
-        return -1;
+        return FD_ERR_UD;
     if ((prefixes & PREFIX_LOCK) && instr->operands[0].type != FD_OT_MEM)
-        return -1;
+        return FD_ERR_UD;
 
     for (int i = 0; i < 4; i++)
     {
         uint32_t reg_type = (desc->reg_types >> 4 * i) & 0xf;
         uint32_t reg_idx = instr->operands[i].reg;
         if (reg_type == FD_RT_MEM && instr->operands[i].type != FD_OT_MEM)
-            return -1;
+            return FD_ERR_UD;
         if (instr->operands[i].type != FD_OT_REG)
             continue;
         if (reg_type == FD_RT_GPL && !(prefixes & PREFIX_REX) &&
@@ -616,14 +618,14 @@ fd_decode(const uint8_t* buffer, size_t len_sz, int mode_int, uintptr_t address,
             reg_type = FD_RT_GPH;
         // Reject invalid segment registers
         if (reg_type == FD_RT_SEG && reg_idx >= 6)
-            return -1;
+            return FD_ERR_UD;
         // Reject invalid control registers
         if (reg_type == FD_RT_CR && reg_idx != 0 && reg_idx != 2 &&
                 reg_idx != 3 && reg_idx != 4 && reg_idx != 8)
-            return -1;
+            return FD_ERR_UD;
         // Reject invalid debug registers
         if (reg_type == FD_RT_DR && reg_idx >= 8)
-            return -1;
+            return FD_ERR_UD;
         instr->operands[i].misc = reg_type;
     }
 
