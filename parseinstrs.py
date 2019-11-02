@@ -180,9 +180,7 @@ def parse_opcode(opcode_string):
     if match is None:
         raise Exception("invalid opcode: '%s'" % opcode_string)
 
-    extended = match.group("extended") is not None
-
-    opcode = [(EntryKind.TABLE256, x) for x in unhexlify(match.group("opcode"))]
+    opcode = [(EntryKind.TABLE256, [x]) for x in unhexlify(match.group("opcode"))]
 
     opcext = match.group("modrm")
     if opcext:
@@ -191,37 +189,33 @@ def parse_opcode(opcode_string):
             assert (0 <= opcext <= 7) or (0xc0 <= opcext <= 0xff)
             if opcext >= 0xc0:
                 opcext -= 0xb8
-            opcode.append((EntryKind.TABLE72, opcext))
+            opcode.append((EntryKind.TABLE72, [opcext]))
         else:
-            opcode.append((EntryKind.TABLE8, int(opcext[1:], 16)))
+            opcode.append((EntryKind.TABLE8, [int(opcext[1:], 16)]))
+
+    if match.group("extended"):
+        last_type, last_indices = opcode[-1]
+        assert last_type in (EntryKind.TABLE256, EntryKind.TABLE72)
+        assert len(last_indices) == 1 and last_indices[0] & 7 == 0
+
+        opcode[-1] = last_type, [last_indices[0] + i for i in range(8)]
 
     if match.group("prefixes"):
-        assert not extended
-
         legacy = {"NP": 0, "66": 1, "F3": 2, "F2": 3}[match.group("legacy")]
         entry = legacy | ((1 << 2) if match.group("vex") else 0)
-        opcode.append((EntryKind.TABLE_PREFIX, entry))
+        opcode.append((EntryKind.TABLE_PREFIX, [entry]))
 
-        if not match.group("vexl") and not match.group("rexw"):
-            return [tuple(opcode)]
+        if match.group("vexl") or match.group("rexw"):
+            rexw = match.group("rexw")
+            rexw = [0, 1<<0] if not rexw else [1<<0] if "W1" in rexw else [0]
+            vexl = match.group("vexl")
+            vexl = [0, 1<<1] if not vexl else [1<<1] if "L1" in vexl else [0]
 
-        rexw = match.group("rexw")
-        rexw = [0, 1<<0] if not rexw else [1<<0] if "W1" in rexw else [0]
-        vexl = match.group("vexl")
-        vexl = [0, 1<<1] if not vexl else [1<<1] if "L1" in vexl else [0]
+            entries = list(map(sum, product(rexw, vexl)))
+            opcode.append((EntryKind.TABLE_VEX, entries))
 
-        entries = list(map(sum, product(rexw, vexl)))
-        return [tuple(opcode) + ((EntryKind.TABLE_VEX, k),) for k in entries]
-
-    if not extended:
-        return [tuple(opcode)]
-
-    last_type, last_index = opcode[-1]
-    assert last_type in (EntryKind.TABLE256, EntryKind.TABLE72)
-    assert last_index & 7 == 0
-
-    common_prefix = tuple(opcode[:-1])
-    return [common_prefix + ((last_type, last_index + i),) for i in range(8)]
+    kinds, values = zip(*opcode)
+    return [tuple(zip(kinds, prod)) for prod in product(*values)]
 
 class Table:
     def __init__(self, root_count=1):
