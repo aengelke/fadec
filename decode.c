@@ -603,15 +603,23 @@ fd_decode(const uint8_t* buffer, size_t len_sz, int mode_int, uintptr_t address,
     for (int i = 0; i < 4; i++)
     {
         uint32_t reg_type = (desc->reg_types >> 4 * i) & 0xf;
+        uint32_t reg_idx = instr->operands[i].reg;
         if (reg_type == FD_RT_MEM && instr->operands[i].type != FD_OT_MEM)
             return -1;
         if (instr->operands[i].type != FD_OT_REG)
             continue;
         if (reg_type == FD_RT_GPL && !(prefixes & PREFIX_REX) &&
-            instr->operands[i].size == 1 && instr->operands[i].reg >= 4)
+            instr->operands[i].size == 1 && reg_idx >= 4)
             reg_type = FD_RT_GPH;
         // Reject invalid segment registers
-        if (reg_type == FD_RT_SEG && instr->operands[i].reg >= 6)
+        if (reg_type == FD_RT_SEG && reg_idx >= 6)
+            return -1;
+        // Reject invalid control registers
+        if (reg_type == FD_RT_CR && reg_idx != 0 && reg_idx != 2 &&
+                reg_idx != 3 && reg_idx != 4 && reg_idx != 8)
+            return -1;
+        // Reject invalid debug registers
+        if (reg_type == FD_RT_DR && reg_idx >= 8)
             return -1;
         instr->operands[i].misc = reg_type;
     }
