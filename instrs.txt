@@ -583,8 +583,8 @@ F2.0fc2               RMI   XMM    XMM    IMM8   -      SSE_CMPSD IMM_8
 66.0fc5               RMI   GP     XMM    IMM8   -      SSE_PEXTRW IMM_8
 NP.0fc6               RMI   XMM    XMM    IMM8   -      SSE_SHUFPS IMM_8
 66.0fc6               RMI   XMM    XMM    IMM8   -      SSE_SHUFPD IMM_8
-NP.0fd0               RM    XMM    XMM    -      -      SSE_ADDSUBPS
 66.0fd0               RM    XMM    XMM    -      -      SSE_ADDSUBPD
+F2.0fd0               RM    XMM    XMM    -      -      SSE_ADDSUBPS
 66.0fd1               RM    XMM    XMM    -      -      SSE_PSRLW
 66.0fd2               RM    XMM    XMM    -      -      SSE_PSRLD
 66.0fd3               RM    XMM    XMM    -      -      SSE_PSRLQ
