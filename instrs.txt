@@ -688,6 +688,8 @@ F2.0ff0               RM    XMM    XMM    -      -      SSE_LDDQU MUSTMEM
 66.0f383f             RM    XMM    XMM    -      -      SSE_PMAXUD
 66.0f3840             RM    XMM    XMM    -      -      SSE_PMULLD
 66.0f3841             RM    XMM    XMM    -      -      SSE_PHMINPOSUW
+66.0f38f8             RM    GP     MEMZ   -      -      MOVDIR64B MUSTMEM
+NP.0f38f9             MR    GP     GP     -      -      MOVDIRI MUSTMEM
 #
 66.0f3a08             RMI   XMM    XMM    IMM    -      SSE_ROUNDPS SIZE_8 IMM_8
 66.0f3a09             RMI   XMM    XMM    IMM    -      SSE_ROUNDPD SIZE_8 IMM_8
@@ -1259,3 +1261,59 @@ F3.0f1e//fb           NP    -      -      -      -      ENDBR32
 NP.0f38f6             MR    GP     GP     -      -      WRSS MUSTMEM
 F3.0fae//5            M     GP     -      -      -      INCSSP INSTR_WIDTH
 F3.0fae//6            M     GP     -      -      -      CLRSSBSY
+
+# VMX
+66.0f3880             RM    GP     MEMZ   -      -      INVEPT DEF64 MUSTMEM
+66.0f3881             RM    GP     MEMZ   -      -      INVVPID DEF64 MUSTMEM
+NP.0f01//c1           NP    -      -      -      -      VMCALL
+66.0fc7//6            M     MEMZ   -      -      -      VMCLEAR MUSTMEM
+NP.0f01//d4           NP    -      -      -      -      VMFUNC
+NP.0f01//c2           NP    -      -      -      -      VMLAUNCH
+NP.0f01//c3           NP    -      -      -      -      VMRESUME
+NP.0fc7//6            M     MEMZ   -      -      -      VMPTRLD MUSTMEM
+NP.0fc7//7            M     MEMZ   -      -      -      VMPTRST MUSTMEM
+NP.0f78               MR    GP     GP     -      -      VMREAD DEF64
+NP.0f79               MR    GP     GP     -      -      VMWRITE DEF64
+NP.0f01//c4           NP    -      -      -      -      VMXOFF
+F3.0fc7//6            M     MEMZ   -      -      -      VMXON MUSTMEM
+
+# WAITPKG
+66.0fae//f0+          O     GP32   -      -      -      TPAUSE
+F3.0fae//f0+          O     GP     -      -      -      UMONITOR
+F2.0fae//f0+          O     GP32   -      -      -      UMWAIT
+
+NP.0f01//ee           NP    -      -      -      -      RDPKRU
+NP.0f01//ef           NP    -      -      -      -      WRPKRU
+F3.0fae//0            M     GP     -      -      -      RDFSBASE ONLY64
+F3.0fae//1            M     GP     -      -      -      RDGSBASE ONLY64
+F3.0fae//2            M     GP     -      -      -      RDFSBASE ONLY64
+F3.0fae//3            M     GP     -      -      -      RDGSBASE ONLY64
+NP.0fae//4            M     MEMZ   -      -      -      XSAVE INSTR_WIDTH
+NP.0fae//5            M     MEMZ   -      -      -      XRSTOR INSTR_WIDTH
+NP.0fae//6            M     MEMZ   -      -      -      XSAVEOPT INSTR_WIDTH
+66.0fae//6            M     GP8    -      -      -      CLWB MUSTMEM
+NP.0fae//7            M     GP8    -      -      -      CLFLUSH
+66.0fae//7            M     GP8    -      -      -      CLFLUSHOPT
+NP.0fc7//3            M     MEMZ   -      -      -      XRSTORS INSTR_WIDTH MUSTMEM
+NP.0fc7//4            M     MEMZ   -      -      -      XSAVEC INSTR_WIDTH MUSTMEM
+NP.0fc7//5            M     MEMZ   -      -      -      XSAVES INSTR_WIDTH MUSTMEM
+RNP.0fc7//f0+         O     GP     -      -      -      RDRAND
+RNP.0fc7//f8+         O     GP     -      -      -      RDSEED
+RF3.0fc7//f8+         O     GP     -      -      -      RDPID DEF64
+66.0f3882             RM    GP     MEMZ   -      -      INVPCID DEF64
+NP.0f38c8             RM    XMM    XMM    -      -      SHA1NEXTE
+NP.0f38c9             RM    XMM    XMM    -      -      SHA1MSG1
+NP.0f38ca             RM    XMM    XMM    -      -      SHA1MSG2
+NP.0f38cb             RMA   XMM    XMM    XMM    -      SHA256RNDS2
+NP.0f38cc             RM    XMM    XMM    -      -      SHA256MSG1
+NP.0f38cd             RM    XMM    XMM    -      -      SHA256MSG2
+NP.0f3acc             RMI   XMM    XMM    IMM8   -      SHA1RNDS4 IMM_8
+
+NP.0f1a               RM    BND    MEMZ   -      -      BNDLDX
+66.0f1a               RM    BND    BND    -      -      BNDMOV DEF64
+F2.0f1a               RM    BND    GP     -      -      BNDCU DEF64
+F3.0f1a               RM    BND    GP     -      -      BNDCL DEF64
+NP.0f1b               MR    MEMZ   BND    -      -      BNDSTX
+66.0f1b               MR    BND    BND    -      -      BNDMOV DEF64
+F2.0f1b               RM    BND    GP     -      -      BNDCN DEF64
+F3.0f1b               RM    BND    MEMZ   -      -      BNDMK
