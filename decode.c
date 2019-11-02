@@ -389,7 +389,12 @@ fd_decode(const uint8_t* buffer, size_t len_sz, int mode_int, uintptr_t address,
         prefixes &= ~(PREFIX_OPSZ | PREFIX_REPNZ | PREFIX_REP);
         ENTRY_UNPACK(table, kind, table[index]);
     }
-    else if (kind == ENTRY_TABLE_PREFIX_REP)
+    else if (prefixes & PREFIX_VEX)
+    {
+        return -1;
+    }
+
+    if (kind == ENTRY_TABLE_PREFIX_REP)
     {
         // Discard 66h mandatory prefix
         uint8_t index = mandatory_prefix != 1 ? mandatory_prefix : 0;
@@ -490,6 +495,10 @@ fd_decode(const uint8_t* buffer, size_t len_sz, int mode_int, uintptr_t address,
         FdOp* operand = &instr->operands[DESC_VEXREG_IDX(desc)];
         operand->type = FD_OT_REG;
         operand->reg = vex_operand;
+    }
+    else if (vex_operand != 0)
+    {
+        return -1;
     }
 
     uint32_t imm_control = DESC_IMM_CONTROL(desc);
