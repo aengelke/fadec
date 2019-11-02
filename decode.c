@@ -593,9 +593,11 @@ fd_decode(const uint8_t* buffer, size_t len_sz, int mode_int, uintptr_t address,
 
     for (int i = 0; i < 4; i++)
     {
+        uint32_t reg_type = (desc->reg_types >> 4 * i) & 0xf;
+        if (reg_type == FD_RT_MEM && instr->operands[i].type != FD_OT_MEM)
+            return -1;
         if (instr->operands[i].type != FD_OT_REG)
             continue;
-        uint32_t reg_type = (desc->reg_types >> 4 * i) & 0xf;
         if (reg_type == FD_RT_GPL && !(prefixes & PREFIX_REX) &&
             instr->operands[i].size == 1 && instr->operands[i].reg >= 4)
             reg_type = FD_RT_GPH;

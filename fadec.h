@@ -75,6 +75,8 @@ typedef enum {
     FD_RT_CR = 9,
     /** Debug Register DRn **/
     FD_RT_DR = 10,
+    /** Must be a memory operand **/
+    FD_RT_MEM = 15,
 } FdRegType;
 
 typedef struct {

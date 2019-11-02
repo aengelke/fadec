@@ -126,6 +126,7 @@ class InstrDesc(namedtuple("InstrDesc", "mnemonic,flags,encoding")):
         if "IMM_8" in desc[6:]:       flags.imm_byte = 1
         if "LOCK" in desc[6:]:        flags.lock = 1
         if "VSIB" in desc[6:]:        flags.vsib = 1
+        if "MUSTMEM" in desc[6:]:     flags.reg_types |= 15 << 4*(flags.modrm_idx^3)
 
         return cls(desc[5], frozenset(desc[6:]), flags._encode(6))
     def encode(self, mnemonics_lut):

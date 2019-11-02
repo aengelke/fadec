@@ -140,7 +140,7 @@
 8a                    RM    GP     GP     -      -      MOV SIZE_8
 8b                    RM    GP     GP     -      -      MOV
 8c                    MR    GP     SREG   -      -      MOV_S2G
-8d                    RM    GP     GP     -      -      LEA
+8d                    RM    GP     GP     -      -      LEA MUSTMEM
 8e                    RM    SREG   GP     -      -      MOV_G2S
 8f/0                  M     GP     -      -      -      POP DEF64
 90                    NP    -      -      -      -      NOP
@@ -413,10 +413,10 @@ NP.0f37               NP    -      -      -      -      GETSEC
 0faf                  RM    GP     GP     -      -      IMUL2
 0fb0                  MR    GP     GP     -      -      CMPXCHG SIZE_8 LOCK
 0fb1                  MR    GP     GP     -      -      CMPXCHG LOCK
-0fb2                  RM    GP     GP     -      -      LSS
+0fb2                  RM    GP     GP     -      -      LSS MUSTMEM
 0fb3                  MR    GP     GP     -      -      BTR LOCK
-0fb4                  RM    GP     GP     -      -      LFS
-0fb5                  RM    GP     GP     -      -      LGS
+0fb4                  RM    GP     GP     -      -      LFS MUSTMEM
+0fb5                  RM    GP     GP     -      -      LGS MUSTMEM
 0fb6                  RM    GP     GP8    -      -      MOVZX
 0fb7                  RM    GP     GP16   -      -      MOVZX
 F3.0fb8               RM    GP     GP     -      -      POPCNT
@@ -474,8 +474,8 @@ NP.0f29               MR    XMM    XMM    -      -      SSE_MOVAPS
 66.0f29               MR    XMM    XMM    -      -      SSE_MOVAPD
 F3.0f2a               RM    XMM32  GP     -      -      SSE_CVTSI2SS
 F2.0f2a               RM    XMM64  GP     -      -      SSE_CVTSI2SD
-NP.0f2b               MR    XMM    XMM    -      -      SSE_MOVNTPS
-66.0f2b               MR    XMM    XMM    -      -      SSE_MOVNTPD
+NP.0f2b               MR    XMM    XMM    -      -      SSE_MOVNTPS MUSTMEM
+66.0f2b               MR    XMM    XMM    -      -      SSE_MOVNTPD MUSTMEM
 F3.0f2c               RM    GP     XMM32  -      -      SSE_CVTTSS2SI
 F2.0f2c               RM    GP     XMM64  -      -      SSE_CVTTSD2SI
 F3.0f2d               RM    GP     XMM32  -      -      SSE_CVTSS2SI
@@ -484,8 +484,8 @@ NP.0f2e               RM    XMM32  XMM32  -      -      SSE_UCOMISS
 66.0f2e               RM    XMM64  XMM64  -      -      SSE_UCOMISD
 NP.0f2f               RM    XMM32  XMM32  -      -      SSE_COMISS
 66.0f2f               RM    XMM64  XMM64  -      -      SSE_COMISD
-NP.0f50               RM    GP     XMM    -      -      SSE_MOVMSKPS DEF64
-66.0f50               RM    GP     XMM    -      -      SSE_MOVMSKPD DEF64
+NP.0f50               RM    GP     XMM    -      -      SSE_MOVMSKPS DEF64 NOMEM
+66.0f50               RM    GP     XMM    -      -      SSE_MOVMSKPD DEF64 NOMEM
 NP.0f51               RM    XMM    XMM    -      -      SSE_SQRTPS
 66.0f51               RM    XMM    XMM    -      -      SSE_SQRTPD
 F3.0f51               RM    XMM32  XMM32  -      -      SSE_SQRTSS
@@ -617,7 +617,7 @@ F2.0fd0               RM    XMM    XMM    -      -      SSE_ADDSUBPS
 66.0fe6               RM    XMM64  XMM    -      -      SSE_CVTTPD2DQ
 F3.0fe6               RM    XMM    XMM64  -      -      SSE_CVTDQ2PD
 F2.0fe6               RM    XMM64  XMM    -      -      SSE_CVTPD2DQ
-66.0fe7               MR    XMM    XMM    -      -      SSE_MOVNTDQ
+66.0fe7               MR    XMM    XMM    -      -      SSE_MOVNTDQ MUSTMEM
 66.0fe8               RM    XMM    XMM    -      -      SSE_PSUBSB
 66.0fe9               RM    XMM    XMM    -      -      SSE_PSUBSW
 66.0feb               RM    XMM    XMM    -      -      SSE_POR
@@ -626,14 +626,14 @@ F2.0fe6               RM    XMM64  XMM    -      -      SSE_CVTPD2DQ
 66.0fee               RM    XMM    XMM    -      -      SSE_PMAXSW
 66.0fed               RM    XMM    XMM    -      -      SSE_PADDSW
 66.0fef               RM    XMM    XMM    -      -      SSE_PXOR
-F2.0ff0               RM    XMM    XMM    -      -      SSE_LDDQU
+F2.0ff0               RM    XMM    XMM    -      -      SSE_LDDQU MUSTMEM
 66.0ff1               RM    XMM    XMM    -      -      SSE_PSLLW
 66.0ff2               RM    XMM    XMM    -      -      SSE_PSLLD
 66.0ff3               RM    XMM    XMM    -      -      SSE_PSLLQ
 66.0ff4               RM    XMM    XMM    -      -      SSE_PMULUDQ
 66.0ff5               RM    XMM    XMM    -      -      SSE_PMADDWD
 66.0ff6               RM    XMM    XMM    -      -      SSE_PSADBW
-66.0ff7               RM    XMM    XMM    -      -      SSE_MASKMOVDQU
+66.0ff7               RM    XMM    XMM    -      -      SSE_MASKMOVDQU NOMEM
 66.0ff8               RM    XMM    XMM    -      -      SSE_PSUBB
 66.0ff9               RM    XMM    XMM    -      -      SSE_PSUBW
 66.0ffa               RM    XMM    XMM    -      -      SSE_PSUBD
@@ -669,7 +669,7 @@ F2.0ff0               RM    XMM    XMM    -      -      SSE_LDDQU
 66.0f3825             RM    XMM    XMM    -      -      SSE_PMOVSXDQ
 66.0f3828             RM    XMM    XMM    -      -      SSE_PMULDQ
 66.0f3829             RM    XMM    XMM    -      -      SSE_PCMPEQQ
-66.0f382a             RM    XMM    XMM    -      -      SSE_MOVNTDQA
+66.0f382a             RM    XMM    XMM    -      -      SSE_MOVNTDQA MUSTMEM
 66.0f382b             RM    XMM    XMM    -      -      SSE_PACKUSDW
 66.0f3830             RM    XMM    XMM    -      -      SSE_PMOVZXBW
 66.0f3831             RM    XMM    XMM    -      -      SSE_PMOVZXBD
