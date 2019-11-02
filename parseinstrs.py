@@ -139,6 +139,7 @@ class EntryKind(Enum):
     TABLE72 = 4
     TABLE_PREFIX = 5
     TABLE_VEX = 6
+    TABLE_PREFIX_REP = 7
 
 class TrieEntry(namedtuple("TrieEntry", "kind,items,payload")):
     __slots__ = ()
@@ -148,6 +149,7 @@ class TrieEntry(namedtuple("TrieEntry", "kind,items,payload")):
         EntryKind.TABLE72: 72,
         EntryKind.TABLE_PREFIX: 8,
         EntryKind.TABLE_VEX: 4,
+        EntryKind.TABLE_PREFIX_REP: 4,
     }
     @classmethod
     def table(cls, kind):
@@ -170,7 +172,7 @@ class TrieEntry(namedtuple("TrieEntry", "kind,items,payload")):
         return TrieEntry(self.kind, tuple(mapped_items), self.payload)
 
 import re
-opcode_regex = re.compile(r"^(?P<prefixes>(?P<vex>VEX\.)?(?P<legacy>NP|66|F2|F3)\.(?P<rexw>W[01]\.)?(?P<vexl>L[01]\.)?)?(?P<opcode>(?:[0-9a-f]{2})+)(?P<modrm>//?[0-7]|//[c-f][0-9a-f])?(?P<extended>\+)?$")
+opcode_regex = re.compile(r"^(?:(?P<prefixes>(?P<vex>VEX\.)?(?P<legacy>NP|66|F2|F3)\.(?P<rexw>W[01]\.)?(?P<vexl>L[01]\.)?)|R(?P<repprefix>NP|F2|F3).)?(?P<opcode>(?:[0-9a-f]{2})+)(?P<modrm>//?[0-7]|//[c-f][0-9a-f])?(?P<extended>\+)?$")
 
 def parse_opcode(opcode_string):
     """
@@ -213,6 +215,9 @@ def parse_opcode(opcode_string):
 
             entries = list(map(sum, product(rexw, vexl)))
             opcode.append((EntryKind.TABLE_VEX, entries))
+    elif match.group("repprefix"):
+        rep = {"NP": 0, "F3": 2, "F2": 3}[match.group("repprefix")]
+        opcode.append((EntryKind.TABLE_PREFIX_REP, [rep]))
 
     kinds, values = zip(*opcode)
     return [tuple(zip(kinds, prod)) for prod in product(*values)]

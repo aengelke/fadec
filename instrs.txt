@@ -422,8 +422,10 @@ F3.0fb8               RM    GP     GP     -      -      POPCNT
 0fba/6                MI    GP     IMM8   -      -      BTR_IMM IMM_8 LOCK
 0fba/7                MI    GP     IMM8   -      -      BTC_IMM IMM_8 LOCK
 0fbb                  MR    GP     GP     -      -      BTC LOCK
-0fbc                  RM    GP     GP     -      -      BSF_TZCNT
-0fbd                  RM    GP     GP     -      -      BSR_LZCNT
+RNP.0fbc              RM    GP     GP     -      -      BSF
+RF3.0fbc              RM    GP     GP     -      -      TZCNT
+RNP.0fbd              RM    GP     GP     -      -      BSR
+RF3.0fbd              RM    GP     GP     -      -      LZCNT
 0fbe                  RM    GP     GP8    -      -      MOVSX
 0fbf                  RM    GP     GP16   -      -      MOVSX
 0fc0                  MR    GP     GP     -      -      XADD SIZE_8 LOCK
@@ -433,8 +435,10 @@ NP.0fc3               MR    GP     GP     -      -      MOVNTI
 0fc8+                 O     GP     -      -      -      BSWAP
 0fff                  RM    GP     GP     -      -      UD0
 #
-0f38f0                RM    GP     GP     -      -      MOVBE_CRC32
-0f38f1                MR    GP     GP     -      -      MOVBE_CRC32
+RNP.0f38f0            RM    GP     GP     -      -      MOVBE MUSTMEM
+RF2.0f38f0            RM    GP     GP8    -      -      CRC32
+RNP.0f38f1            MR    GP     GP     -      -      MOVBE MUSTMEM
+RF2.0f38f1            MR    GP     GP     -      -      CRC32
 #
 # SSE
 NP.0f10               RM    XMM    XMM    -      -      SSE_MOVUPS

@@ -38,6 +38,7 @@ typedef enum DecodeMode DecodeMode;
 #define ENTRY_TABLE72 4
 #define ENTRY_TABLE_PREFIX 5
 #define ENTRY_TABLE_VEX 6
+#define ENTRY_TABLE_PREFIX_REP 7
 #define ENTRY_MASK 7
 
 #define ENTRY_UNPACK(table,kind,entry) do { \
@@ -386,6 +387,13 @@ fd_decode(const uint8_t* buffer, size_t len_sz, int mode_int, uintptr_t address,
         // for the 0x66 prefix, which could otherwise override the operand
         // size of general purpose registers.
         prefixes &= ~(PREFIX_OPSZ | PREFIX_REPNZ | PREFIX_REP);
+        ENTRY_UNPACK(table, kind, table[index]);
+    }
+    else if (kind == ENTRY_TABLE_PREFIX_REP)
+    {
+        // Discard 66h mandatory prefix
+        uint8_t index = mandatory_prefix != 1 ? mandatory_prefix : 0;
+        prefixes &= ~(PREFIX_REPNZ | PREFIX_REP);
         ENTRY_UNPACK(table, kind, table[index]);
     }
 
