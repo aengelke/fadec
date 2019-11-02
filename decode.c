@@ -116,7 +116,7 @@ decode_prefixes(const uint8_t* buffer, int len, DecodeMode mode,
         case 0x4c: case 0x4d: case 0x4e: case 0x4f:
             if (mode != DECODE_64)
                 goto out;
-            rex_prefix |= PREFIX_REX;
+            rex_prefix = PREFIX_REX;
             rex_prefix |= prefix & 0x1 ? PREFIX_REXB : 0;
             rex_prefix |= prefix & 0x2 ? PREFIX_REXX : 0;
             rex_prefix |= prefix & 0x4 ? PREFIX_REXR : 0;
