@@ -526,7 +526,7 @@ fd_decode(const uint8_t* buffer, size_t len_sz, int mode_int, uintptr_t address,
             // Jumps are always 8 or 32 bit on x86-64.
             imm_size = 4;
 #endif
-        else if (prefixes & PREFIX_OPSZ)
+        else if (op_size == 2)
             imm_size = 2;
 #if defined(ARCH_X86_64)
         else if (mode == DECODE_64 && (prefixes & PREFIX_REXW) &&
