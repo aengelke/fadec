@@ -344,7 +344,7 @@ NP.0f23               RM    DR     GP     -      -      MOV_G2D DEF64
 0f33                  NP    -      -      -      -      RDPMC
 0f34                  NP    -      -      -      -      SYSENTER
 0f35                  NP    -      -      -      -      SYSEXIT
-0f37                  NP    -      -      -      -      GETSEC
+NP.0f37               NP    -      -      -      -      GETSEC
 # 0f38, 0f3a are escape opcodes
 0f40                  RM    GP     GP     -      -      CMOVO
 0f41                  RM    GP     GP     -      -      CMOVNO
