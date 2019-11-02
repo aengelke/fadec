@@ -402,7 +402,7 @@ NP.0f23               RM    DR     GP     -      -      MOV_G2D DEF64
 0fa5                  MR    GP     GP     -      -      SHLD_CL
 0fa8                  NP    -      -      -      -      PUSH_GS DEF64 INSTR_WIDTH
 0fa9                  NP    -      -      -      -      POP_GS DEF64 INSTR_WIDTH
-# 0faa RSM
+0faa                  NP    -      -      -      -      RSM
 0fab                  MR    GP     GP     -      -      BTS LOCK
 0fac                  MRI   GP     GP     IMM8   -      SHRD_IMM IMM_8
 0fad                  MR    GP     GP     -      -      SHRD_CL
