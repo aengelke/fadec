@@ -94,9 +94,9 @@ OPKIND_LOOKUP = {
     "SREG": (0, 0, 3),
     "FPU": (0, 0, 4),
     "MEMZ": (0, 0, 0),
-    "BND": (0, 0, 0),
-    "CR": (0, 0, 0),
-    "DR": (0, 0, 0),
+    "BND": (0, 0, 8),
+    "CR": (0, 0, 9),
+    "DR": (0, 0, 10),
 }
 
 class InstrDesc(namedtuple("InstrDesc", "mnemonic,flags,encoding")):

@@ -334,10 +334,14 @@ ff/6                  M     GP     -      -      -      PUSH DEF64
 0f18/2                M     GP8    -      -      -      PREFETCH1
 0f18/3                M     GP8    -      -      -      PREFETCH2
 0f1f                  M     GP     -      -      -      NOP
-NP.0f20               MR    GP     CR     -      -      MOV_C2G DEF64
-NP.0f21               MR    GP     DR     -      -      MOV_D2G DEF64
-NP.0f22               RM    CR     GP     -      -      MOV_G2C DEF64
-NP.0f23               RM    DR     GP     -      -      MOV_G2D DEF64
+0f20                  MR    GP32   CR     -      -      MOV_C2G ONLY32
+0f20                  MR    GP64   CR     -      -      MOV_C2G ONLY64 DEF64
+0f21                  MR    GP32   DR     -      -      MOV_D2G ONLY32
+0f21                  MR    GP64   DR     -      -      MOV_D2G ONLY64 DEF64
+0f22                  RM    CR     GP32   -      -      MOV_G2C ONLY32
+0f22                  RM    CR     GP64   -      -      MOV_G2C ONLY64 DEF64
+0f23                  RM    DR     GP32   -      -      MOV_G2D ONLY32
+0f23                  RM    DR     GP64   -      -      MOV_G2D ONLY64 DEF64
 0f30                  NP    -      -      -      -      WRMSR
 0f31                  NP    -      -      -      -      RDTSC
 0f32                  NP    -      -      -      -      RDMSR
