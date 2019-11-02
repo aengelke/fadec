@@ -260,7 +260,7 @@ ed                    NP    -      -      -      -      IN INSTR_WIDTH
 ee                    NP    -      -      -      -      OUT SIZE_8 INSTR_WIDTH
 ef                    NP    -      -      -      -      OUT INSTR_WIDTH
 #f0 LOCK prefix
-#f1 unused
+f1                    NP    -      -      -      -      INT1
 #f2 REPNZ prefix
 #f3 REP/REPZ prefix
 f4                    NP    -      -      -      -      HLT
