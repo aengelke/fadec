@@ -409,7 +409,10 @@ NP.0f23               RM    DR     GP     -      -      MOV_G2D DEF64
 0faf                  RM    GP     GP     -      -      IMUL2
 0fb0                  MR    GP     GP     -      -      CMPXCHG SIZE_8 LOCK
 0fb1                  MR    GP     GP     -      -      CMPXCHG LOCK
+0fb2                  RM    GP     GP     -      -      LSS
 0fb3                  MR    GP     GP     -      -      BTR LOCK
+0fb4                  RM    GP     GP     -      -      LFS
+0fb5                  RM    GP     GP     -      -      LGS
 0fb6                  RM    GP     GP8    -      -      MOVZX
 0fb7                  RM    GP     GP16   -      -      MOVZX
 F3.0fb8               RM    GP     GP     -      -      POPCNT
