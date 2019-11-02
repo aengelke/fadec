@@ -132,8 +132,11 @@ decode_prefixes(const uint8_t* buffer, int len, DecodeMode mode,
             if (mode == DECODE_32 && (byte & 0xc0) != 0xc0)
                 goto out;
 
-            // VEX + REX/66/F2/F3/LOCK will #UD.
-            if (prefixes & (PREFIX_REX|PREFIX_REP|PREFIX_REPNZ|PREFIX_LOCK))
+            // VEX + 66/F2/F3/LOCK will #UD.
+            if (prefixes & (PREFIX_REP|PREFIX_REPNZ|PREFIX_OPSZ|PREFIX_LOCK)
+                return -1;
+            // VEX + REX will #UD.
+            if (rex_prefix)
                 return -1;
 
             prefixes |= PREFIX_VEX;
