@@ -212,7 +212,7 @@ decode_modrm(const uint8_t* buffer, int len, DecodeMode mode, FdInstr* instr,
         out_o2->reg = reg_idx;
     }
 
-    if (mod == 3)
+    if (mod == 3 || instr->type == FDI_MOV_CR || instr->type == FDI_MOV_DR)
     {
         uint8_t reg_idx = rm;
 #if defined(ARCH_X86_64)
