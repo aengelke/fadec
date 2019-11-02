@@ -96,6 +96,7 @@ decode_prefixes(const uint8_t* buffer, int len, DecodeMode mode,
         // From segment overrides, the last one wins.
         case 0x26: *out_segment = FD_REG_ES; off++; break;
         case 0x2e: *out_segment = FD_REG_CS; off++; break;
+        case 0x36: *out_segment = FD_REG_SS; off++; break;
         case 0x3e: *out_segment = FD_REG_DS; off++; break;
         case 0x64: *out_segment = FD_REG_FS; off++; break;
         case 0x65: *out_segment = FD_REG_GS; off++; break;
