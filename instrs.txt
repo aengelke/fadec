@@ -431,7 +431,7 @@ F3.0fb8               RM    GP     GP     -      -      POPCNT
 NP.0fc3               MR    GP     GP     -      -      MOVNTI
 0fc7//1               M     MEMZ   -      -      -      CMPXCHGD LOCK
 0fc8+                 O     GP     -      -      -      BSWAP
-0fff                  NP    -      -      -      -      UD0
+0fff                  RM    GP     GP     -      -      UD0
 #
 0f38f0                RM    GP     GP     -      -      MOVBE_CRC32
 0f38f1                MR    GP     GP     -      -      MOVBE_CRC32
