@@ -203,8 +203,9 @@ c7//f8                D     IMM    -      -      -      XBEGIN
 # ENTER immediate handled in code
 c8                    I     IMM32  -      -      -      ENTER DEF64 INSTR_WIDTH
 c9                    NP    -      -      -      -      LEAVE DEF64 INSTR_WIDTH
-#ca RETf TODO, ONLY32
-#cb RETf TODO, ONLY32
+# RETF immediate size handled in code
+ca                    I     IMM16  -      -      -      RETF DEF64 INSTR_WIDTH
+cb                    NP    -      -      -      -      RETF DEF64 INSTR_WIDTH
 cc                    NP    -      -      -      -      INT3
 cd                    I     IMM8   -      -      -      INT IMM_8
 ce                    NP    -      -      -      -      INTO ONLY32

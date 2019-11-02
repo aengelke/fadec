@@ -517,7 +517,7 @@ fd_decode(const uint8_t* buffer, size_t len_sz, int mode_int, uintptr_t address,
         uint8_t imm_size;
         if (DESC_IMM_BYTE(desc))
             imm_size = 1;
-        else if (UNLIKELY(instr->type == FDI_RET_IMM))
+        else if (UNLIKELY(instr->type == FDI_RET_IMM || instr->type == FDI_RETF))
             imm_size = 2;
         else if (UNLIKELY(instr->type == FDI_ENTER))
             imm_size = 3;
