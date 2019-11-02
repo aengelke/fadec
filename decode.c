@@ -81,6 +81,8 @@ decode_prefixes(const uint8_t* buffer, int len, DecodeMode mode,
 {
     int off = 0;
     PrefixSet prefixes = 0;
+    PrefixSet rex_prefix = 0;
+    int rex_off = -1;
 
     uint8_t rep = 0;
     *out_mandatory = 0;
@@ -111,18 +113,16 @@ decode_prefixes(const uint8_t* buffer, int len, DecodeMode mode,
         case 0x40: case 0x41: case 0x42: case 0x43: case 0x44: case 0x45:
         case 0x46: case 0x47: case 0x48: case 0x49: case 0x4a: case 0x4b:
         case 0x4c: case 0x4d: case 0x4e: case 0x4f:
-            if (mode == DECODE_64)
-            {
-                prefixes |= PREFIX_REX;
-                prefixes |= prefix & 0x1 ? PREFIX_REXB : 0;
-                prefixes |= prefix & 0x2 ? PREFIX_REXX : 0;
-                prefixes |= prefix & 0x4 ? PREFIX_REXR : 0;
-                prefixes |= prefix & 0x8 ? PREFIX_REXW : 0;
-                off++;
-            }
-            // If in 64-bit mode, the REX prefix is always the last prefix. In
-            // 32-bit mode these are regular opcodes, so exit without consuming.
-            goto out;
+            if (mode != DECODE_64)
+                goto out;
+            rex_prefix |= PREFIX_REX;
+            rex_prefix |= prefix & 0x1 ? PREFIX_REXB : 0;
+            rex_prefix |= prefix & 0x2 ? PREFIX_REXX : 0;
+            rex_prefix |= prefix & 0x4 ? PREFIX_REXR : 0;
+            rex_prefix |= prefix & 0x8 ? PREFIX_REXW : 0;
+            rex_off = off;
+            off++;
+            break;
 #endif
         case 0xc4: case 0xc5: // VEX
             if (UNLIKELY(off + 1 >= len))
@@ -169,6 +169,10 @@ decode_prefixes(const uint8_t* buffer, int len, DecodeMode mode,
     }
 
 out:
+    // REX prefix is only considered if it is the last prefix.
+    if (rex_off == off - 1)
+        prefixes |= rex_prefix;
+
     // If there is no REP/REPNZ prefix and implied opcode extension from a VEX
     // prefix, offer 66h as mandatory prefix. If there is a REP prefix, then the
     // 66h prefix is ignored when evaluating mandatory prefixes.
