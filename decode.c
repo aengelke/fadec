@@ -629,6 +629,9 @@ fd_decode(const uint8_t* buffer, size_t len_sz, int mode_int, uintptr_t address,
         instr->operands[i].misc = reg_type;
     }
 
+    if (instr->type == FDI_MOV_G2S && instr->operands[0].reg == 1)
+        return FD_ERR_UD;
+
     instr->size = off;
 
     return off;
