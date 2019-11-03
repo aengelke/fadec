@@ -43,7 +43,6 @@ The API consists of two functions to decode and format instructions, as well as 
 ## Intended differences to other decoders
 To achieve higher performance, minor differences to other decoders exist, requiring special handling.
 
-- The registers `ah`/... and `spl`/... have the same number (as in machine code). Distinguishing them is possible using `FD_OP_REG_HIGH`.
 - The decoded operand sizes are not always exact. However, the exact size can be reconstructed in all cases.
     - For instructions with rare memory access sizes (e.g. `lgdt`), the provided size is zero. These are: `cmpxchg16b`, `cmpxchg8b`, `fbld` (for 80-bit), `fbstp` (for 80-bit), `fldenv`, `frstor`, `fsave`, `fstenv`, `fstp` (for 80-bit), `fxrstor`, `fxsave`, `lds`, `lds`, `lgdt`, `lidt`, `lldt`, `ltr`, `sgdt`, `sidt`, `sldt`, `str`
     - For some SSE/AVX instructions, the operand size is an over-approximation of the real size, e.g. for permutations or extensions.
@@ -52,11 +51,8 @@ To achieve higher performance, minor differences to other decoders exist, requir
     - `finit` is decoded as `FD_FWAIT` + `FD_FINIT`
     - `fninit` is decoded as plain `FD_FINIT`
 - For `scas` and `cmps`, the `repz` prefix can be queried using `FD_HAS_REP` (matching prefix byte in machine code).
-- The instructions `bsf`/`tzcnt` and `bsr`/`lzcnt` can only be distinguished by the presence of a `rep` prefix (matching the machine code encoding). Note that on older processors `tzcnt`/`lzcnt` are executed as plain `rep bsf`/`rep bsr`.
-- The instructions `movbe`/`crc32` can only be distinguished by the presence of a `repnz` prefix.
 
 ## Known issues
-- MMX instructions are not supported yet.
 - The EVEX prefix (AVX-512) is not supported (yet).
 - The layout of entries in the tables can be improved to improve usage of caches. (Help needed.)
 - No Python API.

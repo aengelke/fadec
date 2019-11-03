@@ -150,13 +150,9 @@ void fd_format(const FdInstr* instr, char* buf, size_t len);
 #define FD_OPSIZE(instr) ((instr)->operandsz)
 /** Indicates whether the instruction was encoded with a REP prefix. Needed for:
  * (1) Handling the instructions MOVS, STOS, LODS, INS and OUTS properly.
- * (2) Handling the instructions SCAS and CMPS, for which this means REPZ.
- * (3) Distinguishing the instructions BSF (no REP) vs. TZCNT (REP) and the
- *     instructions BSR (no REP) vs. LZCNT (REP). **/
+ * (2) Handling the instructions SCAS and CMPS, for which this means REPZ. **/
 #define FD_HAS_REP(instr) ((instr)->flags & FD_FLAG_REP)
-/** Indicates whether the instruction was encoded with a REP prefix. Needed for:
- * (1) Handling the instructions SCAS and CMPS.
- * (2) Distinguishing the instructions MOVBE (no REPNZ) vs. CRC32 (REPNZ). **/
+/** Indicates whether the instruction was encoded with a REPNZ prefix. **/
 #define FD_HAS_REPNZ(instr) ((instr)->flags & FD_FLAG_REPNZ)
 /** Indicates whether the instruction was encoded with a LOCK prefix. Note that
  * it is not checked whether the LOCK prefix is valid for the instruction. **/
