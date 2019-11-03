@@ -616,6 +616,9 @@ fd_decode(const uint8_t* buffer, size_t len_sz, int mode_int, uintptr_t address,
         if (reg_type == FD_RT_GPL && !(prefixes & PREFIX_REX) &&
             instr->operands[i].size == 1 && reg_idx >= 4)
             reg_type = FD_RT_GPH;
+        // Fixup eager application of REX prefix
+        if ((reg_type == FD_RT_MMX || reg_type == FD_RT_SEG) && reg_idx >= 8)
+            instr->operands[i].reg -= 8;
         // Reject invalid segment registers
         if (reg_type == FD_RT_SEG && reg_idx >= 6)
             return FD_ERR_UD;
