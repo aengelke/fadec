@@ -190,7 +190,8 @@ def parse_opcode(opcode_string):
     if opcext:
         if opcext[1] == "/":
             opcext = int(opcext[2:], 16)
-            assert (0 <= opcext <= 7) or (0xc0 <= opcext <= 0xff)
+            if not (0 <= opcext <= 7) and not (0xc0 <= opcext <= 0xff):
+                raise Exception("invalid opcext range: {}".format(opcode_string))
             if opcext >= 0xc0:
                 opcext -= 0xb8
             opcode.append((EntryKind.TABLE72, [opcext]))
@@ -199,8 +200,9 @@ def parse_opcode(opcode_string):
 
     if match.group("extended"):
         last_type, last_indices = opcode[-1]
-        assert last_type in (EntryKind.TABLE256, EntryKind.TABLE72)
-        assert len(last_indices) == 1 and last_indices[0] & 7 == 0
+        if (last_type not in (EntryKind.TABLE256, EntryKind.TABLE72) or
+               len(last_indices) != 1 or last_indices[0] & 7 != 0):
+            raise Exception("invalid opcode duplication: {}".format(opcode_string))
 
         opcode[-1] = last_type, [last_indices[0] + i for i in range(8)]
 
@@ -224,6 +226,26 @@ def parse_opcode(opcode_string):
     kinds, values = zip(*opcode)
     return [tuple(zip(kinds, prod)) for prod in product(*values)]
 
+def format_opcode(opcode):
+    opcode_string = ""
+    prefix = ""
+    for kind, byte in opcode:
+        if kind == EntryKind.TABLE256:
+            opcode_string += "{:02x}".format(byte)
+        elif kind in (EntryKind.TABLE8, EntryKind.TABLE72):
+            opcode_string += "/{:x}".format(byte)
+        elif kind == EntryKind.TABLE_PREFIX:
+            if byte & 4:
+                prefix += "VEX."
+            prefix += ["NP.", "66.", "F3.", "F2."][byte&3]
+        elif kind == EntryKind.TABLE_PREFIX_REP:
+            prefix += ["RNP.", "??.", "RF3.", "RF2."][byte&3]
+        elif kind == EntryKind.TABLE_VEX:
+            prefix += "W{}.L{}.".format(byte & 1, byte >> 1)
+        else:
+            raise Exception("unsupported opcode kind {}".format(kind))
+    return prefix + opcode_string
+
 class Table:
     def __init__(self, root_count=1):
         self.data = OrderedDict()
@@ -234,24 +256,25 @@ class Table:
         self.annotations = {}
 
     def add_opcode(self, opcode, instr_encoding, root_idx=0):
-        opcode = list(opcode) + [(None, None)]
-        opcode = [(opcode[i+1][0], opcode[i][1]) for i in range(len(opcode)-1)]
+        name = "t{},{}".format(root_idx, format_opcode(opcode))
 
-        name, table = "t%d"%root_idx, self.data["root%d"%root_idx]
-        for kind, byte in opcode[:-1]:
+        table = self.data["root%d"%root_idx]
+        for i in range(len(opcode) - 1):
+            kind, byte = opcode[i+1][0], opcode[i][1]
             if table.items[byte] is None:
-                name += "{:02x}".format(byte)
-                self.data[name] = TrieEntry.table(kind)
-                table.items[byte] = name
+                table_name = "t{},{}".format(root_idx, format_opcode(opcode[:i+1]))
+                table.items[byte] = table_name
+                table = self.data[table_name] = TrieEntry.table(kind)
             else:
-                name = table.items[byte]
-            table = self.data[name]
-            assert table.kind == kind
+                table = self.data[table.items[byte]]
+                if table.kind != kind:
+                    raise Exception("have {}, new opcode ({}) has {}".format(
+                                    table.kind, name, kind))
 
         # An opcode can occur once only.
-        assert table.items[opcode[-1][1]] is None
+        if table.items[opcode[-1][1]]:
+            raise Exception("opcode_collision for {}".format(name))
 
-        name += "{:02x}/{}".format(opcode[-1][1], "??")
         table.items[opcode[-1][1]] = name
         self.data[name] = TrieEntry.instr(instr_encoding)
 
@@ -279,7 +302,8 @@ class Table:
             self.annotations[current] = "%s(%d)" % (name, entry.kind.value)
             self.offsets[name] = current
             current += (entry.encode_length + 7) & ~7
-        assert current < 0x10000
+        if current >= 0x10000:
+            raise Exception("maximum table size exceeded: {:x}".format(current))
 
     def encode_item(self, name):
         return self.offsets[name] | self.data[name].kind.value
