@@ -196,13 +196,17 @@ decode_modrm(const uint8_t* buffer, int len, DecodeMode mode, FdInstr* instr,
 
     if (UNLIKELY(off >= len))
     {
-        return -1;
+        return FD_ERR_PARTIAL;
     }
 
     uint8_t modrm = buffer[off++];
     uint8_t mod = (modrm & 0xc0) >> 6;
     uint8_t mod_reg = (modrm & 0x38) >> 3;
     uint8_t rm = modrm & 0x07;
+
+    // VSIB must have a memory operand with SIB byte.
+    if (vsib && (rm != 4 || mod == 3))
+        return FD_ERR_UD;
 
     // Operand 2 may be NULL when reg field is used as opcode extension
     if (out_o2)
@@ -499,6 +503,10 @@ fd_decode(const uint8_t* buffer, size_t len_sz, int mode_int, uintptr_t address,
     {
         FdOp* operand = &instr->operands[DESC_VEXREG_IDX(desc)];
         operand->type = FD_OT_REG;
+#if defined(ARCH_386)
+        if (mode == DECODE_32)
+            vex_operand &= 0x7;
+#endif
         operand->reg = vex_operand;
     }
     else if (vex_operand != 0)
