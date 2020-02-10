@@ -325,7 +325,8 @@ ff/6                  M     GP     -      -      -      PUSH DEF64
 0f06                  NP    -      -      -      -      CLTS
 0f07                  NP    -      -      -      -      SYSRET ONLY64
 0f08                  NP    -      -      -      -      INVD
-0f09                  NP    -      -      -      -      WBINVD
+RNP.0f09              NP    -      -      -      -      WBINVD
+RF3.0f09              NP    -      -      -      -      WBINVD
 0f0b                  NP    -      -      -      -      UD2
 0f0d/0                M     GP8    -      -      -      PREFETCH MUSTMEM
 0f0d/1                M     GP8    -      -      -      PREFETCHW MUSTMEM
@@ -335,10 +336,18 @@ ff/6                  M     GP     -      -      -      PUSH DEF64
 0f0d/5                M     GP8    -      -      -      RESERVED_PREFETCH MUSTMEM
 0f0d/6                M     GP8    -      -      -      RESERVED_PREFETCH MUSTMEM
 0f0d/7                M     GP8    -      -      -      RESERVED_PREFETCH MUSTMEM
-0f18/0                M     GP8    -      -      -      PREFETCHNTA MUSTMEM
-0f18/1                M     GP8    -      -      -      PREFETCH0 MUSTMEM
-0f18/2                M     GP8    -      -      -      PREFETCH1 MUSTMEM
-0f18/3                M     GP8    -      -      -      PREFETCH2 MUSTMEM
+0f18//0               M     GP8    -      -      -      PREFETCHNTA MUSTMEM
+0f18//1               M     GP8    -      -      -      PREFETCH0 MUSTMEM
+0f18//2               M     GP8    -      -      -      PREFETCH1 MUSTMEM
+0f18//3               M     GP8    -      -      -      PREFETCH2 MUSTMEM
+0f18//4               M     GP     -      -      -      RESERVED_NOP
+0f18//5               M     GP     -      -      -      RESERVED_NOP
+0f18//6               M     GP     -      -      -      RESERVED_NOP
+0f18//7               M     GP     -      -      -      RESERVED_NOP
+0f18//c0+             O     GP     -      -      -      RESERVED_NOP
+0f18//c8+             O     GP     -      -      -      RESERVED_NOP
+0f18//d0+             O     GP     -      -      -      RESERVED_NOP
+0f18//d8+             O     GP     -      -      -      RESERVED_NOP
 0f1f                  M     GP     -      -      -      NOP
 0f20                  MR    GP32   CR     -      -      MOV_CR ONLY32
 0f20                  MR    GP64   CR     -      -      MOV_CR ONLY64 DEF64
@@ -433,8 +442,10 @@ RF3.0fb8              RM    GP     GP     -      -      POPCNT
 0fba/7                MI    GP     IMM8   -      -      BTC_IMM IMM_8 LOCK
 0fbb                  MR    GP     GP     -      -      BTC LOCK
 RNP.0fbc              RM    GP     GP     -      -      BSF
+RF2.0fbc              RM    GP     GP     -      -      BSF
 RF3.0fbc              RM    GP     GP     -      -      TZCNT
 RNP.0fbd              RM    GP     GP     -      -      BSR
+RF2.0fbd              RM    GP     GP     -      -      BSR
 RF3.0fbd              RM    GP     GP     -      -      LZCNT
 0fbe                  RM    GP     GP8    -      -      MOVSX
 0fbf                  RM    GP     GP16   -      -      MOVSX
@@ -688,9 +699,9 @@ NP.0fae//0            M     MEMZ   -      -      -      FXSAVE MUSTMEM
 NP.0fae//1            M     MEMZ   -      -      -      FXRSTOR MUSTMEM
 NP.0fae//2            M     GP32   -      -      -      LDMXCSR MUSTMEM
 NP.0fae//3            M     GP32   -      -      -      STMXCSR MUSTMEM
-NP.0fae//e8           NP    -      -      -      -      LFENCE
-NP.0fae//f0           NP    -      -      -      -      MFENCE
-NP.0fae//f8           NP    -      -      -      -      SFENCE
+NP.0fae//e8+          NP    -      -      -      -      LFENCE
+NP.0fae//f0+          NP    -      -      -      -      MFENCE
+NP.0fae//f8+          NP    -      -      -      -      SFENCE
 NP.0fc2               RMI   XMM    XMM    IMM8   -      SSE_CMPPS IMM_8
 66.0fc2               RMI   XMM    XMM    IMM8   -      SSE_CMPPD IMM_8
 F3.0fc2               RMI   XMM    XMM    IMM8   -      SSE_CMPSS IMM_8
@@ -1203,7 +1214,7 @@ VEX.66.W0.L1.0f3a39   MRI   XMM    XMM    IMM8   -      VEXTRACTI128 IMM_8
 VEX.66.0f3a40         RVMI  XMM    XMM    XMM    IMM    VDPPS SIZE_8 IMM_8
 VEX.66.0f3a41         RVMI  XMM    XMM    XMM    IMM    VDPPD SIZE_8 IMM_8
 VEX.66.0f3a42         RVMI  XMM    XMM    XMM    IMM    VMPSADBW SIZE_8 IMM_8
-VEX.66.L0.0f3a44      RVMI  XMM    XMM    XMM    IMM    VPCLMULQDQ SIZE_8 IMM_8
+VEX.66.0f3a44         RVMI  XMM    XMM    XMM    IMM    VPCLMULQDQ SIZE_8 IMM_8
 VEX.66.W0.L1.0f3a46   RVMI  XMM    XMM    XMM    IMM8   VPERM2I128 IMM_8
 VEX.66.0f3a60         RMI   XMM    XMM    IMM    -      VPCMPESTRM SIZE_8 IMM_8
 VEX.66.0f3a61         RMI   XMM    XMM    IMM    -      VPCMPESTRI SIZE_8 IMM_8
