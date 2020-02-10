@@ -142,6 +142,7 @@ class EntryKind(Enum):
     TABLE_PREFIX = 5
     TABLE_VEX = 6
     TABLE_PREFIX_REP = 7
+    TABLE_ROOT = -1
 
 class TrieEntry(namedtuple("TrieEntry", "kind,items,payload")):
     __slots__ = ()
@@ -149,9 +150,10 @@ class TrieEntry(namedtuple("TrieEntry", "kind,items,payload")):
         EntryKind.TABLE256: 256,
         EntryKind.TABLE8: 8,
         EntryKind.TABLE72: 72,
-        EntryKind.TABLE_PREFIX: 8,
+        EntryKind.TABLE_PREFIX: 4,
         EntryKind.TABLE_VEX: 4,
         EntryKind.TABLE_PREFIX_REP: 4,
+        EntryKind.TABLE_ROOT: 8,
     }
     @classmethod
     def table(cls, kind):
@@ -184,7 +186,19 @@ def parse_opcode(opcode_string):
     if match is None:
         raise Exception("invalid opcode: '%s'" % opcode_string)
 
-    opcode = [(EntryKind.TABLE256, [x]) for x in unhexlify(match.group("opcode"))]
+    opcode = []
+    opcode_bytes = unhexlify(match.group("opcode"))
+
+    # root table, VEX prefix already consumes escape opcode bytes
+    if match.group("vex"):
+        idx = [b"", b"\x0f", b"\x0f\x38", b"\x0f\x3a"].index(opcode_bytes[:-1])
+        opcode.append((EntryKind.TABLE_ROOT, [4 | idx]))
+        opcode_bytes = opcode_bytes[-1:]
+    else:
+        opcode.append((EntryKind.TABLE_ROOT, [0]))
+
+    # normal opcode bytes
+    opcode += [(EntryKind.TABLE256, [x]) for x in opcode_bytes]
 
     opcext = match.group("modrm")
     if opcext:
@@ -208,8 +222,7 @@ def parse_opcode(opcode_string):
 
     if match.group("prefixes"):
         legacy = {"NP": 0, "66": 1, "F3": 2, "F2": 3}[match.group("legacy")]
-        entry = legacy | ((1 << 2) if match.group("vex") else 0)
-        opcode.append((EntryKind.TABLE_PREFIX, [entry]))
+        opcode.append((EntryKind.TABLE_PREFIX, [legacy]))
 
         if match.group("vexl") or match.group("rexw"):
             rexw = match.group("rexw")
@@ -230,7 +243,10 @@ def format_opcode(opcode):
     opcode_string = ""
     prefix = ""
     for kind, byte in opcode:
-        if kind == EntryKind.TABLE256:
+        if kind == EntryKind.TABLE_ROOT:
+            opcode_string += ["", "0f", "0f38", "0f3a"][byte & 3]
+            prefix += ["", "VEX."][byte >> 2]
+        elif kind == EntryKind.TABLE256:
             opcode_string += "{:02x}".format(byte)
         elif kind in (EntryKind.TABLE8, EntryKind.TABLE72):
             opcode_string += "/{:x}".format(byte)
@@ -251,7 +267,7 @@ class Table:
         self.data = OrderedDict()
         self.roots = ["root%d"%i for i in range(root_count)]
         for i in range(root_count):
-            self.data["root%d"%i] = TrieEntry.table(EntryKind.TABLE256)
+            self.data["root%d"%i] = TrieEntry.table(EntryKind.TABLE_ROOT)
         self.offsets = {}
         self.annotations = {}
 
@@ -273,7 +289,7 @@ class Table:
 
         # An opcode can occur once only.
         if table.items[opcode[-1][1]]:
-            raise Exception("opcode_collision for {}".format(name))
+            raise Exception("opcode collision for {}".format(name))
 
         table.items[opcode[-1][1]] = name
         self.data[name] = TrieEntry.instr(instr_encoding)

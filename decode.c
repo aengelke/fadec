@@ -39,6 +39,7 @@ typedef enum DecodeMode DecodeMode;
 #define ENTRY_TABLE_PREFIX 5
 #define ENTRY_TABLE_VEX 6
 #define ENTRY_TABLE_PREFIX_REP 7
+#define ENTRY_TABLE_ROOT 8
 #define ENTRY_MASK 7
 
 #define ENTRY_UNPACK(table,kind,entry) do { \
@@ -348,25 +349,24 @@ fd_decode(const uint8_t* buffer, size_t len_sz, int mode_int, uintptr_t address,
         return FD_ERR_PARTIAL;
     off += retval;
 
-    uint32_t kind = ENTRY_TABLE256;
+    uint32_t kind = ENTRY_TABLE_ROOT;
 
-    // "Legacy" walk through table and escape opcodes
-    if (LIKELY(opcode_escape < 0))
-        while (kind == ENTRY_TABLE256 && LIKELY(off < len))
-            ENTRY_UNPACK(table, kind, table[buffer[off++]]);
-    // VEX/EVEX compact escapes; the prefix precedes the single opcode byte
-    else if (opcode_escape == 1 || opcode_escape == 2 || opcode_escape == 3)
+    if (LIKELY(!(prefixes & PREFIX_VEX)))
     {
-        ENTRY_UNPACK(table, kind, table[0x0F]);
-        if (opcode_escape == 2)
-            ENTRY_UNPACK(table, kind, table[0x38]);
-        if (opcode_escape == 3)
-            ENTRY_UNPACK(table, kind, table[0x3A]);
-        if (LIKELY(off < len))
+        // "Legacy" walk through table and escape opcodes
+        ENTRY_UNPACK(table, kind, table[0]);
+        while (kind == ENTRY_TABLE256 && LIKELY(off < len))
             ENTRY_UNPACK(table, kind, table[buffer[off++]]);
     }
     else
-        return FD_ERR_UD;
+    {
+        // VEX/EVEX compact escapes; the prefix precedes the single opcode byte
+        if (opcode_escape < 0 || opcode_escape > 3)
+            return FD_ERR_UD;
+        ENTRY_UNPACK(table, kind, table[4 | opcode_escape]);
+        if (LIKELY(off < len))
+            ENTRY_UNPACK(table, kind, table[buffer[off++]]);
+    }
 
     // Then, walk through ModR/M-encoded opcode extensions.
     if ((kind == ENTRY_TABLE8 || kind == ENTRY_TABLE72) && LIKELY(off < len))
@@ -389,18 +389,12 @@ fd_decode(const uint8_t* buffer, size_t len_sz, int mode_int, uintptr_t address,
     // Handle mandatory prefixes (which behave like an opcode ext.).
     if (kind == ENTRY_TABLE_PREFIX)
     {
-        uint8_t index = mandatory_prefix;
-        index |= prefixes & PREFIX_VEX ? (1 << 2) : 0;
         // If a prefix is mandatory and used as opcode extension, it has no
         // further effect on the instruction. This is especially important
         // for the 0x66 prefix, which could otherwise override the operand
         // size of general purpose registers.
         prefixes &= ~(PREFIX_OPSZ | PREFIX_REPNZ | PREFIX_REP);
-        ENTRY_UNPACK(table, kind, table[index]);
-    }
-    else if (prefixes & PREFIX_VEX)
-    {
-        return FD_ERR_UD;
+        ENTRY_UNPACK(table, kind, table[mandatory_prefix]);
     }
 
     if (kind == ENTRY_TABLE_PREFIX_REP)
@@ -519,7 +513,6 @@ fd_decode(const uint8_t* buffer, size_t len_sz, int mode_int, uintptr_t address,
     {
         FdOp* operand = &instr->operands[DESC_IMM_IDX(desc)];
         operand->type = FD_OT_IMM;
-        operand->size = 1;
         instr->imm = 1;
     }
     else if (imm_control == 2)
@@ -527,7 +520,6 @@ fd_decode(const uint8_t* buffer, size_t len_sz, int mode_int, uintptr_t address,
         FdOp* operand = &instr->operands[DESC_IMM_IDX(desc)];
         operand->type = FD_OT_MEM;
         operand->reg = FD_REG_NONE;
-        operand->size = op_size;
         instr->idx_reg = FD_REG_NONE;
 
         if (UNLIKELY(off + addr_size > len))
