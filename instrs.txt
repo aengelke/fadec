@@ -842,6 +842,12 @@ NP.0f38f9             MR    GP     GP     -      -      MOVDIRI MUSTMEM
 66.0f38de             RM    XMM    XMM    -      -      AESDEC
 66.0f38df             RM    XMM    XMM    -      -      AESDECLAST
 66.0f3adf             RMI   XMM    XMM    IMM    -      AESKEYGENASSIST IMM_8
+VEX.66.L0.0f38db      RM    XMM    XMM    -      -      VAESIMC
+VEX.66.L0.0f38dc      RVM   XMM    XMM    XMM    -      VAESENC
+VEX.66.L0.0f38dd      RVM   XMM    XMM    XMM    -      VAESENCLAST
+VEX.66.L0.0f38de      RVM   XMM    XMM    XMM    -      VAESDEC
+VEX.66.L0.0f38df      RVM   XMM    XMM    XMM    -      VAESDECLAST
+VEX.66.L0.0f3adf      RMI   XMM    XMM    IMM    -      VAESKEYGENASSIST IMM_8
 #
 # AVX
 VEX.NP.0f10           RM    XMM    XMM    -      -      VMOVUPS
@@ -1236,6 +1242,9 @@ VEX.F2.L0.0f38f6      RVM   GP     GP     GP     -      MULX
 VEX.66.L0.0f38f7      RMV   GP     GP     GP     -      SHLX
 VEX.F2.L0.0f38f7      RMV   GP     GP     GP     -      SHRX
 VEX.F3.L0.0f38f7      RMV   GP     GP     GP     -      SARX
+# ADX
+66.0f38f6             RM    GP     GP     -      -      ADCX
+F3.0f38f6             RM    GP     GP     -      -      ADOX
 #
 # FPU
 d8//0                 M     FPU    -      -      -      FADD_F32 MUSTMEM
@@ -1382,6 +1391,9 @@ F3.0f1e//fb           NP    -      -      -      -      ENDBR32
 NP.0f38f6             MR    GP     GP     -      -      WRSS MUSTMEM
 F3.0fae//5            M     GP     -      -      -      INCSSP INSTR_WIDTH
 F3.0fae//6            M     GP     -      -      -      CLRSSBSY
+#
+# CLDEMOTE
+NP.0f1c/0             M     MEMZ   -      -      -      CLDEMOTE MUSTMEM
 
 # VMX
 66.0f3880             RM    GP     MEMZ   -      -      INVEPT DEF64 MUSTMEM
@@ -1410,6 +1422,16 @@ F3.0fae//4            M     GP     -      -      -      PTWRITE
 66.0f38cf             RM    XMM    XMM    -      -      GF2P8MULB
 66.0f3ace             RMI   XMM    XMM    IMM8   -      GF2P8AFFINEQB IMM_8
 66.0f3acf             RMI   XMM    XMM    IMM8   -      GF2P8AFFINEINVQB IMM_8
+
+# ENQCMD
+F2.0f38f8             RM    GP     MEMZ   -      -      ENQCMD
+F3.0f38f8             RM    GP     MEMZ   -      -      ENQCMDS
+
+# PCONFIG
+NP.0f01//c5           NP    -      -      -      -      PCONFIG
+
+# WBNOINVD
+RF2.0f09              NP    -      -      -      -      WBNOINVD
 
 NP.0f01//ee           NP    -      -      -      -      RDPKRU
 NP.0f01//ef           NP    -      -      -      -      WRPKRU
