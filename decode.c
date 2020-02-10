@@ -536,9 +536,24 @@ fd_decode(const uint8_t* buffer, size_t len_sz, int mode_int, uintptr_t address,
 #endif
         off += addr_size;
     }
+    else if (UNLIKELY(imm_control == 5))
+    {
+        FdOp* operand = &instr->operands[DESC_IMM_IDX(desc)];
+        operand->type = FD_OT_REG;
+
+        if (UNLIKELY(off + 1 > len))
+            return FD_ERR_PARTIAL;
+        uint8_t reg = (uint8_t) LOAD_LE_1(&buffer[off]);
+        off += 1;
+
+        if (mode == DECODE_32)
+            reg &= 0x7f;
+        operand->reg = reg >> 4;
+    }
     else if (imm_control != 0)
     {
         FdOp* operand = &instr->operands[DESC_IMM_IDX(desc)];
+        operand->type = FD_OT_IMM;
 
         uint8_t imm_size;
         if (DESC_IMM_BYTE(desc))
@@ -587,16 +602,6 @@ fd_decode(const uint8_t* buffer, size_t len_sz, int mode_int, uintptr_t address,
             if (mode == DECODE_64)
                 operand->size = 8;
 #endif
-        }
-
-        if (UNLIKELY(imm_control == 5))
-        {
-            operand->type = FD_OT_REG;
-            operand->reg = (instr->imm & 0xf0) >> 4;
-        }
-        else
-        {
-            operand->type = FD_OT_IMM;
         }
     }
 
