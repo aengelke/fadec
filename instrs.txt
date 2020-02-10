@@ -204,8 +204,8 @@ c7//f8                D     IMM    -      -      -      XBEGIN
 c8                    I     IMM32  -      -      -      ENTER DEF64 INSTR_WIDTH
 c9                    NP    -      -      -      -      LEAVE DEF64 INSTR_WIDTH
 # RETF immediate size handled in code
-ca                    I     IMM16  -      -      -      RETF DEF64 INSTR_WIDTH
-cb                    NP    -      -      -      -      RETF DEF64 INSTR_WIDTH
+ca                    I     IMM16  -      -      -      RETF INSTR_WIDTH
+cb                    NP    -      -      -      -      RETF INSTR_WIDTH
 cc                    NP    -      -      -      -      INT3
 cd                    I     IMM8   -      -      -      INT IMM_8
 ce                    NP    -      -      -      -      INTO ONLY32
@@ -425,7 +425,7 @@ NP.0f37               NP    -      -      -      -      GETSEC
 0fb5                  RM    GP     GP     -      -      LGS MUSTMEM
 0fb6                  RM    GP     GP8    -      -      MOVZX
 0fb7                  RM    GP     GP16   -      -      MOVZX
-F3.0fb8               RM    GP     GP     -      -      POPCNT
+RF3.0fb8              RM    GP     GP     -      -      POPCNT
 0fb9                  RM    GP     GP     -      -      UD1
 0fba/4                MI    GP     IMM8   -      -      BT_IMM IMM_8
 0fba/5                MI    GP     IMM8   -      -      BTS_IMM IMM_8 LOCK
@@ -1219,6 +1219,8 @@ VEX.NP.L0.0f38f7      RMV   GP     GP     GP     -      BEXTR
 # BMI2
 VEX.F2.L0.0f3af0      RMI   GP     GP     IMM8   -      RORX IMM_8
 VEX.NP.L0.0f38f5      RMV   GP     GP     GP     -      BZHI
+VEX.F2.L0.0f38f5      RVM   GP     GP     GP     -      PDEP
+VEX.F3.L0.0f38f5      RVM   GP     GP     GP     -      PEXT
 VEX.F2.L0.0f38f6      RVM   GP     GP     GP     -      MULX
 VEX.66.L0.0f38f7      RMV   GP     GP     GP     -      SHLX
 VEX.F2.L0.0f38f7      RMV   GP     GP     GP     -      SHRX
