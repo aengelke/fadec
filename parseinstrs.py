@@ -25,6 +25,7 @@ def bitstruct(name, fields):
     return __class
 
 InstrFlags = bitstruct("InstrFlags", [
+    "mnemonic:16",
     "modrm_idx:2",
     "modreg_idx:2",
     "vexreg_idx:2",
@@ -129,9 +130,10 @@ class InstrDesc(namedtuple("InstrDesc", "mnemonic,flags,encoding")):
         if "VSIB" in desc[6:]:        flags.vsib = 1
         if "MUSTMEM" in desc[6:]:     flags.reg_types |= 15 << 4*(flags.modrm_idx^3)
 
-        return cls(desc[5], frozenset(desc[6:]), flags._encode(6))
+        return cls(desc[5], frozenset(desc[6:]), flags)
     def encode(self, mnemonics_lut):
-        return struct.pack("<H", mnemonics_lut[self.mnemonic]) + self.encoding
+        self.encoding.mnemonic = mnemonics_lut[self.mnemonic]
+        return self.encoding._encode(8)
 
 class EntryKind(Enum):
     NONE = 0
