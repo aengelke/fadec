@@ -30,7 +30,10 @@ InstrFlags = bitstruct("InstrFlags", [
     "modreg_idx:2",
     "vexreg_idx:2",
     "zeroreg_idx:2",
-    "operand_sizes:8",
+    "op0_size:2",
+    "op1_size:2",
+    "op2_size:2",
+    "op3_size:2",
     "imm_idx:2",
     "imm_size:2",
     "imm_control:3",
@@ -41,7 +44,10 @@ InstrFlags = bitstruct("InstrFlags", [
     "gp_fixed_operand_size:3",
     "lock:1",
     "vsib:1",
-    "reg_types:16",
+    "op0_regty:4",
+    "op1_regty:4",
+    "op2_regty:4",
+    "op3_regty:4",
 ])
 
 ENCODINGS = {
@@ -106,19 +112,15 @@ class InstrDesc(namedtuple("InstrDesc", "mnemonic,flags,encoding")):
     @classmethod
     def parse(cls, desc):
         desc = desc.split()
+        flags = copy(ENCODINGS[desc[0]])
 
         fixed_opsz = set()
-        opsizes = 0
-        reg_types = 0
         for i, opkind in enumerate(desc[1:5]):
             enc_size, fixed_size, reg_type = OPKIND_LOOKUP[opkind]
             if enc_size == 1: fixed_opsz.add(fixed_size)
-            opsizes |= enc_size << 2 * i
-            reg_types |= reg_type << 4 * i
+            setattr(flags, "op%d_size"%i, enc_size)
+            setattr(flags, "op%d_regty"%i, reg_type)
 
-        flags = copy(ENCODINGS[desc[0]])
-        flags.operand_sizes = opsizes
-        flags.reg_types = reg_types
         if fixed_opsz: flags.gp_fixed_operand_size = next(iter(fixed_opsz))
 
         # Miscellaneous Flags
@@ -128,7 +130,7 @@ class InstrDesc(namedtuple("InstrDesc", "mnemonic,flags,encoding")):
         if "IMM_8" in desc[6:]:       flags.imm_byte = 1
         if "LOCK" in desc[6:]:        flags.lock = 1
         if "VSIB" in desc[6:]:        flags.vsib = 1
-        if "MUSTMEM" in desc[6:]:     flags.reg_types |= 15 << 4*(flags.modrm_idx^3)
+        if "MUSTMEM" in desc[6:]:     setattr(flags, "op%d_regty"%(flags.modrm_idx^3), 0xf)
 
         return cls(desc[5], frozenset(desc[6:]), flags)
     def encode(self, mnemonics_lut):
