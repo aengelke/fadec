@@ -309,6 +309,7 @@ struct InstrDesc
 #define DESC_IMM_CONTROL(desc) (((desc)->immediate >> 4) & 0x7)
 #define DESC_IMM_IDX(desc) (((desc)->immediate & 3) ^ 3)
 #define DESC_IMM_BYTE(desc) (((desc)->immediate >> 7) & 1)
+#define DESC_IMPLICIT_VAL(desc) (((desc)->immediate >> 2) & 1)
 
 int
 fd_decode(const uint8_t* buffer, size_t len_sz, int mode_int, uintptr_t address,
@@ -465,7 +466,7 @@ fd_decode(const uint8_t* buffer, size_t len_sz, int mode_int, uintptr_t address,
     {
         FdOp* operand = &instr->operands[DESC_IMPLICIT_IDX(desc)];
         operand->type = FD_OT_REG;
-        operand->reg = 0;
+        operand->reg = DESC_IMPLICIT_VAL(desc);
     }
 
     if (DESC_HAS_MODRM(desc))

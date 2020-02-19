@@ -224,20 +224,20 @@ d1/3                  M1    GP     IMM8   -      -      RCR_IMM
 d1/4                  M1    GP     IMM8   -      -      SHL_IMM
 d1/5                  M1    GP     IMM8   -      -      SHR_IMM
 d1/7                  M1    GP     IMM8   -      -      SAR_IMM
-d2/0                  M     GP     -      -      -      ROL_CL SIZE_8
-d2/1                  M     GP     -      -      -      ROR_CL SIZE_8
-d2/2                  M     GP     -      -      -      RCL_CL SIZE_8
-d2/3                  M     GP     -      -      -      RCR_CL SIZE_8
-d2/4                  M     GP     -      -      -      SHL_CL SIZE_8
-d2/5                  M     GP     -      -      -      SHR_CL SIZE_8
-d2/7                  M     GP     -      -      -      SAR_CL SIZE_8
-d3/0                  M     GP     -      -      -      ROL_CL
-d3/1                  M     GP     -      -      -      ROR_CL
-d3/2                  M     GP     -      -      -      RCL_CL
-d3/3                  M     GP     -      -      -      RCR_CL
-d3/4                  M     GP     -      -      -      SHL_CL
-d3/5                  M     GP     -      -      -      SHR_CL
-d3/7                  M     GP     -      -      -      SAR_CL
+d2/0                  MC    GP     GP8    -      -      ROL_CL SIZE_8
+d2/1                  MC    GP     GP8    -      -      ROR_CL SIZE_8
+d2/2                  MC    GP     GP8    -      -      RCL_CL SIZE_8
+d2/3                  MC    GP     GP8    -      -      RCR_CL SIZE_8
+d2/4                  MC    GP     GP8    -      -      SHL_CL SIZE_8
+d2/5                  MC    GP     GP8    -      -      SHR_CL SIZE_8
+d2/7                  MC    GP     GP8    -      -      SAR_CL SIZE_8
+d3/0                  MC    GP     GP8    -      -      ROL_CL
+d3/1                  MC    GP     GP8    -      -      ROR_CL
+d3/2                  MC    GP     GP8    -      -      RCL_CL
+d3/3                  MC    GP     GP8    -      -      RCR_CL
+d3/4                  MC    GP     GP8    -      -      SHL_CL
+d3/5                  MC    GP     GP8    -      -      SHR_CL
+d3/7                  MC    GP     GP8    -      -      SAR_CL
 d4                    I     IMM    -      -      -      AAM ONLY32 SIZE_8 IMM_8
 d5                    I     IMM    -      -      -      AAD ONLY32 SIZE_8 IMM_8
 #d6 unused
@@ -418,13 +418,13 @@ NP.0f37               NP    -      -      -      -      GETSEC
 0fa2                  NP    -      -      -      -      CPUID
 0fa3                  MR    GP     GP     -      -      BT
 0fa4                  MRI   GP     GP     IMM8   -      SHLD_IMM IMM_8
-0fa5                  MR    GP     GP     -      -      SHLD_CL
+0fa5                  MRC   GP     GP     GP8    -      SHLD_CL
 0fa8                  NP    -      -      -      -      PUSH_GS DEF64 INSTR_WIDTH
 0fa9                  NP    -      -      -      -      POP_GS DEF64 INSTR_WIDTH
 0faa                  NP    -      -      -      -      RSM
 0fab                  MR    GP     GP     -      -      BTS LOCK
 0fac                  MRI   GP     GP     IMM8   -      SHRD_IMM IMM_8
-0fad                  MR    GP     GP     -      -      SHRD_CL
+0fad                  MRC   GP     GP     GP8    -      SHRD_CL
 0faf                  RM    GP     GP     -      -      IMUL2
 0fb0                  MR    GP     GP     -      -      CMPXCHG SIZE_8 LOCK
 0fb1                  MR    GP     GP     -      -      CMPXCHG LOCK
