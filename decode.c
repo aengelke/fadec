@@ -559,7 +559,7 @@ fd_decode(const uint8_t* buffer, size_t len_sz, int mode_int, uintptr_t address,
         uint8_t imm_size;
         if (DESC_IMM_BYTE(desc))
             imm_size = 1;
-        else if (UNLIKELY(instr->type == FDI_RET_IMM || instr->type == FDI_RETF))
+        else if (UNLIKELY(instr->type == FDI_RET || instr->type == FDI_RETF))
             imm_size = 2;
         else if (UNLIKELY(instr->type == FDI_ENTER))
             imm_size = 3;
@@ -572,7 +572,7 @@ fd_decode(const uint8_t* buffer, size_t len_sz, int mode_int, uintptr_t address,
             imm_size = 2;
 #if defined(ARCH_X86_64)
         else if (mode == DECODE_64 && (prefixes & PREFIX_REXW) &&
-                 instr->type == FDI_MOVABS_IMM)
+                 instr->type == FDI_MOVABS)
             imm_size = 8;
 #endif
         else

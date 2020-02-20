@@ -2,64 +2,64 @@
 01                    MR    GP     GP     -      -      ADD LOCK
 02                    RM    GP     GP     -      -      ADD SIZE_8
 03                    RM    GP     GP     -      -      ADD
-04                    IA    GP     IMM    -      -      ADD_IMM SIZE_8 IMM_8
-05                    IA    GP     IMM    -      -      ADD_IMM
+04                    IA    GP     IMM    -      -      ADD SIZE_8 IMM_8
+05                    IA    GP     IMM    -      -      ADD
 06                    NP    -      -      -      -      PUSH_ES ONLY32
 07                    NP    -      -      -      -      POP_ES ONLY32
 08                    MR    GP     GP     -      -      OR SIZE_8 LOCK
 09                    MR    GP     GP     -      -      OR LOCK
 0a                    RM    GP     GP     -      -      OR SIZE_8
 0b                    RM    GP     GP     -      -      OR
-0c                    IA    GP     IMM    -      -      OR_IMM SIZE_8 IMM_8
-0d                    IA    GP     IMM    -      -      OR_IMM
+0c                    IA    GP     IMM    -      -      OR SIZE_8 IMM_8
+0d                    IA    GP     IMM    -      -      OR
 0e                    NP    -      -      -      -      PUSH_CS ONLY32
 #0f    escape opcode
 10                    MR    GP     GP     -      -      ADC SIZE_8 LOCK
 11                    MR    GP     GP     -      -      ADC LOCK
 12                    RM    GP     GP     -      -      ADC SIZE_8
 13                    RM    GP     GP     -      -      ADC
-14                    IA    GP     IMM    -      -      ADC_IMM SIZE_8 IMM_8
-15                    IA    GP     IMM    -      -      ADC_IMM
+14                    IA    GP     IMM    -      -      ADC SIZE_8 IMM_8
+15                    IA    GP     IMM    -      -      ADC
 16                    NP    -      -      -      -      PUSH_SS ONLY32
 17                    NP    -      -      -      -      POP_SS ONLY32
 18                    MR    GP     GP     -      -      SBB SIZE_8 LOCK
 19                    MR    GP     GP     -      -      SBB LOCK
 1a                    RM    GP     GP     -      -      SBB SIZE_8
 1b                    RM    GP     GP     -      -      SBB
-1c                    IA    GP     IMM    -      -      SBB_IMM SIZE_8 IMM_8
-1d                    IA    GP     IMM    -      -      SBB_IMM
+1c                    IA    GP     IMM    -      -      SBB SIZE_8 IMM_8
+1d                    IA    GP     IMM    -      -      SBB
 1e                    NP    -      -      -      -      PUSH_DS ONLY32
 1f                    NP    -      -      -      -      POP_DS ONLY32
 20                    MR    GP     GP     -      -      AND SIZE_8 LOCK
 21                    MR    GP     GP     -      -      AND LOCK
 22                    RM    GP     GP     -      -      AND SIZE_8
 23                    RM    GP     GP     -      -      AND
-24                    IA    GP     IMM    -      -      AND_IMM SIZE_8 IMM_8
-25                    IA    GP     IMM    -      -      AND_IMM
+24                    IA    GP     IMM    -      -      AND SIZE_8 IMM_8
+25                    IA    GP     IMM    -      -      AND
 #26    SEG=ES prefix
 27                    NP    -      -      -      -      DAA ONLY32
 28                    MR    GP     GP     -      -      SUB SIZE_8 LOCK
 29                    MR    GP     GP     -      -      SUB LOCK
 2a                    RM    GP     GP     -      -      SUB SIZE_8
 2b                    RM    GP     GP     -      -      SUB
-2c                    IA    GP     IMM    -      -      SUB_IMM SIZE_8 IMM_8
-2d                    IA    GP     IMM    -      -      SUB_IMM
+2c                    IA    GP     IMM    -      -      SUB SIZE_8 IMM_8
+2d                    IA    GP     IMM    -      -      SUB
 #2e    SEG=CS prefix
 2f                    NP    -      -      -      -      DAS ONLY32
 30                    MR    GP     GP     -      -      XOR SIZE_8 LOCK
 31                    MR    GP     GP     -      -      XOR LOCK
 32                    RM    GP     GP     -      -      XOR SIZE_8
 33                    RM    GP     GP     -      -      XOR
-34                    IA    GP     IMM    -      -      XOR_IMM SIZE_8 IMM_8
-35                    IA    GP     IMM    -      -      XOR_IMM
+34                    IA    GP     IMM    -      -      XOR SIZE_8 IMM_8
+35                    IA    GP     IMM    -      -      XOR
 #36    SEG=SS prefix
 37                    NP    -      -      -      -      AAA ONLY32
 38                    MR    GP     GP     -      -      CMP SIZE_8
 39                    MR    GP     GP     -      -      CMP
 3a                    RM    GP     GP     -      -      CMP SIZE_8
 3b                    RM    GP     GP     -      -      CMP
-3c                    IA    GP     IMM    -      -      CMP_IMM SIZE_8 IMM_8
-3d                    IA    GP     IMM    -      -      CMP_IMM
+3c                    IA    GP     IMM    -      -      CMP SIZE_8 IMM_8
+3d                    IA    GP     IMM    -      -      CMP
 #3e    SEG=DS prefix
 3f                    NP    -      -      -      -      AAS ONLY32 INSTR_WIDTH
 40+                   O     GP     -      -      -      INC ONLY32
@@ -76,9 +76,9 @@
 #66    operand size prefix
 #67    address size prefix
 68                    I     IMM    -      -      -      PUSH DEF64
-69                    RMI   GP     GP     IMM    -      IMUL3
+69                    RMI   GP     GP     IMM    -      IMUL
 6a                    I     IMM    -      -      -      PUSH DEF64 IMM_8
-6b                    RMI   GP     GP     IMM    -      IMUL3 IMM_8
+6b                    RMI   GP     GP     IMM    -      IMUL IMM_8
 6c                    NP    -      -      -      -      INS SIZE_8 INSTR_WIDTH
 6d                    NP    -      -      -      -      INS INSTR_WIDTH
 6e                    NP    -      -      -      -      OUTS SIZE_8 INSTR_WIDTH
@@ -99,38 +99,38 @@
 7d                    D     IMM    -      -      -      JGE DEF64 IMM_8
 7e                    D     IMM    -      -      -      JLE DEF64 IMM_8
 7f                    D     IMM    -      -      -      JG DEF64 IMM_8
-80/0                  MI    GP     IMM    -      -      ADD_IMM IMM_8 SIZE_8 LOCK
-80/1                  MI    GP     IMM    -      -      OR_IMM IMM_8 SIZE_8 LOCK
-80/2                  MI    GP     IMM    -      -      ADC_IMM IMM_8 SIZE_8 LOCK
-80/3                  MI    GP     IMM    -      -      SBB_IMM IMM_8 SIZE_8 LOCK
-80/4                  MI    GP     IMM    -      -      AND_IMM IMM_8 SIZE_8 LOCK
-80/5                  MI    GP     IMM    -      -      SUB_IMM IMM_8 SIZE_8 LOCK
-80/6                  MI    GP     IMM    -      -      XOR_IMM IMM_8 SIZE_8 LOCK
-80/7                  MI    GP     IMM    -      -      CMP_IMM IMM_8 SIZE_8
-81/0                  MI    GP     IMM    -      -      ADD_IMM LOCK
-81/1                  MI    GP     IMM    -      -      OR_IMM LOCK
-81/2                  MI    GP     IMM    -      -      ADC_IMM LOCK
-81/3                  MI    GP     IMM    -      -      SBB_IMM LOCK
-81/4                  MI    GP     IMM    -      -      AND_IMM LOCK
-81/5                  MI    GP     IMM    -      -      SUB_IMM LOCK
-81/6                  MI    GP     IMM    -      -      XOR_IMM LOCK
-81/7                  MI    GP     IMM    -      -      CMP_IMM
-82/0                  MI    GP     IMM    -      -      ADD_IMM ONLY32 IMM_8 SIZE_8 LOCK
-82/1                  MI    GP     IMM    -      -      OR_IMM ONLY32 IMM_8 SIZE_8 LOCK
-82/2                  MI    GP     IMM    -      -      ADC_IMM ONLY32 IMM_8 SIZE_8 LOCK
-82/3                  MI    GP     IMM    -      -      SBB_IMM ONLY32 IMM_8 SIZE_8 LOCK
-82/4                  MI    GP     IMM    -      -      AND_IMM ONLY32 IMM_8 SIZE_8 LOCK
-82/5                  MI    GP     IMM    -      -      SUB_IMM ONLY32 IMM_8 SIZE_8 LOCK
-82/6                  MI    GP     IMM    -      -      XOR_IMM ONLY32 IMM_8 SIZE_8 LOCK
-82/7                  MI    GP     IMM    -      -      CMP_IMM ONLY32 IMM_8 SIZE_8
-83/0                  MI    GP     IMM    -      -      ADD_IMM IMM_8 LOCK
-83/1                  MI    GP     IMM    -      -      OR_IMM IMM_8 LOCK
-83/2                  MI    GP     IMM    -      -      ADC_IMM IMM_8 LOCK
-83/3                  MI    GP     IMM    -      -      SBB_IMM IMM_8 LOCK
-83/4                  MI    GP     IMM    -      -      AND_IMM IMM_8 LOCK
-83/5                  MI    GP     IMM    -      -      SUB_IMM IMM_8 LOCK
-83/6                  MI    GP     IMM    -      -      XOR_IMM IMM_8 LOCK
-83/7                  MI    GP     IMM    -      -      CMP_IMM IMM_8
+80/0                  MI    GP     IMM    -      -      ADD IMM_8 SIZE_8 LOCK
+80/1                  MI    GP     IMM    -      -      OR IMM_8 SIZE_8 LOCK
+80/2                  MI    GP     IMM    -      -      ADC IMM_8 SIZE_8 LOCK
+80/3                  MI    GP     IMM    -      -      SBB IMM_8 SIZE_8 LOCK
+80/4                  MI    GP     IMM    -      -      AND IMM_8 SIZE_8 LOCK
+80/5                  MI    GP     IMM    -      -      SUB IMM_8 SIZE_8 LOCK
+80/6                  MI    GP     IMM    -      -      XOR IMM_8 SIZE_8 LOCK
+80/7                  MI    GP     IMM    -      -      CMP IMM_8 SIZE_8
+81/0                  MI    GP     IMM    -      -      ADD LOCK
+81/1                  MI    GP     IMM    -      -      OR LOCK
+81/2                  MI    GP     IMM    -      -      ADC LOCK
+81/3                  MI    GP     IMM    -      -      SBB LOCK
+81/4                  MI    GP     IMM    -      -      AND LOCK
+81/5                  MI    GP     IMM    -      -      SUB LOCK
+81/6                  MI    GP     IMM    -      -      XOR LOCK
+81/7                  MI    GP     IMM    -      -      CMP
+82/0                  MI    GP     IMM    -      -      ADD ONLY32 IMM_8 SIZE_8 LOCK
+82/1                  MI    GP     IMM    -      -      OR ONLY32 IMM_8 SIZE_8 LOCK
+82/2                  MI    GP     IMM    -      -      ADC ONLY32 IMM_8 SIZE_8 LOCK
+82/3                  MI    GP     IMM    -      -      SBB ONLY32 IMM_8 SIZE_8 LOCK
+82/4                  MI    GP     IMM    -      -      AND ONLY32 IMM_8 SIZE_8 LOCK
+82/5                  MI    GP     IMM    -      -      SUB ONLY32 IMM_8 SIZE_8 LOCK
+82/6                  MI    GP     IMM    -      -      XOR ONLY32 IMM_8 SIZE_8 LOCK
+82/7                  MI    GP     IMM    -      -      CMP ONLY32 IMM_8 SIZE_8
+83/0                  MI    GP     IMM    -      -      ADD IMM_8 LOCK
+83/1                  MI    GP     IMM    -      -      OR IMM_8 LOCK
+83/2                  MI    GP     IMM    -      -      ADC IMM_8 LOCK
+83/3                  MI    GP     IMM    -      -      SBB IMM_8 LOCK
+83/4                  MI    GP     IMM    -      -      AND IMM_8 LOCK
+83/5                  MI    GP     IMM    -      -      SUB IMM_8 LOCK
+83/6                  MI    GP     IMM    -      -      XOR IMM_8 LOCK
+83/7                  MI    GP     IMM    -      -      CMP IMM_8
 84                    MR    GP     GP     -      -      TEST SIZE_8
 85                    MR    GP     GP     -      -      TEST
 86                    MR    GP     GP     -      -      XCHG SIZE_8 LOCK
@@ -167,38 +167,38 @@ a4                    NP    -      -      -      -      MOVS SIZE_8 INSTR_WIDTH
 a5                    NP    -      -      -      -      MOVS INSTR_WIDTH
 a6                    NP    -      -      -      -      CMPS SIZE_8 INSTR_WIDTH
 a7                    NP    -      -      -      -      CMPS INSTR_WIDTH
-a8                    IA    GP     IMM    -      -      TEST_IMM SIZE_8 IMM_8
-a9                    IA    GP     IMM    -      -      TEST_IMM
+a8                    IA    GP     IMM    -      -      TEST SIZE_8 IMM_8
+a9                    IA    GP     IMM    -      -      TEST
 aa                    NP    -      -      -      -      STOS SIZE_8 INSTR_WIDTH
 ab                    NP    -      -      -      -      STOS INSTR_WIDTH
 ac                    NP    -      -      -      -      LODS SIZE_8 INSTR_WIDTH
 ad                    NP    -      -      -      -      LODS INSTR_WIDTH
 ae                    NP    -      -      -      -      SCAS SIZE_8 INSTR_WIDTH
 af                    NP    -      -      -      -      SCAS INSTR_WIDTH
-b0+                   OI    GP     IMM    -      -      MOVABS_IMM SIZE_8 IMM_8
-b8+                   OI    GP     IMM    -      -      MOVABS_IMM
-c0/0                  MI    GP     IMM    -      -      ROL_IMM SIZE_8 IMM_8
-c0/1                  MI    GP     IMM    -      -      ROR_IMM SIZE_8 IMM_8
-c0/2                  MI    GP     IMM    -      -      RCL_IMM SIZE_8 IMM_8
-c0/3                  MI    GP     IMM    -      -      RCR_IMM SIZE_8 IMM_8
-c0/4                  MI    GP     IMM    -      -      SHL_IMM SIZE_8 IMM_8
-c0/5                  MI    GP     IMM    -      -      SHR_IMM SIZE_8 IMM_8
-c0/7                  MI    GP     IMM    -      -      SAR_IMM SIZE_8 IMM_8
-c1/0                  MI    GP     IMM    -      -      ROL_IMM IMM_8
-c1/1                  MI    GP     IMM    -      -      ROR_IMM IMM_8
-c1/2                  MI    GP     IMM    -      -      RCL_IMM IMM_8
-c1/3                  MI    GP     IMM    -      -      RCR_IMM IMM_8
-c1/4                  MI    GP     IMM    -      -      SHL_IMM IMM_8
-c1/5                  MI    GP     IMM    -      -      SHR_IMM IMM_8
-c1/7                  MI    GP     IMM    -      -      SAR_IMM IMM_8
-# RET_IMM immediate size handled in code
-c2                    I     IMM16  -      -      -      RET_IMM DEF64 INSTR_WIDTH
+b0+                   OI    GP     IMM    -      -      MOVABS SIZE_8 IMM_8
+b8+                   OI    GP     IMM    -      -      MOVABS
+c0/0                  MI    GP     IMM    -      -      ROL SIZE_8 IMM_8
+c0/1                  MI    GP     IMM    -      -      ROR SIZE_8 IMM_8
+c0/2                  MI    GP     IMM    -      -      RCL SIZE_8 IMM_8
+c0/3                  MI    GP     IMM    -      -      RCR SIZE_8 IMM_8
+c0/4                  MI    GP     IMM    -      -      SHL SIZE_8 IMM_8
+c0/5                  MI    GP     IMM    -      -      SHR SIZE_8 IMM_8
+c0/7                  MI    GP     IMM    -      -      SAR SIZE_8 IMM_8
+c1/0                  MI    GP     IMM    -      -      ROL IMM_8
+c1/1                  MI    GP     IMM    -      -      ROR IMM_8
+c1/2                  MI    GP     IMM    -      -      RCL IMM_8
+c1/3                  MI    GP     IMM    -      -      RCR IMM_8
+c1/4                  MI    GP     IMM    -      -      SHL IMM_8
+c1/5                  MI    GP     IMM    -      -      SHR IMM_8
+c1/7                  MI    GP     IMM    -      -      SAR IMM_8
+# RET immediate size handled in code
+c2                    I     IMM16  -      -      -      RET DEF64 INSTR_WIDTH
 c3                    NP    -      -      -      -      RET DEF64 INSTR_WIDTH
 c4                    RM    GP     MEMZ   -      -      LES ONLY32 MUSTMEM
 c5                    RM    GP     MEMZ   -      -      LDS ONLY32 MUSTMEM
-c6//0                 MI    GP     IMM    -      -      MOV_IMM SIZE_8 IMM_8
+c6//0                 MI    GP     IMM    -      -      MOV SIZE_8 IMM_8
 c6//f8                I     IMM    -      -      -      XABORT IMM_8
-c7//0                 MI    GP     IMM    -      -      MOV_IMM
+c7//0                 MI    GP     IMM    -      -      MOV
 c7//f8                D     IMM    -      -      -      XBEGIN
 # ENTER immediate handled in code
 c8                    I     IMM32  -      -      -      ENTER DEF64 INSTR_WIDTH
@@ -210,34 +210,34 @@ cc                    NP    -      -      -      -      INT3
 cd                    I     IMM8   -      -      -      INT IMM_8
 ce                    NP    -      -      -      -      INTO ONLY32
 cf                    NP    -      -      -      -      IRET INSTR_WIDTH
-d0/0                  M1    GP     IMM8   -      -      ROL_IMM SIZE_8
-d0/1                  M1    GP     IMM8   -      -      ROR_IMM SIZE_8
-d0/2                  M1    GP     IMM8   -      -      RCL_IMM SIZE_8
-d0/3                  M1    GP     IMM8   -      -      RCR_IMM SIZE_8
-d0/4                  M1    GP     IMM8   -      -      SHL_IMM SIZE_8
-d0/5                  M1    GP     IMM8   -      -      SHR_IMM SIZE_8
-d0/7                  M1    GP     IMM8   -      -      SAR_IMM SIZE_8
-d1/0                  M1    GP     IMM8   -      -      ROL_IMM
-d1/1                  M1    GP     IMM8   -      -      ROR_IMM
-d1/2                  M1    GP     IMM8   -      -      RCL_IMM
-d1/3                  M1    GP     IMM8   -      -      RCR_IMM
-d1/4                  M1    GP     IMM8   -      -      SHL_IMM
-d1/5                  M1    GP     IMM8   -      -      SHR_IMM
-d1/7                  M1    GP     IMM8   -      -      SAR_IMM
-d2/0                  MC    GP     GP8    -      -      ROL_CL SIZE_8
-d2/1                  MC    GP     GP8    -      -      ROR_CL SIZE_8
-d2/2                  MC    GP     GP8    -      -      RCL_CL SIZE_8
-d2/3                  MC    GP     GP8    -      -      RCR_CL SIZE_8
-d2/4                  MC    GP     GP8    -      -      SHL_CL SIZE_8
-d2/5                  MC    GP     GP8    -      -      SHR_CL SIZE_8
-d2/7                  MC    GP     GP8    -      -      SAR_CL SIZE_8
-d3/0                  MC    GP     GP8    -      -      ROL_CL
-d3/1                  MC    GP     GP8    -      -      ROR_CL
-d3/2                  MC    GP     GP8    -      -      RCL_CL
-d3/3                  MC    GP     GP8    -      -      RCR_CL
-d3/4                  MC    GP     GP8    -      -      SHL_CL
-d3/5                  MC    GP     GP8    -      -      SHR_CL
-d3/7                  MC    GP     GP8    -      -      SAR_CL
+d0/0                  M1    GP     IMM8   -      -      ROL SIZE_8
+d0/1                  M1    GP     IMM8   -      -      ROR SIZE_8
+d0/2                  M1    GP     IMM8   -      -      RCL SIZE_8
+d0/3                  M1    GP     IMM8   -      -      RCR SIZE_8
+d0/4                  M1    GP     IMM8   -      -      SHL SIZE_8
+d0/5                  M1    GP     IMM8   -      -      SHR SIZE_8
+d0/7                  M1    GP     IMM8   -      -      SAR SIZE_8
+d1/0                  M1    GP     IMM8   -      -      ROL
+d1/1                  M1    GP     IMM8   -      -      ROR
+d1/2                  M1    GP     IMM8   -      -      RCL
+d1/3                  M1    GP     IMM8   -      -      RCR
+d1/4                  M1    GP     IMM8   -      -      SHL
+d1/5                  M1    GP     IMM8   -      -      SHR
+d1/7                  M1    GP     IMM8   -      -      SAR
+d2/0                  MC    GP     GP8    -      -      ROL SIZE_8
+d2/1                  MC    GP     GP8    -      -      ROR SIZE_8
+d2/2                  MC    GP     GP8    -      -      RCL SIZE_8
+d2/3                  MC    GP     GP8    -      -      RCR SIZE_8
+d2/4                  MC    GP     GP8    -      -      SHL SIZE_8
+d2/5                  MC    GP     GP8    -      -      SHR SIZE_8
+d2/7                  MC    GP     GP8    -      -      SAR SIZE_8
+d3/0                  MC    GP     GP8    -      -      ROL
+d3/1                  MC    GP     GP8    -      -      ROR
+d3/2                  MC    GP     GP8    -      -      RCL
+d3/3                  MC    GP     GP8    -      -      RCR
+d3/4                  MC    GP     GP8    -      -      SHL
+d3/5                  MC    GP     GP8    -      -      SHR
+d3/7                  MC    GP     GP8    -      -      SAR
 d4                    I     IMM    -      -      -      AAM ONLY32 SIZE_8 IMM_8
 d5                    I     IMM    -      -      -      AAD ONLY32 SIZE_8 IMM_8
 #d6 unused
@@ -247,10 +247,10 @@ e0                    D     IMM    -      -      -      LOOPNZ DEF64 IMM_8
 e1                    D     IMM    -      -      -      LOOPZ DEF64 IMM_8
 e2                    D     IMM    -      -      -      LOOP DEF64 IMM_8
 e3                    D     IMM    -      -      -      JCXZ DEF64 IMM_8
-e4                    IA    GP     IMM    -      -      IN_IMM SIZE_8 IMM_8
-e5                    IA    GP     IMM    -      -      IN_IMM IMM_8
-e6                    IA    GP     IMM    -      -      OUT_IMM SIZE_8 IMM_8
-e7                    IA    GP     IMM    -      -      OUT_IMM IMM_8
+e4                    IA    GP     IMM    -      -      IN SIZE_8 IMM_8
+e5                    IA    GP     IMM    -      -      IN IMM_8
+e6                    IA    GP     IMM    -      -      OUT SIZE_8 IMM_8
+e7                    IA    GP     IMM    -      -      OUT IMM_8
 e8                    D     IMM    -      -      -      CALL DEF64
 e9                    D     IMM    -      -      -      JMP DEF64
 #ea JMPf TODO, ONLY32
@@ -265,14 +265,14 @@ f1                    NP    -      -      -      -      INT1
 #f3 REP/REPZ prefix
 f4                    NP    -      -      -      -      HLT
 f5                    NP    -      -      -      -      CMC
-f6/0                  MI    GP     IMM    -      -      TEST_IMM SIZE_8 IMM_8
+f6/0                  MI    GP     IMM    -      -      TEST SIZE_8 IMM_8
 f6/2                  M     GP     -      -      -      NOT SIZE_8 LOCK
 f6/3                  M     GP     -      -      -      NEG SIZE_8 LOCK
 f6/4                  M     GP     -      -      -      MUL SIZE_8
 f6/5                  M     GP     -      -      -      IMUL SIZE_8
 f6/6                  M     GP     -      -      -      DIV SIZE_8
 f6/7                  M     GP     -      -      -      IDIV SIZE_8
-f7/0                  MI    GP     IMM    -      -      TEST_IMM
+f7/0                  MI    GP     IMM    -      -      TEST
 f7/2                  M     GP     -      -      -      NOT LOCK
 f7/3                  M     GP     -      -      -      NEG LOCK
 f7/4                  M     GP     -      -      -      MUL
@@ -289,9 +289,9 @@ fe/0                  M     GP     -      -      -      INC SIZE_8 LOCK
 fe/1                  M     GP     -      -      -      DEC SIZE_8 LOCK
 ff/0                  M     GP     -      -      -      INC LOCK
 ff/1                  M     GP     -      -      -      DEC LOCK
-ff/2                  M     GP     -      -      -      CALL_IND DEF64
+ff/2                  M     GP     -      -      -      CALL DEF64
 ff/3                  M     MEMZ   -      -      -      CALLF MUSTMEM
-ff/4                  M     GP     -      -      -      JMP_IND DEF64
+ff/4                  M     GP     -      -      -      JMP DEF64
 ff/5                  M     MEMZ   -      -      -      JMPF MUSTMEM
 ff/6                  M     GP     -      -      -      PUSH DEF64
 0f00/0                M     GP16   -      -      -      SLDT
@@ -337,9 +337,9 @@ RF3.0f09              NP    -      -      -      -      WBINVD
 0f0d/6                M     GP8    -      -      -      RESERVED_PREFETCH MUSTMEM
 0f0d/7                M     GP8    -      -      -      RESERVED_PREFETCH MUSTMEM
 0f18//0               M     GP8    -      -      -      PREFETCHNTA MUSTMEM
-0f18//1               M     GP8    -      -      -      PREFETCH0 MUSTMEM
-0f18//2               M     GP8    -      -      -      PREFETCH1 MUSTMEM
-0f18//3               M     GP8    -      -      -      PREFETCH2 MUSTMEM
+0f18//1               M     GP8    -      -      -      PREFETCHT0 MUSTMEM
+0f18//2               M     GP8    -      -      -      PREFETCHT1 MUSTMEM
+0f18//3               M     GP8    -      -      -      PREFETCHT2 MUSTMEM
 0f18//4               M     GP     -      -      -      RESERVED_NOP
 0f18//5               M     GP     -      -      -      RESERVED_NOP
 0f18//6               M     GP     -      -      -      RESERVED_NOP
@@ -417,15 +417,15 @@ NP.0f37               NP    -      -      -      -      GETSEC
 0fa1                  NP    -      -      -      -      POP_FS DEF64 INSTR_WIDTH
 0fa2                  NP    -      -      -      -      CPUID
 0fa3                  MR    GP     GP     -      -      BT
-0fa4                  MRI   GP     GP     IMM8   -      SHLD_IMM IMM_8
-0fa5                  MRC   GP     GP     GP8    -      SHLD_CL
+0fa4                  MRI   GP     GP     IMM8   -      SHLD IMM_8
+0fa5                  MRC   GP     GP     GP8    -      SHLD
 0fa8                  NP    -      -      -      -      PUSH_GS DEF64 INSTR_WIDTH
 0fa9                  NP    -      -      -      -      POP_GS DEF64 INSTR_WIDTH
 0faa                  NP    -      -      -      -      RSM
 0fab                  MR    GP     GP     -      -      BTS LOCK
-0fac                  MRI   GP     GP     IMM8   -      SHRD_IMM IMM_8
-0fad                  MRC   GP     GP     GP8    -      SHRD_CL
-0faf                  RM    GP     GP     -      -      IMUL2
+0fac                  MRI   GP     GP     IMM8   -      SHRD IMM_8
+0fad                  MRC   GP     GP     GP8    -      SHRD
+0faf                  RM    GP     GP     -      -      IMUL
 0fb0                  MR    GP     GP     -      -      CMPXCHG SIZE_8 LOCK
 0fb1                  MR    GP     GP     -      -      CMPXCHG LOCK
 0fb2                  RM    GP     GP     -      -      LSS MUSTMEM
@@ -436,10 +436,10 @@ NP.0f37               NP    -      -      -      -      GETSEC
 0fb7                  RM    GP     GP16   -      -      MOVZX
 RF3.0fb8              RM    GP     GP     -      -      POPCNT
 0fb9                  RM    GP     GP     -      -      UD1
-0fba/4                MI    GP     IMM8   -      -      BT_IMM IMM_8
-0fba/5                MI    GP     IMM8   -      -      BTS_IMM IMM_8 LOCK
-0fba/6                MI    GP     IMM8   -      -      BTR_IMM IMM_8 LOCK
-0fba/7                MI    GP     IMM8   -      -      BTC_IMM IMM_8 LOCK
+0fba/4                MI    GP     IMM8   -      -      BT IMM_8
+0fba/5                MI    GP     IMM8   -      -      BTS IMM_8 LOCK
+0fba/6                MI    GP     IMM8   -      -      BTR IMM_8 LOCK
+0fba/7                MI    GP     IMM8   -      -      BTC IMM_8 LOCK
 0fbb                  MR    GP     GP     -      -      BTC LOCK
 RNP.0fbc              RM    GP     GP     -      -      BSF
 RF2.0fbc              RM    GP     GP     -      -      BSF
@@ -480,9 +480,9 @@ NP.0f68               RM    MMX    MMX    -      -      MMX_PUNPCKHBW
 NP.0f69               RM    MMX    MMX    -      -      MMX_PUNPCKHWD
 NP.0f6a               RM    MMX    MMX    -      -      MMX_PUNPCKHDQ
 NP.0f6b               RM    MMX    MMX    -      -      MMX_PACKSSDW
-NP.W0.0f6e            RM    MMX    GP     -      -      MMX_MOVD_G2X
-NP.W1.0f6e            RM    MMX    GP     -      -      MMX_MOVQ_G2X
-NP.0f6f               RM    MMX    MMX    -      -      MMX_MOVQ_X2X
+NP.W0.0f6e            RM    MMX    GP     -      -      MMX_MOVD
+NP.W1.0f6e            RM    MMX    GP     -      -      MMX_MOVQ
+NP.0f6f               RM    MMX    MMX    -      -      MMX_MOVQ
 NP.0f71/2             MI    MMX    IMM8   -      -      MMX_PSRLW IMM_8 NOMEM
 NP.0f71/4             MI    MMX    IMM8   -      -      MMX_PSRAW IMM_8 NOMEM
 NP.0f71/6             MI    MMX    IMM8   -      -      MMX_PSLLW IMM_8 NOMEM
@@ -495,9 +495,9 @@ NP.0f74               RM    MMX    MMX    -      -      MMX_PCMPEQB
 NP.0f75               RM    MMX    MMX    -      -      MMX_PCMPEQW
 NP.0f76               RM    MMX    MMX    -      -      MMX_PCMPEQD
 NP.0f77               NP    -      -      -      -      MMX_EMMS
-NP.W0.0f7e            MR    GP     MMX    -      -      MMX_MOVD_X2G
-NP.W1.0f7e            MR    GP     MMX    -      -      MMX_MOVQ_X2G
-NP.0f7f               MR    MMX    MMX    -      -      MMX_MOVQ_X2X
+NP.W0.0f7e            MR    GP     MMX    -      -      MMX_MOVD
+NP.W1.0f7e            MR    GP     MMX    -      -      MMX_MOVQ
+NP.0f7f               MR    MMX    MMX    -      -      MMX_MOVQ
 NP.0fc4               RMI   MMX    GP     IMM8   -      MMX_PINSRW IMM_8
 NP.0fc5               RMI   GP     MMX    IMM8   -      MMX_PEXTRW IMM_8 NOMEM
 NP.0fd1               RM    MMX    MMX    -      -      MMX_PSRLW
@@ -578,10 +578,10 @@ F3.0f12               RM    XMM    XMM    -      -      SSE_MOVSLDUP
 F2.0f12               RM    XMM    XMM64  -      -      SSE_MOVDDUP
 NP.0f13               MR    XMM64  XMM    -      -      SSE_MOVLPS MUSTMEM
 66.0f13               MR    XMM64  XMM    -      -      SSE_MOVLPD MUSTMEM
-NP.0f14               RM    XMM    XMM    -      -      SSE_UNPACKLPS
-66.0f14               RM    XMM    XMM    -      -      SSE_UNPACKLPD
-NP.0f15               RM    XMM    XMM    -      -      SSE_UNPACKHPS
-66.0f15               RM    XMM    XMM    -      -      SSE_UNPACKHPD
+NP.0f14               RM    XMM    XMM    -      -      SSE_UNPCKLPS
+66.0f14               RM    XMM    XMM    -      -      SSE_UNPCKLPD
+NP.0f15               RM    XMM    XMM    -      -      SSE_UNPCKHPS
+66.0f15               RM    XMM    XMM    -      -      SSE_UNPCKHPD
 NP.0f16               RM    XMM    XMM64  -      -      SSE_MOVHPS
 66.0f16               RM    XMM    XMM64  -      -      SSE_MOVHPD
 F3.0f16               RM    XMM    XMM    -      -      SSE_MOVSHDUP
@@ -666,8 +666,8 @@ F2.0f5f               RM    XMM64  XMM64  -      -      SSE_MAXSD
 66.0f6b               RM    XMM    XMM    -      -      SSE_PACKSSDW
 66.0f6c               RM    XMM    XMM    -      -      SSE_PUNPCKLQDQ
 66.0f6d               RM    XMM    XMM    -      -      SSE_PUNPCKHQDQ
-66.W0.0f6e            RM    XMM32  GP     -      -      SSE_MOVD_G2X
-66.W1.0f6e            RM    XMM64  GP     -      -      SSE_MOVQ_G2X
+66.W0.0f6e            RM    XMM32  GP     -      -      SSE_MOVD
+66.W1.0f6e            RM    XMM64  GP     -      -      SSE_MOVQ
 66.0f6f               RM    XMM    XMM    -      -      SSE_MOVDQA
 F3.0f6f               RM    XMM    XMM    -      -      SSE_MOVDQU
 66.0f70               RMI   XMM    XMM    IMM8   -      SSE_PSHUFD IMM_8
@@ -690,9 +690,9 @@ F2.0f70               RMI   XMM    XMM    IMM8   -      SSE_PSHUFLW IMM_8
 F2.0f7c               RM    XMM    XMM    -      -      SSE_HADDPS
 66.0f7d               RM    XMM    XMM    -      -      SSE_HSUBPD
 F2.0f7d               RM    XMM    XMM    -      -      SSE_HSUBPS
-66.W0.0f7e            MR    GP     XMM32  -      -      SSE_MOVD_X2G
-66.W1.0f7e            MR    GP     XMM64  -      -      SSE_MOVQ_X2G
-F3.0f7e               RM    XMM64  XMM64  -      -      SSE_MOVQ_X2X
+66.W0.0f7e            MR    GP     XMM32  -      -      SSE_MOVD
+66.W1.0f7e            MR    GP     XMM64  -      -      SSE_MOVQ
+F3.0f7e               RM    XMM64  XMM64  -      -      SSE_MOVQ
 66.0f7f               MR    XMM    XMM    -      -      SSE_MOVDQA
 F3.0f7f               MR    XMM    XMM    -      -      SSE_MOVDQU
 NP.0fae//0            M     MEMZ   -      -      -      FXSAVE MUSTMEM
@@ -717,7 +717,7 @@ F2.0fd0               RM    XMM    XMM    -      -      SSE_ADDSUBPS
 66.0fd3               RM    XMM    XMM    -      -      SSE_PSRLQ
 66.0fd4               RM    XMM    XMM    -      -      SSE_PADDQ
 66.0fd5               RM    XMM    XMM    -      -      SSE_PMULLW
-66.0fd6               MR    XMM64  XMM64  -      -      SSE_MOVQ_X2X
+66.0fd6               MR    XMM64  XMM64  -      -      SSE_MOVQ
 66.0fd7               RM    GP     XMM    -      -      SSE_PMOVMSKB DEF64 NOMEM
 66.0fd8               RM    XMM    XMM    -      -      SSE_PSUBUSB
 66.0fd9               RM    XMM    XMM    -      -      SSE_PSUBUSW
@@ -864,10 +864,10 @@ VEX.F2.0f12           RM    XMM    XMM    -      -      VMOVDDUP
 VEX.F3.0f12           RM    XMM    XMM    -      -      VMOVSLDUP
 VEX.NP.L0.0f13        MR    XMM64  XMM    -      -      VMOVLPS
 VEX.66.L0.0f13        MR    XMM64  XMM    -      -      VMOVLPD
-VEX.NP.0f14           RVM   XMM    XMM    XMM    -      VUNPACKLPS
-VEX.66.0f14           RVM   XMM    XMM    XMM    -      VUNPACKLPD
-VEX.NP.0f15           RVM   XMM    XMM    XMM    -      VUNPACKHPS
-VEX.66.0f15           RVM   XMM    XMM    XMM    -      VUNPACKHPD
+VEX.NP.0f14           RVM   XMM    XMM    XMM    -      VUNPCKLPS
+VEX.66.0f14           RVM   XMM    XMM    XMM    -      VUNPCKLPD
+VEX.NP.0f15           RVM   XMM    XMM    XMM    -      VUNPCKHPS
+VEX.66.0f15           RVM   XMM    XMM    XMM    -      VUNPCKHPD
 VEX.NP.L0.0f16        RVM   XMM    XMM    XMM64  -      VMOVHPS
 VEX.66.L0.0f16        RVM   XMM    XMM    XMM64  -      VMOVHPD
 VEX.F3.0f16           RM    XMM    XMM    -      -      VMOVSHDUP
@@ -953,9 +953,9 @@ VEX.66.0f6a           RVM   XMM    XMM    XMM    -      VPUNPCKHDQ
 VEX.66.0f6b           RVM   XMM    XMM    XMM    -      VPACKSSDW
 VEX.66.0f6c           RVM   XMM    XMM    XMM    -      VPUNPCKLQDQ
 VEX.66.0f6d           RVM   XMM    XMM    XMM    -      VPUNPCKHQDQ
-VEX.66.W0.L0.0f6e     RM    XMM32  GP     -      -      VMOVD_G2X
-VEX.66.W1.L0.0f6e     RM    XMM32  GP     -      -      VMOVD_G2X ONLY32
-VEX.66.W1.L0.0f6e     RM    XMM64  GP     -      -      VMOVQ_G2X ONLY64
+VEX.66.W0.L0.0f6e     RM    XMM32  GP     -      -      VMOVD
+VEX.66.W1.L0.0f6e     RM    XMM32  GP     -      -      VMOVD ONLY32
+VEX.66.W1.L0.0f6e     RM    XMM64  GP     -      -      VMOVQ ONLY64
 VEX.66.0f6f           RM    XMM    XMM    -      -      VMOVDQA
 VEX.F3.0f6f           RM    XMM    XMM    -      -      VMOVDQU
 VEX.66.0f70           RMI   XMM    XMM    IMM8   -      VPSHUFD IMM_8
@@ -980,10 +980,10 @@ VEX.66.0f7c           RVM   XMM    XMM    XMM    -      VHADDPD
 VEX.F2.0f7c           RVM   XMM    XMM    XMM    -      VHADDPS
 VEX.66.0f7d           RVM   XMM    XMM    XMM    -      VHSUBPD
 VEX.F2.0f7d           RVM   XMM    XMM    XMM    -      VHSUBPS
-VEX.66.W0.L0.0f7e     MR    GP     XMM32  -      -      VMOVD_X2G
-VEX.66.W1.L0.0f7e     MR    GP     XMM32  -      -      VMOVQ_X2G ONLY32
-VEX.66.W1.L0.0f7e     MR    GP     XMM64  -      -      VMOVQ_X2G ONLY64
-VEX.F3.L0.0f7e        RM    XMM64  XMM64  -      -      VMOVQ_X2X
+VEX.66.W0.L0.0f7e     MR    GP     XMM32  -      -      VMOVD
+VEX.66.W1.L0.0f7e     MR    GP     XMM32  -      -      VMOVQ ONLY32
+VEX.66.W1.L0.0f7e     MR    GP     XMM64  -      -      VMOVQ ONLY64
+VEX.F3.L0.0f7e        RM    XMM64  XMM64  -      -      VMOVQ
 VEX.66.0f7f           MR    XMM    XMM    -      -      VMOVDQA
 VEX.F3.0f7f           MR    XMM    XMM    -      -      VMOVDQU
 VEX.NP.0fae//2        M     GP32   -      -      -      VLDMXCSR
@@ -1003,7 +1003,7 @@ VEX.66.0fd2           RVM   XMM    XMM    XMM    -      VPSRLD
 VEX.66.0fd3           RVM   XMM    XMM    XMM    -      VPSRLQ
 VEX.66.0fd4           RVM   XMM    XMM    XMM    -      VPADDQ
 VEX.66.0fd5           RVM   XMM    XMM    XMM    -      VPMULLW
-VEX.66.L0.0fd6        MR    XMM64  XMM64  -      -      VMOVQ_X2X
+VEX.66.L0.0fd6        MR    XMM64  XMM64  -      -      VMOVQ
 VEX.66.0fd7           RM    GP     XMM    -      -      VPMOVMSKB DEF64
 VEX.66.0fd8           RVM   XMM    XMM    XMM    -      VPSUBUSB
 VEX.66.0fd9           RVM   XMM    XMM    XMM    -      VPSUBUSW
