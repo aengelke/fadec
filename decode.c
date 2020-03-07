@@ -597,7 +597,10 @@ fd_decode(const uint8_t* buffer, size_t len_sz, int mode_int, uintptr_t address,
 
         if (imm_control == 4)
         {
-            instr->imm += instr->address + off;
+            if (instr->address != 0)
+                instr->imm += instr->address + off;
+            else
+                operand->type = FD_OT_OFF;
 #if defined(ARCH_X86_64)
             // On x86-64, jumps always have an operand size of 64 bit.
             if (mode == DECODE_64)

@@ -50,6 +50,7 @@ typedef enum {
     FD_OT_REG = 1,
     FD_OT_IMM = 2,
     FD_OT_MEM = 3,
+    FD_OT_OFF = 4,
 } FdOpType;
 
 typedef enum {
