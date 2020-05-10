@@ -7,6 +7,7 @@ from copy import copy
 from enum import Enum, IntEnum
 from itertools import accumulate, product
 import struct
+from typing import NamedTuple, FrozenSet, List, Tuple, Union, Optional, ByteString
 
 def bitstruct(name, fields):
     names, sizes = zip(*(field.split(":") for field in fields))
@@ -110,8 +111,11 @@ OPKIND_LOOKUP = {
     "DR": (0, 0, 10),
 }
 
-class InstrDesc(namedtuple("InstrDesc", "mnemonic,flags,encoding")):
-    __slots__ = ()
+class InstrDesc(NamedTuple):
+    mnemonic: str
+    flags: FrozenSet[str]
+    encoding: bitstruct
+
     @classmethod
     def parse(cls, desc):
         desc = desc.split()
@@ -151,8 +155,11 @@ class EntryKind(Enum):
     TABLE_PREFIX_REP = 7
     TABLE_ROOT = -1
 
-class TrieEntry(namedtuple("TrieEntry", "kind,items,payload")):
-    __slots__ = ()
+class TrieEntry(NamedTuple):
+    kind: EntryKind
+    items: Union[List[Optional[str]], Tuple[Optional[str]]]
+    payload: ByteString
+
     TABLE_LENGTH = {
         EntryKind.TABLE256: 256,
         EntryKind.TABLE8: 8,
