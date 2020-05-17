@@ -82,7 +82,7 @@ typedef enum {
 typedef struct {
     uint8_t type;
     uint8_t size;
-    int8_t reg;
+    uint8_t reg;
     uint8_t misc;
 } FdOp;
 
@@ -92,12 +92,13 @@ typedef struct {
     uint8_t segment;
     uint8_t addrsz;
     uint8_t operandsz;
+    uint8_t size;
+    uint8_t _pad0;
+
     FdOp operands[4];
 
-    uint8_t idx_reg;
-    uint8_t idx_scale;
-    uint8_t size;
-    intptr_t disp;
+    int32_t disp;
+    uint32_t _pad1;
     intptr_t imm;
 
     uintptr_t address;
@@ -192,16 +193,16 @@ void fd_format(const FdInstr* instr, char* buf, size_t len);
 /** Gets the index of the index register from a memory operand, or FD_REG_NONE,
  * if the memory operand has no scaled index register.
  * Only valid if  FD_OP_TYPE == FD_OT_MEM  **/
-#define FD_OP_INDEX(instr,idx) ((FdReg) (instr)->idx_reg)
+#define FD_OP_INDEX(instr,idx) ((FdReg) (instr)->operands[idx].misc & 0x3f)
 /** Gets the scale of the index register from a memory operand when existent.
  * This does /not/ return the scale in an absolute value but returns the amount
  * of bits the index register is shifted to the left (i.e. the value in in the
  * range 0-3). The actual scale can be computed easily using  1<<FD_OP_SCALE.
  * Only valid if  FD_OP_TYPE == FD_OT_MEM  and  FD_OP_INDEX != FD_REG_NONE **/
-#define FD_OP_SCALE(instr,idx) ((instr)->idx_scale)
+#define FD_OP_SCALE(instr,idx) ((instr)->operands[idx].misc >> 6)
 /** Gets the sign-extended displacement of a memory operand.
  * Only valid if  FD_OP_TYPE == FD_OT_MEM  **/
-#define FD_OP_DISP(instr,idx) ((instr)->disp)
+#define FD_OP_DISP(instr,idx) ((int64_t) (instr)->disp)
 /** Gets the (sign-extended) encoded constant for an immediate operand.
  * Only valid if  FD_OP_TYPE == FD_OT_IMM  **/
 #define FD_OP_IMM(instr,idx) ((instr)->imm)

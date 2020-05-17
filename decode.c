@@ -249,8 +249,7 @@ decode_modrm(const uint8_t* buffer, int len, DecodeMode mode, FdInstr* instr,
     }
 
     out_o1->type = FD_OT_MEM;
-    instr->idx_scale = scale;
-    instr->idx_reg = !vsib && idx == 4 ? FD_REG_NONE : idx;
+    out_o1->misc = (scale << 6) | (!vsib && idx == 4 ? FD_REG_NONE : idx);
 
     // RIP-relative addressing only if SIB-byte is absent
     if (mod == 0 && rm == 5 && mode == DECODE_64)
@@ -521,7 +520,7 @@ fd_decode(const uint8_t* buffer, size_t len_sz, int mode_int, uintptr_t address,
         FdOp* operand = &instr->operands[DESC_IMM_IDX(desc)];
         operand->type = FD_OT_MEM;
         operand->reg = FD_REG_NONE;
-        instr->idx_reg = FD_REG_NONE;
+        operand->misc = FD_REG_NONE;
 
         if (UNLIKELY(off + addr_size > len))
             return FD_ERR_PARTIAL;
