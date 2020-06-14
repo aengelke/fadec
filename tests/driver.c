@@ -58,8 +58,7 @@ main(int argc, char** argv)
         while (current_off != length)
         {
             size_t remaining = length - current_off;
-            int retval = fd_decode(code + current_off, remaining, mode,
-                                   0x1234000, &instr);
+            int retval = fd_decode(code + current_off, remaining, mode, 0, &instr);
             if (retval < 0)
                 goto fail;
             current_off += retval;

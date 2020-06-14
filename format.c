@@ -55,7 +55,7 @@ fd_format(const FdInstr* instr, char* buffer, size_t len)
         if (op_type == FD_OT_NONE)
             break;
 
-        const char* op_type_name = &"reg\0imm\0mem"[op_type * 4] - 4;
+        const char* op_type_name = &"reg\0imm\0mem\0off"[op_type * 4] - 4;
         FMT_CONCAT(buf, end, " %s%u:", op_type_name, FD_OP_SIZE(instr, i));
 
         switch (op_type)
@@ -70,6 +70,14 @@ fd_format(const FdInstr* instr, char* buffer, size_t len)
             else
                 FMT_CONCAT(buf, end, "r%u", FD_OP_REG(instr, i));
             break;
+        case FD_OT_OFF:
+            if (FD_OP_SIZE(instr, i) == 2)
+                FMT_CONCAT(buf, end, "ip+");
+            else if (FD_OP_SIZE(instr, i) == 4)
+                FMT_CONCAT(buf, end, "eip+");
+            else if (FD_OP_SIZE(instr, i) == 8)
+                FMT_CONCAT(buf, end, "rip+");
+            // fallthrough
         case FD_OT_IMM:
             immediate = FD_OP_IMM(instr, i);
             if (FD_OP_SIZE(instr, i) == 1)
