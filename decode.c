@@ -608,6 +608,21 @@ fd_decode(const uint8_t* buffer, size_t len_sz, int mode_int, uintptr_t address,
         }
     }
 
+    if (instr->type == FDI_XCHG_NOP)
+    {
+        // Only 4890, 90, and 6690 are true NOPs.
+        if (instr->operands[0].reg == 0 && instr->operands[1].reg == 0)
+        {
+            instr->operands[0].type = FD_OT_NONE;
+            instr->operands[1].type = FD_OT_NONE;
+            instr->type = FDI_NOP;
+        }
+        else
+        {
+            instr->type = FDI_XCHG;
+        }
+    }
+
     if ((prefixes & PREFIX_LOCK) && !desc->lock)
         return FD_ERR_UD;
     if ((prefixes & PREFIX_LOCK) && instr->operands[0].type != FD_OT_MEM)

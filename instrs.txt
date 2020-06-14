@@ -143,7 +143,9 @@
 8d                    RM    GP     GP     -      -      LEA MUSTMEM
 8e                    RM    SREG   GP     -      -      MOV_G2S
 8f/0                  M     GP     -      -      -      POP DEF64
-90                    NP    -      -      -      -      NOP
+# Against frequent belief, only, XCHG (r/e)AX, (r)AX with 90 is NOP.
+# As a lacking REX.B cannot be specified here, this is hardcoded.
+90                    OA    GP     GP     -      -      XCHG_NOP
 91                    OA    GP     GP     -      -      XCHG
 92                    OA    GP     GP     -      -      XCHG
 93                    OA    GP     GP     -      -      XCHG
