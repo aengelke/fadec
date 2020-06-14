@@ -49,6 +49,7 @@ main(int argc, char** argv)
     struct timespec time_end;
 
     FdInstr instr;
+    int retval = 0;
 
     __asm__ volatile("" : : : "memory");
     clock_gettime(CLOCK_MONOTONIC, &time_start);
@@ -58,18 +59,29 @@ main(int argc, char** argv)
         while (current_off != length)
         {
             size_t remaining = length - current_off;
-            int retval = fd_decode(code + current_off, remaining, mode, 0, &instr);
+            retval = fd_decode(code + current_off, remaining, mode, 0, &instr);
             if (retval < 0)
-                goto fail;
+                break;
             current_off += retval;
         }
     }
     clock_gettime(CLOCK_MONOTONIC, &time_end);
     __asm__ volatile("" : : : "memory");
 
-    char format_buffer[128];
-    fd_format(&instr, format_buffer, sizeof(format_buffer));
-    printf("%s\n", format_buffer);
+    if (retval >= 0)
+    {
+        char format_buffer[128];
+        fd_format(&instr, format_buffer, sizeof(format_buffer));
+        printf("%s\n", format_buffer);
+    }
+    else if (retval == FD_ERR_UD)
+    {
+        printf("UD\n");
+    }
+    else if (retval == FD_ERR_PARTIAL)
+    {
+        printf("PARTIAL\n");
+    }
 
     if (repetitions > 1)
     {
@@ -80,8 +92,4 @@ main(int argc, char** argv)
     }
 
     return 0;
-
-fail:
-    puts("Decoding failed.");
-    return 1;
 }

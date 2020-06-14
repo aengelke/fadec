@@ -14,3 +14,6 @@ decode   f266f3660f10c1                 [SSE_MOVSS reg4:r0 reg4:r1]
 decode64 4890                           [NOP]
 decode64 4990                           [XCHG reg8:r8 reg8:r0]
 decode64 6690                           [NOP]
+decode   66                             PARTIAL
+decode   0f                             PARTIAL
+decode   80                             PARTIAL

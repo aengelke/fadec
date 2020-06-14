@@ -416,7 +416,7 @@ fd_decode(const uint8_t* buffer, size_t len_sz, int mode_int, uintptr_t address,
     }
 
     if (UNLIKELY(kind != ENTRY_INSTR))
-        return FD_ERR_UD;
+        return kind == 0 ? FD_ERR_UD : FD_ERR_PARTIAL;
 
     struct InstrDesc* desc = (struct InstrDesc*) table;
 
