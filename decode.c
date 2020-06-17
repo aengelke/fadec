@@ -371,19 +371,10 @@ fd_decode(const uint8_t* buffer, size_t len_sz, int mode_int, uintptr_t address,
     // Then, walk through ModR/M-encoded opcode extensions.
     if ((kind == ENTRY_TABLE8 || kind == ENTRY_TABLE72) && LIKELY(off < len))
     {
-        uint16_t entry = 0;
         if (kind == ENTRY_TABLE72 && (buffer[off] & 0xc0) == 0xc0)
-        {
-            entry = table[buffer[off] - 0xb8];
-            if ((entry & ENTRY_MASK) != ENTRY_NONE)
-                off++;
-            else
-                entry = table[(buffer[off] >> 3) & 7];
-        }
+            ENTRY_UNPACK(table, kind, table[buffer[off++] - 0xb8]);
         else
-            entry = table[(buffer[off] >> 3) & 7];
-
-        ENTRY_UNPACK(table, kind, entry);
+            ENTRY_UNPACK(table, kind, table[(buffer[off] >> 3) & 7]);
     }
 
     // Handle mandatory prefixes (which behave like an opcode ext.).
