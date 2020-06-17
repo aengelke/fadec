@@ -351,18 +351,15 @@ class Table:
         for off, entry in ordered:
             data += (0,) * (off - len(data)) + entry.encode(self.encode_item)
 
-        data = struct.pack("<%dH"%len(data), *data)
-
         stats = dict(Counter(entry.kind for entry in self.data.values()))
-        print("%d bytes" % len(data), stats)
+        print("%d bytes" % (2*len(data)), stats)
         return data, self.annotations, [self.offsets[k] for k in self.roots]
 
 def wrap(string):
     return "\n".join(string[i:i+56] for i in range(0, len(string), 56))
 
 def bytes_to_table(data, notes):
-    hexdata = ",".join("0x{:04x}".format(int.from_bytes(data[i:i+2], "little"))
-                       for i in range(0, len(data), 2))
+    hexdata = ",".join("0x{:04x}".format(d) for d in data)
     offs = [0] + sorted(notes.keys()) + [len(data)]
     return "\n".join(wrap(hexdata[p*7:c*7]) + "\n//%04x "%c + notes.get(c, "")
                      for p, c in zip(offs, offs[1:]))
