@@ -336,12 +336,12 @@ class Table:
         for name, entry in self.data.items():
             self.annotations[current] = "%s(%d)" % (name, entry.kind.value)
             self.offsets[name] = current
-            current += (2*entry.encode_length + 7) & ~7
-        if current >= 0x10000:
+            current += (entry.encode_length + 3) & ~3
+        if current >= 0x8000:
             raise Exception("maximum table size exceeded: {:x}".format(current))
 
     def encode_item(self, name):
-        return self.offsets[name] | self.data[name].kind.value
+        return (self.offsets[name] << 1) | self.data[name].kind.value
 
     def compile(self):
         self.calc_offsets()
@@ -349,7 +349,7 @@ class Table:
 
         data = ()
         for off, entry in ordered:
-            data += (0,) * (off//2 - len(data)) + entry.encode(self.encode_item)
+            data += (0,) * (off - len(data)) + entry.encode(self.encode_item)
 
         data = struct.pack("<%dH"%len(data), *data)
 
@@ -358,12 +358,13 @@ class Table:
         return data, self.annotations, [self.offsets[k] for k in self.roots]
 
 def wrap(string):
-    return "\n".join(string[i:i+80] for i in range(0, len(string), 80))
+    return "\n".join(string[i:i+56] for i in range(0, len(string), 56))
 
 def bytes_to_table(data, notes):
-    hexdata = ",".join("0x{:02x}".format(byte) for byte in data)
+    hexdata = ",".join("0x{:04x}".format(int.from_bytes(data[i:i+2], "little"))
+                       for i in range(0, len(data), 2))
     offs = [0] + sorted(notes.keys()) + [len(data)]
-    return "\n".join(wrap(hexdata[p*5:c*5]) + "\n//%04x "%c + notes.get(c, "")
+    return "\n".join(wrap(hexdata[p*7:c*7]) + "\n//%04x "%c + notes.get(c, "")
                      for p, c in zip(offs, offs[1:]))
 
 template = """// Auto-generated file -- do not modify!
