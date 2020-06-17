@@ -113,16 +113,22 @@ OPKIND_LOOKUP = {
 
 class InstrDesc(NamedTuple):
     mnemonic: str
+    encoding: str
+    operands: Tuple[str, ...]
     flags: FrozenSet[str]
-    encoding: bitstruct
 
     @classmethod
     def parse(cls, desc):
         desc = desc.split()
-        flags = copy(ENCODINGS[desc[0]])
+        operands = tuple(op for op in desc[1:5] if op != "-")
+        return cls(desc[5], desc[0], operands, frozenset(desc[6:]))
+
+    def encode(self, mnemonics_lut):
+        flags = copy(ENCODINGS[self.encoding])
+        flags.mnemonic = mnemonics_lut[self.mnemonic]
 
         fixed_opsz = set()
-        for i, opkind in enumerate(desc[1:5]):
+        for i, opkind in enumerate(self.operands):
             enc_size, fixed_size, reg_type = OPKIND_LOOKUP[opkind]
             if enc_size == 1: fixed_opsz.add(fixed_size)
             setattr(flags, "op%d_size"%i, enc_size)
@@ -131,18 +137,16 @@ class InstrDesc(NamedTuple):
         if fixed_opsz: flags.gp_fixed_operand_size = next(iter(fixed_opsz))
 
         # Miscellaneous Flags
-        if "DEF64" in desc[6:]:       flags.gp_size_def64 = 1
-        if "SIZE_8" in desc[6:]:      flags.gp_size_8 = 1
-        if "INSTR_WIDTH" in desc[6:]: flags.gp_instr_width = 1
-        if "IMM_8" in desc[6:]:       flags.imm_byte = 1
-        if "LOCK" in desc[6:]:        flags.lock = 1
-        if "VSIB" in desc[6:]:        flags.vsib = 1
-        if "MUSTMEM" in desc[6:]:     setattr(flags, "op%d_regty"%(flags.modrm_idx^3), 0xf)
+        if "DEF64" in self.flags:       flags.gp_size_def64 = 1
+        if "SIZE_8" in self.flags:      flags.gp_size_8 = 1
+        if "INSTR_WIDTH" in self.flags: flags.gp_instr_width = 1
+        if "IMM_8" in self.flags:       flags.imm_byte = 1
+        if "LOCK" in self.flags:        flags.lock = 1
+        if "VSIB" in self.flags:        flags.vsib = 1
+        if "MUSTMEM" in self.flags:     setattr(flags, "op%d_regty"%(flags.modrm_idx^3), 0xf)
 
-        return cls(desc[5], frozenset(desc[6:]), flags)
-    def encode(self, mnemonics_lut):
-        self.encoding.mnemonic = mnemonics_lut[self.mnemonic]
-        return self.encoding._encode(8)
+        enc = flags._encode(8)
+        return tuple(int.from_bytes(enc[i:i+2], "little") for i in range(0, 8, 2))
 
 class EntryKind(Enum):
     NONE = 0
@@ -158,7 +162,7 @@ class EntryKind(Enum):
 class TrieEntry(NamedTuple):
     kind: EntryKind
     items: Union[List[Optional[str]], Tuple[Optional[str]]]
-    payload: ByteString
+    payload: Tuple[int]
 
     TABLE_LENGTH = {
         EntryKind.TABLE256: 256,
@@ -171,17 +175,18 @@ class TrieEntry(NamedTuple):
     }
     @classmethod
     def table(cls, kind):
-        return cls(kind, [None] * cls.TABLE_LENGTH[kind], b"")
+        return cls(kind, [None] * cls.TABLE_LENGTH[kind], ())
     @classmethod
     def instr(cls, payload):
         return cls(EntryKind.INSTR, [], payload)
 
     @property
     def encode_length(self):
-        return len(self.payload) + 2 * len(self.items)
-    def encode(self, encode_item):
+        return len(self.payload) + len(self.items)
+    def encode(self, encode_item) -> Tuple[int]:
         enc_items = (encode_item(item) if item else 0 for item in self.items)
-        return self.payload + struct.pack("<%dH"%len(self.items), *enc_items)
+        print(self)
+        return self.payload + tuple(enc_items)
 
     def readonly(self):
         return TrieEntry(self.kind, tuple(self.items), self.payload)
@@ -331,7 +336,7 @@ class Table:
         for name, entry in self.data.items():
             self.annotations[current] = "%s(%d)" % (name, entry.kind.value)
             self.offsets[name] = current
-            current += (entry.encode_length + 7) & ~7
+            current += (2*entry.encode_length + 7) & ~7
         if current >= 0x10000:
             raise Exception("maximum table size exceeded: {:x}".format(current))
 
@@ -342,9 +347,11 @@ class Table:
         self.calc_offsets()
         ordered = sorted((off, self.data[k]) for k, off in self.offsets.items())
 
-        data = b""
+        data = ()
         for off, entry in ordered:
-            data += b"\x00" * (off - len(data)) + entry.encode(self.encode_item)
+            data += (0,) * (off//2 - len(data)) + entry.encode(self.encode_item)
+
+        data = struct.pack("<%dH"%len(data), *data)
 
         stats = dict(Counter(entry.kind for entry in self.data.values()))
         print("%d bytes" % len(data), stats)
