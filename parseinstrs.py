@@ -161,7 +161,7 @@ class EntryKind(Enum):
 
 class TrieEntry(NamedTuple):
     kind: EntryKind
-    items: Union[List[Optional[str]], Tuple[Optional[str]]]
+    items: Tuple[Optional[str]]
     payload: Tuple[Union[int, str]]
 
     TABLE_LENGTH = {
@@ -175,10 +175,10 @@ class TrieEntry(NamedTuple):
     }
     @classmethod
     def table(cls, kind):
-        return cls(kind, [None] * cls.TABLE_LENGTH[kind], ())
+        return cls(kind, (None,) * cls.TABLE_LENGTH[kind], ())
     @classmethod
     def instr(cls, payload):
-        return cls(EntryKind.INSTR, [], payload)
+        return cls(EntryKind.INSTR, (), payload)
 
     @property
     def encode_length(self):
@@ -187,11 +187,11 @@ class TrieEntry(NamedTuple):
         enc_items = (encode_item(item) if item else 0 for item in self.items)
         return self.payload + tuple(enc_items)
 
-    def readonly(self):
-        return TrieEntry(self.kind, tuple(self.items), self.payload)
-    def map(self, mapping):
-        mapped_items = (mapping.get(v, v) for v in self.items)
+    def map(self, map_func):
+        mapped_items = (map_func(i, v) for i, v in enumerate(self.items))
         return TrieEntry(self.kind, tuple(mapped_items), self.payload)
+    def update(self, idx, new_val):
+        return self.map(lambda i, v: new_val if i == idx else v)
 
 import re
 opcode_regex = re.compile(r"^(?:(?P<prefixes>(?P<vex>VEX\.)?(?P<legacy>NP|66|F2|F3)\.(?P<rexw>W[01]\.)?(?P<vexl>L[01]\.)?)|R(?P<repprefix>NP|F2|F3).)?(?P<opcode>(?:[0-9a-f]{2})+)(?P<modrm>//?[0-7]|//[c-f][0-9a-f])?(?P<extended>\+)?$")
@@ -289,33 +289,34 @@ class Table:
         self.offsets = {}
         self.annotations = {}
 
+    def _update_table(self, name, idx, entry_name, entry_val):
+        # Don't override existing entries. This only happens on invalid input,
+        # e.g. when an opcode is specified twice.
+        if self.data[name].items[idx]:
+            raise Exception("{}/{} set, not overriding to {}".format(name, idx, entry_name))
+        self.data[entry_name] = entry_val
+        self.data[name] = self.data[name].update(idx, entry_name)
+
     def add_opcode(self, opcode, instr_encoding, root_idx=0):
         name = "t{},{}".format(root_idx, format_opcode(opcode))
 
-        table = self.data["root%d"%root_idx]
+        tn = "root%d"%root_idx
         for i in range(len(opcode) - 1):
+            # kind is the table kind that we want to point to in the _next_.
             kind, byte = opcode[i+1][0], opcode[i][1]
-            if table.items[byte] is None:
-                table_name = "t{},{}".format(root_idx, format_opcode(opcode[:i+1]))
-                table.items[byte] = table_name
-                table = self.data[table_name] = TrieEntry.table(kind)
-            else:
-                table = self.data[table.items[byte]]
-                if table.kind != kind:
-                    raise Exception("have {}, new opcode ({}) has {}".format(
-                                    table.kind, name, kind))
+            # Retain prev_tn name so that we can update it.
+            prev_tn, tn = tn, self.data[tn].items[byte]
+            if tn is None:
+                tn = "t{},{}".format(root_idx, format_opcode(opcode[:i+1]))
+                self._update_table(prev_tn, byte, tn, TrieEntry.table(kind))
 
-        # An opcode can occur once only.
-        if table.items[opcode[-1][1]]:
-            raise Exception("opcode collision for {}".format(name))
+            if self.data[tn].kind != kind:
+                raise Exception("{}, have {}, want {}".format(
+                                name, self.data[tn].kind, kind))
 
-        table.items[opcode[-1][1]] = name
-        self.data[name] = TrieEntry.instr(instr_encoding)
+        self._update_table(tn, opcode[-1][1], name, TrieEntry.instr(instr_encoding))
 
     def deduplicate(self):
-        # Make values hashable
-        for name, entry in self.data.items():
-            self.data[name] = entry.readonly()
         synonyms = True
         while synonyms:
             entries = {} # Mapping from entry to name
@@ -326,7 +327,7 @@ class Table:
                 else:
                     entries[entry] = name
             for name, entry in self.data.items():
-                self.data[name] = entry.map(synonyms)
+                self.data[name] = entry.map(lambda _, v: synonyms.get(v, v))
             for key in synonyms:
                 del self.data[key]
 
