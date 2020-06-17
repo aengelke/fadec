@@ -145,8 +145,8 @@ class InstrDesc(NamedTuple):
         if "VSIB" in self.flags:        flags.vsib = 1
         if "MUSTMEM" in self.flags:     setattr(flags, "op%d_regty"%(flags.modrm_idx^3), 0xf)
 
-        enc = flags._encode(8)
-        return tuple(int.from_bytes(enc[i:i+2], "little") for i in range(0, 8, 2))
+        enc = flags._encode(8)[2:]
+        return ("FDI_"+self.mnemonic,) + tuple(int.from_bytes(enc[i:i+2], "little") for i in range(0, 6, 2))
 
 class EntryKind(Enum):
     NONE = 0
@@ -162,7 +162,7 @@ class EntryKind(Enum):
 class TrieEntry(NamedTuple):
     kind: EntryKind
     items: Union[List[Optional[str]], Tuple[Optional[str]]]
-    payload: Tuple[int]
+    payload: Tuple[Union[int, str]]
 
     TABLE_LENGTH = {
         EntryKind.TABLE256: 256,
@@ -183,9 +183,8 @@ class TrieEntry(NamedTuple):
     @property
     def encode_length(self):
         return len(self.payload) + len(self.items)
-    def encode(self, encode_item) -> Tuple[int]:
+    def encode(self, encode_item) -> Tuple[Union[int, str]]:
         enc_items = (encode_item(item) if item else 0 for item in self.items)
-        print(self)
         return self.payload + tuple(enc_items)
 
     def readonly(self):
@@ -355,13 +354,10 @@ class Table:
         print("%d bytes" % (2*len(data)), stats)
         return data, self.annotations, [self.offsets[k] for k in self.roots]
 
-def wrap(string):
-    return "\n".join(string[i:i+56] for i in range(0, len(string), 56))
-
 def bytes_to_table(data, notes):
-    hexdata = ",".join("0x{:04x}".format(d) for d in data)
+    strdata = tuple(d+"," if type(d) == str else "%#04x,"%d for d in data)
     offs = [0] + sorted(notes.keys()) + [len(data)]
-    return "\n".join(wrap(hexdata[p*7:c*7]) + "\n//%04x "%c + notes.get(c, "")
+    return "\n".join("".join(strdata[p:c]) + "\n//%04x "%c + notes.get(c, "")
                      for p, c in zip(offs, offs[1:]))
 
 template = """// Auto-generated file -- do not modify!
