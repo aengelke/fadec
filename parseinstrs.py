@@ -26,7 +26,6 @@ def bitstruct(name, fields):
     return __class
 
 InstrFlags = bitstruct("InstrFlags", [
-    "mnemonic:16",
     "modrm_idx:2",
     "modreg_idx:2",
     "vexreg_idx:2",
@@ -123,9 +122,8 @@ class InstrDesc(NamedTuple):
         operands = tuple(op for op in desc[1:5] if op != "-")
         return cls(desc[5], desc[0], operands, frozenset(desc[6:]))
 
-    def encode(self, mnemonics_lut):
+    def encode(self):
         flags = copy(ENCODINGS[self.encoding])
-        flags.mnemonic = mnemonics_lut[self.mnemonic]
 
         fixed_opsz = set()
         for i, opkind in enumerate(self.operands):
@@ -145,8 +143,10 @@ class InstrDesc(NamedTuple):
         if "VSIB" in self.flags:        flags.vsib = 1
         if "MUSTMEM" in self.flags:     setattr(flags, "op%d_regty"%(flags.modrm_idx^3), 0xf)
 
-        enc = flags._encode(8)[2:]
-        return ("FDI_"+self.mnemonic,) + tuple(int.from_bytes(enc[i:i+2], "little") for i in range(0, 6, 2))
+        enc = flags._encode(6)
+        enc = tuple(int.from_bytes(enc[i:i+2], "little") for i in range(0, 6, 2))
+        # First 2 bytes are the mnemonic, last 6 bytes are the encoding.
+        return ("FDI_"+self.mnemonic,) + enc
 
 class EntryKind(Enum):
     NONE = 0
@@ -399,7 +399,7 @@ if __name__ == "__main__":
     for opcode, desc in entries:
         for i, mode in enumerate(args.modes):
             if "ONLY%d"%(96-mode) not in desc.flags:
-                table.add_opcode(opcode, desc.encode(mnemonics_lut), i)
+                table.add_opcode(opcode, desc.encode(), i)
 
     table.deduplicate()
     table_data, annotations, root_offsets = table.compile()
