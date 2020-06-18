@@ -38,7 +38,7 @@ InstrFlags = bitstruct("InstrFlags", [
     "zeroreg_val:1",
     "_unused:1",
     "imm_control:3",
-    "imm_byte:1",
+    "_unused:1",
     "gp_size_8:1",
     "gp_size_def64:1",
     "gp_instr_width:1",
@@ -55,30 +55,30 @@ ENCODINGS = {
     "NP": InstrFlags(),
     "M": InstrFlags(modrm_idx=0^3),
     "M1": InstrFlags(modrm_idx=0^3, imm_idx=1^3, imm_control=1),
-    "MI": InstrFlags(modrm_idx=0^3, imm_idx=1^3, imm_control=3),
+    "MI": InstrFlags(modrm_idx=0^3, imm_idx=1^3, imm_control=4),
     "MC": InstrFlags(modrm_idx=0^3, zeroreg_idx=1^3, zeroreg_val=1),
     "MR": InstrFlags(modrm_idx=0^3, modreg_idx=1^3),
     "RM": InstrFlags(modrm_idx=1^3, modreg_idx=0^3),
     "RMA": InstrFlags(modrm_idx=1^3, modreg_idx=0^3, zeroreg_idx=2^3),
-    "MRI": InstrFlags(modrm_idx=0^3, modreg_idx=1^3, imm_idx=2^3, imm_control=3),
-    "RMI": InstrFlags(modrm_idx=1^3, modreg_idx=0^3, imm_idx=2^3, imm_control=3),
+    "MRI": InstrFlags(modrm_idx=0^3, modreg_idx=1^3, imm_idx=2^3, imm_control=4),
+    "RMI": InstrFlags(modrm_idx=1^3, modreg_idx=0^3, imm_idx=2^3, imm_control=4),
     "MRC": InstrFlags(modrm_idx=0^3, modreg_idx=1^3, zeroreg_idx=2^3, zeroreg_val=1),
-    "I": InstrFlags(imm_idx=0^3, imm_control=3),
-    "IA": InstrFlags(zeroreg_idx=0^3, imm_idx=1^3, imm_control=3),
+    "I": InstrFlags(imm_idx=0^3, imm_control=4),
+    "IA": InstrFlags(zeroreg_idx=0^3, imm_idx=1^3, imm_control=4),
     "O": InstrFlags(modreg_idx=0^3),
-    "OI": InstrFlags(modreg_idx=0^3, imm_idx=1^3, imm_control=3),
+    "OI": InstrFlags(modreg_idx=0^3, imm_idx=1^3, imm_control=4),
     "OA": InstrFlags(modreg_idx=0^3, zeroreg_idx=1^3),
     "AO": InstrFlags(modreg_idx=1^3, zeroreg_idx=0^3),
-    "D": InstrFlags(imm_idx=0^3, imm_control=4),
+    "D": InstrFlags(imm_idx=0^3, imm_control=6),
     "FD": InstrFlags(zeroreg_idx=0^3, imm_idx=1^3, imm_control=2),
     "TD": InstrFlags(zeroreg_idx=1^3, imm_idx=0^3, imm_control=2),
 
     "RVM": InstrFlags(modrm_idx=2^3, modreg_idx=0^3, vexreg_idx=1^3),
-    "RVMI": InstrFlags(modrm_idx=2^3, modreg_idx=0^3, vexreg_idx=1^3, imm_idx=3^3, imm_control=3, imm_byte=1),
-    "RVMR": InstrFlags(modrm_idx=2^3, modreg_idx=0^3, vexreg_idx=1^3, imm_idx=3^3, imm_control=5, imm_byte=1),
+    "RVMI": InstrFlags(modrm_idx=2^3, modreg_idx=0^3, vexreg_idx=1^3, imm_idx=3^3, imm_control=4, imm_byte=1),
+    "RVMR": InstrFlags(modrm_idx=2^3, modreg_idx=0^3, vexreg_idx=1^3, imm_idx=3^3, imm_control=3, imm_byte=1),
     "RMV": InstrFlags(modrm_idx=1^3, modreg_idx=0^3, vexreg_idx=2^3),
     "VM": InstrFlags(modrm_idx=1^3, vexreg_idx=0^3),
-    "VMI": InstrFlags(modrm_idx=1^3, vexreg_idx=0^3, imm_idx=2^3, imm_control=3, imm_byte=1),
+    "VMI": InstrFlags(modrm_idx=1^3, vexreg_idx=0^3, imm_idx=2^3, imm_control=4, imm_byte=1),
     "MVR": InstrFlags(modrm_idx=0^3, modreg_idx=2^3, vexreg_idx=1^3),
 }
 
@@ -138,7 +138,7 @@ class InstrDesc(NamedTuple):
         if "DEF64" in self.flags:       flags.gp_size_def64 = 1
         if "SIZE_8" in self.flags:      flags.gp_size_8 = 1
         if "INSTR_WIDTH" in self.flags: flags.gp_instr_width = 1
-        if "IMM_8" in self.flags:       flags.imm_byte = 1
+        if "IMM_8" in self.flags:       flags.imm_control = {4: 5, 6: 7}[flags.imm_control]
         if "LOCK" in self.flags:        flags.lock = 1
         if "VSIB" in self.flags:        flags.vsib = 1
         if "MUSTMEM" in self.flags:     setattr(flags, "op%d_regty"%(flags.modrm_idx^3), 0xf)

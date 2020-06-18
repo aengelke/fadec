@@ -307,7 +307,6 @@ struct InstrDesc
 #define DESC_IMPLICIT_IDX(desc) ((((desc)->operand_indices >> 6) & 3) ^ 3)
 #define DESC_IMM_CONTROL(desc) (((desc)->immediate >> 4) & 0x7)
 #define DESC_IMM_IDX(desc) (((desc)->immediate & 3) ^ 3)
-#define DESC_IMM_BYTE(desc) (((desc)->immediate >> 7) & 1)
 #define DESC_IMPLICIT_VAL(desc) (((desc)->immediate >> 2) & 1)
 
 int
@@ -500,14 +499,16 @@ fd_decode(const uint8_t* buffer, size_t len_sz, int mode_int, uintptr_t address,
     }
 
     uint32_t imm_control = DESC_IMM_CONTROL(desc);
-    if (imm_control == 1)
+    if (UNLIKELY(imm_control == 1))
     {
+        // 1 = immediate constant 1, used for shifts
         FdOp* operand = &instr->operands[DESC_IMM_IDX(desc)];
         operand->type = FD_OT_IMM;
         instr->imm = 1;
     }
-    else if (imm_control == 2)
+    else if (UNLIKELY(imm_control == 2))
     {
+        // 2 = memory, address-sized, used for mov with moffs operand
         FdOp* operand = &instr->operands[DESC_IMM_IDX(desc)];
         operand->type = FD_OT_MEM;
         operand->reg = FD_REG_NONE;
@@ -527,8 +528,9 @@ fd_decode(const uint8_t* buffer, size_t len_sz, int mode_int, uintptr_t address,
 #endif
         off += addr_size;
     }
-    else if (UNLIKELY(imm_control == 5))
+    else if (UNLIKELY(imm_control == 3))
     {
+        // 3 = register in imm8[7:4], used for RVMR encoding with VBLENDVP[SD]
         FdOp* operand = &instr->operands[DESC_IMM_IDX(desc)];
         operand->type = FD_OT_REG;
 
@@ -546,15 +548,20 @@ fd_decode(const uint8_t* buffer, size_t len_sz, int mode_int, uintptr_t address,
         FdOp* operand = &instr->operands[DESC_IMM_IDX(desc)];
         operand->type = FD_OT_IMM;
 
+        // 4/5 = immediate, operand-sized/8 bit
+        // 6/7 = offset, operand-sized/8 bit (used for jumps/calls)
+        int imm_byte = imm_control & 1;
+        int imm_offset = imm_control & 2;
+
         uint8_t imm_size;
-        if (DESC_IMM_BYTE(desc))
+        if (imm_byte)
             imm_size = 1;
         else if (UNLIKELY(instr->type == FDI_RET || instr->type == FDI_RETF))
             imm_size = 2;
         else if (UNLIKELY(instr->type == FDI_ENTER))
             imm_size = 3;
 #if defined(ARCH_X86_64)
-        else if (mode == DECODE_64 && UNLIKELY(imm_control == 4))
+        else if (mode == DECODE_64 && UNLIKELY(imm_offset))
             // Jumps are always 8 or 32 bit on x86-64.
             imm_size = 4;
 #endif
@@ -585,7 +592,7 @@ fd_decode(const uint8_t* buffer, size_t len_sz, int mode_int, uintptr_t address,
 #endif
         off += imm_size;
 
-        if (imm_control == 4)
+        if (imm_offset)
         {
             if (instr->address != 0)
                 instr->imm += instr->address + off;
