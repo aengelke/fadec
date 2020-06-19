@@ -97,8 +97,7 @@ typedef struct {
 
     FdOp operands[4];
 
-    int32_t disp;
-    uint32_t _pad1;
+    intptr_t disp;
     intptr_t imm;
 
     uintptr_t address;
