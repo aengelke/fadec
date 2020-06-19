@@ -52,9 +52,7 @@ typedef enum DecodeMode DecodeMode;
 #define LOAD_LE_2(buf) (LOAD_LE_1(buf) | LOAD_LE_1((uint8_t*) (buf) + 1)<<8)
 #define LOAD_LE_3(buf) (LOAD_LE_2(buf) | LOAD_LE_1((uint8_t*) (buf) + 2)<<16)
 #define LOAD_LE_4(buf) (LOAD_LE_2(buf) | LOAD_LE_2((uint8_t*) (buf) + 2)<<16)
-#if defined(ARCH_X86_64)
 #define LOAD_LE_8(buf) (LOAD_LE_4(buf) | LOAD_LE_4((uint8_t*) (buf) + 4)<<32)
-#endif
 
 enum PrefixSet
 {
@@ -314,20 +312,25 @@ fd_decode(const uint8_t* buffer, size_t len_sz, int mode_int, uintptr_t address,
           FdInstr* instr)
 {
     const uint16_t* table = NULL;
+    DecodeMode mode;
 
     int len = len_sz > 15 ? 15 : len_sz;
-    DecodeMode mode = mode_int == 32 ? DECODE_32 :
-                      mode_int == 64 ? DECODE_64 : -1;
 
     // Ensure that we can actually handle the decode request
+    if (mode_int == 32)
+    {
 #if defined(ARCH_386)
-    if (mode == DECODE_32)
         table = &_decode_table[FD_TABLE_OFFSET_32];
+        mode = DECODE_32;
 #endif
+    }
+    else if (mode_int == 64)
+    {
 #if defined(ARCH_X86_64)
-    if (mode == DECODE_64)
         table = &_decode_table[FD_TABLE_OFFSET_64];
+        mode = DECODE_64;
 #endif
+    }
 
     if (UNLIKELY(table == NULL))
         return FD_ERR_INTERNAL;
@@ -478,10 +481,8 @@ fd_decode(const uint8_t* buffer, size_t len_sz, int mode_int, uintptr_t address,
     {
         FdOp* operand = &instr->operands[DESC_VEXREG_IDX(desc)];
         operand->type = FD_OT_REG;
-#if defined(ARCH_386)
         if (mode == DECODE_32)
             vex_operand &= 0x7;
-#endif
         operand->reg = vex_operand;
     }
     else if (vex_operand != 0)
@@ -507,16 +508,12 @@ fd_decode(const uint8_t* buffer, size_t len_sz, int mode_int, uintptr_t address,
 
         if (UNLIKELY(off + addr_size > len))
             return FD_ERR_PARTIAL;
-#if defined(ARCH_386)
         if (addr_size == 2)
             instr->disp = LOAD_LE_2(&buffer[off]);
-#endif
         if (addr_size == 4)
             instr->disp = LOAD_LE_4(&buffer[off]);
-#if defined(ARCH_X86_64)
-        if (addr_size == 8)
+        if (LIKELY(addr_size == 8))
             instr->disp = LOAD_LE_8(&buffer[off]);
-#endif
         off += addr_size;
     }
     else if (UNLIKELY(imm_control == 3))
@@ -557,11 +554,9 @@ fd_decode(const uint8_t* buffer, size_t len_sz, int mode_int, uintptr_t address,
             imm_size = 3;
         else if (op_size == 2)
             imm_size = 2;
-#if defined(ARCH_X86_64)
         else if (mode == DECODE_64 && (prefixes & PREFIX_REXW) &&
                  instr->type == FDI_MOVABS)
             imm_size = 8;
-#endif
         else
             imm_size = 4;
 
@@ -576,10 +571,8 @@ fd_decode(const uint8_t* buffer, size_t len_sz, int mode_int, uintptr_t address,
             instr->imm = LOAD_LE_3(&buffer[off]);
         else if (imm_size == 4)
             instr->imm = (int32_t) LOAD_LE_4(&buffer[off]);
-#if defined(ARCH_X86_64)
         else if (imm_size == 8)
             instr->imm = (int64_t) LOAD_LE_8(&buffer[off]);
-#endif
         off += imm_size;
 
         if (imm_offset)
