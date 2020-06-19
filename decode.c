@@ -6,10 +6,6 @@
 #include <fadec.h>
 
 
-#if defined(ARCH_X86_64) && __SIZEOF_POINTER__ < 8
-#error "Decoding x86-64 requires a 64-bit architecture"
-#endif
-
 #define LIKELY(x) __builtin_expect((x), 1)
 #define UNLIKELY(x) __builtin_expect((x), 0)
 

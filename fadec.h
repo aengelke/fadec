@@ -97,10 +97,10 @@ typedef struct {
 
     FdOp operands[4];
 
-    intptr_t disp;
-    intptr_t imm;
+    int64_t disp;
+    int64_t imm;
 
-    uintptr_t address;
+    uint64_t address;
 } FdInstr;
 
 typedef enum {
