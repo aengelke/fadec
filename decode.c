@@ -206,7 +206,7 @@ decode_modrm(const uint8_t* buffer, int len, DecodeMode mode, FdInstr* instr,
     uint8_t rm = modrm & 0x07;
 
     // VSIB must have a memory operand with SIB byte.
-    if (vsib && (rm != 4 || mod == 3))
+    if (UNLIKELY(vsib) && (rm != 4 || mod == 3))
         return FD_ERR_UD;
 
     // Operand 2 may be NULL when reg field is used as opcode extension
@@ -354,7 +354,9 @@ fd_decode(const uint8_t* buffer, size_t len_sz, int mode_int, uintptr_t address,
     {
         // "Legacy" walk through table and escape opcodes
         ENTRY_UNPACK(table, kind, table[0]);
-        while (kind == ENTRY_TABLE256 && LIKELY(off < len))
+        if (kind == ENTRY_TABLE256 && LIKELY(off < len))
+            ENTRY_UNPACK(table, kind, table[buffer[off++]]);
+        if (UNLIKELY(kind == ENTRY_TABLE256) && LIKELY(off < len))
             ENTRY_UNPACK(table, kind, table[buffer[off++]]);
     }
     else
@@ -386,8 +388,7 @@ fd_decode(const uint8_t* buffer, size_t len_sz, int mode_int, uintptr_t address,
         prefixes &= ~(PREFIX_OPSZ | PREFIX_REPNZ | PREFIX_REP);
         ENTRY_UNPACK(table, kind, table[mandatory_prefix]);
     }
-
-    if (kind == ENTRY_TABLE_PREFIX_REP)
+    else if (kind == ENTRY_TABLE_PREFIX_REP)
     {
         // Discard 66h mandatory prefix
         uint8_t index = mandatory_prefix != 1 ? mandatory_prefix : 0;
@@ -427,8 +428,7 @@ fd_decode(const uint8_t* buffer, size_t len_sz, int mode_int, uintptr_t address,
         op_size = 8;
     else
         op_size = 4;
-
-    instr->operandsz = desc->gp_instr_width ? op_size : 0;
+    // Note: operand size is updates for jumps when handling immediate operands.
 
     uint8_t vec_size = 16;
     if (prefixes & PREFIX_VEXL)
@@ -436,20 +436,11 @@ fd_decode(const uint8_t* buffer, size_t len_sz, int mode_int, uintptr_t address,
 
     // Compute address size.
     uint8_t addr_size = mode == DECODE_64 ? 8 : 4;
-    if (prefixes & PREFIX_ADDRSZ)
+    if (UNLIKELY(prefixes & PREFIX_ADDRSZ))
         addr_size >>= 1;
     instr->addrsz = addr_size;
 
-    uint8_t operand_sizes[4] = {
-        0, 1 << desc->gp_fixed_operand_size, op_size, vec_size
-    };
-
     __builtin_memset(instr->operands, 0, sizeof(instr->operands));
-    for (int i = 0; i < 4; i++)
-    {
-        uint8_t enc_size = (desc->operand_sizes >> 2 * i) & 3;
-        instr->operands[i].size = operand_sizes[enc_size];
-    }
 
     if (DESC_HAS_IMPLICIT(desc))
     {
@@ -552,6 +543,10 @@ fd_decode(const uint8_t* buffer, size_t len_sz, int mode_int, uintptr_t address,
         // 6/7 = offset, operand-sized/8 bit (used for jumps/calls)
         int imm_byte = imm_control & 1;
         int imm_offset = imm_control & 2;
+        // Jumps are always 8 or 32 bit on x86-64, and the operand size is
+        // forced to 64 bit.
+        if (mode == DECODE_64 && UNLIKELY(imm_offset))
+            op_size = 8;
 
         uint8_t imm_size;
         if (imm_byte)
@@ -560,11 +555,6 @@ fd_decode(const uint8_t* buffer, size_t len_sz, int mode_int, uintptr_t address,
             imm_size = 2;
         else if (UNLIKELY(instr->type == FDI_ENTER))
             imm_size = 3;
-#if defined(ARCH_X86_64)
-        else if (mode == DECODE_64 && UNLIKELY(imm_offset))
-            // Jumps are always 8 or 32 bit on x86-64.
-            imm_size = 4;
-#endif
         else if (op_size == 2)
             imm_size = 2;
 #if defined(ARCH_X86_64)
@@ -598,11 +588,6 @@ fd_decode(const uint8_t* buffer, size_t len_sz, int mode_int, uintptr_t address,
                 instr->imm += instr->address + off;
             else
                 operand->type = FD_OT_OFF;
-#if defined(ARCH_X86_64)
-            // On x86-64, jumps always have an operand size of 64 bit.
-            if (mode == DECODE_64)
-                operand->size = 8;
-#endif
         }
     }
 
@@ -621,13 +606,22 @@ fd_decode(const uint8_t* buffer, size_t len_sz, int mode_int, uintptr_t address,
         }
     }
 
-    if ((prefixes & PREFIX_LOCK) && !desc->lock)
-        return FD_ERR_UD;
-    if ((prefixes & PREFIX_LOCK) && instr->operands[0].type != FD_OT_MEM)
-        return FD_ERR_UD;
+    if (UNLIKELY(prefixes & PREFIX_LOCK))
+        if (!desc->lock || instr->operands[0].type != FD_OT_MEM)
+            return FD_ERR_UD;
+
+    uint8_t operand_sizes[4] = {
+        0, 1 << desc->gp_fixed_operand_size, op_size, vec_size
+    };
 
     for (int i = 0; i < 4; i++)
     {
+        if (instr->operands[i].type == FD_OT_NONE)
+            break;
+
+        uint8_t enc_size = (desc->operand_sizes >> 2 * i) & 3;
+        instr->operands[i].size = operand_sizes[enc_size];
+
         uint32_t reg_type = (desc->reg_types >> 4 * i) & 0xf;
         uint32_t reg_idx = instr->operands[i].reg;
         if (reg_type == FD_RT_MEM && instr->operands[i].type != FD_OT_MEM)
@@ -641,14 +635,14 @@ fd_decode(const uint8_t* buffer, size_t len_sz, int mode_int, uintptr_t address,
         if ((reg_type == FD_RT_MMX || reg_type == FD_RT_SEG) && reg_idx >= 8)
             instr->operands[i].reg -= 8;
         // Reject invalid segment registers
-        if (reg_type == FD_RT_SEG && reg_idx >= 6)
+        if (UNLIKELY(reg_type == FD_RT_SEG) && reg_idx >= 6)
             return FD_ERR_UD;
         // Reject invalid control registers
-        if (reg_type == FD_RT_CR && reg_idx != 0 && reg_idx != 2 &&
+        if (UNLIKELY(reg_type == FD_RT_CR) && reg_idx != 0 && reg_idx != 2 &&
                 reg_idx != 3 && reg_idx != 4 && reg_idx != 8)
             return FD_ERR_UD;
         // Reject invalid debug registers
-        if (reg_type == FD_RT_DR && reg_idx >= 8)
+        if (UNLIKELY(reg_type == FD_RT_DR) && reg_idx >= 8)
             return FD_ERR_UD;
         instr->operands[i].misc = reg_type;
     }
@@ -657,6 +651,7 @@ fd_decode(const uint8_t* buffer, size_t len_sz, int mode_int, uintptr_t address,
         return FD_ERR_UD;
 
     instr->size = off;
+    instr->operandsz = desc->gp_instr_width ? op_size : 0;
 
     return off;
 }
