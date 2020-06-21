@@ -138,7 +138,6 @@ decode_prefixes(const uint8_t* buffer, int len, DecodeMode mode,
             prefixes |= byte & 0x80 ? 0 : PREFIX_REXR;
             if (prefix == 0xc4) // 3-byte VEX
             {
-                prefixes |= byte & 0x80 ? 0 : PREFIX_REXR;
                 prefixes |= byte & 0x40 ? 0 : PREFIX_REXX;
                 // SDM Vol 2A 2-15 (Dec. 2016): Ignored in 32-bit mode
                 prefixes |= mode == DECODE_64 || (byte & 0x20) ? 0 : PREFIX_REXB;
@@ -203,20 +202,37 @@ decode_modrm(const uint8_t* buffer, int len, DecodeMode mode, FdInstr* instr,
     if (UNLIKELY(vsib) && (rm != 4 || mod == 3))
         return FD_ERR_UD;
 
+    bool is_seg = UNLIKELY(instr->type == FDI_MOV_G2S || instr->type == FDI_MOV_S2G);
+    bool is_cr = UNLIKELY(instr->type == FDI_MOV_CR);
+    bool is_dr = UNLIKELY(instr->type == FDI_MOV_DR);
+
     // Operand 2 may be NULL when reg field is used as opcode extension
     if (out_o2)
     {
         uint8_t reg_idx = mod_reg;
+        // FIXME: don't apply REX.R to MMX registers.
 #if defined(ARCH_X86_64)
-        reg_idx += prefixes & PREFIX_REXR ? 8 : 0;
+        if (!is_seg)
+            reg_idx += prefixes & PREFIX_REXR ? 8 : 0;
 #endif
+
+        if (is_seg && reg_idx >= 6)
+            return FD_ERR_UD;
+        else if (UNLIKELY(instr->type == FDI_MOV_G2S) && reg_idx == 1)
+            return FD_ERR_UD;
+        else if (is_cr && (~0x011d >> reg_idx) & 1)
+            return FD_ERR_UD;
+        else if (is_dr && reg_idx >= 8)
+            return FD_ERR_UD;
+
         out_o2->type = FD_OT_REG;
         out_o2->reg = reg_idx;
     }
 
-    if (mod == 3 || instr->type == FDI_MOV_CR || instr->type == FDI_MOV_DR)
+    if (mod == 3 || is_cr || is_dr)
     {
         uint8_t reg_idx = rm;
+        // FIXME: don't apply REX.B to MMX and MASK registers.
 #if defined(ARCH_X86_64)
         reg_idx += prefixes & PREFIX_REXB ? 8 : 0;
 #endif
@@ -466,6 +482,7 @@ fd_decode(const uint8_t* buffer, size_t len_sz, int mode_int, uintptr_t address,
         // If there is no ModRM, but a Mod-Reg, its opcode-encoded.
         FdOp* operand = &instr->operands[DESC_MODREG_IDX(desc)];
         uint8_t reg_idx = buffer[off - 1] & 7;
+        // FIXME: don't apply REX.B to FPU, MMX, and MASK registers.
 #if defined(ARCH_X86_64)
         reg_idx += prefixes & PREFIX_REXB ? 8 : 0;
 #endif
@@ -621,23 +638,10 @@ fd_decode(const uint8_t* buffer, size_t len_sz, int mode_int, uintptr_t address,
             instr->operands[i].size == 1 && reg_idx >= 4)
             reg_type = FD_RT_GPH;
         // Fixup eager application of REX prefix
-        if ((reg_type == FD_RT_MMX || reg_type == FD_RT_SEG) && reg_idx >= 8)
+        if ((reg_type == FD_RT_MMX || reg_type == FD_RT_FPU) && reg_idx >= 8)
             instr->operands[i].reg -= 8;
-        // Reject invalid segment registers
-        if (UNLIKELY(reg_type == FD_RT_SEG) && reg_idx >= 6)
-            return FD_ERR_UD;
-        // Reject invalid control registers
-        if (UNLIKELY(reg_type == FD_RT_CR) && reg_idx != 0 && reg_idx != 2 &&
-                reg_idx != 3 && reg_idx != 4 && reg_idx != 8)
-            return FD_ERR_UD;
-        // Reject invalid debug registers
-        if (UNLIKELY(reg_type == FD_RT_DR) && reg_idx >= 8)
-            return FD_ERR_UD;
         instr->operands[i].misc = reg_type;
     }
-
-    if (instr->type == FDI_MOV_G2S && instr->operands[0].reg == 1)
-        return FD_ERR_UD;
 
     instr->size = off;
     instr->operandsz = desc->gp_instr_width ? op_size : 0;

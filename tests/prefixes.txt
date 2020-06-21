@@ -17,3 +17,15 @@ decode64 6690                           [NOP]
 decode   66                             PARTIAL
 decode   0f                             PARTIAL
 decode   80                             PARTIAL
+decode   0F01E2                         [SMSW reg4:r2]
+decode64 660f2000                       [MOV_CR reg8:r0 reg0:r0]
+decode64 0f20c8                         UD
+decode64 0f20d0                         [MOV_CR reg8:r0 reg0:r2]
+decode64 440f2008                       UD
+decode64 440f2100                       UD
+decode   8cc0                           [MOV_S2G reg4:r0 reg0:r0]
+decode64 448cc0                         [MOV_S2G reg4:r0 reg0:r0]
+decode   8ec0                           [MOV_G2S reg0:r0 reg4:r0]
+decode   8ec8                           UD
+decode   d8c1                           [FADD reg0:r0 reg0:r1]
+decode64 41d8c1                         [FADD reg0:r0 reg0:r1]
