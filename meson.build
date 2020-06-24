@@ -58,12 +58,16 @@ instr_data = custom_target('tables',
                            command: [python3, '@INPUT0@', '@INPUT1@', '@OUTPUT@'] + generate_args,
                            input: files('parseinstrs.py', 'instrs.txt'),
                            output: [
-                             'fadec-mnems.inc', 'fadec-table.inc'
+                             'fadec-mnems.inc', 'fadec-table.inc',
+                             'fadec-enc-mnems.inc', 'fadec-enc-cases.inc',
                            ],
                            install: true,
-                           install_dir: [get_option('includedir'), false])
+                           install_dir: [
+                             get_option('includedir'), false,
+                             get_option('includedir'), false,
+                           ])
 
-libfadec = static_library('fadec', 'decode.c', 'format.c', instr_data,
+libfadec = static_library('fadec', 'decode.c', 'encode.c', 'format.c', instr_data,
                           install: true)
 fadec = declare_dependency(link_with: libfadec,
                            include_directories: include_directories('.'),
@@ -71,7 +75,7 @@ fadec = declare_dependency(link_with: libfadec,
 
 subdir('tests')
 
-install_headers('fadec.h')
+install_headers('fadec.h', 'fadec-enc.h')
 
 pkg = import('pkgconfig')
 pkg.generate(libraries: libfadec,

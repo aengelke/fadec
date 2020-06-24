@@ -145,14 +145,7 @@
 8f/0                  M     GP     -      -      -      POP DEF64
 # Against frequent belief, only, XCHG (r/e)AX, (r)AX with 90 is NOP.
 # As a lacking REX.B cannot be specified here, this is hardcoded.
-90                    OA    GP     GP     -      -      XCHG_NOP
-91                    OA    GP     GP     -      -      XCHG
-92                    OA    GP     GP     -      -      XCHG
-93                    OA    GP     GP     -      -      XCHG
-94                    OA    GP     GP     -      -      XCHG
-95                    OA    GP     GP     -      -      XCHG
-96                    OA    GP     GP     -      -      XCHG
-97                    OA    GP     GP     -      -      XCHG
+90+                   OA    GP     GP     -      -      XCHG_NOP
 98                    NP    -      -      -      -      C_EX INSTR_WIDTH
 99                    NP    -      -      -      -      C_SEP INSTR_WIDTH
 #9a CALLF TODO

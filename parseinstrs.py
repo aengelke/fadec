@@ -423,6 +423,191 @@ template = """// Auto-generated file -- do not modify!
 #endif
 """
 
+class EncodeMnemonic(NamedTuple):
+    name: str
+    optypes: Tuple[str, ...]
+    opsize: int # bits
+    lock: bool
+
+def encode_table(entries):
+    mnemonics = defaultdict(list)
+    for opcode, desc in entries:
+        if desc.mnemonic in ("RESERVED_NOP",):
+            continue
+        if "ONLY32" in desc.flags or "UNDOC" in desc.flags:
+            continue
+        opsizes = None
+        if "SIZE_8" in desc.flags:
+            opsizes = {8}
+        else:
+            opsizes = {16, 32, 64}
+            if any(kind == EntryKind.TABLE_PREFIX for kind, _ in opcode):
+                opsizes.remove(16)
+            if any(kind == EntryKind.TABLE_VEX and (val&1) == 0 for kind, val in opcode):
+                opsizes.remove(64)
+            if any(kind == EntryKind.TABLE_VEX and (val&1) == 1 for kind, val in opcode):
+                opsizes.remove(32)
+            if "DEF64" in desc.flags:
+                opsizes.remove(32)
+
+        if "INSTR_WIDTH" not in desc.flags and not any(op.size == OpKind.SZ_OP for op in desc.operands):
+            opsizes = {0}
+
+        mustmem = "MUSTMEM" in desc.flags or any(kind == EntryKind.TABLE72 and val < 8 for kind, val in opcode)
+        rm = "r" if "NOMEM" in desc.flags else "m" if mustmem else "rm"
+        optypes = {
+            "NP": (),
+            "M": (rm,),
+            "M1": (rm, "i"),
+            "MI": (rm, "i"),
+            "MC": (rm, "r"),
+            "MR": (rm, "r"),
+            "RM": ("r", rm),
+            "RMA": ("r", rm, "r"),
+            "MRI": (rm, "r", "i"),
+            "RMI": ("r", rm, "i"),
+            "MRC": (rm, "r", "r"),
+            "I": ("i",),
+            "IA": ("r", "i"),
+            "O": ("r",),
+            "OI": ("r", "i"),
+            "OA": ("r", "r"),
+            "AO": ("r", "r"),
+            "A": ("r",),
+            "D": ("o"),
+            "FD": ("r", "a"),
+            "TD": ("a", "r"),
+
+            "RVM": ("r", "r", rm),
+            "RVMI": ("r", "r", rm, "i"),
+            "RVMR": ("r", "r", rm, "r"),
+            "RMV": ("r", rm, "r"),
+            "VM": ("r", rm),
+            "VMI": ("r", rm, "i"),
+            "MVR": (rm, "r", "r"),
+        }[desc.encoding]
+
+        lock = ["", "LOCK_"] if "LOCK" in desc.flags else [""]
+        for opsize, lock_p, *ots in product(opsizes, lock, *optypes):
+            if lock_p and ots[0] != "m":
+                continue
+            separate_opsize = any(op.kind == "GP" and op.size > 0 for op in desc.operands) and desc.encoding not in ("MC", "MRC")
+            prepend_opsize = not separate_opsize and ("INSTR_WIDTH" in desc.flags or any(op.size == OpKind.SZ_OP for op in desc.operands))
+            if "DEF64" in desc.flags and opsize == 64:
+                prepend_opsize = False
+            suffixes = []
+            if prepend_opsize:
+                suffixes.append(opsize)
+            for i, op in enumerate(desc.operands):
+                if ots[i] != "o":
+                    suffixes.append(ots[i])
+                if separate_opsize:
+                    if op.size > 0:
+                        suffixes.append(8 * op.size)
+                    elif op.size == OpKind.SZ_OP:
+                        suffixes.append(opsize)
+            mnem_name = {"MOVABS": "MOV"}.get(desc.mnemonic, desc.mnemonic)
+            name = "FE_" + lock_p + mnem_name + "".join(map(str, suffixes))
+            mnemonics[EncodeMnemonic(name, tuple(ots), opsize, not not lock_p)].append((opcode, desc))
+
+    switch_code = ""
+    for mnem, v in sorted(mnemonics.items(), key=lambda e: e[0].name):
+        enc_prio = ["O", "OA", "AO", "OI", "D", "IA", "M", "MI", "MR", "RM", "FD", "TD"]
+        v.sort(key=lambda e: ("IMM_8" not in e[1].flags, e[1].encoding in enc_prio and enc_prio.index(e[1].encoding)))
+        variants = []
+        for opcode, desc in v:
+            conds = []
+            if desc.encoding == "M1":
+                conds.append(f"op1 == 1")
+            elif desc.encoding == "MC":
+                conds.append(f"op_reg_idx(op1) == 1")
+            elif desc.encoding == "IA":
+                conds.append(f"op_reg_idx(op0) == 0")
+            elif desc.encoding == "RMA":
+                conds.append(f"op_reg_idx(op2) == 0")
+            elif desc.encoding == "MRC":
+                conds.append(f"op_reg_idx(op2) == 1")
+            elif desc.encoding in ("NP", "M", "MI", "MR", "RM", "MRI", "RMI", "I", "D", "O"):
+                pass
+            else:
+                conds.append("0 /*enc not supp*/")
+
+            gp8ops = [] # operands that require special handling
+            for i, ot in enumerate(mnem.optypes):
+                if ot == "m":
+                    conds.append(f"op_mem(op{i})")
+                elif ot == "i":
+                    if "IMM_8" in desc.flags:
+                        conds.append(f"op_imm8(op{i})")
+                elif ot == "o":
+                    if "IMM_8" in desc.flags:
+                        # TODO: Handle JCXZ and LOOP/LOOPcc, which only have IMM_8
+                        # TODO: Support short jumps
+                        conds.append(f"0 /*short jumps not supp*/")
+                elif ot == "r":
+                    if desc.operands[i].kind == "GP":
+                        sz = mnem.opsize // 8 if desc.operands[i].size == OpKind.SZ_OP else desc.operands[i].size
+                        if sz == 1:
+                            conds.append(f"(op_reg_gpl(op{i})||op_reg_gph(op{i}))")
+                            gp8ops.append(i)
+                        else:
+                            conds.append(f"op_reg_gpl(op{i})")
+                    else:
+                        conds.append("0 /*reg not supp*/")
+
+            flags = ""
+            opc_i = -1
+            for kind, val in opcode:
+                if kind == EntryKind.TABLE_ROOT:
+                    if val & 4:
+                        conds.append("0 /*opc,vex not supp*/")
+                    flags += ["","|OPC_0F","|OPC_0F38","|OPC_0F3A"][val & 3]
+                elif kind == EntryKind.TABLE256:
+                    opc_i = val
+                elif kind in (EntryKind.TABLE8, EntryKind.TABLE72):
+                    opc_i |= (val if val < 8 else val + 0xb8) << 8
+                elif kind in (EntryKind.TABLE_PREFIX, EntryKind.TABLE_PREFIX_REP):
+                    flags += ["", "|OPC_66", "|OPC_F2", "|OPC_F3"][val]
+                elif kind == EntryKind.TABLE_VEX:
+                    if val & 2:
+                        conds.append("0 /*opc,vexl not supp*/")
+                    flags += ["", "|OPC_REXW"][val & 1]
+                else:
+                    conds.append("0 /*opc not supp*/")
+            opc_s = hex(opc_i) + flags
+            if mnem.lock: opc_s += "|OPC_LOCK"
+            if mnem.opsize == 16: opc_s += "|OPC_66"
+            if mnem.opsize == 64 and "DEF64" not in desc.flags: opc_s += "|OPC_REXW"
+
+            imm_size = 0
+            if "IMM_8" in desc.flags:
+                imm_size = 1
+            elif desc.mnemonic in ("RET", "RETF"):
+                imm_size = 2
+            elif desc.mnemonic == "ENTER":
+                imm_size = 3
+            elif mnem.opsize == 2:
+                imm_size = 2
+            elif mnem.opsize == 8 and desc.mnemonic == "MOVABS":
+                imm_size = 8
+            else:
+                imm_size = 4
+
+            code = f"enc=ENC_{desc.encoding};opc={opc_s};immsz={imm_size};"
+            if gp8ops:
+                code += f"gp8ops={sum(1 << i for i in gp8ops)};"
+
+            cond_str = f"if ({'&&'.join(conds)}) " if conds else ""
+            variants.append(f"{cond_str}{{{code}goto encode;}}")
+
+        variant_str = "\n  ".join(variants)
+        switch_code += f"case {mnem.name}:\n  {variant_str}\n  goto fail;\n"
+
+    mnemonics_list = sorted(mnemonics.keys())
+    mnemonics_lut = {mnem.name: mnemonics_list.index(mnem) for mnem in mnemonics_list}
+    mnemonics_tab = "\n".join("FE_MNEMONIC(%s,%d)"%entry for entry in mnemonics_lut.items())
+    return mnemonics_tab, switch_code
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--32", dest="modes", action="append_const", const=32)
@@ -430,6 +615,8 @@ if __name__ == "__main__":
     parser.add_argument("table", type=argparse.FileType('r'))
     parser.add_argument("decode_mnems", type=argparse.FileType('w'))
     parser.add_argument("decode_table", type=argparse.FileType('w'))
+    parser.add_argument("encode_mnems", type=argparse.FileType('w'))
+    parser.add_argument("encode_table", type=argparse.FileType('w'))
     args = parser.parse_args()
 
     entries = []
@@ -469,3 +656,7 @@ if __name__ == "__main__":
         defines="\n".join("#define " + line for line in defines),
     )
     args.decode_table.write(decode_table)
+
+    fe_mnem_list, fe_code = encode_table(entries)
+    args.encode_mnems.write(fe_mnem_list)
+    args.encode_table.write(fe_code)
