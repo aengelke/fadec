@@ -45,10 +45,10 @@ InstrFlags = bitstruct("InstrFlags", [
     "gp_fixed_operand_size:3",
     "lock:1",
     "vsib:1",
-    "op0_regty:4",
-    "op1_regty:4",
-    "op2_regty:4",
-    "op3_regty:4",
+    "op0_regty:3",
+    "op1_regty:3",
+    "op2_regty:3",
+    "_unused:7",
 ])
 
 ENCODINGS = {
@@ -84,34 +84,34 @@ ENCODINGS = {
 
 OPKIND_LOOKUP = {
     # sizeidx (0, fixedsz, opsz, vecsz), fixedsz (log2), regtype
-    "-": (0, 0, 0),
-    "IMM": (2, 0, 0),
-    "IMM8": (1, 0, 0),
-    "IMM16": (1, 1, 0),
-    "IMM32": (1, 2, 0),
-    "GP": (2, 0, 1),
-    "GP8": (1, 0, 1),
-    "GP16": (1, 1, 1),
-    "GP32": (1, 2, 1),
-    "GP64": (1, 3, 1),
-    "MMX": (1, 3, 5),
-    "XMM": (3, 0, 6),
-    "XMM8": (1, 0, 6),
-    "XMM16": (1, 1, 6),
-    "XMM32": (1, 2, 6),
-    "XMM64": (1, 3, 6),
-    "XMM128": (1, 4, 6),
-    "XMM256": (1, 5, 6),
-    "SREG": (0, 0, 3),
-    "FPU": (0, 0, 4),
-    "MEMZ": (0, 0, 0),
-    "MEM8": (1, 0, 0),
-    "MEM16": (1, 1, 0),
-    "MEM32": (1, 2, 0),
-    "MEM64": (1, 3, 0),
-    "BND": (0, 0, 8),
-    "CR": (0, 0, 9),
-    "DR": (0, 0, 10),
+    "-": (0, 0, 7),
+    "IMM": (2, 0, 7),
+    "IMM8": (1, 0, 7),
+    "IMM16": (1, 1, 7),
+    "IMM32": (1, 2, 7),
+    "GP": (2, 0, 0),
+    "GP8": (1, 0, 0),
+    "GP16": (1, 1, 0),
+    "GP32": (1, 2, 0),
+    "GP64": (1, 3, 0),
+    "MMX": (1, 3, 4),
+    "XMM": (3, 0, 2),
+    "XMM8": (1, 0, 2),
+    "XMM16": (1, 1, 2),
+    "XMM32": (1, 2, 2),
+    "XMM64": (1, 3, 2),
+    "XMM128": (1, 4, 2),
+    "XMM256": (1, 5, 2),
+    "SREG": (0, 0, 7),
+    "FPU": (0, 0, 1),
+    "MEMZ": (0, 0, 7),
+    "MEM8": (1, 0, 7),
+    "MEM16": (1, 1, 7),
+    "MEM32": (1, 2, 7),
+    "MEM64": (1, 3, 7),
+    "BND": (0, 0, 5),
+    "CR": (0, 0, 7),
+    "DR": (0, 0, 7),
 }
 
 class InstrDesc(NamedTuple):
@@ -134,7 +134,10 @@ class InstrDesc(NamedTuple):
             enc_size, fixed_size, reg_type = OPKIND_LOOKUP[opkind]
             if enc_size == 1: fixed_opsz.add(fixed_size)
             setattr(flags, "op%d_size"%i, enc_size)
-            setattr(flags, "op%d_regty"%i, reg_type)
+            if i < 3:
+                setattr(flags, "op%d_regty"%i, reg_type)
+            elif reg_type not in (7, 2):
+                raise Exception("invalid regty for op 3, must be VEC")
 
         if fixed_opsz: flags.gp_fixed_operand_size = next(iter(fixed_opsz))
 

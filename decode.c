@@ -210,9 +210,8 @@ decode_modrm(const uint8_t* buffer, int len, DecodeMode mode, FdInstr* instr,
     if (out_o2)
     {
         uint8_t reg_idx = mod_reg;
-        // FIXME: don't apply REX.R to MMX registers.
 #if defined(ARCH_X86_64)
-        if (!is_seg)
+        if (!is_seg && !UNLIKELY(out_o2->misc == FD_RT_MMX))
             reg_idx += prefixes & PREFIX_REXR ? 8 : 0;
 #endif
 
@@ -227,14 +226,23 @@ decode_modrm(const uint8_t* buffer, int len, DecodeMode mode, FdInstr* instr,
 
         out_o2->type = FD_OT_REG;
         out_o2->reg = reg_idx;
+        if (is_cr)
+            out_o2->misc = FD_RT_CR;
+        else if (is_dr)
+            out_o2->misc = FD_RT_DR;
+        else if (is_seg)
+            out_o2->misc = FD_RT_SEG;
     }
 
     if (mod == 3 || is_cr || is_dr)
     {
+        if (out_o1->misc == FD_RT_MEM)
+            return FD_ERR_UD;
+
         uint8_t reg_idx = rm;
-        // FIXME: don't apply REX.B to MMX and MASK registers.
 #if defined(ARCH_X86_64)
-        reg_idx += prefixes & PREFIX_REXB ? 8 : 0;
+        if (!UNLIKELY(out_o1->misc == FD_RT_MMX || out_o1->misc == FD_RT_MASK))
+            reg_idx += prefixes & PREFIX_REXB ? 8 : 0;
 #endif
         out_o1->type = FD_OT_REG;
         out_o1->reg = reg_idx;
@@ -457,6 +465,14 @@ fd_decode(const uint8_t* buffer, size_t len_sz, int mode_int, uintptr_t address,
 
     __builtin_memset(instr->operands, 0, sizeof(instr->operands));
 
+    // Reg operand 4 is only possible with RVMR encoding, which implies VEC.
+    for (int i = 0; i < 3; i++)
+    {
+        uint32_t reg_type = (desc->reg_types >> 3 * i) & 0x7;
+        // GPL FPU VEC MSK MMX BND ??? NVR
+        instr->operands[i].misc = (0xf0857641 >> (4 * reg_type)) & 0xf;
+    }
+
     if (DESC_HAS_IMPLICIT(desc))
     {
         FdOp* operand = &instr->operands[DESC_IMPLICIT_IDX(desc)];
@@ -484,7 +500,8 @@ fd_decode(const uint8_t* buffer, size_t len_sz, int mode_int, uintptr_t address,
         uint8_t reg_idx = buffer[off - 1] & 7;
         // FIXME: don't apply REX.B to FPU, MMX, and MASK registers.
 #if defined(ARCH_X86_64)
-        reg_idx += prefixes & PREFIX_REXB ? 8 : 0;
+        if (!UNLIKELY(operand->misc == FD_RT_FPU))
+            reg_idx += prefixes & PREFIX_REXB ? 8 : 0;
 #endif
         operand->type = FD_OT_REG;
         operand->reg = reg_idx;
@@ -534,6 +551,7 @@ fd_decode(const uint8_t* buffer, size_t len_sz, int mode_int, uintptr_t address,
         // 3 = register in imm8[7:4], used for RVMR encoding with VBLENDVP[SD]
         FdOp* operand = &instr->operands[DESC_IMM_IDX(desc)];
         operand->type = FD_OT_REG;
+        operand->misc = FD_RT_VEC;
 
         if (UNLIKELY(off + 1 > len))
             return FD_ERR_PARTIAL;
@@ -622,25 +640,16 @@ fd_decode(const uint8_t* buffer, size_t len_sz, int mode_int, uintptr_t address,
 
     for (int i = 0; i < 4; i++)
     {
-        if (instr->operands[i].type == FD_OT_NONE)
+        FdOp* operand = &instr->operands[i];
+        if (operand->type == FD_OT_NONE)
             break;
 
-        uint8_t enc_size = (desc->operand_sizes >> 2 * i) & 3;
-        instr->operands[i].size = operand_sizes[enc_size];
+        operand->size = operand_sizes[(desc->operand_sizes >> 2 * i) & 3];
 
-        uint32_t reg_type = (desc->reg_types >> 4 * i) & 0xf;
-        uint32_t reg_idx = instr->operands[i].reg;
-        if (reg_type == FD_RT_MEM && instr->operands[i].type != FD_OT_MEM)
-            return FD_ERR_UD;
-        if (instr->operands[i].type != FD_OT_REG)
-            continue;
-        if (reg_type == FD_RT_GPL && !(prefixes & PREFIX_REX) &&
-            instr->operands[i].size == 1 && reg_idx >= 4)
-            reg_type = FD_RT_GPH;
-        // Fixup eager application of REX prefix
-        if ((reg_type == FD_RT_MMX || reg_type == FD_RT_FPU) && reg_idx >= 8)
-            instr->operands[i].reg -= 8;
-        instr->operands[i].misc = reg_type;
+        // if (operand->type == FD_OT_REG && operand->misc == FD_RT_GPL &&
+        //     !(prefixes & PREFIX_REX) && operand->size == 1 && operand->reg >= 4)
+        if (!(prefixes & PREFIX_REX) && (LOAD_LE_4(operand) & 0xfffcffff) == 0x01040101)
+            operand->misc = FD_RT_GPH;
     }
 
     instr->size = off;
