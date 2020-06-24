@@ -91,6 +91,13 @@ class OpKind(NamedTuple):
     K_MEM = "mem"
     K_IMM = "imm"
 
+    def abssize(self, opsz=None, vecsz=None):
+        res = opsz if self.size == self.SZ_OP else \
+              vecsz if self.size == self.SZ_VEC else self.size
+        if res is None:
+            raise Exception("unspecified operand size")
+        return res
+
 OPKINDS = {
     # sizeidx (0, fixedsz, opsz, vecsz), fixedsz (log2), regtype
     "IMM": OpKind(OpKind.SZ_OP, OpKind.K_IMM),
@@ -423,6 +430,144 @@ template = """// Auto-generated file -- do not modify!
 #endif
 """
 
+def encode_table(entries):
+    mnemonics = defaultdict(list)
+    mnemonics["FE_NOP"].append(("NP", 0, 0, "0x90"))
+    for opcode, desc in entries:
+        if desc.mnemonic[:9] == "RESERVED_":
+            continue
+        if "ONLY32" in desc.flags or "UNDOC" in desc.flags:
+            continue
+
+        opsizes = {8} if "SIZE_8" in desc.flags else {16, 32, 64}
+        hasvex, vecsizes = False, {128}
+
+        opc_i = opcode.opc | (opcode.opcext[1] << 8 if opcode.opcext else 0)
+        opc_flags = ""
+        opc_flags += ["","|OPC_0F","|OPC_0F38","|OPC_0F3A"][opcode.escape]
+        if opcode.vex:
+            hasvex, vecsizes = True, {128, 256}
+            opc_flags += "|OPC_VEX"
+        if opcode.prefix:
+            opc_flags += ["", "|OPC_66", "|OPC_F3", "|OPC_F2"][opcode.prefix[1]]
+            if not opcode.prefix[0]: opsizes -= {16}
+        if opcode.vexl == "IG":
+            vecsizes = {0}
+        elif opcode.vexl:
+            vecsizes -= {128 if opcode.vexl == "1" else 256}
+            if opcode.vexl == "1": opc_flags += "|OPC_VEXL"
+        if opcode.rexw == "IG":
+            opsizes = {0}
+        elif opcode.rexw:
+            opsizes -= {32 if opcode.rexw == "1" else 64}
+            if opcode.rexw == "1": opc_flags += "|OPC_REXW"
+
+        if "DEF64" in desc.flags:
+            opsizes -= {32}
+        if "INSTR_WIDTH" not in desc.flags and all(op.size != OpKind.SZ_OP for op in desc.operands):
+            opsizes = {0}
+        if all(op.size != OpKind.SZ_VEC for op in desc.operands):
+            vecsizes = {0} # for VEX-encoded general-purpose instructions.
+        if "ENC_NOSZ" in desc.flags:
+            opsizes, vecsizes = {0}, {0}
+
+        # Where to put the operand size in the mnemonic
+        separate_opsize = "ENC_SEPSZ" in desc.flags
+        prepend_opsize = max(opsizes) > 0 and not separate_opsize
+        prepend_vecsize = hasvex and max(vecsizes) > 0 and not separate_opsize
+
+        optypes = ["", "", "", ""]
+        enc = ENCODINGS[desc.encoding]
+        if enc.modrm_idx:
+            if "NOMEM" in desc.flags:
+                optypes[enc.modrm_idx^3] = "r"
+            elif ((opcode.opcext and opcode.opcext[0] and opcode.opcext[1] < 8)
+                  or desc.operands[enc.modrm_idx^3].kind == OpKind.K_MEM):
+                optypes[enc.modrm_idx^3] = "m"
+            else:
+                optypes[enc.modrm_idx^3] = "rm"
+        if enc.modreg_idx: optypes[enc.modreg_idx^3] = "r"
+        if enc.vexreg_idx: optypes[enc.vexreg_idx^3] = "r"
+        if enc.zeroreg_idx: optypes[enc.zeroreg_idx^3] = "r"
+        if enc.imm_control: optypes[enc.imm_idx^3] = " iariioo"[enc.imm_control]
+        optypes = product(*(ot for ot in optypes if ot))
+
+        prefixes = [("", "")]
+        if "LOCK" in desc.flags:
+            prefixes.append(("LOCK_", "|OPC_LOCK"))
+        if "ENC_REP" in desc.flags:
+            prefixes.append(("REP_", "|OPC_F3"))
+        if "ENC_REPCC" in desc.flags:
+            prefixes.append(("REPNZ_", "|OPC_F2"))
+            prefixes.append(("REPZ_", "|OPC_F3"))
+
+        for opsize, vecsize, prefix, ots in product(opsizes, vecsizes, prefixes, optypes):
+            if prefix[1] == "|OPC_LOCK" and ots[0] != "m":
+                continue
+
+            imm_size = 0
+            if enc.imm_control >= 4:
+                if desc.mnemonic == "ENTER":
+                    imm_size = 3
+                elif "IMM_8" in desc.flags:
+                    imm_size = 1
+                else:
+                    max_imm_size = 4 if desc.mnemonic != "MOVABS" else 8
+                    imm_opsize = desc.operands[enc.imm_idx^3].abssize(opsize//8)
+                    imm_size = min(max_imm_size, imm_opsize)
+
+            tys = [] # operands that require special handling
+            for ot, op in zip(ots, desc.operands):
+                if ot == "m":
+                    tys.append(0xf)
+                elif op.kind == "GP":
+                    tys.append(2 if op.abssize(opsize//8) == 1 else 1)
+                else:
+                    tys.append({
+                        "imm": 0, "SEG": 3, "FPU": 4, "MMX": 5, "XMM": 6,
+                        "BND": 8, "CR": 9, "DR": 10,
+                    }.get(op.kind, -1))
+
+            tys_i = sum(ty << (4*i) for i, ty in enumerate(tys))
+            opc_s = hex(opc_i) + opc_flags + prefix[1]
+            if opsize == 16: opc_s += "|OPC_66"
+            if opsize == 64 and "DEF64" not in desc.flags: opc_s += "|OPC_REXW"
+
+            # Construct mnemonic name
+            mnem_name = {"MOVABS": "MOV", "XCHG_NOP": "XCHG"}.get(desc.mnemonic, desc.mnemonic)
+            name = "FE_" + prefix[0] + mnem_name
+            if prepend_opsize and not ("DEF64" in desc.flags and opsize == 64):
+                name += f"_{opsize}"[name[-1] not in "0123456789":]
+            if prepend_vecsize:
+                name += f"_{vecsize}"[name[-1] not in "0123456789":]
+            for ot, op in zip(ots, desc.operands):
+                name += ot.replace("o", "")
+                if separate_opsize:
+                    name += f"{op.abssize(opsize//8, vecsize//8)*8}"
+            mnemonics[name].append((desc.encoding, imm_size, tys_i, opc_s))
+
+    descs = ""
+    alt_index = 0
+    for mnem, variants in sorted(mnemonics.items()):
+        dedup = []
+        for variant in variants:
+            if not any(x[:3] == variant[:3] for x in dedup):
+                dedup.append(variant)
+
+        enc_prio = ["O", "OA", "OI", "IA", "M", "MI", "MR", "RM"]
+        dedup.sort(key=lambda e: (e[1], e[0] in enc_prio and enc_prio.index(e[0])))
+
+        indices = [mnem] + [f"FE_MNEM_MAX+{alt_index+i}" for i in range(len(dedup) - 1)]
+        alt_list = indices[1:] + ["0"]
+        alt_index += len(alt_list) - 1
+        for idx, alt, (enc, immsz, tys_i, opc_s) in zip(indices, alt_list, dedup):
+            descs += f"[{idx}] = {{ .enc = ENC_{enc}, .immsz = {immsz}, .tys = {tys_i:#x}, .opc = {opc_s}, .alt = {alt} }},\n"
+
+    mnemonics_list = sorted(mnemonics.keys())
+    mnemonics_lut = {mnem: mnemonics_list.index(mnem) for mnem in mnemonics_list}
+    mnemonics_tab = "\n".join("FE_MNEMONIC(%s,%d)"%entry for entry in mnemonics_lut.items())
+    return mnemonics_tab, descs
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--32", dest="modes", action="append_const", const=32)
@@ -430,6 +575,8 @@ if __name__ == "__main__":
     parser.add_argument("table", type=argparse.FileType('r'))
     parser.add_argument("decode_mnems", type=argparse.FileType('w'))
     parser.add_argument("decode_table", type=argparse.FileType('w'))
+    parser.add_argument("encode_mnems", type=argparse.FileType('w'))
+    parser.add_argument("encode_table", type=argparse.FileType('w'))
     args = parser.parse_args()
 
     entries = []
@@ -469,3 +616,7 @@ if __name__ == "__main__":
         defines="\n".join("#define " + line for line in defines),
     )
     args.decode_table.write(decode_table)
+
+    fe_mnem_list, fe_code = encode_table(entries)
+    args.encode_mnems.write(fe_mnem_list)
+    args.encode_table.write(fe_code)
