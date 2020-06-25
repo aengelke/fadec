@@ -214,16 +214,11 @@ def parse_opcode(opcode_string):
     opcode = []
     opcode_bytes = unhexlify(match.group("opcode"))
 
-    # root table, VEX prefix already consumes escape opcode bytes
+    idx = [b"", b"\x0f", b"\x0f\x38", b"\x0f\x3a"].index(opcode_bytes[:-1])
     if match.group("vex"):
-        idx = [b"", b"\x0f", b"\x0f\x38", b"\x0f\x3a"].index(opcode_bytes[:-1])
-        opcode.append((EntryKind.TABLE_ROOT, [4 | idx]))
-        opcode_bytes = opcode_bytes[-1:]
-    else:
-        opcode.append((EntryKind.TABLE_ROOT, [0]))
-
-    # normal opcode bytes
-    opcode += [(EntryKind.TABLE256, [x]) for x in opcode_bytes]
+        idx |= 4
+    opcode.append((EntryKind.TABLE_ROOT, [idx]))
+    opcode.append((EntryKind.TABLE256, [opcode_bytes[-1]]))
 
     opcext = match.group("modrm")
     if opcext:

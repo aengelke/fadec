@@ -83,7 +83,7 @@ decode_prefixes(const uint8_t* buffer, int len, DecodeMode mode,
     uint8_t rep = 0;
     *out_mandatory = 0;
     *out_segment = FD_REG_NONE;
-    *out_opcode_escape = -1;
+    *out_opcode_escape = 0;
 
     while (LIKELY(off < len))
     {
@@ -373,24 +373,28 @@ fd_decode(const uint8_t* buffer, size_t len_sz, int mode_int, uintptr_t address,
 
     uint32_t kind = ENTRY_TABLE_ROOT;
 
-    if (LIKELY(!(prefixes & PREFIX_VEX)))
+    if (UNLIKELY(prefixes & PREFIX_VEX))
     {
-        // "Legacy" walk through table and escape opcodes
-        ENTRY_UNPACK(table, kind, table[0]);
-        if (kind == ENTRY_TABLE256 && LIKELY(off < len))
-            ENTRY_UNPACK(table, kind, table[buffer[off++]]);
-        if (UNLIKELY(kind == ENTRY_TABLE256) && LIKELY(off < len))
-            ENTRY_UNPACK(table, kind, table[buffer[off++]]);
-    }
-    else
-    {
-        // VEX/EVEX compact escapes; the prefix precedes the single opcode byte
         if (opcode_escape < 0 || opcode_escape > 3)
             return FD_ERR_UD;
-        ENTRY_UNPACK(table, kind, table[4 | opcode_escape]);
-        if (LIKELY(off < len))
-            ENTRY_UNPACK(table, kind, table[buffer[off++]]);
+        opcode_escape |= 4;
     }
+    else if (buffer[off] == 0x0f)
+    {
+        if (UNLIKELY(off + 1 >= len))
+            return FD_ERR_PARTIAL;
+        if (buffer[off + 1] == 0x38)
+            opcode_escape = 2;
+        else if (buffer[off + 1] == 0x3a)
+            opcode_escape = 3;
+        else
+            opcode_escape = 1;
+        off += opcode_escape >= 2 ? 2 : 1;
+    }
+
+    ENTRY_UNPACK(table, kind, table[opcode_escape]);
+    if (LIKELY(off < len))
+        ENTRY_UNPACK(table, kind, table[buffer[off++]]);
 
     // Then, walk through ModR/M-encoded opcode extensions.
     if ((kind == ENTRY_TABLE8 || kind == ENTRY_TABLE72) && LIKELY(off < len))
