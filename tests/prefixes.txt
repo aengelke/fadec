@@ -29,3 +29,4 @@ decode   8ec0                           [MOV_G2S reg0:r0 reg4:r0]
 decode   8ec8                           UD
 decode   d8c1                           [FADD reg0:r0 reg0:r1]
 decode64 41d8c1                         [FADD reg0:r0 reg0:r1]
+decode64 41dfe0                         [FSTSW reg2:r0]

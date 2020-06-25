@@ -1391,7 +1391,7 @@ df//5                 M     MEM64  -      -      -      FILD
 df//6                 M     FPU    -      -      -      FBSTP
 df//7                 M     MEM64  -      -      -      FISTP
 # FSTSW AX
-df//e0                O     GP16   -      -      -      FSTSW
+df//e0                A     GP16   -      -      -      FSTSW
 df//f0+               AO    FPU    FPU    -      -      FCOMIP
 df//f8+               AO    FPU    FPU    -      -      FUCOMIP
 #

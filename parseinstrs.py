@@ -69,6 +69,7 @@ ENCODINGS = {
     "OI": InstrFlags(modreg_idx=0^3, imm_idx=1^3, imm_control=4),
     "OA": InstrFlags(modreg_idx=0^3, zeroreg_idx=1^3),
     "AO": InstrFlags(modreg_idx=1^3, zeroreg_idx=0^3),
+    "A": InstrFlags(zeroreg_idx=0^3),
     "D": InstrFlags(imm_idx=0^3, imm_control=6),
     "FD": InstrFlags(zeroreg_idx=0^3, imm_idx=1^3, imm_control=2),
     "TD": InstrFlags(zeroreg_idx=1^3, imm_idx=0^3, imm_control=2),
