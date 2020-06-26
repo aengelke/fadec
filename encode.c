@@ -235,7 +235,7 @@ encode:
         if (enc_mr(buf, opc, op0, (opc & 0xff00) >> 8)) goto fail;
         break;
     case ENC_MI:
-        if (enc_mr(buf, opc, op0, (opc & 0xff00) > 8)) goto fail;
+        if (enc_mr(buf, opc, op0, (opc & 0xff00) >> 8)) goto fail;
         if (enc_imm(buf, op1, immsz)) goto fail;
         break;
     case ENC_MR:

@@ -513,7 +513,7 @@ def encode_table(entries):
     switch_code = ""
     for mnem, v in sorted(mnemonics.items(), key=lambda e: e[0].name):
         enc_prio = ["O", "OA", "AO", "OI", "D", "IA", "M", "MI", "MR", "RM", "FD", "TD"]
-        v.sort(key=lambda e: ("IMM_8" not in e[1].flags, e[1].encoding in enc_prio and enc_prio.index(e[1].encoding)))
+        v.sort(key=lambda e: (e[1].encoding != "M1", "IMM_8" not in e[1].flags, e[1].encoding in enc_prio and enc_prio.index(e[1].encoding)))
         variants = []
         for opcode, desc in v:
             conds = []
@@ -569,7 +569,7 @@ def encode_table(entries):
                 elif kind in (EntryKind.TABLE8, EntryKind.TABLE72):
                     opc_i |= (val if val < 8 else val + 0xb8) << 8
                 elif kind in (EntryKind.TABLE_PREFIX, EntryKind.TABLE_PREFIX_REP):
-                    flags += ["", "|OPC_66", "|OPC_F2", "|OPC_F3"][val]
+                    flags += ["", "|OPC_66", "|OPC_F3", "|OPC_F2"][val]
                 elif kind == EntryKind.TABLE_VEX:
                     if val & 2:
                         conds.append("0 /*opc,vexl not supp*/")
