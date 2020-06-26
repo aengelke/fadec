@@ -455,37 +455,14 @@ def encode_table(entries):
 
         mustmem = "MUSTMEM" in desc.flags or any(kind == EntryKind.TABLE72 and val < 8 for kind, val in opcode)
         rm = "r" if "NOMEM" in desc.flags else "m" if mustmem else "rm"
-        optypes = {
-            "NP": (),
-            "M": (rm,),
-            "M1": (rm, "i"),
-            "MI": (rm, "i"),
-            "MC": (rm, "r"),
-            "MR": (rm, "r"),
-            "RM": ("r", rm),
-            "RMA": ("r", rm, "r"),
-            "MRI": (rm, "r", "i"),
-            "RMI": ("r", rm, "i"),
-            "MRC": (rm, "r", "r"),
-            "I": ("i",),
-            "IA": ("r", "i"),
-            "O": ("r",),
-            "OI": ("r", "i"),
-            "OA": ("r", "r"),
-            "AO": ("r", "r"),
-            "A": ("r",),
-            "D": ("o"),
-            "FD": ("r", "a"),
-            "TD": ("a", "r"),
-
-            "RVM": ("r", "r", rm),
-            "RVMI": ("r", "r", rm, "i"),
-            "RVMR": ("r", "r", rm, "r"),
-            "RMV": ("r", rm, "r"),
-            "VM": ("r", rm),
-            "VMI": ("r", rm, "i"),
-            "MVR": (rm, "r", "r"),
-        }[desc.encoding]
+        optypes = ["", "", "", ""]
+        enc = ENCODINGS[desc.encoding]
+        if enc.modrm_idx: optypes[enc.modrm_idx^3] = rm
+        if enc.modreg_idx: optypes[enc.modreg_idx^3] = "r"
+        if enc.vexreg_idx: optypes[enc.vexreg_idx^3] = "r"
+        if enc.zeroreg_idx: optypes[enc.zeroreg_idx^3] = "r"
+        if enc.imm_control: optypes[enc.imm_idx^3] = " iariioo"[enc.imm_control]
+        optypes = [ot for ot in optypes if ot]
 
         lock = ["", "LOCK_"] if "LOCK" in desc.flags else [""]
         for opsize, lock_p, *ots in product(opsizes, lock, *optypes):
