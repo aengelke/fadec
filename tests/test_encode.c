@@ -68,6 +68,13 @@ main(int argc, char** argv)
     TEST("", FE_SHL8rr, FE_AH, FE_DX);
     TEST("\x48\xf7\x28", FE_IMUL64m, FE_MEM(FE_AX, 0, 0, 0));
     // TEST("\x66\x90", FE_XCHG16rr, FE_AX, FE_AX);
+    TEST("\xc2\x00\x00", FE_RETi, 0);
+    TEST("\x05\x00\x01\x00\x00", FE_ADD32ri, FE_AX, 0x100);
+    TEST("\x66\x05\x00\x01", FE_ADD16ri, FE_AX, 0x100);
+    TEST("\xb8\x05\x00\x01\x00", FE_MOV32ri, FE_AX, 0x10005);
+    TEST("\x48\xb8\x05\x00\x01\x00\xff\x00\x00\x00", FE_MOV64ri, FE_AX, 0xff00010005);
+    TEST("\x48\xb8\x00\x00\x00\x00\x00\x00\x00\x00", FE_MOV64ri, FE_AX, 0x0);
+    TEST("\xc8\x33\x22\x11", FE_ENTERi, 0x112233);
 
     // Test ModRM encoding
     TEST("\x01\x00", FE_ADD32mr, FE_MEM(FE_AX, 0, 0, 0), FE_AX);

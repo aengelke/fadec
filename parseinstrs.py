@@ -521,13 +521,15 @@ def encode_table(entries):
                 conds.append(f"op1 == 1")
             elif desc.encoding == "MC":
                 conds.append(f"op_reg_idx(op1) == 1")
-            elif desc.encoding == "IA":
+            elif desc.encoding in ("IA", "AO"):
                 conds.append(f"op_reg_idx(op0) == 0")
+            elif desc.encoding == "OA":
+                conds.append(f"op_reg_idx(op1) == 0")
             elif desc.encoding == "RMA":
                 conds.append(f"op_reg_idx(op2) == 0")
             elif desc.encoding == "MRC":
                 conds.append(f"op_reg_idx(op2) == 1")
-            elif desc.encoding in ("NP", "M", "MI", "MR", "RM", "MRI", "RMI", "I", "D", "O"):
+            elif desc.encoding in ("NP", "M", "MI", "MR", "RM", "MRI", "RMI", "I", "D", "O", "OI"):
                 pass
             else:
                 conds.append("0 /*enc not supp*/")
@@ -586,9 +588,9 @@ def encode_table(entries):
                 imm_size = 2
             elif desc.mnemonic == "ENTER":
                 imm_size = 3
-            elif mnem.opsize == 2:
+            elif mnem.opsize == 16:
                 imm_size = 2
-            elif mnem.opsize == 8 and desc.mnemonic == "MOVABS":
+            elif mnem.opsize == 64 and desc.mnemonic == "MOVABS":
                 imm_size = 8
             else:
                 imm_size = 4

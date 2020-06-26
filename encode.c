@@ -255,9 +255,11 @@ encode:
         if (enc_imm(buf, op2, immsz)) goto fail;
         break;
     case ENC_I:
+        if (enc_opc(buf, opc)) goto fail;
         if (enc_imm(buf, op0, immsz)) goto fail;
         break;
     case ENC_IA:
+        if (enc_opc(buf, opc)) goto fail;
         if (enc_imm(buf, op1, immsz)) goto fail;
         break;
     case ENC_O:
