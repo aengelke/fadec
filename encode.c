@@ -24,12 +24,17 @@ static bool op_mem(uint64_t op) { return (op & 0x8000000000000000) != 0; }
 static bool op_reg(uint64_t op) { return (op & 0x8000000000000000) == 0; }
 static bool op_reg_gpl(uint64_t op) { return (op & 0xfffffffffffffff0) == 0x100; }
 static bool op_reg_gph(uint64_t op) { return (op & 0xfffffffffffffffc) == 0x204; }
-static bool op_imm8(uint64_t op) { return (uint64_t) (int64_t) (int8_t) op == op; }
 static int64_t op_mem_offset(uint64_t op) { return (int32_t) (op & 0x00000000ffffffff); }
 static unsigned op_mem_base(uint64_t op) { return (op & 0x00000fff00000000) >> 32; }
 static unsigned op_mem_idx(uint64_t op) { return (op & 0x00fff00000000000) >> 44; }
 static unsigned op_mem_scale(uint64_t op) { return (op & 0x0f00000000000000) >> 56; }
 static unsigned op_reg_idx(uint64_t op) { return (op & 0x00000000000000ff); }
+static bool op_imm_n(uint64_t imm, unsigned immsz) {
+    if (immsz == 1 && (uint64_t) (int64_t) (int8_t) imm != imm) return false;
+    if (immsz == 2 && (uint64_t) (int64_t) (int16_t) imm != imm) return false;
+    if (immsz == 4 && (uint64_t) (int64_t) (int32_t) imm != imm) return false;
+    return true;
+}
 
 static
 int
@@ -59,9 +64,7 @@ static
 int
 enc_imm(uint8_t** buf, uint64_t imm, unsigned immsz)
 {
-    if (immsz == 1 && (uint64_t) (int64_t) (int8_t) imm != imm) return -1;
-    if (immsz == 2 && (uint64_t) (int64_t) (int16_t) imm != imm) return -1;
-    if (immsz == 4 && (uint64_t) (int64_t) (int32_t) imm != imm) return -1;
+    if (!op_imm_n(imm, immsz)) return -1;
     for (unsigned i = 0; i < immsz; i++)
         *(*buf)++ = imm >> 8 * i;
     return 0;
@@ -138,7 +141,7 @@ enc_mr(uint8_t** buf, uint64_t opc, uint64_t op0, uint64_t op1)
             if (rm == 5) mod = 1;
         }
 
-        if (op_mem_offset(op0) && op_imm8(op_mem_offset(op0)) && !mod0off)
+        if (op_mem_offset(op0) && op_imm_n(op_mem_offset(op0), 1) && !mod0off)
             mod = 1;
         else if (op_mem_offset(op0) && !mod0off)
             mod = 2;

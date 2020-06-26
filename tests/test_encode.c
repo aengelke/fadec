@@ -80,7 +80,10 @@ main(int argc, char** argv)
     TEST("\x66\x05\x00\x01", FE_ADD16ri, FE_AX, 0x100);
     TEST("\xb8\x05\x00\x01\x00", FE_MOV32ri, FE_AX, 0x10005);
     TEST("\x48\xb8\x05\x00\x01\x00\xff\x00\x00\x00", FE_MOV64ri, FE_AX, 0xff00010005);
-    TEST("\x48\xb8\x00\x00\x00\x00\x00\x00\x00\x00", FE_MOV64ri, FE_AX, 0x0);
+    TEST("\x48\xc7\xc0\x00\x00\x00\x00", FE_MOV64ri, FE_AX, 0x0);
+    TEST("\x48\xc7\xc0\x00\x00\x00\x80", FE_MOV64ri, FE_AX, (int32_t) 0x80000000);
+    TEST("\x48\xb8\x00\x00\x00\x00\x00\x00\x00\x80", FE_MOV64ri, FE_AX, INT64_MIN);
+    TEST("\x48\xb8\x00\x00\x00\x80\x00\x00\x00\x00", FE_MOV64ri, FE_AX, 0x80000000);
     TEST("\xb0\xff", FE_MOV8ri, FE_AX, (int8_t) 0xff);
     TEST("\xb4\xff", FE_MOV8ri, FE_AH, -1);
     TEST("\xb7\x64", FE_MOV8ri, FE_BH, 0x64);

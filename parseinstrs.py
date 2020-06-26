@@ -513,7 +513,7 @@ def encode_table(entries):
     switch_code = ""
     for mnem, v in sorted(mnemonics.items(), key=lambda e: e[0].name):
         enc_prio = ["O", "OA", "AO", "OI", "D", "IA", "M", "MI", "MR", "RM", "FD", "TD"]
-        v.sort(key=lambda e: (e[1].encoding != "M1", "IMM_8" not in e[1].flags, e[1].encoding in enc_prio and enc_prio.index(e[1].encoding)))
+        v.sort(key=lambda e: (e[1].encoding != "M1", e[1].mnemonic == "MOVABS" and mnem.opsize == 64, "IMM_8" not in e[1].flags, e[1].encoding in enc_prio and enc_prio.index(e[1].encoding)))
         variants = []
         for opcode, desc in v:
             conds = []
@@ -534,13 +534,26 @@ def encode_table(entries):
             else:
                 conds.append("0 /*enc not supp*/")
 
+            imm_size = 0
+            if "IMM_8" in desc.flags:
+                imm_size = 1
+            elif desc.mnemonic in ("RET", "RETF"):
+                imm_size = 2
+            elif desc.mnemonic == "ENTER":
+                imm_size = 3
+            elif mnem.opsize == 16:
+                imm_size = 2
+            elif mnem.opsize == 64 and desc.mnemonic == "MOVABS":
+                imm_size = 8
+            else:
+                imm_size = 4
+
             gp8ops = [] # operands that require special handling
             for i, ot in enumerate(mnem.optypes):
                 if ot == "m":
                     conds.append(f"op_mem(op{i})")
                 elif ot == "i":
-                    if "IMM_8" in desc.flags:
-                        conds.append(f"op_imm8(op{i})")
+                    conds.append(f"op_imm_n(op{i}, {imm_size})")
                 elif ot == "o":
                     if "IMM_8" in desc.flags:
                         # TODO: Handle JCXZ and LOOP/LOOPcc, which only have IMM_8
@@ -580,20 +593,6 @@ def encode_table(entries):
             if mnem.lock: opc_s += "|OPC_LOCK"
             if mnem.opsize == 16: opc_s += "|OPC_66"
             if mnem.opsize == 64 and "DEF64" not in desc.flags: opc_s += "|OPC_REXW"
-
-            imm_size = 0
-            if "IMM_8" in desc.flags:
-                imm_size = 1
-            elif desc.mnemonic in ("RET", "RETF"):
-                imm_size = 2
-            elif desc.mnemonic == "ENTER":
-                imm_size = 3
-            elif mnem.opsize == 16:
-                imm_size = 2
-            elif mnem.opsize == 64 and desc.mnemonic == "MOVABS":
-                imm_size = 8
-            else:
-                imm_size = 4
 
             code = f"enc=ENC_{desc.encoding};opc={opc_s};immsz={imm_size};"
             if gp8ops:
