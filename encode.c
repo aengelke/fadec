@@ -5,6 +5,10 @@
 
 #include <fadec-enc.h>
 
+
+#define LIKELY(x) __builtin_expect((x), 1)
+#define UNLIKELY(x) __builtin_expect((x), 0)
+
 enum {
     OPC_0F = 1 << 16,
     OPC_0F38 = (1 << 17) | OPC_0F,
@@ -13,13 +17,13 @@ enum {
     OPC_F2 = 1 << 20,
     OPC_F3 = 1 << 21,
     OPC_REXW = 1 << 22,
-    OPC_REXR = 1 << 23,
-    OPC_REXX = 1 << 24,
-    OPC_REXB = 1 << 25,
-    OPC_REX = 1 << 26,
-    OPC_VEX = 1 << 27,
-    OPC_LOCK = 1 << 28,
-    OPC_VEXL = 1 << 29,
+    OPC_LOCK = 1 << 23,
+    OPC_VEX = 1 << 24,
+    OPC_VEXL = 1 << 25,
+    OPC_REXR = 1 << 28,
+    OPC_REXX = 1 << 27,
+    OPC_REXB = 1 << 26,
+    OPC_REX = 1 << 29,
 };
 
 static bool op_mem(uint64_t op) { return (op & 0x8000000000000000) != 0; }
@@ -36,6 +40,23 @@ static bool op_imm_n(uint64_t imm, unsigned immsz) {
     if (immsz == 2 && (uint64_t) (int64_t) (int16_t) imm != imm) return false;
     if (immsz == 4 && (uint64_t) (int64_t) (int32_t) imm != imm) return false;
     return true;
+}
+
+static
+unsigned
+opc_size(uint64_t opc)
+{
+    if (opc & OPC_VEX) return 0; // TODO: support VEX encoding
+    unsigned res = 1;
+    if (opc & OPC_66) res++;
+    if (opc & OPC_F2) res++;
+    if (opc & OPC_F3) res++;
+    if (opc & (OPC_REX|OPC_REXW|OPC_REXR|OPC_REXX|OPC_REXB)) res++;
+    if (opc & OPC_0F) res++;
+    if ((opc & OPC_0F38) == OPC_0F38) res++;
+    if ((opc & OPC_0F3A) == OPC_0F3A) res++;
+    if ((opc & 0xc000) == 0xc000) res++;
+    return res;
 }
 
 static
@@ -179,92 +200,117 @@ struct EncodingInfo {
     uint8_t vexreg : 2;
     uint8_t immidx : 2;
     uint8_t immctl : 3;
+    uint8_t zregidx : 2;
+    uint8_t zregval : 1;
 };
 
 const struct EncodingInfo encoding_infos[ENC_MAX] = {
     [ENC_INVALID] = { 0 },
     [ENC_NP]      = { 0 },
     [ENC_M]       = { .modrm = 0^3 },
-    [ENC_M1]      = { .modrm = 0^3 },
-    [ENC_MI]      = { .modrm = 0^3, .immctl = 1, .immidx = 1 },
-    [ENC_MC]      = { .modrm = 0^3 },
+    [ENC_M1]      = { .modrm = 0^3, .immctl = 1, .immidx = 1 },
+    [ENC_MI]      = { .modrm = 0^3, .immctl = 4, .immidx = 1 },
+    [ENC_MC]      = { .modrm = 0^3, .zregidx = 1^3, .zregval = 1 },
     [ENC_MR]      = { .modrm = 0^3, .modreg = 1^3 },
     [ENC_RM]      = { .modrm = 1^3, .modreg = 0^3 },
-    [ENC_RMA]     = { .modrm = 1^3, .modreg = 0^3 },
-    [ENC_MRI]     = { .modrm = 0^3, .modreg = 1^3, .immctl = 1, .immidx = 2 },
-    [ENC_RMI]     = { .modrm = 1^3, .modreg = 0^3, .immctl = 1, .immidx = 2 },
-    [ENC_MRC]     = { .modrm = 0^3, .modreg = 1^3 },
-    [ENC_I]       = { .immctl = 1, .immidx = 0 },
-    [ENC_IA]      = { .immctl = 1, .immidx = 1 },
+    [ENC_RMA]     = { .modrm = 1^3, .modreg = 0^3, .zregidx = 2^3, .zregval = 0 },
+    [ENC_MRI]     = { .modrm = 0^3, .modreg = 1^3, .immctl = 4, .immidx = 2 },
+    [ENC_RMI]     = { .modrm = 1^3, .modreg = 0^3, .immctl = 4, .immidx = 2 },
+    [ENC_MRC]     = { .modrm = 0^3, .modreg = 1^3, .zregidx = 2^3, .zregval = 1 },
+    [ENC_I]       = { .immctl = 4, .immidx = 0 },
+    [ENC_IA]      = { .zregidx = 0^3, .zregval = 0, .immctl = 4, .immidx = 1 },
     [ENC_O]       = { .modreg = 0^3 },
-    [ENC_OI]      = { .modreg = 0^3, .immctl = 1, .immidx = 1 },
-    [ENC_OA]      = { .modreg = 0^3 },
-    [ENC_AO]      = { .modreg = 1^3 },
-    [ENC_A]       = { 0 },
-    [ENC_D]       = { .immctl = 2, .immidx = 0 },
-    [ENC_FD]      = { .immctl = 3, .immidx = 1 },
-    [ENC_TD]      = { .immctl = 3, .immidx = 0 },
+    [ENC_OI]      = { .modreg = 0^3, .immctl = 4, .immidx = 1 },
+    [ENC_OA]      = { .modreg = 0^3, .zregidx = 1^3, .zregval = 0 },
+    [ENC_AO]      = { .modreg = 1^3, .zregidx = 0^3, .zregval = 0 },
+    [ENC_A]       = { .zregidx = 0^3, .zregval = 0 },
+    [ENC_D]       = { .immctl = 6, .immidx = 0 },
+    [ENC_FD]      = { .immctl = 2, .immidx = 1 },
+    [ENC_TD]      = { .immctl = 2, .immidx = 0 },
     [ENC_RVM]     = { .modrm = 2^3, .modreg = 0^3, .vexreg = 1^3 },
-    [ENC_RVMI]    = { .modrm = 2^3, .modreg = 0^3, .vexreg = 1^3, .immctl = 1, .immidx = 3 },
-    // [ENC_RVMR]    = { .modrm = 2^3, .modreg = 0^3, .vexreg = 1^3, .immctl = 4, .immidx = 3 },
+    [ENC_RVMI]    = { .modrm = 2^3, .modreg = 0^3, .vexreg = 1^3, .immctl = 4, .immidx = 3 },
+    [ENC_RVMR]    = { .modrm = 2^3, .modreg = 0^3, .vexreg = 1^3, .immctl = 3, .immidx = 3 },
     [ENC_RMV]     = { .modrm = 1^3, .modreg = 0^3, .vexreg = 2^3 },
     [ENC_VM]      = { .modrm = 1^3, .vexreg = 0^3 },
-    [ENC_VMI]     = { .modrm = 1^3, .vexreg = 0^3, .immctl = 1, .immidx = 2 },
+    [ENC_VMI]     = { .modrm = 1^3, .vexreg = 0^3, .immctl = 4, .immidx = 2 },
     [ENC_MVR]     = { .modrm = 0^3, .modreg = 1^3, .vexreg = 1^3 },
+};
+
+struct EncodeDesc {
+    uint64_t opc : 26;
+    uint64_t enc : 5;
+    uint64_t immsz : 4;
+    uint64_t alt : 13;
+    uint64_t tys : 16;
+};
+
+static const struct EncodeDesc descs[] = {
+#include <fadec-enc-cases.inc>
 };
 
 int
 fe_enc64_impl(uint8_t** buf, uint64_t mnem, FeOp op0, FeOp op1, FeOp op2, FeOp op3)
 {
     uint8_t* buf_start = *buf;
-    Encoding enc = ENC_INVALID;
-    uint64_t opc;
-    unsigned immsz;
-    unsigned gp8ops = 0;
-
-    switch (mnem & FE_MNEM_MASK)
-    {
-    default: goto fail;
-#include <fadec-enc-cases.inc>
-    }
-
-encode:
-    if (gp8ops)
-    {
-        if ((gp8ops & 1) && op_reg_gpl(op0) && op0 >= FE_SP && op0 <= FE_DI)
-            opc |= OPC_REX;
-        if ((gp8ops & 2) && op_reg_gpl(op1) && op1 >= FE_SP && op1 <= FE_DI)
-            opc |= OPC_REX;
-        if ((gp8ops & 4) && op_reg_gpl(op2) && op2 >= FE_SP && op2 <= FE_DI)
-            opc |= OPC_REX;
-        if ((gp8ops & 8) && op_reg_gpl(op3) && op3 >= FE_SP && op3 <= FE_DI)
-            opc |= OPC_REX;
-    }
-
-    if (mnem & FE_ADDR32)
-        *(*buf)++ = 0x67;
-    if (mnem & 0x70000)
-        *(*buf)++ = (0x65643e362e2600 >> (8 * ((mnem & 0x70000) >> 16))) & 0xff;
-
-    const struct EncodingInfo* ei = &encoding_infos[enc];
     uint64_t ops[4] = {op0, op1, op2, op3};
-    if (ei->modrm) {
-        FeOp modreg = ei->modreg ? ops[ei->modreg^3] : (opc & 0xff00) >> 8;
-        if (enc_mr(buf, opc, ops[ei->modrm^3], modreg)) goto fail;
-    } else if (ei->modreg) {
-        if (enc_o(buf, opc, ops[ei->modreg^3])) goto fail;
-    } else {
-        if (enc_opc(buf, opc)) goto fail;
-    }
 
-    if (ei->immctl) {
-        int64_t imm = ops[ei->immidx];
-        if (ei->immctl == 2)
-            imm = imm == FE_JMP_RESERVE ? 0 : imm - ((int64_t) *buf + immsz);
-        if (enc_imm(buf, imm, immsz)) goto fail;
-    }
+    uint64_t desc_idx = mnem & FE_MNEM_MASK;
+    if (UNLIKELY(desc_idx >= FE_MNEM_MAX)) goto fail;
 
-    return 0;
+    do
+    {
+        const struct EncodeDesc* desc = &descs[desc_idx];
+        const struct EncodingInfo* ei = &encoding_infos[desc->enc];
+        uint64_t opc = desc->opc;
+        int64_t imm;
+
+        if (UNLIKELY(desc->enc == ENC_INVALID)) goto fail;
+
+        if (ei->zregidx)
+            if (op_reg_idx(ops[ei->zregidx^3]) != ei->zregval) goto next;
+
+        for (int i = 0; i < 4; i++) {
+            unsigned ty = (desc->tys >> (4 * i)) & 0xf;
+            if (ty == 0x0) continue;
+            if (ty == 0xf && !op_mem(ops[i])) goto next;
+            if (ty == 0x1 && !op_reg_gpl(ops[i])) goto next;
+            if (ty == 0x2 && !op_reg_gpl(ops[i]) && !op_reg_gph(ops[i])) goto next;
+            if (ty == 0x2 && op_reg_gpl(ops[i]) && ops[i] >= FE_SP && ops[i] <= FE_DI) opc |= OPC_REX;
+        }
+
+        if (ei->immctl && ei->immctl != 3)
+            imm = ops[ei->immidx];
+        if (ei->immctl == 6) {
+            if (imm == FE_JMP_RESERVE)
+                imm = 0;
+            else
+                imm -= (int64_t) *buf + opc_size(opc) + desc->immsz;
+        }
+        if (UNLIKELY(ei->immctl == 1) && imm != 1) goto next;
+        if (ei->immctl && !op_imm_n(imm, desc->immsz)) goto next;
+
+        if (UNLIKELY(mnem & FE_ADDR32))
+            *(*buf)++ = 0x67;
+        if (UNLIKELY(mnem & 0x70000))
+            *(*buf)++ = (0x65643e362e2600 >> (8 * ((mnem & 0x70000) >> 16))) & 0xff;
+
+        if (ei->modrm) {
+            FeOp modreg = ei->modreg ? ops[ei->modreg^3] : (opc & 0xff00) >> 8;
+            if (enc_mr(buf, opc, ops[ei->modrm^3], modreg)) goto fail;
+        } else if (ei->modreg) {
+            if (enc_o(buf, opc, ops[ei->modreg^3])) goto fail;
+        } else {
+            if (enc_opc(buf, opc)) goto fail;
+        }
+
+        if (ei->immctl >= 2)
+            if (enc_imm(buf, imm, desc->immsz)) goto fail;
+
+        return 0;
+
+    next:
+        desc_idx = desc->alt;
+    } while (desc_idx != 0);
 
 fail:
     *buf = buf_start; // Don't advance buffer on error

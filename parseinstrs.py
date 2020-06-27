@@ -488,29 +488,12 @@ def encode_table(entries):
             mnemonics[EncodeMnemonic(name, tuple(ots), opsize, not not lock_p)].append((opcode, desc))
 
     switch_code = ""
+    alt_index = 0
     for mnem, v in sorted(mnemonics.items(), key=lambda e: e[0].name):
-        enc_prio = ["O", "OA", "AO", "OI", "D", "IA", "M", "MI", "MR", "RM", "FD", "TD"]
+        enc_prio = ["O", "OA", "OI", "IA", "M", "MI", "MR", "RM"]
         v.sort(key=lambda e: (e[1].encoding != "M1", e[1].mnemonic == "MOVABS" and mnem.opsize == 64, "IMM_8" not in e[1].flags, e[1].encoding in enc_prio and enc_prio.index(e[1].encoding)))
-        variants = {}
+        variants = []
         for opcode, desc in v:
-            conds = []
-            if desc.encoding == "M1":
-                conds.append(f"op1 == 1")
-            elif desc.encoding == "MC":
-                conds.append(f"op_reg_idx(op1) == 1")
-            elif desc.encoding in ("A", "IA", "AO"):
-                conds.append(f"op_reg_idx(op0) == 0")
-            elif desc.encoding == "OA":
-                conds.append(f"op_reg_idx(op1) == 0")
-            elif desc.encoding == "RMA":
-                conds.append(f"op_reg_idx(op2) == 0")
-            elif desc.encoding == "MRC":
-                conds.append(f"op_reg_idx(op2) == 1")
-            elif desc.encoding in ("NP", "M", "MI", "MR", "RM", "MRI", "RMI", "I", "D", "O", "OI"):
-                pass
-            else:
-                conds.append("0 /*enc not supp*/")
-
             imm_size = 0
             if "IMM_8" in desc.flags:
                 imm_size = 1
@@ -525,27 +508,28 @@ def encode_table(entries):
             else:
                 imm_size = 4
 
-            gp8ops = [] # operands that require special handling
+            tys = [] # operands that require special handling
             for i, ot in enumerate(mnem.optypes):
                 if ot == "m":
-                    conds.append(f"op_mem(op{i})")
+                    tys.append(0xf)
                 elif ot == "i":
-                    conds.append(f"op_imm_n(op{i}, {imm_size})")
+                    tys.append(0x0)
                 elif ot == "o":
-                    if "IMM_8" in desc.flags:
-                        # TODO: Handle JCXZ and LOOP/LOOPcc, which only have IMM_8
-                        # TODO: Support short jumps
-                        conds.append(f"0 /*short jumps not supp*/")
+                    # TODO: Handle JCXZ and LOOP/LOOPcc, which only have IMM_8
+                    # TODO: Support short jumps
+                    tys.append(-1 if "IMM_8" in desc.flags else 0x0)
                 elif ot == "r":
                     if desc.operands[i].kind == "GP":
                         sz = mnem.opsize // 8 if desc.operands[i].size == OpKind.SZ_OP else desc.operands[i].size
                         if sz == 1:
-                            conds.append(f"(op_reg_gpl(op{i})||op_reg_gph(op{i}))")
-                            gp8ops.append(i)
+                            tys.append(0x2)
                         else:
-                            conds.append(f"op_reg_gpl(op{i})")
+                            tys.append(0x1)
                     else:
-                        conds.append("0 /*reg not supp*/")
+                        tys.append(-1)
+
+            if any(ty < 0 for ty in tys):
+                continue # unsupported register kind
 
             flags = ""
             opc_i = -1
@@ -569,16 +553,17 @@ def encode_table(entries):
             if mnem.opsize == 16: opc_s += "|OPC_66"
             if mnem.opsize == 64 and "DEF64" not in desc.flags: opc_s += "|OPC_REXW"
 
-            code = f"enc=ENC_{desc.encoding};opc={opc_s};immsz={imm_size};"
-            if gp8ops:
-                code += f"gp8ops={sum(1 << i for i in gp8ops)};"
+            tys_i = sum(ty << (4*i) for i, ty in enumerate(tys))
+            variant = desc.encoding, imm_size, tys_i, opc_s
+            if not any(x[:3] == variant[:3] for x in variants):
+                variants.append(variant)
 
-            cond_str = f"if ({'&&'.join(conds)}) " if conds else ""
-            if cond_str not in variants:
-                variants[cond_str] = f"{cond_str}{{{code}goto encode;}}"
-
-        variant_str = "\n  ".join(variants.values())
-        switch_code += f"case {mnem.name}:\n  {variant_str}\n  goto fail;\n"
+        if variants:
+            indices = [mnem.name] + [f"FE_MNEM_MAX+{alt_index+i}" for i in range(len(variants) - 1)]
+            alt_list = indices[1:] + ["0"]
+            alt_index += len(alt_list) - 1
+            for idx, alt, (enc, immsz, tys_i, opc_s) in zip(indices, alt_list, variants):
+                switch_code += f"[{idx}] = {{ .enc = ENC_{enc}, .immsz = {immsz}, .tys = {tys_i:#x}, .opc = {opc_s}, .alt = {alt} }},\n"
 
     mnemonics_list = sorted(mnemonics.keys())
     mnemonics_lut = {mnem.name: mnemonics_list.index(mnem) for mnem in mnemonics_list}

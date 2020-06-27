@@ -34,6 +34,7 @@ enum {
 #define FE_MNEMONIC(name,value) name = value,
 #include <fadec-enc-mnems.inc>
 #undef FE_MNEMONIC
+    FE_MNEM_MAX
 };
 
 #define fe_enc64_1(buf, mnem, op0, op1, op2, op3, ...) fe_enc64_impl(buf, mnem, op0, op1, op2, op3)
