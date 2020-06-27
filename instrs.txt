@@ -334,18 +334,18 @@ ff/6                  M     GP     -      -      -      PUSH DEF64
 RNP.0f09              NP    -      -      -      -      WBINVD
 RF3.0f09              NP    -      -      -      -      WBINVD
 0f0b                  NP    -      -      -      -      UD2
-0f0d/0                M     GP8    -      -      -      PREFETCH MUSTMEM
-0f0d/1                M     GP8    -      -      -      PREFETCHW MUSTMEM
-0f0d/2                M     GP8    -      -      -      PREFETCHWT1 MUSTMEM
-0f0d/3                M     GP8    -      -      -      RESERVED_PREFETCH MUSTMEM
-0f0d/4                M     GP8    -      -      -      RESERVED_PREFETCH MUSTMEM
-0f0d/5                M     GP8    -      -      -      RESERVED_PREFETCH MUSTMEM
-0f0d/6                M     GP8    -      -      -      RESERVED_PREFETCH MUSTMEM
-0f0d/7                M     GP8    -      -      -      RESERVED_PREFETCH MUSTMEM
-0f18//0               M     GP8    -      -      -      PREFETCHNTA
-0f18//1               M     GP8    -      -      -      PREFETCHT0
-0f18//2               M     GP8    -      -      -      PREFETCHT1
-0f18//3               M     GP8    -      -      -      PREFETCHT2
+0f0d//0               M     MEM8   -      -      -      PREFETCH
+0f0d//1               M     MEM8   -      -      -      PREFETCHW
+0f0d//2               M     MEM8   -      -      -      PREFETCHWT1
+0f0d//3               M     MEM8   -      -      -      RESERVED_PREFETCH
+0f0d//4               M     MEM8   -      -      -      RESERVED_PREFETCH
+0f0d//5               M     MEM8   -      -      -      RESERVED_PREFETCH
+0f0d//6               M     MEM8   -      -      -      RESERVED_PREFETCH
+0f0d//7               M     MEM8   -      -      -      RESERVED_PREFETCH
+0f18//0               M     MEM8   -      -      -      PREFETCHNTA
+0f18//1               M     MEM8   -      -      -      PREFETCHT0
+0f18//2               M     MEM8   -      -      -      PREFETCHT1
+0f18//3               M     MEM8   -      -      -      PREFETCHT2
 0f18//4               M     GP     -      -      -      RESERVED_NOP
 0f18//5               M     GP     -      -      -      RESERVED_NOP
 0f18//6               M     GP     -      -      -      RESERVED_NOP
@@ -359,14 +359,14 @@ RF3.0f09              NP    -      -      -      -      WBINVD
 0f18//f0+             O     GP     -      -      -      RESERVED_NOP
 0f18//f8+             O     GP     -      -      -      RESERVED_NOP
 0f1f                  M     GP     -      -      -      NOP
-0f20                  MR    GP32   CR     -      -      MOV_CR ONLY32
-0f20                  MR    GP64   CR     -      -      MOV_CR ONLY64 DEF64
-0f21                  MR    GP32   DR     -      -      MOV_DR ONLY32
-0f21                  MR    GP64   DR     -      -      MOV_DR ONLY64 DEF64
-0f22                  RM    CR     GP32   -      -      MOV_CR ONLY32
-0f22                  RM    CR     GP64   -      -      MOV_CR ONLY64 DEF64
-0f23                  RM    DR     GP32   -      -      MOV_DR ONLY32
-0f23                  RM    DR     GP64   -      -      MOV_DR ONLY64 DEF64
+0f20                  MR    GP32   CR     -      -      MOV_CR NOMEM ONLY32
+0f20                  MR    GP64   CR     -      -      MOV_CR NOMEM ONLY64 DEF64
+0f21                  MR    GP32   DR     -      -      MOV_DR NOMEM ONLY32
+0f21                  MR    GP64   DR     -      -      MOV_DR NOMEM ONLY64 DEF64
+0f22                  RM    CR     GP32   -      -      MOV_CR NOMEM ONLY32
+0f22                  RM    CR     GP64   -      -      MOV_CR NOMEM ONLY64 DEF64
+0f23                  RM    DR     GP32   -      -      MOV_DR NOMEM ONLY32
+0f23                  RM    DR     GP64   -      -      MOV_DR NOMEM ONLY64 DEF64
 0f30                  NP    -      -      -      -      WRMSR
 0f31                  NP    -      -      -      -      RDTSC
 0f32                  NP    -      -      -      -      RDMSR
@@ -467,9 +467,9 @@ NP.0fc3               MR    GP     GP     -      -      MOVNTI MUSTMEM
 0fff                  RM    GP     GP     -      -      UD0
 #
 RNP.0f38f0            RM    GP     GP     -      -      MOVBE MUSTMEM
-RF2.0f38f0            RM    GP     GP8    -      -      CRC32
+RF2.0f38f0            RM    GP32   GP     -      -      CRC32 SIZE_8
 RNP.0f38f1            MR    GP     GP     -      -      MOVBE MUSTMEM
-RF2.0f38f1            MR    GP     GP     -      -      CRC32
+RF2.0f38f1            RM    GP32   GP     -      -      CRC32
 #
 # MMX
 NP.0f2a               RM    XMM64  MMX    -      -      MMX_CVTPI2PS
@@ -515,7 +515,7 @@ NP.0fd2               RM    MMX    MMX    -      -      MMX_PSRLD
 NP.0fd3               RM    MMX    MMX    -      -      MMX_PSRLQ
 NP.0fd4               RM    MMX    MMX    -      -      MMX_PADDQ
 NP.0fd5               RM    MMX    MMX    -      -      MMX_PMULLW
-F2.0fd6               RM    MMX    XMM64  -      -      MMX_MOVDQ2Q
+F2.0fd6               RM    MMX    XMM64  -      -      MMX_MOVDQ2Q NOMEM
 F3.0fd6               RM    XMM    MMX    -      -      MMX_MOVQ2DQ
 NP.0fd7               RM    GP     MMX    -      -      MMX_PMOVMSKB DEF64 NOMEM
 NP.0fd8               RM    MMX    MMX    -      -      MMX_PSUBUSB
@@ -708,8 +708,8 @@ F3.0f7e               RM    XMM    XMM64  -      -      SSE_MOVQ
 F3.0f7f               MR    XMM    XMM    -      -      SSE_MOVDQU
 NP.0fae//0            M     MEMZ   -      -      -      FXSAVE
 NP.0fae//1            M     MEMZ   -      -      -      FXRSTOR
-NP.0fae//2            M     GP32   -      -      -      LDMXCSR
-NP.0fae//3            M     GP32   -      -      -      STMXCSR
+NP.0fae//2            M     MEM32  -      -      -      LDMXCSR
+NP.0fae//3            M     MEM32  -      -      -      STMXCSR
 NP.0fae//e8+          NP    -      -      -      -      LFENCE
 NP.0fae//f0+          NP    -      -      -      -      MFENCE
 NP.0fae//f8+          NP    -      -      -      -      SFENCE
@@ -822,44 +822,44 @@ F2.0ff0               RM    XMM    XMM    -      -      SSE_LDDQU MUSTMEM
 66.0f38f8             RM    GP     MEMZ   -      -      MOVDIR64B MUSTMEM
 NP.0f38f9             MR    GP     GP     -      -      MOVDIRI MUSTMEM
 #
-66.0f3a08             RMI   XMM    XMM    IMM    -      SSE_ROUNDPS SIZE_8 IMM_8
-66.0f3a09             RMI   XMM    XMM    IMM    -      SSE_ROUNDPD SIZE_8 IMM_8
-66.0f3a0a             RMI   XMM32  XMM32  IMM    -      SSE_ROUNDSS SIZE_8 IMM_8
-66.0f3a0b             RMI   XMM64  XMM64  IMM    -      SSE_ROUNDSD SIZE_8 IMM_8
-66.0f3a0c             RMI   XMM    XMM    IMM    -      SSE_BLENDPS SIZE_8 IMM_8
-66.0f3a0d             RMI   XMM    XMM    IMM    -      SSE_BLENDPD SIZE_8 IMM_8
-66.0f3a0e             RMI   XMM    XMM    IMM    -      SSE_PBLENDW SIZE_8 IMM_8
-66.0f3a0f             RMI   XMM    XMM    IMM    -      SSE_PALIGNR SIZE_8 IMM_8
-66.0f3a14             MRI   GP8    XMM    IMM    -      SSE_PEXTRB IMM_8
-66.0f3a15             MRI   GP16   XMM    IMM    -      SSE_PEXTRW IMM_8
-66.W0.0f3a16          MRI   GP     XMM    IMM    -      SSE_PEXTRD IMM_8
-66.W1.0f3a16          MRI   GP     XMM    IMM    -      SSE_PEXTRQ IMM_8
-66.0f3a17             MRI   GP32   XMM    IMM    -      SSE_EXTRACTPS IMM_8
-66.0f3a20             RMI   XMM    GP8    IMM    -      SSE_PINSRB IMM_8
-66.0f3a21             RMI   XMM    XMM32  IMM    -      SSE_INSERTPS SIZE_8 IMM_8
-66.W0.0f3a22          RMI   XMM    GP     IMM    -      SSE_PINSRD IMM_8
-66.W1.0f3a22          RMI   XMM    GP     IMM    -      SSE_PINSRQ IMM_8
-66.0f3a40             RMI   XMM    XMM    IMM    -      SSE_DPPS SIZE_8 IMM_8
-66.0f3a41             RMI   XMM    XMM    IMM    -      SSE_DPPD SIZE_8 IMM_8
-66.0f3a42             RMI   XMM    XMM    IMM    -      SSE_MPSADBW SIZE_8 IMM_8
-66.0f3a44             RMI   XMM    XMM    IMM    -      SSE_PCLMULQDQ SIZE_8 IMM_8
-66.0f3a60             RMI   XMM    XMM    IMM    -      SSE_PCMPESTRM SIZE_8 IMM_8
-66.0f3a61             RMI   XMM    XMM    IMM    -      SSE_PCMPESTRI SIZE_8 IMM_8
-66.0f3a62             RMI   XMM    XMM    IMM    -      SSE_PCMPISTRM SIZE_8 IMM_8
-66.0f3a63             RMI   XMM    XMM    IMM    -      SSE_PCMPISTRI SIZE_8 IMM_8
+66.0f3a08             RMI   XMM    XMM    IMM8   -      SSE_ROUNDPS IMM_8
+66.0f3a09             RMI   XMM    XMM    IMM8   -      SSE_ROUNDPD IMM_8
+66.0f3a0a             RMI   XMM32  XMM32  IMM8   -      SSE_ROUNDSS IMM_8
+66.0f3a0b             RMI   XMM64  XMM64  IMM8   -      SSE_ROUNDSD IMM_8
+66.0f3a0c             RMI   XMM    XMM    IMM8   -      SSE_BLENDPS IMM_8
+66.0f3a0d             RMI   XMM    XMM    IMM8   -      SSE_BLENDPD IMM_8
+66.0f3a0e             RMI   XMM    XMM    IMM8   -      SSE_PBLENDW IMM_8
+66.0f3a0f             RMI   XMM    XMM    IMM8   -      SSE_PALIGNR IMM_8
+66.0f3a14             MRI   GP8    XMM    IMM8   -      SSE_PEXTRB IMM_8
+66.0f3a15             MRI   GP16   XMM    IMM8   -      SSE_PEXTRW IMM_8
+66.W0.0f3a16          MRI   GP     XMM    IMM8   -      SSE_PEXTRD IMM_8
+66.W1.0f3a16          MRI   GP     XMM    IMM8   -      SSE_PEXTRQ IMM_8
+66.0f3a17             MRI   GP32   XMM    IMM8   -      SSE_EXTRACTPS IMM_8
+66.0f3a20             RMI   XMM    GP8    IMM8   -      SSE_PINSRB IMM_8
+66.0f3a21             RMI   XMM    XMM32  IMM8   -      SSE_INSERTPS IMM_8
+66.W0.0f3a22          RMI   XMM    GP     IMM8   -      SSE_PINSRD IMM_8
+66.W1.0f3a22          RMI   XMM    GP     IMM8   -      SSE_PINSRQ IMM_8
+66.0f3a40             RMI   XMM    XMM    IMM8   -      SSE_DPPS IMM_8
+66.0f3a41             RMI   XMM    XMM    IMM8   -      SSE_DPPD IMM_8
+66.0f3a42             RMI   XMM    XMM    IMM8   -      SSE_MPSADBW IMM_8
+66.0f3a44             RMI   XMM    XMM    IMM8   -      SSE_PCLMULQDQ IMM_8
+66.0f3a60             RMI   XMM    XMM    IMM8   -      SSE_PCMPESTRM IMM_8
+66.0f3a61             RMI   XMM    XMM    IMM8   -      SSE_PCMPESTRI IMM_8
+66.0f3a62             RMI   XMM    XMM    IMM8   -      SSE_PCMPISTRM IMM_8
+66.0f3a63             RMI   XMM    XMM    IMM8   -      SSE_PCMPISTRI IMM_8
 #
 66.0f38db             RM    XMM    XMM    -      -      AESIMC
 66.0f38dc             RM    XMM    XMM    -      -      AESENC
 66.0f38dd             RM    XMM    XMM    -      -      AESENCLAST
 66.0f38de             RM    XMM    XMM    -      -      AESDEC
 66.0f38df             RM    XMM    XMM    -      -      AESDECLAST
-66.0f3adf             RMI   XMM    XMM    IMM    -      AESKEYGENASSIST IMM_8
+66.0f3adf             RMI   XMM    XMM    IMM8   -      AESKEYGENASSIST IMM_8
 VEX.66.L0.0f38db      RM    XMM    XMM    -      -      VAESIMC
 VEX.66.L0.0f38dc      RVM   XMM    XMM    XMM    -      VAESENC
 VEX.66.L0.0f38dd      RVM   XMM    XMM    XMM    -      VAESENCLAST
 VEX.66.L0.0f38de      RVM   XMM    XMM    XMM    -      VAESDEC
 VEX.66.L0.0f38df      RVM   XMM    XMM    XMM    -      VAESDECLAST
-VEX.66.L0.0f3adf      RMI   XMM    XMM    IMM    -      VAESKEYGENASSIST IMM_8
+VEX.66.L0.0f3adf      RMI   XMM    XMM    IMM8   -      VAESKEYGENASSIST IMM_8
 #
 # AVX
 VEX.NP.0f10           RM    XMM    XMM    -      -      VMOVUPS
@@ -1458,9 +1458,9 @@ F3.0fae//d8+          O     GP     -      -      -      WRGSBASE ONLY64
 NP.0fae//4            M     MEMZ   -      -      -      XSAVE INSTR_WIDTH
 NP.0fae//5            M     MEMZ   -      -      -      XRSTOR INSTR_WIDTH
 NP.0fae//6            M     MEMZ   -      -      -      XSAVEOPT INSTR_WIDTH
-66.0fae//6            M     GP8    -      -      -      CLWB
-NP.0fae//7            M     GP8    -      -      -      CLFLUSH
-66.0fae//7            M     GP8    -      -      -      CLFLUSHOPT
+66.0fae//6            M     MEM8   -      -      -      CLWB
+NP.0fae//7            M     MEM8   -      -      -      CLFLUSH
+66.0fae//7            M     MEM8   -      -      -      CLFLUSHOPT
 NP.0fc7//3            M     MEMZ   -      -      -      XRSTORS INSTR_WIDTH
 NP.0fc7//4            M     MEMZ   -      -      -      XSAVEC INSTR_WIDTH
 NP.0fc7//5            M     MEMZ   -      -      -      XSAVES INSTR_WIDTH
