@@ -139,9 +139,9 @@
 89                    MR    GP     GP     -      -      MOV
 8a                    RM    GP     GP     -      -      MOV SIZE_8
 8b                    RM    GP     GP     -      -      MOV
-8c                    MR    GP16   SREG   -      -      MOV_S2G
+8c                    MR    GP16   SREG   -      -      MOV_S2G ENC_NOSZ
 8d                    RM    GP     MEMZ   -      -      LEA
-8e                    RM    SREG   GP16   -      -      MOV_G2S
+8e                    RM    SREG   GP16   -      -      MOV_G2S ENC_NOSZ
 8f/0                  M     GP     -      -      -      POP DEF64
 # Against frequent belief, only, XCHG (r/e)AX, (r)AX with 90 is NOP.
 # As a lacking REX.B cannot be specified here, this is hardcoded.
@@ -301,8 +301,8 @@ ff/6                  M     GP     -      -      -      PUSH DEF64
 0f01//1               M     MEMZ   -      -      -      SIDT
 0f01//2               M     MEMZ   -      -      -      LGDT
 0f01//3               M     MEMZ   -      -      -      LIDT
-0f01//4               M     GP16   -      -      -      SMSW
-0f01//6               M     GP16   -      -      -      LMSW
+0f01//4               M     GP16   -      -      -      SMSW ENC_NOSZ
+0f01//6               M     GP16   -      -      -      LMSW ENC_NOSZ
 0f01//7               M     GP     -      -      -      INVLPG SIZE_8
 0f01//c8              NP    -      -      -      -      MONITOR
 0f01//c9              NP    -      -      -      -      MWAIT
@@ -352,14 +352,14 @@ RF3.0f09              NP    -      -      -      -      WBINVD
 0f18//f0+             O     GP     -      -      -      RESERVED_NOP
 0f18//f8+             O     GP     -      -      -      RESERVED_NOP
 0f1f                  M     GP     -      -      -      NOP
-0f20                  MR    GP32   CR     -      -      MOV_CR NOMEM ONLY32
-0f20                  MR    GP64   CR     -      -      MOV_CR NOMEM ONLY64 DEF64
-0f21                  MR    GP32   DR     -      -      MOV_DR NOMEM ONLY32
-0f21                  MR    GP64   DR     -      -      MOV_DR NOMEM ONLY64 DEF64
-0f22                  RM    CR     GP32   -      -      MOV_CR NOMEM ONLY32
-0f22                  RM    CR     GP64   -      -      MOV_CR NOMEM ONLY64 DEF64
-0f23                  RM    DR     GP32   -      -      MOV_DR NOMEM ONLY32
-0f23                  RM    DR     GP64   -      -      MOV_DR NOMEM ONLY64 DEF64
+0f20                  MR    GP32   CR     -      -      MOV_CR NOMEM ONLY32 ENC_NOSZ
+0f20                  MR    GP64   CR     -      -      MOV_CR NOMEM ONLY64 DEF64 ENC_NOSZ
+0f21                  MR    GP32   DR     -      -      MOV_DR NOMEM ONLY32 ENC_NOSZ
+0f21                  MR    GP64   DR     -      -      MOV_DR NOMEM ONLY64 DEF64 ENC_NOSZ
+0f22                  RM    CR     GP32   -      -      MOV_CR NOMEM ONLY32 ENC_NOSZ
+0f22                  RM    CR     GP64   -      -      MOV_CR NOMEM ONLY64 DEF64 ENC_NOSZ
+0f23                  RM    DR     GP32   -      -      MOV_DR NOMEM ONLY32 ENC_NOSZ
+0f23                  RM    DR     GP64   -      -      MOV_DR NOMEM ONLY64 DEF64 ENC_NOSZ
 0f30                  NP    -      -      -      -      WRMSR
 0f31                  NP    -      -      -      -      RDTSC
 0f32                  NP    -      -      -      -      RDMSR
@@ -1422,9 +1422,9 @@ NP.0f01//c4           NP    -      -      -      -      VMXOFF
 F3.0fc7//6            M     MEMZ   -      -      -      VMXON
 
 # WAITPKG
-66.0fae//f0+          O     GP32   -      -      -      TPAUSE
+66.0fae//f0+          O     GP32   -      -      -      TPAUSE ENC_NOSZ
 F3.0fae//f0+          O     GP     -      -      -      UMONITOR
-F2.0fae//f0+          O     GP32   -      -      -      UMWAIT
+F2.0fae//f0+          O     GP32   -      -      -      UMWAIT ENC_NOSZ
 
 # PRWRITE
 F3.0fae//4            M     GP     -      -      -      PTWRITE

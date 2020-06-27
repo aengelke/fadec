@@ -30,6 +30,10 @@ static bool op_mem(uint64_t op) { return (op & 0x8000000000000000) != 0; }
 static bool op_reg(uint64_t op) { return (op & 0x8000000000000000) == 0; }
 static bool op_reg_gpl(uint64_t op) { return (op & 0xfffffffffffffff0) == 0x100; }
 static bool op_reg_gph(uint64_t op) { return (op & 0xfffffffffffffffc) == 0x204; }
+static bool op_reg_seg(uint64_t op) { return (op & 0xfffffffffffffff8) == 0x300 && (op & 7) < 6; }
+static bool op_reg_fpu(uint64_t op) { return (op & 0xfffffffffffffff8) == 0x400; }
+static bool op_reg_mmx(uint64_t op) { return (op & 0xfffffffffffffff8) == 0x500; }
+static bool op_reg_xmm(uint64_t op) { return (op & 0xfffffffffffffff0) == 0x600; }
 static int64_t op_mem_offset(uint64_t op) { return (int32_t) (op & 0x00000000ffffffff); }
 static unsigned op_mem_base(uint64_t op) { return (op & 0x00000fff00000000) >> 32; }
 static unsigned op_mem_idx(uint64_t op) { return (op & 0x00fff00000000000) >> 44; }
@@ -274,6 +278,10 @@ fe_enc64_impl(uint8_t** restrict buf, uint64_t mnem, FeOp op0, FeOp op1, FeOp op
             if (ty == 0x1 && !op_reg_gpl(ops[i])) goto next;
             if (ty == 0x2 && !op_reg_gpl(ops[i]) && !op_reg_gph(ops[i])) goto next;
             if (ty == 0x2 && op_reg_gpl(ops[i]) && ops[i] >= FE_SP && ops[i] <= FE_DI) opc |= OPC_REX;
+            if (ty == 0x3 && !op_reg_seg(ops[i])) goto next;
+            if (ty == 0x4 && !op_reg_fpu(ops[i])) goto next;
+            if (ty == 0x5 && !op_reg_mmx(ops[i])) goto next;
+            if (ty == 0x6 && !op_reg_xmm(ops[i])) goto next;
         }
 
         if (ei->immctl && ei->immctl != 3)

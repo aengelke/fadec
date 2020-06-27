@@ -91,6 +91,13 @@ class OpKind(NamedTuple):
     K_MEM = "mem"
     K_IMM = "imm"
 
+    def abssize(self, opsz=None, vecsz=None):
+        res = opsz if self.size == self.SZ_OP else \
+              vecsz if self.size == self.SZ_VEC else self.size
+        if res is None:
+            raise Exception("unspecified operand size")
+        return res
+
 OPKINDS = {
     # sizeidx (0, fixedsz, opsz, vecsz), fixedsz (log2), regtype
     "IMM": OpKind(OpKind.SZ_OP, OpKind.K_IMM),
@@ -432,7 +439,7 @@ class EncodeMnemonic(NamedTuple):
 def encode_table(entries):
     mnemonics = defaultdict(list)
     for opcode, desc in entries:
-        if desc.mnemonic in ("RESERVED_NOP",):
+        if desc.mnemonic[:9] == "RESERVED_":
             continue
         if "ONLY32" in desc.flags or "UNDOC" in desc.flags:
             continue
@@ -452,6 +459,12 @@ def encode_table(entries):
 
         if "INSTR_WIDTH" not in desc.flags and not any(op.size == OpKind.SZ_OP for op in desc.operands):
             opsizes = {0}
+        if "ENC_NOSZ" in desc.flags:
+            opsizes = {0} # necessary for consistent metadata in EncodeMnemonic
+
+        # Where to put the operand size in the mnemonic
+        separate_opsize = desc.mnemonic in ("MOVSX", "MOVZX")
+        prepend_opsize = max(opsizes) > 0 and not separate_opsize
 
         mustmem = "MUSTMEM" in desc.flags or any(kind == EntryKind.TABLE72 and val < 8 for kind, val in opcode)
         rm = "r" if "NOMEM" in desc.flags else "m" if mustmem else "rm"
@@ -462,30 +475,21 @@ def encode_table(entries):
         if enc.vexreg_idx: optypes[enc.vexreg_idx^3] = "r"
         if enc.zeroreg_idx: optypes[enc.zeroreg_idx^3] = "r"
         if enc.imm_control: optypes[enc.imm_idx^3] = " iariioo"[enc.imm_control]
-        optypes = [ot for ot in optypes if ot]
+        optypes = product(*(ot for ot in optypes if ot))
 
         lock = ["", "LOCK_"] if "LOCK" in desc.flags else [""]
-        for opsize, lock_p, *ots in product(opsizes, lock, *optypes):
+        for opsize, lock_p, ots in product(opsizes, lock, optypes):
             if lock_p and ots[0] != "m":
                 continue
-            separate_opsize = any(op.kind == "GP" and op.size > 0 for op in desc.operands) and desc.encoding not in ("MC", "MRC")
-            prepend_opsize = not separate_opsize and ("INSTR_WIDTH" in desc.flags or any(op.size == OpKind.SZ_OP for op in desc.operands))
-            if "DEF64" in desc.flags and opsize == 64:
-                prepend_opsize = False
-            suffixes = []
-            if prepend_opsize:
-                suffixes.append(opsize)
-            for i, op in enumerate(desc.operands):
-                if ots[i] != "o":
-                    suffixes.append(ots[i])
-                if separate_opsize:
-                    if op.size > 0:
-                        suffixes.append(8 * op.size)
-                    elif op.size == OpKind.SZ_OP:
-                        suffixes.append(opsize)
             mnem_name = {"MOVABS": "MOV"}.get(desc.mnemonic, desc.mnemonic)
-            name = "FE_" + lock_p + mnem_name + "".join(map(str, suffixes))
-            mnemonics[EncodeMnemonic(name, tuple(ots), opsize, not not lock_p)].append((opcode, desc))
+            name = "FE_" + lock_p + mnem_name
+            if prepend_opsize and not ("DEF64" in desc.flags and opsize == 64):
+                name += f"_{opsize}"[name[-1] not in "0123456789":]
+            for ot, op in zip(ots, desc.operands):
+                name += ot.replace("o", "")
+                if separate_opsize:
+                    name += f"{op.abssize(opsize//8, 16)*8}"
+            mnemonics[EncodeMnemonic(name, ots, opsize, not not lock_p)].append((opcode, desc))
 
     switch_code = ""
     alt_index = 0
@@ -509,7 +513,7 @@ def encode_table(entries):
                 imm_size = 4
 
             tys = [] # operands that require special handling
-            for i, ot in enumerate(mnem.optypes):
+            for ot, op in zip(mnem.optypes, desc.operands):
                 if ot == "m":
                     tys.append(0xf)
                 elif ot == "i":
@@ -519,14 +523,10 @@ def encode_table(entries):
                     # TODO: Support short jumps
                     tys.append(-1 if "IMM_8" in desc.flags else 0x0)
                 elif ot == "r":
-                    if desc.operands[i].kind == "GP":
-                        sz = mnem.opsize // 8 if desc.operands[i].size == OpKind.SZ_OP else desc.operands[i].size
-                        if sz == 1:
-                            tys.append(0x2)
-                        else:
-                            tys.append(0x1)
+                    if op.kind == "GP":
+                        tys.append(2 if op.abssize(mnem.opsize//8) == 1 else 1)
                     else:
-                        tys.append(-1)
+                        tys.append({"SEG": 3, "FPU": 4, "MMX": 5, "XMM": 6}.get(op.kind, -1))
 
             if any(ty < 0 for ty in tys):
                 continue # unsupported register kind
