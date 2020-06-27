@@ -37,7 +37,7 @@ test(const void* buf, size_t buf_len, unsigned mode, const char* exp_fmt)
     if ((retval < 0 || (unsigned) retval == buf_len) && !strcmp(fmt, exp_fmt))
         return 0;
 
-    printf("Failed case ");
+    printf("Failed case (%u-bit): ", mode);
     print_hex(buf, buf_len);
     printf("\n  Exp (%2zu): %s", buf_len, exp_fmt);
     printf("\n  Got (%2d): %s\n", retval, fmt);
