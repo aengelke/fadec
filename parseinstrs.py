@@ -432,6 +432,7 @@ template = """// Auto-generated file -- do not modify!
 
 def encode_table(entries):
     mnemonics = defaultdict(list)
+    mnemonics["FE_NOP"].append(("NP", 0, 0, "0x90"))
     for opcode, desc in entries:
         if desc.mnemonic[:9] == "RESERVED_":
             continue
@@ -535,7 +536,7 @@ def encode_table(entries):
             if opsize == 64 and "DEF64" not in desc.flags: opc_s += "|OPC_REXW"
 
             # Construct mnemonic name
-            mnem_name = {"MOVABS": "MOV"}.get(desc.mnemonic, desc.mnemonic)
+            mnem_name = {"MOVABS": "MOV", "XCHG_NOP": "XCHG"}.get(desc.mnemonic, desc.mnemonic)
             name = "FE_" + lock_p + mnem_name
             if prepend_opsize and not ("DEF64" in desc.flags and opsize == 64):
                 name += f"_{opsize}"[name[-1] not in "0123456789":]

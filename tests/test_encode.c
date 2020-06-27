@@ -100,6 +100,13 @@ main(int argc, char** argv)
     TEST("\xf3\x0f\xbc\xc2", FE_TZCNT32rr, FE_AX, FE_DX);
     TEST("\x66\xf3\x0f\xbc\xc2", FE_TZCNT16rr, FE_AX, FE_DX);
     TEST("\x0f\x01\xd0", FE_XGETBV);
+    TEST("\x41\x90", FE_XCHG32rr, FE_R8, FE_AX);
+    TEST("\x91", FE_XCHG32rr, FE_CX, FE_AX);
+    TEST("\x66\x90", FE_XCHG16rr, FE_AX, FE_AX);
+    TEST("\x87\xc0", FE_XCHG32rr, FE_AX, FE_AX);
+    TEST("\x48\x90", FE_XCHG64rr, FE_AX, FE_AX);
+    TEST("\x90", FE_NOP);
+    TEST("\x0f\x1f\xc0", FE_NOP32r, FE_AX);
 
     // Test ModRM encoding
     TEST("\x01\x00", FE_ADD32mr, FE_MEM(FE_AX, 0, 0, 0), FE_AX);

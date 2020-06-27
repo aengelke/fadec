@@ -295,6 +295,9 @@ fe_enc64_impl(uint8_t** restrict buf, uint64_t mnem, FeOp op0, FeOp op1, FeOp op
         if (UNLIKELY(ei->immctl == 1) && imm != 1) goto next;
         if (ei->immctl && !op_imm_n(imm, desc->immsz)) goto next;
 
+        // NOP has no operands, so this must be the 32-bit OA XCHG
+        if ((desc->opc & ~7) == 0x90 && ops[0] == FE_AX) goto next;
+
         if (UNLIKELY(mnem & FE_ADDR32))
             *(*buf)++ = 0x67;
         if (UNLIKELY(mnem & 0x70000))
