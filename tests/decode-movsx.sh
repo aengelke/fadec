@@ -1,5 +1,0 @@
-decode 660fbec2 [MOVSX reg2:r0 reg1:r2]
-decode 0fbec2 [MOVSX reg4:r0 reg1:r2]
-decode 0fbfc2 [MOVSX reg4:r0 reg2:r2]
-decode64 480fbfc2 [MOVSX reg8:r0 reg2:r2]
-decode64 4863c2 [MOVSX reg8:r0 reg4:r2]
