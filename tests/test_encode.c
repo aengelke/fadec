@@ -61,6 +61,7 @@ main(int argc, char** argv)
     TEST("\x75\x00", FE_JNZ, (intptr_t) buf + 2);
     TEST("\x0f\x85\x00\x00\x00\x00", FE_JNZ|FE_JMPL, (intptr_t) buf + 6);
     TEST("\xe3\xfc", FE_JCXZ, (intptr_t) buf - 2);
+    TEST("\x67\xe3\xfb", FE_JCXZ|FE_ADDR32, (intptr_t) buf - 2);
     TEST("\xe3\xfc", FE_JCXZ|FE_JMPL, (intptr_t) buf - 2);
     TEST("\xac", FE_LODS8);
     TEST("\x67\xac", FE_LODS8|FE_ADDR32);
@@ -112,6 +113,12 @@ main(int argc, char** argv)
     TEST("\x48\x90", FE_XCHG64rr, FE_AX, FE_AX);
     TEST("\x90", FE_NOP);
     TEST("\x0f\x1f\xc0", FE_NOP32r, FE_AX);
+    TEST("\x26\x01\x00", FE_ADD32mr|FE_SEG(FE_ES), FE_MEM(FE_AX, 0, 0, 0), FE_AX);
+    TEST("\x2e\x01\x00", FE_ADD32mr|FE_SEG(FE_CS), FE_MEM(FE_AX, 0, 0, 0), FE_AX);
+    TEST("\x36\x01\x00", FE_ADD32mr|FE_SEG(FE_SS), FE_MEM(FE_AX, 0, 0, 0), FE_AX);
+    TEST("\x3e\x01\x00", FE_ADD32mr|FE_SEG(FE_DS), FE_MEM(FE_AX, 0, 0, 0), FE_AX);
+    TEST("\x64\x01\x00", FE_ADD32mr|FE_SEG(FE_FS), FE_MEM(FE_AX, 0, 0, 0), FE_AX);
+    TEST("\x65\x01\x00", FE_ADD32mr|FE_SEG(FE_GS), FE_MEM(FE_AX, 0, 0, 0), FE_AX);
 
     // Test ModRM encoding
     TEST("\x01\x00", FE_ADD32mr, FE_MEM(FE_AX, 0, 0, 0), FE_AX);
