@@ -61,7 +61,7 @@ opc_size(uint64_t opc)
 
 static
 int
-enc_opc(uint8_t** buf, uint64_t opc)
+enc_opc(uint8_t** restrict buf, uint64_t opc)
 {
     if (opc & OPC_VEX) return -1; // TODO: support VEX encoding
     if (opc & OPC_66) *(*buf)++ = 0x66;
@@ -86,7 +86,7 @@ enc_opc(uint8_t** buf, uint64_t opc)
 
 static
 int
-enc_imm(uint8_t** buf, uint64_t imm, unsigned immsz)
+enc_imm(uint8_t** restrict buf, uint64_t imm, unsigned immsz)
 {
     if (!op_imm_n(imm, immsz)) return -1;
     for (unsigned i = 0; i < immsz; i++)
@@ -96,7 +96,7 @@ enc_imm(uint8_t** buf, uint64_t imm, unsigned immsz)
 
 static
 int
-enc_o(uint8_t** buf, uint64_t opc, uint64_t op0)
+enc_o(uint8_t** restrict buf, uint64_t opc, uint64_t op0)
 {
     if (op_reg_idx(op0) & 0x8) opc |= OPC_REXB;
 
@@ -110,7 +110,7 @@ enc_o(uint8_t** buf, uint64_t opc, uint64_t op0)
 
 static
 int
-enc_mr(uint8_t** buf, uint64_t opc, uint64_t op0, uint64_t op1)
+enc_mr(uint8_t** restrict buf, uint64_t opc, uint64_t op0, uint64_t op1)
 {
     // If !op_reg(op1), it is a constant value for ModRM.reg
     if (op_reg(op0) && (op_reg_idx(op0) & 0x8)) opc |= OPC_REXB;
@@ -121,9 +121,8 @@ enc_mr(uint8_t** buf, uint64_t opc, uint64_t op0, uint64_t op1)
     bool has_rex = !!(opc & (OPC_REX|OPC_REXW|OPC_REXR|OPC_REXX|OPC_REXB));
     if (has_rex && (op_reg_gph(op0) || op_reg_gph(op1))) return -1;
 
-    if (enc_opc(buf, opc)) return -1;
     int mod = 0, reg = op1 & 7, rm;
-    int scale = 0, idx = 4, base;
+    int scale = 0, idx = 4, base = 0;
     bool withsib = false, mod0off = false;
     if (op_reg(op0))
     {
@@ -132,17 +131,15 @@ enc_mr(uint8_t** buf, uint64_t opc, uint64_t op0, uint64_t op1)
     }
     else
     {
+        if (!!op_mem_idx(op0) != !!op_mem_scale(op0)) return -1;
         if (op_mem_idx(op0))
         {
             if (!op_reg_gpl(op_mem_idx(op0))) return -1;
             if (op_reg_idx(op_mem_idx(op0)) == 4) return -1;
             idx = op_mem_idx(op0) & 7;
             int scalabs = op_mem_scale(op0);
-            if (scalabs == 1) scale = 0;
-            else if (scalabs == 2) scale = 1;
-            else if (scalabs == 4) scale = 2;
-            else if (scalabs == 8) scale = 3;
-            else return -1;
+            if (scalabs & (scalabs - 1)) return -1;
+            scale = (scalabs & 0xA ? 1 : 0) | (scalabs & 0xC ? 2 : 0);
             withsib = true;
         }
 
@@ -177,6 +174,7 @@ enc_mr(uint8_t** buf, uint64_t opc, uint64_t op0, uint64_t op1)
         }
     }
 
+    if (enc_opc(buf, opc)) return -1;
     *(*buf)++ = (mod << 6) | (reg << 3) | rm;
     if (mod != 3 && rm == 4)
         *(*buf)++ = (scale << 6) | (idx << 3) | base;
@@ -249,7 +247,7 @@ static const struct EncodeDesc descs[] = {
 };
 
 int
-fe_enc64_impl(uint8_t** buf, uint64_t mnem, FeOp op0, FeOp op1, FeOp op2, FeOp op3)
+fe_enc64_impl(uint8_t** restrict buf, uint64_t mnem, FeOp op0, FeOp op1, FeOp op2, FeOp op3)
 {
     uint8_t* buf_start = *buf;
     uint64_t ops[4] = {op0, op1, op2, op3};
