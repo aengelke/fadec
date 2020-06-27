@@ -162,36 +162,53 @@ enc_mr(uint8_t** buf, uint64_t opc, uint64_t op0, uint64_t op1)
 }
 
 typedef enum {
-    ENC_INVALID,
+    ENC_INVALID = 0,
     ENC_NP,
-    ENC_M,
-    ENC_M1,
-    ENC_MI,
-    ENC_MC,
-    ENC_MR,
-    ENC_RM,
-    ENC_RMA,
-    ENC_MRI,
-    ENC_RMI,
-    ENC_MRC,
-    ENC_I,
-    ENC_IA,
-    ENC_O,
-    ENC_OI,
-    ENC_OA,
-    ENC_AO,
-    ENC_A,
-    ENC_D,
-    ENC_FD,
-    ENC_TD,
-    ENC_RVM,
-    ENC_RVMI,
-    ENC_RVMR,
-    ENC_RMV,
-    ENC_VM,
-    ENC_VMI,
-    ENC_MVR,
+    ENC_M, ENC_M1, ENC_MI, ENC_MC, ENC_MR, ENC_RM, ENC_RMA, ENC_MRI, ENC_RMI, ENC_MRC,
+    ENC_I, ENC_IA, ENC_O, ENC_OI, ENC_OA, ENC_AO, ENC_A, ENC_D, ENC_FD, ENC_TD,
+    ENC_RVM, ENC_RVMI, ENC_RVMR, ENC_RMV, ENC_VM, ENC_VMI, ENC_MVR,
+    ENC_MAX
 } Encoding;
+
+struct EncodingInfo {
+    uint8_t modrm : 2;
+    uint8_t modreg : 2;
+    uint8_t vexreg : 2;
+    uint8_t immidx : 2;
+    uint8_t immctl : 3;
+};
+
+const struct EncodingInfo encoding_infos[ENC_MAX] = {
+    [ENC_INVALID] = { 0 },
+    [ENC_NP]      = { 0 },
+    [ENC_M]       = { .modrm = 0^3 },
+    [ENC_M1]      = { .modrm = 0^3 },
+    [ENC_MI]      = { .modrm = 0^3, .immctl = 1, .immidx = 1 },
+    [ENC_MC]      = { .modrm = 0^3 },
+    [ENC_MR]      = { .modrm = 0^3, .modreg = 1^3 },
+    [ENC_RM]      = { .modrm = 1^3, .modreg = 0^3 },
+    [ENC_RMA]     = { .modrm = 1^3, .modreg = 0^3 },
+    [ENC_MRI]     = { .modrm = 0^3, .modreg = 1^3, .immctl = 1, .immidx = 2 },
+    [ENC_RMI]     = { .modrm = 1^3, .modreg = 0^3, .immctl = 1, .immidx = 2 },
+    [ENC_MRC]     = { .modrm = 0^3, .modreg = 1^3 },
+    [ENC_I]       = { .immctl = 1, .immidx = 0 },
+    [ENC_IA]      = { .immctl = 1, .immidx = 1 },
+    [ENC_O]       = { .modreg = 0^3 },
+    [ENC_OI]      = { .modreg = 0^3, .immctl = 1, .immidx = 1 },
+    [ENC_OA]      = { .modreg = 0^3 },
+    [ENC_AO]      = { .modreg = 1^3 },
+    [ENC_A]       = { 0 },
+    [ENC_D]       = { .immctl = 2, .immidx = 0 },
+    [ENC_FD]      = { .immctl = 3, .immidx = 1 },
+    [ENC_TD]      = { .immctl = 3, .immidx = 0 },
+    [ENC_RVM]     = { .modrm = 2^3, .modreg = 0^3, .vexreg = 1^3 },
+    [ENC_RVMI]    = { .modrm = 2^3, .modreg = 0^3, .vexreg = 1^3, .immctl = 1, .immidx = 3 },
+    // [ENC_RVMR]    = { .modrm = 2^3, .modreg = 0^3, .vexreg = 1^3, .immctl = 4, .immidx = 3 },
+    [ENC_RMV]     = { .modrm = 1^3, .modreg = 0^3, .vexreg = 2^3 },
+    [ENC_VM]      = { .modrm = 1^3, .vexreg = 0^3 },
+    [ENC_VMI]     = { .modrm = 1^3, .vexreg = 0^3, .immctl = 1, .immidx = 2 },
+    [ENC_MVR]     = { .modrm = 0^3, .modreg = 1^3, .vexreg = 1^3 },
+};
 
 int
 fe_enc64_impl(uint8_t** buf, uint64_t mnem, FeOp op0, FeOp op1, FeOp op2, FeOp op3)
@@ -226,63 +243,22 @@ encode:
     if (mnem & 0x70000)
         *(*buf)++ = (0x65643e362e2600 >> (8 * ((mnem & 0x70000) >> 16))) & 0xff;
 
-    switch (enc)
-    {
-    case ENC_NP:
-    case ENC_A:
+    const struct EncodingInfo* ei = &encoding_infos[enc];
+    uint64_t ops[4] = {op0, op1, op2, op3};
+    if (ei->modrm) {
+        FeOp modreg = ei->modreg ? ops[ei->modreg^3] : (opc & 0xff00) >> 8;
+        if (enc_mr(buf, opc, ops[ei->modrm^3], modreg)) goto fail;
+    } else if (ei->modreg) {
+        if (enc_o(buf, opc, ops[ei->modreg^3])) goto fail;
+    } else {
         if (enc_opc(buf, opc)) goto fail;
-        break;
-    case ENC_M:
-    case ENC_M1:
-    case ENC_MC:
-        if (enc_mr(buf, opc, op0, (opc & 0xff00) >> 8)) goto fail;
-        break;
-    case ENC_MI:
-        if (enc_mr(buf, opc, op0, (opc & 0xff00) >> 8)) goto fail;
-        if (enc_imm(buf, op1, immsz)) goto fail;
-        break;
-    case ENC_MR:
-    case ENC_MRC:
-        if (enc_mr(buf, opc, op0, op1)) goto fail;
-        break;
-    case ENC_RM:
-    case ENC_RMA:
-        if (enc_mr(buf, opc, op1, op0)) goto fail;
-        break;
-    case ENC_MRI:
-        if (enc_mr(buf, opc, op0, op1)) goto fail;
-        if (enc_imm(buf, op2, immsz)) goto fail;
-        break;
-    case ENC_RMI:
-        if (enc_mr(buf, opc, op1, op0)) goto fail;
-        if (enc_imm(buf, op2, immsz)) goto fail;
-        break;
-    case ENC_I:
-        if (enc_opc(buf, opc)) goto fail;
-        if (enc_imm(buf, op0, immsz)) goto fail;
-        break;
-    case ENC_IA:
-        if (enc_opc(buf, opc)) goto fail;
-        if (enc_imm(buf, op1, immsz)) goto fail;
-        break;
-    case ENC_O:
-    case ENC_OA:
-        if (enc_o(buf, opc, op0)) goto fail;
-        break;
-    case ENC_OI:
-        if (enc_o(buf, opc, op0)) goto fail;
-        if (enc_imm(buf, op1, immsz)) goto fail;
-        break;
-    case ENC_AO:
-        if (enc_o(buf, opc, op1)) goto fail;
-        break;
-    case ENC_D:
-        if (enc_opc(buf, opc)) goto fail;
-        if (enc_imm(buf, op0 == FE_JMP_RESERVE ? 0 : op0 - ((int64_t) *buf + immsz), immsz)) goto fail;
-        break;
-    case ENC_INVALID:
-    default:
-        goto fail;
+    }
+
+    if (ei->immctl) {
+        int64_t imm = ops[ei->immidx];
+        if (ei->immctl == 2)
+            imm = imm == FE_JMP_RESERVE ? 0 : imm - ((int64_t) *buf + immsz);
+        if (enc_imm(buf, imm, immsz)) goto fail;
     }
 
     return 0;
