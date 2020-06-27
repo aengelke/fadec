@@ -17,7 +17,9 @@ enum {
     OPC_REXX = 1 << 24,
     OPC_REXB = 1 << 25,
     OPC_REX = 1 << 26,
+    OPC_VEX = 1 << 27,
     OPC_LOCK = 1 << 28,
+    OPC_VEXL = 1 << 29,
 };
 
 static bool op_mem(uint64_t op) { return (op & 0x8000000000000000) != 0; }
@@ -40,6 +42,7 @@ static
 int
 enc_opc(uint8_t** buf, uint64_t opc)
 {
+    if (opc & OPC_VEX) return -1; // TODO: support VEX encoding
     if (opc & OPC_66) *(*buf)++ = 0x66;
     if (opc & OPC_F2) *(*buf)++ = 0xF2;
     if (opc & OPC_F3) *(*buf)++ = 0xF3;

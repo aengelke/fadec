@@ -491,14 +491,14 @@ def encode_table(entries):
     for mnem, v in sorted(mnemonics.items(), key=lambda e: e[0].name):
         enc_prio = ["O", "OA", "AO", "OI", "D", "IA", "M", "MI", "MR", "RM", "FD", "TD"]
         v.sort(key=lambda e: (e[1].encoding != "M1", e[1].mnemonic == "MOVABS" and mnem.opsize == 64, "IMM_8" not in e[1].flags, e[1].encoding in enc_prio and enc_prio.index(e[1].encoding)))
-        variants = []
+        variants = {}
         for opcode, desc in v:
             conds = []
             if desc.encoding == "M1":
                 conds.append(f"op1 == 1")
             elif desc.encoding == "MC":
                 conds.append(f"op_reg_idx(op1) == 1")
-            elif desc.encoding in ("IA", "AO"):
+            elif desc.encoding in ("A", "IA", "AO"):
                 conds.append(f"op_reg_idx(op0) == 0")
             elif desc.encoding == "OA":
                 conds.append(f"op_reg_idx(op1) == 0")
@@ -551,8 +551,7 @@ def encode_table(entries):
             opc_i = -1
             for kind, val in opcode:
                 if kind == EntryKind.TABLE_ROOT:
-                    if val & 4:
-                        conds.append("0 /*opc,vex not supp*/")
+                    flags += ["", "|OPC_VEX"][val >> 2]
                     flags += ["","|OPC_0F","|OPC_0F38","|OPC_0F3A"][val & 3]
                 elif kind == EntryKind.TABLE256:
                     opc_i = val
@@ -561,11 +560,10 @@ def encode_table(entries):
                 elif kind in (EntryKind.TABLE_PREFIX, EntryKind.TABLE_PREFIX_REP):
                     flags += ["", "|OPC_66", "|OPC_F3", "|OPC_F2"][val]
                 elif kind == EntryKind.TABLE_VEX:
-                    if val & 2:
-                        conds.append("0 /*opc,vexl not supp*/")
+                    flags += ["", "|OPC_VEXL"][val >> 1]
                     flags += ["", "|OPC_REXW"][val & 1]
                 else:
-                    conds.append("0 /*opc not supp*/")
+                    raise Exception("invalid opcode table")
             opc_s = hex(opc_i) + flags
             if mnem.lock: opc_s += "|OPC_LOCK"
             if mnem.opsize == 16: opc_s += "|OPC_66"
@@ -576,9 +574,10 @@ def encode_table(entries):
                 code += f"gp8ops={sum(1 << i for i in gp8ops)};"
 
             cond_str = f"if ({'&&'.join(conds)}) " if conds else ""
-            variants.append(f"{cond_str}{{{code}goto encode;}}")
+            if cond_str not in variants:
+                variants[cond_str] = f"{cond_str}{{{code}goto encode;}}"
 
-        variant_str = "\n  ".join(variants)
+        variant_str = "\n  ".join(variants.values())
         switch_code += f"case {mnem.name}:\n  {variant_str}\n  goto fail;\n"
 
     mnemonics_list = sorted(mnemonics.keys())
