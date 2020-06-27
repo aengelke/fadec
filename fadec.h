@@ -79,6 +79,7 @@ typedef enum {
     FD_RT_MEM = 15,
 } FdRegType;
 
+/** Internal use only. **/
 typedef struct {
     uint8_t type;
     uint8_t size;
@@ -86,6 +87,7 @@ typedef struct {
     uint8_t misc;
 } FdOp;
 
+/** Never(!) access struct fields directly. Use the macros defined below. **/
 typedef struct {
     uint16_t type;
     uint8_t flags;
@@ -117,8 +119,9 @@ typedef enum {
  * \param mode Decoding mode, either 32 for protected/compatibility mode or 64
  *        for long mode. 16-bit mode is not supported.
  * \param address Virtual address where the decoded instruction. This is used
- *        for computing jump targets and segment-offset-relative memory
- *        operations (MOV with moffs* encoding) and stored in the instruction.
+ *        for computing jump targets. If "0" is passed, operands which require
+ *        adding EIP/RIP will be stored as FD_OT_OFF operands.
+ *        DEPRECATED: Strongly prefer passing 0 and using FD_OT_OFF operands.
  * \param out_instr Pointer to the instruction buffer. Note that this may get
  *        partially written even if an error is returned.
  * \return The number of bytes consumed by the instruction, or a negative number
@@ -137,7 +140,8 @@ void fd_format(const FdInstr* instr, char* buf, size_t len);
 
 /** Gets the type/mnemonic of the instruction. **/
 #define FD_TYPE(instr) ((FdInstrType) (instr)->type)
-/** Gets the address of the instruction. **/
+/** DEPRECATED: This functionality is obsolete in favor of FD_OT_OFF.
+ * Gets the address of the instruction. Invalid if decoded  address == 0. **/
 #define FD_ADDRESS(instr) ((instr)->address)
 /** Gets the size of the instruction in bytes. **/
 #define FD_SIZE(instr) ((instr)->size)
