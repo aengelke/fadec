@@ -146,6 +146,16 @@ main(int argc, char** argv)
     TEST("\x69\xC7\x08\x01\x00\x00", "[IMUL reg4:r0 reg4:r7 imm4:0x108]");
     TEST("\x6B\xC7\x08", "[IMUL reg4:r0 reg4:r7 imm4:0x8]");
 
+    TEST("\x0f\x38\xf0\xd1", "UD"); // MOVBE doesn't allow register moves
+    TEST("\x0f\x38\xf0\x11", "[MOVBE reg4:r2 mem4:r1]");
+    TEST("\x66\x0f\x38\xf0\x11", "[MOVBE reg2:r2 mem2:r1]");
+    TEST64("\x48\x0f\x38\xf0\x01", "[MOVBE reg8:r0 mem8:r1]");
+    TEST("\xf2\x0f\x38\xf0\xd1", "[CRC32 reg4:r2 reg1:r1]");
+    TEST("\xf2\x66\x0f\x38\xf1\xd1", "[CRC32 reg4:r2 reg2:r1]");
+    TEST("\xf2\x0f\x38\xf1\xd1", "[CRC32 reg4:r2 reg4:r1]");
+    TEST64("\xf2\x48\x0f\x38\xf1\xd1", "[CRC32 reg4:r2 reg8:r1]");
+    TEST64("\xf2\x4c\x0f\x38\xf1\xd1", "[CRC32 reg4:r10 reg8:r1]");
+
     TEST32("\x40", "[INC reg4:r0]");
     TEST32("\x43", "[INC reg4:r3]");
     TEST32("\x66\x47", "[INC reg2:r7]");
