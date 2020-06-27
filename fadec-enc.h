@@ -23,11 +23,15 @@ typedef enum {
 typedef int64_t FeOp;
 
 #define FE_MEM(base,sc,idx,off) (INT64_MIN | ((int64_t) ((base) & 0xfff) << 32) | ((int64_t) ((idx) & 0xfff) << 44) | ((int64_t) ((sc) & 0xf) << 56) | ((off) & 0xffffffff))
-#define FE_JMP_RESERVE INT64_MIN
 
 #define FE_SEG(seg) ((((seg) & 0x7) + 1) << 16)
 #define FE_SEG_MASK 0x70000
 #define FE_ADDR32 0x80000
+/** Used together with a RIP-relative (conditional) jump, this will force the
+ * use of the encoding with the largest distance. Useful for reserving a jump
+ * when the target offset is still unknown; if the jump is re-encoded later on,
+ * FE_JMPL must be specified there, too, so that the encoding lengths match. **/
+#define FE_JMPL 0x100000
 #define FE_MNEM_MASK 0xffff
 
 enum {

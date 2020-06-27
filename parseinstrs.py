@@ -497,12 +497,8 @@ def encode_table(entries):
             for ot, op in zip(ots, desc.operands):
                 if ot == "m":
                     tys.append(0xf)
-                elif ot == "i":
+                elif ot == "i" or ot == "o":
                     tys.append(0x0)
-                elif ot == "o":
-                    # TODO: Handle JCXZ and LOOP/LOOPcc, which only have IMM_8
-                    # TODO: Support short jumps
-                    tys.append(-1 if "IMM_8" in desc.flags else 0x0)
                 elif ot == "r":
                     if op.kind == "GP":
                         tys.append(2 if op.abssize(opsize//8) == 1 else 1)

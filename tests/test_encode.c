@@ -54,9 +54,14 @@ main(int argc, char** argv)
 
     TEST("\00\xe0", FE_ADD8rr, FE_AX, FE_AH);
     TEST("", FE_ADD8rr, FE_SI, FE_AH);
-    TEST("\xe9\xfb\xff\xff\xff", FE_JMP, (intptr_t) buf);
-    TEST("\xe9\x00\x00\x00\x00", FE_JMP, FE_JMP_RESERVE);
-    TEST("\x0f\x85\x00\x00\x00\x00", FE_JNZ, (intptr_t) buf + 6);
+    TEST("\xeb\xfe", FE_JMP, (intptr_t) buf);
+    TEST("\xeb\x7f", FE_JMP, (intptr_t) buf + 129);
+    TEST("\xe9\xfb\xff\xff\xff", FE_JMP|FE_JMPL, (intptr_t) buf);
+    TEST("\xe9\x00\x00\x00\x00", FE_JMP|FE_JMPL, (intptr_t) buf + 5);
+    TEST("\x75\x00", FE_JNZ, (intptr_t) buf + 2);
+    TEST("\x0f\x85\x00\x00\x00\x00", FE_JNZ|FE_JMPL, (intptr_t) buf + 6);
+    TEST("\xe3\xfc", FE_JCXZ, (intptr_t) buf - 2);
+    TEST("\xe3\xfc", FE_JCXZ|FE_JMPL, (intptr_t) buf - 2);
     TEST("\xac", FE_LODS8);
     TEST("\x67\xac", FE_LODS8|FE_ADDR32);
     TEST("\x50", FE_PUSHr, FE_AX);

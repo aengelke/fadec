@@ -287,10 +287,8 @@ fe_enc64_impl(uint8_t** restrict buf, uint64_t mnem, FeOp op0, FeOp op1, FeOp op
         if (ei->immctl && ei->immctl != 3)
             imm = ops[ei->immidx];
         if (ei->immctl == 6) {
-            if (imm == FE_JMP_RESERVE)
-                imm = 0;
-            else
-                imm -= (int64_t) *buf + opc_size(opc) + desc->immsz;
+            if (UNLIKELY(mnem & FE_JMPL) && desc->alt) goto next;
+            imm -= (int64_t) *buf + opc_size(opc) + desc->immsz;
         }
         if (UNLIKELY(ei->immctl == 1) && imm != 1) goto next;
         if (ei->immctl && !op_imm_n(imm, desc->immsz)) goto next;
