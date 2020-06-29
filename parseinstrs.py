@@ -497,16 +497,13 @@ def encode_table(entries):
             for ot, op in zip(ots, desc.operands):
                 if ot == "m":
                     tys.append(0xf)
-                elif ot == "i" or ot == "o":
-                    tys.append(0x0)
-                elif ot == "r":
-                    if op.kind == "GP":
-                        tys.append(2 if op.abssize(opsize//8) == 1 else 1)
-                    else:
-                        tys.append({"SEG": 3, "FPU": 4, "MMX": 5, "XMM": 6}.get(op.kind, -1))
+                elif op.kind == "GP":
+                    tys.append(2 if op.abssize(opsize//8) == 1 else 1)
+                else:
+                    tys.append({
+                        "imm": 0, "SEG": 3, "FPU": 4, "MMX": 5, "XMM": 6,
+                    }.get(op.kind, -1))
 
-            if any(ty < 0 for ty in tys):
-                continue # unsupported register kind
             tys_i = sum(ty << (4*i) for i, ty in enumerate(tys))
 
             opc_i = -1

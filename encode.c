@@ -28,23 +28,23 @@ enum {
     OPC_SEG = (1l << 31) | (1l << 32) | (1l << 33),
 };
 
-static bool op_mem(uint64_t op) { return (op & 0x8000000000000000) != 0; }
-static bool op_reg(uint64_t op) { return (op & 0x8000000000000000) == 0; }
-static bool op_reg_gpl(uint64_t op) { return (op & 0xfffffffffffffff0) == 0x100; }
-static bool op_reg_gph(uint64_t op) { return (op & 0xfffffffffffffffc) == 0x204; }
-static bool op_reg_seg(uint64_t op) { return (op & 0xfffffffffffffff8) == 0x300 && (op & 7) < 6; }
-static bool op_reg_fpu(uint64_t op) { return (op & 0xfffffffffffffff8) == 0x400; }
-static bool op_reg_mmx(uint64_t op) { return (op & 0xfffffffffffffff8) == 0x500; }
-static bool op_reg_xmm(uint64_t op) { return (op & 0xfffffffffffffff0) == 0x600; }
-static int64_t op_mem_offset(uint64_t op) { return (int32_t) (op & 0x00000000ffffffff); }
-static unsigned op_mem_base(uint64_t op) { return (op & 0x00000fff00000000) >> 32; }
-static unsigned op_mem_idx(uint64_t op) { return (op & 0x00fff00000000000) >> 44; }
-static unsigned op_mem_scale(uint64_t op) { return (op & 0x0f00000000000000) >> 56; }
-static unsigned op_reg_idx(uint64_t op) { return (op & 0x00000000000000ff); }
-static bool op_imm_n(uint64_t imm, unsigned immsz) {
-    if (immsz == 1 && (uint64_t) (int64_t) (int8_t) imm != imm) return false;
-    if (immsz == 2 && (uint64_t) (int64_t) (int16_t) imm != imm) return false;
-    if (immsz == 4 && (uint64_t) (int64_t) (int32_t) imm != imm) return false;
+static bool op_mem(FeOp op) { return op < 0; }
+static bool op_reg(FeOp op) { return op >= 0; }
+static bool op_reg_gpl(FeOp op) { return (op & ~0xf) == 0x100; }
+static bool op_reg_gph(FeOp op) { return (op & ~0x3) == 0x204; }
+static bool op_reg_seg(FeOp op) { return (op & ~0x7) == 0x300 && (op & 7) < 6; }
+static bool op_reg_fpu(FeOp op) { return (op & ~0x7) == 0x400; }
+static bool op_reg_mmx(FeOp op) { return (op & ~0x7) == 0x500; }
+static bool op_reg_xmm(FeOp op) { return (op & ~0xf) == 0x600; }
+static int64_t op_mem_offset(FeOp op) { return (int32_t) op; }
+static unsigned op_mem_base(FeOp op) { return (op >> 32) & 0xfff; }
+static unsigned op_mem_idx(FeOp op) { return (op >> 44) & 0xfff; }
+static unsigned op_mem_scale(FeOp op) { return (op >> 56) & 0xf; }
+static unsigned op_reg_idx(FeOp op) { return op & 0xff; }
+static bool op_imm_n(FeOp imm, unsigned immsz) {
+    if (immsz == 1 && (int8_t) imm != imm) return false;
+    if (immsz == 2 && (int16_t) imm != imm) return false;
+    if (immsz == 4 && (int32_t) imm != imm) return false;
     return true;
 }
 
@@ -258,7 +258,8 @@ static const struct EncodeDesc descs[] = {
 };
 
 int
-fe_enc64_impl(uint8_t** restrict buf, uint64_t mnem, FeOp op0, FeOp op1, FeOp op2, FeOp op3)
+fe_enc64_impl(uint8_t** restrict buf, uint64_t mnem, FeOp op0, FeOp op1,
+              FeOp op2, FeOp op3)
 {
     uint8_t* buf_start = *buf;
     uint64_t ops[4] = {op0, op1, op2, op3};
@@ -280,15 +281,16 @@ fe_enc64_impl(uint8_t** restrict buf, uint64_t mnem, FeOp op0, FeOp op1, FeOp op
 
         for (int i = 0; i < 4; i++) {
             unsigned ty = (desc->tys >> (4 * i)) & 0xf;
+            FeOp op = ops[i];
             if (ty == 0x0) continue;
-            if (ty == 0xf && !op_mem(ops[i])) goto next;
-            if (ty == 0x1 && !op_reg_gpl(ops[i])) goto next;
-            if (ty == 0x2 && !op_reg_gpl(ops[i]) && !op_reg_gph(ops[i])) goto next;
-            if (ty == 0x2 && op_reg_gpl(ops[i]) && ops[i] >= FE_SP && ops[i] <= FE_DI) opc |= OPC_REX;
-            if (ty == 0x3 && !op_reg_seg(ops[i])) goto next;
-            if (ty == 0x4 && !op_reg_fpu(ops[i])) goto next;
-            if (ty == 0x5 && !op_reg_mmx(ops[i])) goto next;
-            if (ty == 0x6 && !op_reg_xmm(ops[i])) goto next;
+            if (ty == 0xf && !op_mem(op)) goto next;
+            if (ty == 0x1 && !op_reg_gpl(op)) goto next;
+            if (ty == 0x2 && !op_reg_gpl(op) && !op_reg_gph(op)) goto next;
+            if (ty == 0x2 && op_reg_gpl(op) && op >= FE_SP) opc |= OPC_REX;
+            if (ty == 0x3 && !op_reg_seg(op)) goto next;
+            if (ty == 0x4 && !op_reg_fpu(op)) goto next;
+            if (ty == 0x5 && !op_reg_mmx(op)) goto next;
+            if (ty == 0x6 && !op_reg_xmm(op)) goto next;
         }
 
         if (UNLIKELY(mnem & FE_ADDR32))
@@ -303,7 +305,7 @@ fe_enc64_impl(uint8_t** restrict buf, uint64_t mnem, FeOp op0, FeOp op1, FeOp op
             imm -= (int64_t) *buf + opc_size(opc) + desc->immsz;
         }
         if (UNLIKELY(ei->immctl == 1) && imm != 1) goto next;
-        if (ei->immctl && !op_imm_n(imm, desc->immsz)) goto next;
+        if (ei->immctl >= 2 && !op_imm_n(imm, desc->immsz)) goto next;
 
         // NOP has no operands, so this must be the 32-bit OA XCHG
         if ((desc->opc & ~7) == 0x90 && ops[0] == FE_AX) goto next;
@@ -327,6 +329,7 @@ fe_enc64_impl(uint8_t** restrict buf, uint64_t mnem, FeOp op0, FeOp op1, FeOp op
     } while (desc_idx != 0);
 
 fail:
-    *buf = buf_start; // Don't advance buffer on error
+    // Don't advance buffer on error; though we shouldn't write anything.
+    *buf = buf_start;
     return -1;
 }
