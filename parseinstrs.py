@@ -451,15 +451,28 @@ def encode_table(entries):
                 opsizes.remove(32)
             if "DEF64" in desc.flags:
                 opsizes.remove(32)
-
         if "INSTR_WIDTH" not in desc.flags and not any(op.size == OpKind.SZ_OP for op in desc.operands):
             opsizes = {0}
+
+        hasvex, vecsizes = False, {128}
+        if any(kind == EntryKind.TABLE_ROOT and (val&4) for kind, val in opcode):
+            hasvex, vecsizes = True, {128, 256}
+            # if "VEXLIG" not in desc.flags and any(op.size == OpKind.SZ_VEC for op in desc.operands):
+            #     vecsizes.add(256)
+            if any(kind == EntryKind.TABLE_VEX and (val&2) == 0 for kind, val in opcode):
+                vecsizes.remove(256)
+            if any(kind == EntryKind.TABLE_VEX and (val&2) == 2 for kind, val in opcode):
+                vecsizes.remove(128)
+        if "VEXLIG" in desc.flags or all(op.size != OpKind.SZ_VEC for op in desc.operands):
+            vecsizes = {0}
+
         if "ENC_NOSZ" in desc.flags:
-            opsizes = {0}
+            opsizes, vecsizes = {0}, {0}
 
         # Where to put the operand size in the mnemonic
         separate_opsize = desc.mnemonic in ("MOVSX", "MOVZX")
         prepend_opsize = max(opsizes) > 0 and not separate_opsize
+        prepend_vecsize = hasvex and max(vecsizes) > 0 and not separate_opsize
 
         mustmem = "MUSTMEM" in desc.flags or any(kind == EntryKind.TABLE72 and val < 8 for kind, val in opcode)
         rm = "r" if "NOMEM" in desc.flags else "m" if mustmem else "rm"
@@ -473,7 +486,7 @@ def encode_table(entries):
         optypes = product(*(ot for ot in optypes if ot))
 
         lock = ["", "LOCK_"] if "LOCK" in desc.flags else [""]
-        for opsize, lock_p, ots in product(opsizes, lock, optypes):
+        for opsize, vecsize, lock_p, ots in product(opsizes, vecsizes, lock, optypes):
             if lock_p and ots[0] != "m":
                 continue
 
@@ -533,10 +546,12 @@ def encode_table(entries):
             name = "FE_" + lock_p + mnem_name
             if prepend_opsize and not ("DEF64" in desc.flags and opsize == 64):
                 name += f"_{opsize}"[name[-1] not in "0123456789":]
+            if prepend_vecsize:
+                name += f"_{vecsize}"[name[-1] not in "0123456789":]
             for ot, op in zip(ots, desc.operands):
                 name += ot.replace("o", "")
                 if separate_opsize:
-                    name += f"{op.abssize(opsize//8, 16)*8}"
+                    name += f"{op.abssize(opsize//8, vecsize//8)*8}"
             mnemonics[name].append((desc.encoding, imm_size, tys_i, opc_s))
 
     descs = ""
