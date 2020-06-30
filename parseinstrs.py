@@ -83,36 +83,48 @@ ENCODINGS = {
     "MVR": InstrFlags(modrm_idx=0^3, modreg_idx=2^3, vexreg_idx=1^3),
 }
 
-OPKIND_LOOKUP = {
+class OpKind(NamedTuple):
+    size: int
+    kind: str
+
+    SZ_OP = -1
+    SZ_VEC = -2
+    K_MEM = "mem"
+    K_IMM = "imm"
+
+OPKINDS = {
     # sizeidx (0, fixedsz, opsz, vecsz), fixedsz (log2), regtype
-    "-": (0, 0, 7),
-    "IMM": (2, 0, 7),
-    "IMM8": (1, 0, 7),
-    "IMM16": (1, 1, 7),
-    "IMM32": (1, 2, 7),
-    "GP": (2, 0, 0),
-    "GP8": (1, 0, 0),
-    "GP16": (1, 1, 0),
-    "GP32": (1, 2, 0),
-    "GP64": (1, 3, 0),
-    "MMX": (1, 3, 4),
-    "XMM": (3, 0, 2),
-    "XMM8": (1, 0, 2),
-    "XMM16": (1, 1, 2),
-    "XMM32": (1, 2, 2),
-    "XMM64": (1, 3, 2),
-    "XMM128": (1, 4, 2),
-    "XMM256": (1, 5, 2),
-    "SREG": (0, 0, 7),
-    "FPU": (0, 0, 1),
-    "MEMZ": (0, 0, 7),
-    "MEM8": (1, 0, 7),
-    "MEM16": (1, 1, 7),
-    "MEM32": (1, 2, 7),
-    "MEM64": (1, 3, 7),
-    "BND": (0, 0, 5),
-    "CR": (0, 0, 7),
-    "DR": (0, 0, 7),
+    "IMM": OpKind(OpKind.SZ_OP, OpKind.K_IMM),
+    "IMM8": OpKind(1, OpKind.K_IMM),
+    "IMM16": OpKind(2, OpKind.K_IMM),
+    "IMM32": OpKind(4, OpKind.K_IMM),
+    "GP": OpKind(OpKind.SZ_OP, "GP"),
+    "GP8": OpKind(1, "GP"),
+    "GP16": OpKind(2, "GP"),
+    "GP32": OpKind(4, "GP"),
+    "GP64": OpKind(8, "GP"),
+    "MMX": OpKind(8, "MMX"),
+    "XMM": OpKind(OpKind.SZ_VEC, "XMM"),
+    "XMM8": OpKind(1, "XMM"),
+    "XMM16": OpKind(2, "XMM"),
+    "XMM32": OpKind(4, "XMM"),
+    "XMM64": OpKind(8, "XMM"),
+    "XMM128": OpKind(16, "XMM"),
+    "XMM256": OpKind(32, "XMM"),
+    "SREG": OpKind(0, "SEG"),
+    "FPU": OpKind(10, "FPU"),
+    "MEMZ": OpKind(0, OpKind.K_MEM),
+    "MEM8": OpKind(1, OpKind.K_MEM),
+    "MEM16": OpKind(2, OpKind.K_MEM),
+    "MEM32": OpKind(4, OpKind.K_MEM),
+    "MEM64": OpKind(8, OpKind.K_MEM),
+    "MASK8": OpKind(1, "MASK"),
+    "MASK16": OpKind(2, "MASK"),
+    "MASK32": OpKind(4, "MASK"),
+    "MASK64": OpKind(8, "MASK"),
+    "BND": OpKind(0, "BND"),
+    "CR": OpKind(0, "CR"),
+    "DR": OpKind(0, "DR"),
 }
 
 class InstrDesc(NamedTuple):
@@ -121,10 +133,16 @@ class InstrDesc(NamedTuple):
     operands: Tuple[str, ...]
     flags: FrozenSet[str]
 
+    OPKIND_REGTYS = {"GP": 0, "FPU": 1, "XMM": 2, "MASK": 3, "MMX": 4, "BND": 5}
+    OPKIND_SIZES = {
+        0: (0,0), 1: (1,0), 2: (1,1), 4: (1,2), 8: (1,3), 16: (1,4), 32: (1,5),
+        OpKind.SZ_OP: (2,0), OpKind.SZ_VEC: (3,0),
+    }
+
     @classmethod
     def parse(cls, desc):
         desc = desc.split()
-        operands = tuple(op for op in desc[1:5] if op != "-")
+        operands = tuple(OPKINDS[op] for op in desc[1:5] if op != "-")
         return cls(desc[5], desc[0], operands, frozenset(desc[6:]))
 
     def encode(self):
@@ -132,7 +150,8 @@ class InstrDesc(NamedTuple):
 
         fixed_opsz = set()
         for i, opkind in enumerate(self.operands):
-            enc_size, fixed_size, reg_type = OPKIND_LOOKUP[opkind]
+            enc_size, fixed_size = self.OPKIND_SIZES.get(opkind.size, (0, 0))
+            reg_type = self.OPKIND_REGTYS.get(opkind.kind, 7)
             if enc_size == 1: fixed_opsz.add(fixed_size)
             setattr(flags, "op%d_size"%i, enc_size)
             if i < 3:
