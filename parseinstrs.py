@@ -30,21 +30,20 @@ InstrFlags = bitstruct("InstrFlags", [
     "modreg_idx:2",
     "vexreg_idx:2",
     "zeroreg_idx:2",
+    "imm_idx:2",
+    "zeroreg_val:1",
+    "lock:1",
+    "imm_control:3",
+    "vsib:1",
     "op0_size:2",
     "op1_size:2",
     "op2_size:2",
     "op3_size:2",
-    "imm_idx:2",
-    "zeroreg_val:1",
-    "_unused:1",
-    "imm_control:3",
-    "_unused:1",
-    "gp_size_8:1",
-    "gp_size_def64:1",
-    "gp_instr_width:1",
-    "gp_fixed_operand_size:3",
-    "lock:1",
-    "vsib:1",
+    "size8:1",
+    "sized64:1",
+    "size_fix1:3",
+    "size_fix2:2",
+    "instr_width:1",
     "op0_regty:3",
     "op1_regty:3",
     "op2_regty:3",
@@ -135,8 +134,8 @@ class InstrDesc(NamedTuple):
 
     OPKIND_REGTYS = {"GP": 0, "FPU": 1, "XMM": 2, "MASK": 3, "MMX": 4, "BND": 5}
     OPKIND_SIZES = {
-        0: (0,0), 1: (1,0), 2: (1,1), 4: (1,2), 8: (1,3), 16: (1,4), 32: (1,5),
-        OpKind.SZ_OP: (2,0), OpKind.SZ_VEC: (3,0),
+        0: 0, 1: 1, 2: 2, 4: 3, 8: 4, 16: 5, 32: 6, 10: 0,
+        OpKind.SZ_OP: -2, OpKind.SZ_VEC: -3,
     }
 
     @classmethod
@@ -148,23 +147,29 @@ class InstrDesc(NamedTuple):
     def encode(self):
         flags = copy(ENCODINGS[self.encoding])
 
-        fixed_opsz = set()
+        opsz = set(self.OPKIND_SIZES[opkind.size] for opkind in self.operands)
+
+        # Sort fixed sizes encodable in size_fix2 as second element.
+        fixed = sorted((x for x in opsz if x >= 0), key=lambda x: 1 <= x <= 4)
+        if len(fixed) > 2 or (len(fixed) == 2 and not (1 <= fixed[1] <= 4)):
+            raise Exception("invalid fixed operand sizes: %r"%fixed)
+        sizes = (fixed + [1, 1])[:2] + [-2, -3] # See operand_sizes in decode.c.
+        flags.size_fix1 = sizes[0]
+        flags.size_fix2 = sizes[1] - 1
+
         for i, opkind in enumerate(self.operands):
-            enc_size, fixed_size = self.OPKIND_SIZES.get(opkind.size, (0, 0))
+            sz = self.OPKIND_SIZES[opkind.size]
             reg_type = self.OPKIND_REGTYS.get(opkind.kind, 7)
-            if enc_size == 1: fixed_opsz.add(fixed_size)
-            setattr(flags, "op%d_size"%i, enc_size)
+            setattr(flags, "op%d_size"%i, sizes.index(sz))
             if i < 3:
                 setattr(flags, "op%d_regty"%i, reg_type)
             elif reg_type not in (7, 2):
                 raise Exception("invalid regty for op 3, must be VEC")
 
-        if fixed_opsz: flags.gp_fixed_operand_size = next(iter(fixed_opsz))
-
         # Miscellaneous Flags
-        if "DEF64" in self.flags:       flags.gp_size_def64 = 1
-        if "SIZE_8" in self.flags:      flags.gp_size_8 = 1
-        if "INSTR_WIDTH" in self.flags: flags.gp_instr_width = 1
+        if "DEF64" in self.flags:       flags.sized64 = 1
+        if "SIZE_8" in self.flags:      flags.size8 = 1
+        if "INSTR_WIDTH" in self.flags: flags.instr_width = 1
         if "IMM_8" in self.flags:       flags.imm_control = {4: 5, 6: 7}[flags.imm_control]
         if "LOCK" in self.flags:        flags.lock = 1
         if "VSIB" in self.flags:        flags.vsib = 1

@@ -303,15 +303,8 @@ struct InstrDesc
 {
     uint16_t type;
     uint8_t operand_indices;
-    uint8_t operand_sizes;
     uint8_t immediate;
-
-    uint8_t gp_size_8 : 1;
-    uint8_t gp_size_def64 : 1;
-    uint8_t gp_instr_width : 1;
-    uint8_t gp_fixed_operand_size : 3;
-    uint8_t lock : 1;
-    uint8_t vsib : 1;
+    uint16_t operand_sizes;
     uint16_t reg_types;
 } __attribute__((packed));
 
@@ -326,6 +319,13 @@ struct InstrDesc
 #define DESC_IMM_CONTROL(desc) (((desc)->immediate >> 4) & 0x7)
 #define DESC_IMM_IDX(desc) (((desc)->immediate & 3) ^ 3)
 #define DESC_IMPLICIT_VAL(desc) (((desc)->immediate >> 2) & 1)
+#define DESC_LOCK(desc) (((desc)->immediate >> 3) & 1)
+#define DESC_VSIB(desc) (((desc)->immediate >> 7) & 1)
+#define DESC_SIZE8(desc) (((desc)->operand_sizes >> 8) & 1)
+#define DESC_SIZED64(desc) (((desc)->operand_sizes >> 9) & 1)
+#define DESC_SIZE_FIX1(desc) (((desc)->operand_sizes >> 10) & 7)
+#define DESC_SIZE_FIX2(desc) (((desc)->operand_sizes >> 13) & 3)
+#define DESC_INSTR_WIDTH(desc) (((desc)->operand_sizes >> 15) & 1)
 
 int
 fd_decode(const uint8_t* buffer, size_t len_sz, int mode_int, uintptr_t address,
@@ -445,13 +445,13 @@ fd_decode(const uint8_t* buffer, size_t len_sz, int mode_int, uintptr_t address,
     instr->address = address;
 
     uint8_t op_size = 0;
-    if (desc->gp_size_8)
+    if (DESC_SIZE8(desc))
         op_size = 1;
     else if (mode == DECODE_64 && (prefixes & PREFIX_REXW))
         op_size = 8;
     else if (prefixes & PREFIX_OPSZ)
         op_size = 2;
-    else if (mode == DECODE_64 && desc->gp_size_def64)
+    else if (mode == DECODE_64 && DESC_SIZED64(desc))
         op_size = 8;
     else
         op_size = 4;
@@ -492,7 +492,7 @@ fd_decode(const uint8_t* buffer, size_t len_sz, int mode_int, uintptr_t address,
             operand2 = &instr->operands[DESC_MODREG_IDX(desc)];
 
         retval = decode_modrm(buffer + off, len - off, mode, instr, prefixes,
-                              desc->vsib, operand1, operand2);
+                              DESC_VSIB(desc), operand1, operand2);
         if (UNLIKELY(retval < 0))
             return retval;
         off += retval;
@@ -635,11 +635,11 @@ fd_decode(const uint8_t* buffer, size_t len_sz, int mode_int, uintptr_t address,
     }
 
     if (UNLIKELY(prefixes & PREFIX_LOCK))
-        if (!desc->lock || instr->operands[0].type != FD_OT_MEM)
+        if (!DESC_LOCK(desc) || instr->operands[0].type != FD_OT_MEM)
             return FD_ERR_UD;
 
     uint8_t operand_sizes[4] = {
-        0, 1 << desc->gp_fixed_operand_size, op_size, vec_size
+        1 << DESC_SIZE_FIX1(desc) >> 1, 1 << DESC_SIZE_FIX2(desc), op_size, vec_size
     };
 
     for (int i = 0; i < 4; i++)
@@ -657,7 +657,7 @@ fd_decode(const uint8_t* buffer, size_t len_sz, int mode_int, uintptr_t address,
     }
 
     instr->size = off;
-    instr->operandsz = desc->gp_instr_width ? op_size : 0;
+    instr->operandsz = DESC_INSTR_WIDTH(desc) ? op_size : 0;
 
     return off;
 }
