@@ -198,10 +198,6 @@ decode_modrm(const uint8_t* buffer, int len, DecodeMode mode, FdInstr* instr,
     uint8_t mod_reg = (modrm & 0x38) >> 3;
     uint8_t rm = modrm & 0x07;
 
-    // VSIB must have a memory operand with SIB byte.
-    if (UNLIKELY(vsib) && (rm != 4 || mod == 3))
-        return FD_ERR_UD;
-
     bool is_seg = UNLIKELY(instr->type == FDI_MOV_G2S || instr->type == FDI_MOV_S2G);
     bool is_cr = UNLIKELY(instr->type == FDI_MOV_CR);
     bool is_dr = UNLIKELY(instr->type == FDI_MOV_DR);
@@ -248,6 +244,10 @@ decode_modrm(const uint8_t* buffer, int len, DecodeMode mode, FdInstr* instr,
         out_o1->reg = reg_idx;
         return off;
     }
+
+    // VSIB must have a memory operand with SIB byte.
+    if (UNLIKELY(vsib) && rm != 4)
+        return FD_ERR_UD;
 
     // SIB byte
     uint8_t scale = 0;
