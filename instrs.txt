@@ -570,7 +570,7 @@ NP.0f380b             RM    MMX    MMX    -      -      MMX_PMULHRSW
 NP.0f381c             RM    MMX    MMX    -      -      MMX_PABSB
 NP.0f381d             RM    MMX    MMX    -      -      MMX_PABSW
 NP.0f381e             RM    MMX    MMX    -      -      MMX_PABSD
-NP.0f3a0f             RMI   MMX    MMX    IMM    -      MMX_PALIGNR SIZE_8 IMM_8
+NP.0f3a0f             RMI   MMX    MMX    IMM8   -      MMX_PALIGNR IMM_8
 
 #
 # SSE
@@ -715,8 +715,8 @@ NP.0fae//f0+          NP    -      -      -      -      MFENCE
 NP.0fae//f8+          NP    -      -      -      -      SFENCE
 NP.0fc2               RMI   XMM    XMM    IMM8   -      SSE_CMPPS IMM_8
 66.0fc2               RMI   XMM    XMM    IMM8   -      SSE_CMPPD IMM_8
-F3.0fc2               RMI   XMM    XMM32  IMM    -      SSE_CMPSS SIZE_8 IMM_8
-F2.0fc2               RMI   XMM    XMM64  IMM    -      SSE_CMPSD SIZE_8 IMM_8
+F3.0fc2               RMI   XMM    XMM32  IMM8   -      SSE_CMPSS IMM_8
+F2.0fc2               RMI   XMM    XMM64  IMM8   -      SSE_CMPSD IMM_8
 66.0fc4               RMI   XMM    GP     IMM8   -      SSE_PINSRW IMM_8
 66.0fc5               RMI   GP     XMM    IMM8   -      SSE_PEXTRW IMM_8 NOMEM
 NP.0fc6               RMI   XMM    XMM    IMM8   -      SSE_SHUFPS IMM_8
@@ -1005,8 +1005,8 @@ VEX.NP.0fae//2        M     GP32   -      -      -      VLDMXCSR
 VEX.NP.0fae//3        M     GP32   -      -      -      VSTMXCSR
 VEX.NP.0fc2           RVMI  XMM    XMM    XMM    IMM8   VCMPPS IMM_8
 VEX.66.0fc2           RVMI  XMM    XMM    XMM    IMM8   VCMPPD IMM_8
-VEX.F3.0fc2           RVMI  XMM    XMM    XMM32  IMM    VCMPSS SIZE_8 IMM_8 VEXLIG
-VEX.F2.0fc2           RVMI  XMM    XMM    XMM64  IMM    VCMPSD SIZE_8 IMM_8 VEXLIG
+VEX.F3.0fc2           RVMI  XMM    XMM    XMM32  IMM8   VCMPSS IMM_8 VEXLIG
+VEX.F2.0fc2           RVMI  XMM    XMM    XMM64  IMM8   VCMPSD IMM_8 VEXLIG
 VEX.66.W0.0fc4        RVMI  XMM    XMM    GP     IMM8   VPINSRW IMM_8
 VEX.66.W0.L0.0fc5     RMI   GP     XMM    IMM8   -      VPEXTRW IMM_8
 VEX.NP.0fc6           RVMI  XMM    XMM    XMM    IMM8   VSHUFPS IMM_8
@@ -1210,37 +1210,37 @@ VEX.66.W0.0f3a02      RVMI  XMM    XMM    XMM    IMM8   VPBLENDD IMM_8
 VEX.66.W0.0f3a04      RMI   XMM    XMM    IMM8   -      VPERMILPS IMM_8
 VEX.66.W0.0f3a05      RMI   XMM    XMM    IMM8   -      VPERMILPD IMM_8
 VEX.66.W0.L1.0f3a06   RVMI  XMM    XMM    XMM    IMM8   VPERM2F128 IMM_8
-VEX.66.0f3a08         RVMI  XMM    XMM    XMM    IMM    VROUNDPS SIZE_8 IMM_8
-VEX.66.0f3a09         RVMI  XMM    XMM    XMM    IMM    VROUNDPD SIZE_8 IMM_8
-VEX.66.0f3a0a         RVMI  XMM    XMM    XMM32  IMM    VROUNDSS SIZE_8 IMM_8 VEXLIG
-VEX.66.0f3a0b         RVMI  XMM    XMM    XMM64  IMM    VROUNDSD SIZE_8 IMM_8 VEXLIG
-VEX.66.0f3a0c         RVMI  XMM    XMM    XMM    IMM    VBLENDPS SIZE_8 IMM_8
-VEX.66.0f3a0d         RVMI  XMM    XMM    XMM    IMM    VBLENDPD SIZE_8 IMM_8
-VEX.66.0f3a0e         RVMI  XMM    XMM    XMM    IMM    VPBLENDW SIZE_8 IMM_8
-VEX.66.0f3a0f         RVMI  XMM    XMM    XMM    IMM    VPALIGNR SIZE_8 IMM_8
-VEX.66.W0.L0.0f3a14   MRI   GP8    XMM    IMM    -      VPEXTRB SIZE_8 IMM_8
-VEX.66.W0.L0.0f3a15   MRI   GP16   XMM    IMM    -      VPEXTRW SIZE_8 IMM_8
-VEX.66.W0.L0.0f3a16   MRI   GP     XMM    IMM    -      VPEXTRD SIZE_8 IMM_8
-VEX.66.W1.L0.0f3a16   MRI   GP     XMM    IMM    -      VPEXTRQ SIZE_8 IMM_8
-VEX.66.L0.0f3a17      MRI   GP32   XMM    IMM    -      VEXTRACTPS SIZE_8 IMM_8
+VEX.66.0f3a08         RVMI  XMM    XMM    XMM    IMM8   VROUNDPS IMM_8
+VEX.66.0f3a09         RVMI  XMM    XMM    XMM    IMM8   VROUNDPD IMM_8
+VEX.66.0f3a0a         RVMI  XMM    XMM    XMM32  IMM8   VROUNDSS IMM_8 VEXLIG
+VEX.66.0f3a0b         RVMI  XMM    XMM    XMM64  IMM8   VROUNDSD IMM_8 VEXLIG
+VEX.66.0f3a0c         RVMI  XMM    XMM    XMM    IMM8   VBLENDPS IMM_8
+VEX.66.0f3a0d         RVMI  XMM    XMM    XMM    IMM8   VBLENDPD IMM_8
+VEX.66.0f3a0e         RVMI  XMM    XMM    XMM    IMM8   VPBLENDW IMM_8
+VEX.66.0f3a0f         RVMI  XMM    XMM    XMM    IMM8   VPALIGNR IMM_8
+VEX.66.W0.L0.0f3a14   MRI   GP8    XMM    IMM8   -      VPEXTRB IMM_8
+VEX.66.W0.L0.0f3a15   MRI   GP16   XMM    IMM8   -      VPEXTRW IMM_8
+VEX.66.W0.L0.0f3a16   MRI   GP     XMM    IMM8   -      VPEXTRD IMM_8
+VEX.66.W1.L0.0f3a16   MRI   GP     XMM    IMM8   -      VPEXTRQ IMM_8
+VEX.66.L0.0f3a17      MRI   GP32   XMM    IMM8   -      VEXTRACTPS IMM_8
 VEX.66.W0.L1.0f3a18   RVMI  XMM    XMM    XMM    IMM8   VINSERTF128 IMM_8
 VEX.66.W0.L1.0f3a19   MRI   XMM    XMM    IMM8   -      VEXTRACTF128 IMM_8
 VEX.66.W0.L1.0f3a1d   MRI   XMM    XMM    IMM8   -      VCVTPS2PH IMM_8
 VEX.66.W0.L0.0f3a20   RMI   XMM    GP8    IMM8   -      VPINSRB IMM_8
-VEX.66.L0.0f3a21      RVMI  XMM    XMM    XMM32  IMM    VINSERTPS SIZE_8 IMM_8
+VEX.66.L0.0f3a21      RVMI  XMM    XMM    XMM32  IMM8   VINSERTPS IMM_8
 VEX.66.W0.L0.0f3a22   RMI   XMM    GP     IMM8   -      VPINSRD IMM_8
 VEX.66.W1.L0.0f3a22   RMI   XMM    GP     IMM8   -      VPINSRQ IMM_8
 VEX.66.W0.L1.0f3a38   RVMI  XMM    XMM    XMM    IMM8   VINSERTI128 IMM_8
 VEX.66.W0.L1.0f3a39   MRI   XMM    XMM    IMM8   -      VEXTRACTI128 IMM_8
-VEX.66.0f3a40         RVMI  XMM    XMM    XMM    IMM    VDPPS SIZE_8 IMM_8
-VEX.66.0f3a41         RVMI  XMM    XMM    XMM    IMM    VDPPD SIZE_8 IMM_8
-VEX.66.0f3a42         RVMI  XMM    XMM    XMM    IMM    VMPSADBW SIZE_8 IMM_8
-VEX.66.0f3a44         RVMI  XMM    XMM    XMM    IMM    VPCLMULQDQ SIZE_8 IMM_8
+VEX.66.0f3a40         RVMI  XMM    XMM    XMM    IMM8   VDPPS IMM_8
+VEX.66.0f3a41         RVMI  XMM    XMM    XMM    IMM8   VDPPD IMM_8
+VEX.66.0f3a42         RVMI  XMM    XMM    XMM    IMM8   VMPSADBW IMM_8
+VEX.66.0f3a44         RVMI  XMM    XMM    XMM    IMM8   VPCLMULQDQ IMM_8
 VEX.66.W0.L1.0f3a46   RVMI  XMM    XMM    XMM    IMM8   VPERM2I128 IMM_8
-VEX.66.0f3a60         RMI   XMM    XMM    IMM    -      VPCMPESTRM SIZE_8 IMM_8
-VEX.66.0f3a61         RMI   XMM    XMM    IMM    -      VPCMPESTRI SIZE_8 IMM_8
-VEX.66.0f3a62         RMI   XMM    XMM    IMM    -      VPCMPISTRM SIZE_8 IMM_8
-VEX.66.0f3a63         RMI   XMM    XMM    IMM    -      VPCMPISTRI SIZE_8 IMM_8
+VEX.66.0f3a60         RMI   XMM    XMM    IMM8   -      VPCMPESTRM IMM_8
+VEX.66.0f3a61         RMI   XMM    XMM    IMM8   -      VPCMPESTRI IMM_8
+VEX.66.0f3a62         RMI   XMM    XMM    IMM8   -      VPCMPISTRM IMM_8
+VEX.66.0f3a63         RMI   XMM    XMM    IMM8   -      VPCMPISTRI IMM_8
 #
 # BMI1
 VEX.NP.L0.0f38f2      RVM   GP     GP     GP     -      ANDN
