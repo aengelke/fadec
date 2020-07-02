@@ -170,10 +170,15 @@ class InstrDesc(NamedTuple):
         if "DEF64" in self.flags:       flags.sized64 = 1
         if "SIZE_8" in self.flags:      flags.size8 = 1
         if "INSTR_WIDTH" in self.flags: flags.instr_width = 1
-        if "IMM_8" in self.flags:       flags.imm_control = {4: 5, 6: 7}[flags.imm_control]
         if "LOCK" in self.flags:        flags.lock = 1
         if "VSIB" in self.flags:        flags.vsib = 1
         if "MUSTMEM" in self.flags:     setattr(flags, "op%d_regty"%(flags.modrm_idx^3), 0xf)
+
+        if flags.imm_control >= 4:
+            imm_op = next(op for op in self.operands if op.kind == OpKind.K_IMM)
+            if ("IMM_8" in self.flags or imm_op.size == 1 or
+                (imm_op.size == OpKind.SZ_OP and flags.size8)):
+                flags.imm_control |= 1
 
         enc = flags._encode(6)
         enc = tuple(int.from_bytes(enc[i:i+2], "little") for i in range(0, 6, 2))

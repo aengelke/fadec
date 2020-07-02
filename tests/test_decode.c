@@ -130,6 +130,18 @@ main(int argc, char** argv)
     // [reg+s*reg+disp32]
     TEST64("\x42\x01\x84\x25\x01\x00\x00\x00", "[ADD mem4:r5+1*r12+0x1 reg4:r0]");
 
+    TEST("\x04\x01", "[ADD reg1:r0 imm1:0x1]");
+    TEST("\x66\x68\xff\xad", "[PUSH imm2:0xadff]");
+    TEST32("\x68\xff\xad\x90\xbc", "[PUSH imm4:0xbc90adff]");
+    TEST64("\x68\xff\xad\x90\xbc", "[PUSH imm8:0xffffffffbc90adff]");
+    TEST("\x66\x6a\xff", "[PUSH imm2:0xffff]");
+    TEST32("\x6a\xff", "[PUSH imm4:0xffffffff]");
+    TEST64("\x6a\xff", "[PUSH imm8:0xffffffffffffffff]");
+    TEST("\xb0\xf0", "[MOVABS reg1:r0 imm1:0xf0]");
+    TEST("\xb8\xf0\xf0\xab\xff", "[MOVABS reg4:r0 imm4:0xffabf0f0]");
+    TEST64("\x48\xb8\xf0\xf0\xab\xff\x00\x12\x12\xcd", "[MOVABS reg8:r0 imm8:0xcd121200ffabf0f0]");
+    TEST64("\xcd\x80", "[INT imm1:0x80]");
+
     TEST("\x66\xc8\x00\x00\x00", "[ENTER_2 imm4:0x0]");
     TEST("\x66\xc8\x00\x0f\x00", "[ENTER_2 imm4:0xf00]");
     TEST("\x66\xc8\x00\x00\x01", "[ENTER_2 imm4:0x10000]");
