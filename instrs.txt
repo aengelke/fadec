@@ -896,14 +896,14 @@ VEX.F3.0f2a           RVM   XMM    XMM    GP     -      VCVTSI2SS VEXLIG
 VEX.F2.0f2a           RVM   XMM    XMM    GP     -      VCVTSI2SD VEXLIG
 VEX.NP.0f2b           MR    MEMV   XMM    -      -      VMOVNTPS
 VEX.66.0f2b           MR    MEMV   XMM    -      -      VMOVNTPD
-VEX.F3.0f2c           RM    GP     XMM32  -      -      VCVTTSS2SI
-VEX.F2.0f2c           RM    GP     XMM64  -      -      VCVTTSD2SI
-VEX.F3.0f2d           RM    GP     XMM32  -      -      VCVTSS2SI
-VEX.F2.0f2d           RM    GP     XMM64  -      -      VCVTSD2SI
-VEX.NP.0f2e           RM    XMM32  XMM32  -      -      VUCOMISS
-VEX.66.0f2e           RM    XMM64  XMM64  -      -      VUCOMISD
-VEX.NP.0f2f           RM    XMM32  XMM32  -      -      VCOMISS
-VEX.66.0f2f           RM    XMM64  XMM64  -      -      VCOMISD
+VEX.F3.0f2c           RM    GP     XMM32  -      -      VCVTTSS2SI VEXLIG
+VEX.F2.0f2c           RM    GP     XMM64  -      -      VCVTTSD2SI VEXLIG
+VEX.F3.0f2d           RM    GP     XMM32  -      -      VCVTSS2SI VEXLIG
+VEX.F2.0f2d           RM    GP     XMM64  -      -      VCVTSD2SI VEXLIG
+VEX.NP.0f2e           RM    XMM32  XMM32  -      -      VUCOMISS VEXLIG
+VEX.66.0f2e           RM    XMM64  XMM64  -      -      VUCOMISD VEXLIG
+VEX.NP.0f2f           RM    XMM32  XMM32  -      -      VCOMISS VEXLIG
+VEX.66.0f2f           RM    XMM64  XMM64  -      -      VCOMISD VEXLIG
 VEX.NP.0f50           RM    GP     XMM    -      -      VMOVMSKPS DEF64 NOMEM
 VEX.66.0f50           RM    GP     XMM    -      -      VMOVMSKPD DEF64 NOMEM
 VEX.NP.0f51           RVM   XMM    XMM    XMM    -      VSQRTPS
