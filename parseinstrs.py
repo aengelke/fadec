@@ -112,11 +112,14 @@ OPKINDS = {
     "XMM256": OpKind(32, "XMM"),
     "SREG": OpKind(0, "SEG"),
     "FPU": OpKind(10, "FPU"),
+    "MEM": OpKind(OpKind.SZ_OP, OpKind.K_MEM),
+    "MEMV": OpKind(OpKind.SZ_VEC, OpKind.K_MEM),
     "MEMZ": OpKind(0, OpKind.K_MEM),
     "MEM8": OpKind(1, OpKind.K_MEM),
     "MEM16": OpKind(2, OpKind.K_MEM),
     "MEM32": OpKind(4, OpKind.K_MEM),
     "MEM64": OpKind(8, OpKind.K_MEM),
+    "MEM128": OpKind(16, OpKind.K_MEM),
     "MASK8": OpKind(1, "MASK"),
     "MASK16": OpKind(2, "MASK"),
     "MASK32": OpKind(4, "MASK"),
@@ -172,7 +175,6 @@ class InstrDesc(NamedTuple):
         if "INSTR_WIDTH" in self.flags: flags.instr_width = 1
         if "LOCK" in self.flags:        flags.lock = 1
         if "VSIB" in self.flags:        flags.vsib = 1
-        if "MUSTMEM" in self.flags:     setattr(flags, "op%d_regty"%(flags.modrm_idx^3), 0xf)
 
         if flags.imm_control >= 4:
             imm_op = next(op for op in self.operands if op.kind == OpKind.K_IMM)
