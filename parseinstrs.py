@@ -438,34 +438,39 @@ def encode_table(entries):
             continue
         if "ONLY32" in desc.flags or "UNDOC" in desc.flags:
             continue
-        opsizes = None
-        if "SIZE_8" in desc.flags:
-            opsizes = {8}
-        else:
-            opsizes = {16, 32, 64}
-            if any(kind == EntryKind.TABLE_PREFIX for kind, _ in opcode):
-                opsizes.remove(16)
-            if any(kind == EntryKind.TABLE_VEX and (val&1) == 0 for kind, val in opcode):
-                opsizes.remove(64)
-            if any(kind == EntryKind.TABLE_VEX and (val&1) == 1 for kind, val in opcode):
-                opsizes.remove(32)
-            if "DEF64" in desc.flags:
-                opsizes.remove(32)
-        if "INSTR_WIDTH" not in desc.flags and not any(op.size == OpKind.SZ_OP for op in desc.operands):
-            opsizes = {0}
 
+        opsizes = {8} if "SIZE_8" in desc.flags else {16, 32, 64}
         hasvex, vecsizes = False, {128}
-        if any(kind == EntryKind.TABLE_ROOT and (val&4) for kind, val in opcode):
-            hasvex, vecsizes = True, {128, 256}
-            # if "VEXLIG" not in desc.flags and any(op.size == OpKind.SZ_VEC for op in desc.operands):
-            #     vecsizes.add(256)
-            if any(kind == EntryKind.TABLE_VEX and (val&2) == 0 for kind, val in opcode):
-                vecsizes.remove(256)
-            if any(kind == EntryKind.TABLE_VEX and (val&2) == 2 for kind, val in opcode):
-                vecsizes.remove(128)
+
+        opc_i = -1
+        opc_flags = ""
+        for kind, val in opcode:
+            if kind == EntryKind.TABLE_ROOT:
+                opc_flags += ["","|OPC_0F","|OPC_0F38","|OPC_0F3A"][val & 3]
+                if (val >> 2) == 1:
+                    hasvex, vecsizes = True, {128, 256}
+                    opc_flags += "|OPC_VEX"
+            elif kind == EntryKind.TABLE256:
+                opc_i = val
+            elif kind in (EntryKind.TABLE8, EntryKind.TABLE72):
+                opc_i |= (val if val < 8 else val + 0xb8) << 8
+            elif kind in (EntryKind.TABLE_PREFIX, EntryKind.TABLE_PREFIX_REP):
+                opc_flags += ["", "|OPC_66", "|OPC_F3", "|OPC_F2"][val]
+                if kind == EntryKind.TABLE_PREFIX: opsizes -= {16}
+            elif kind == EntryKind.TABLE_VEX:
+                opc_flags += ["", "|OPC_VEXL"][hasvex and val >> 1]
+                vecsizes -= {128 if hasvex and val >> 1 else 256}
+                opc_flags += ["", "|OPC_REXW"][val & 1]
+                opsizes -= {64 if val & 1 else 32}
+            else:
+                raise Exception("invalid opcode table")
+
+        if "DEF64" in desc.flags:
+            opsizes -= {32}
+        if "INSTR_WIDTH" not in desc.flags and all(op.size != OpKind.SZ_OP for op in desc.operands):
+            opsizes = {0}
         if "VEXLIG" in desc.flags or all(op.size != OpKind.SZ_VEC for op in desc.operands):
             vecsizes = {0}
-
         if "ENC_NOSZ" in desc.flags:
             opsizes, vecsizes = {0}, {0}
 
@@ -513,25 +518,6 @@ def encode_table(entries):
                     }.get(op.kind, -1))
 
             tys_i = sum(ty << (4*i) for i, ty in enumerate(tys))
-
-            opc_i = -1
-            opc_flags = ""
-            for kind, val in opcode:
-                if kind == EntryKind.TABLE_ROOT:
-                    opc_flags += ["", "|OPC_VEX"][val >> 2]
-                    opc_flags += ["","|OPC_0F","|OPC_0F38","|OPC_0F3A"][val & 3]
-                elif kind == EntryKind.TABLE256:
-                    opc_i = val
-                elif kind in (EntryKind.TABLE8, EntryKind.TABLE72):
-                    opc_i |= (val if val < 8 else val + 0xb8) << 8
-                elif kind in (EntryKind.TABLE_PREFIX, EntryKind.TABLE_PREFIX_REP):
-                    opc_flags += ["", "|OPC_66", "|OPC_F3", "|OPC_F2"][val]
-                elif kind == EntryKind.TABLE_VEX:
-                    if hasvex:
-                        opc_flags += ["", "|OPC_VEXL"][val >> 1]
-                    opc_flags += ["", "|OPC_REXW"][val & 1]
-                else:
-                    raise Exception("invalid opcode table")
             opc_s = hex(opc_i) + opc_flags
             if lock_p: opc_s += "|OPC_LOCK"
             if opsize == 16: opc_s += "|OPC_66"
