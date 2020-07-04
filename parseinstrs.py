@@ -233,63 +233,77 @@ class TrieEntry(NamedTuple):
         return self.map(lambda i, v: new_val if i == idx else v)
 
 import re
-opcode_regex = re.compile(r"^(?:(?P<prefixes>(?P<vex>VEX\.)?(?P<legacy>NP|66|F2|F3)\.(?P<rexw>W[01]\.)?(?P<vexl>L[01]\.)?)|R(?P<repprefix>NP|F2|F3).)?(?P<opcode>(?:[0-9a-f]{2})+)(?P<modrm>//?[0-7]|//[c-f][0-9a-f])?(?P<extended>\+)?$")
+opcode_regex = re.compile(
+    r"^(?:(?P<prefixes>(?P<vex>VEX\.)?(?P<legacy>NP|66|F2|F3)\." +
+                     r"(?:W(?P<rexw>[01]|IG)\.)?(?:L(?P<vexl>[01]|IG)\.)?)" +
+        r"|R(?P<repprefix>NP|F2|F3).)?" +
+     r"(?P<opcode>(?:[0-9a-f]{2})+)" +
+     r"(?P<modrm>//?[0-7]|//[c-f][0-9a-f])?" +
+     r"(?P<extended>\+)?$")
 
-def parse_opcode(opcode_string):
-    """
-    Parse opcode string into list of type-index tuples.
-    """
-    match = opcode_regex.match(opcode_string)
-    if match is None:
-        raise Exception("invalid opcode: '%s'" % opcode_string)
+class Opcode(NamedTuple):
+    prefix: Union[None, Tuple[bool, str]] # (False, NP/66/F2/F3), (True, NP/F2/F3)
+    escape: int # [0, 0f, 0f38, 0f3a]
+    opc: int
+    opcext: Union[None, Tuple[bool, int]] # (False, T8), (True, T72), None
+    extended: bool # Extend opc or opcext, if present
+    vex: bool
+    vexl: Union[str, None] # 0, 1, IG, None = used, both
+    rexw: Union[str, None] # 0, 1, IG, None = used, both
 
-    opcode = []
-    opcode_bytes = unhexlify(match.group("opcode"))
+    @classmethod
+    def parse(cls, opcode_string):
+        match = opcode_regex.match(opcode_string)
+        if match is None:
+            return None
 
-    idx = [b"", b"\x0f", b"\x0f\x38", b"\x0f\x3a"].index(opcode_bytes[:-1])
-    if match.group("vex"):
-        idx |= 4
-    opcode.append((EntryKind.TABLE_ROOT, [idx]))
-    opcode.append((EntryKind.TABLE256, [opcode_bytes[-1]]))
+        opcext = match.group("modrm")
+        if opcext:
+            is72 = opcext[1] == "/"
+            opcext = is72, int(opcext[1 + is72:], 16)
 
-    opcext = match.group("modrm")
-    if opcext:
-        if opcext[1] == "/":
-            opcext = int(opcext[2:], 16)
-            if not (0 <= opcext <= 7) and not (0xc0 <= opcext <= 0xff):
-                raise Exception("invalid opcext range: {}".format(opcode_string))
-            if opcext >= 0xc0:
-                opcext -= 0xb8
-            opcode.append((EntryKind.TABLE72, [opcext]))
-        else:
-            opcode.append((EntryKind.TABLE8, [int(opcext[1:], 16)]))
+        if match.group("extended") and opcext and not opcext[0]:
+            raise Exception("invalid opcode extension: {}".format(opcode_string))
 
-    if match.group("extended"):
-        last_type, last_indices = opcode[-1]
-        if (last_type not in (EntryKind.TABLE256, EntryKind.TABLE72) or
-               len(last_indices) != 1 or last_indices[0] & 7 != 0):
-            raise Exception("invalid opcode duplication: {}".format(opcode_string))
+        prefix_strs = match.group("legacy"), match.group("repprefix")
+        prefix = prefix_strs[0] or prefix_strs[1]
+        if prefix:
+            prefix = prefix_strs[1] is not None, ["NP", "66", "F3", "F2"].index(prefix)
 
-        opcode[-1] = last_type, [last_indices[0] + i for i in range(8)]
+        return cls(
+            prefix=prefix,
+            escape=["", "0f", "0f38", "0f3a"].index(match.group("opcode")[:-2]),
+            opc=int(match.group("opcode")[-2:], 16),
+            opcext=opcext,
+            extended=match.group("extended") is not None,
+            vex=match.group("vex") is not None,
+            vexl=match.group("vexl"),
+            rexw=match.group("rexw"),
+        )
 
-    if match.group("prefixes"):
-        legacy = {"NP": 0, "66": 1, "F3": 2, "F2": 3}[match.group("legacy")]
-        opcode.append((EntryKind.TABLE_PREFIX, [legacy]))
-
-        if match.group("vexl") or match.group("rexw"):
-            rexw = match.group("rexw")
-            rexw = [0, 1<<0] if not rexw else [1<<0] if "W1" in rexw else [0]
-            vexl = match.group("vexl")
-            vexl = [0, 1<<1] if not vexl else [1<<1] if "L1" in vexl else [0]
-
+    def for_trie(self):
+        opcode = []
+        opcode.append((EntryKind.TABLE_ROOT, [self.escape | self.vex << 2]))
+        opcode.append((EntryKind.TABLE256, [self.opc]))
+        if self.opcext:
+            opcext_kind = [EntryKind.TABLE8, EntryKind.TABLE72][self.opcext[0]]
+            opcext_val = self.opcext[1] - (0 if self.opcext[1] < 8 else 0xb8)
+            opcode.append((opcext_kind, [opcext_val]))
+        if self.extended:
+            last_type, last_indices = opcode[-1]
+            opcode[-1] = last_type, [last_indices[0] + i for i in range(8)]
+        if self.prefix:
+            prefix_kind = [EntryKind.TABLE_PREFIX, EntryKind.TABLE_PREFIX_REP][self.prefix[0]]
+            prefix_val = self.prefix[1]
+            opcode.append((prefix_kind, [prefix_val]))
+        if self.vexl in ("0", "1") or self.rexw in ("0", "1"):
+            rexw = {"0": [0], "1": [1<<0], "IG": [0, 1<<0]}[self.rexw or "IG"]
+            vexl = {"0": [0], "1": [1<<1], "IG": [0, 1<<1]}[self.vexl or "IG"]
             entries = list(map(sum, product(rexw, vexl)))
             opcode.append((EntryKind.TABLE_VEX, entries))
-    elif match.group("repprefix"):
-        rep = {"NP": 0, "F3": 2, "F2": 3}[match.group("repprefix")]
-        opcode.append((EntryKind.TABLE_PREFIX_REP, [rep]))
 
-    kinds, values = zip(*opcode)
-    return [tuple(zip(kinds, prod)) for prod in product(*values)]
+        kinds, values = zip(*opcode)
+        return [tuple(zip(kinds, prod)) for prod in product(*values)]
 
 def format_opcode(opcode):
     opcode_string = ""
@@ -422,8 +436,7 @@ if __name__ == "__main__":
     for line in args.table.read().splitlines():
         if not line or line[0] == "#": continue
         opcode_string, desc = tuple(line.split(maxsplit=1))
-        for opcode in parse_opcode(opcode_string):
-            entries.append((opcode, InstrDesc.parse(desc)))
+        entries.append((Opcode.parse(opcode_string), InstrDesc.parse(desc)))
 
     mnemonics = sorted({desc.mnemonic for _, desc in entries})
     mnemonics_lut = {name: mnemonics.index(name) for name in mnemonics}
@@ -436,7 +449,8 @@ if __name__ == "__main__":
     for opcode, desc in entries:
         for i, mode in enumerate(args.modes):
             if "ONLY%d"%(96-mode) not in desc.flags:
-                table.add_opcode(opcode, desc.encode(), i)
+                for opcode_path in opcode.for_trie():
+                    table.add_opcode(opcode_path, desc.encode(), i)
 
     table.deduplicate()
     table_data, annotations, root_offsets = table.compile()
