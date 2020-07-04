@@ -527,7 +527,8 @@ def encode_table(entries):
                 elif kind in (EntryKind.TABLE_PREFIX, EntryKind.TABLE_PREFIX_REP):
                     opc_flags += ["", "|OPC_66", "|OPC_F3", "|OPC_F2"][val]
                 elif kind == EntryKind.TABLE_VEX:
-                    opc_flags += ["", "|OPC_VEXL"][val >> 1]
+                    if hasvex:
+                        opc_flags += ["", "|OPC_VEXL"][val >> 1]
                     opc_flags += ["", "|OPC_REXW"][val & 1]
                 else:
                     raise Exception("invalid opcode table")
