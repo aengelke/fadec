@@ -11,13 +11,13 @@
 
 #define FD_DECODE_TABLE_DATA
 static __attribute__((aligned(16))) const uint16_t _decode_table[] = {
-#include <fadec-decode-table.inc>
+#include <fadec-table.inc>
 };
 #undef FD_DECODE_TABLE_DATA
 
 // Defines FD_TABLE_OFFSET_32 and FD_TABLE_OFFSET_64, if available
 #define FD_DECODE_TABLE_DEFINES
-#include <fadec-decode-table.inc>
+#include <fadec-table.inc>
 #undef FD_DECODE_TABLE_DEFINES
 
 enum DecodeMode {

@@ -398,8 +398,6 @@ def bytes_to_table(data, notes):
 template = """// Auto-generated file -- do not modify!
 #if defined(FD_DECODE_TABLE_DATA)
 {hex_table}
-#elif defined(FD_DECODE_TABLE_MNEMONICS)
-{mnemonic_list}
 #elif defined(FD_DECODE_TABLE_STRTAB1)
 {mnemonic_cstr}
 #elif defined(FD_DECODE_TABLE_STRTAB2)
@@ -416,7 +414,8 @@ if __name__ == "__main__":
     parser.add_argument("--32", dest="modes", action="append_const", const=32)
     parser.add_argument("--64", dest="modes", action="append_const", const=64)
     parser.add_argument("table", type=argparse.FileType('r'))
-    parser.add_argument("output", type=argparse.FileType('w'))
+    parser.add_argument("decode_mnems", type=argparse.FileType('w'))
+    parser.add_argument("decode_table", type=argparse.FileType('w'))
     args = parser.parse_args()
 
     entries = []
@@ -428,6 +427,9 @@ if __name__ == "__main__":
 
     mnemonics = sorted({desc.mnemonic for _, desc in entries})
     mnemonics_lut = {name: mnemonics.index(name) for name in mnemonics}
+
+    decode_mnems_lines = ["FD_MNEMONIC(%s,%d)"%e for e in mnemonics_lut.items()]
+    args.decode_mnems.write("\n".join(decode_mnems_lines))
 
     modes = [32, 64]
     table = Table(root_count=len(args.modes))
@@ -446,11 +448,10 @@ if __name__ == "__main__":
 
     defines = ["FD_TABLE_OFFSET_%d %d"%k for k in zip(args.modes, root_offsets)]
 
-    file = template.format(
+    decode_table = template.format(
         hex_table=bytes_to_table(table_data, annotations),
-        mnemonic_list="\n".join("FD_MNEMONIC(%s,%d)"%entry for entry in mnemonics_lut.items()),
         mnemonic_cstr=mnemonic_cstr,
         mnemonic_offsets=",".join(str(off) for off in mnemonic_tab),
         defines="\n".join("#define " + line for line in defines),
     )
-    args.output.write(file)
+    args.decode_table.write(decode_table)

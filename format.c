@@ -9,13 +9,13 @@
 
 #define FD_DECODE_TABLE_STRTAB1
 static const char* _mnemonic_str =
-#include <fadec-decode-table.inc>
+#include <fadec-table.inc>
 ;
 #undef FD_DECODE_TABLE_STRTAB1
 
 #define FD_DECODE_TABLE_STRTAB2
 static const uint16_t _mnemonic_offs[] = {
-#include <fadec-decode-table.inc>
+#include <fadec-table.inc>
 };
 #undef FD_DECODE_TABLE_STRTAB2
 

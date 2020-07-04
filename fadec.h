@@ -29,10 +29,8 @@ typedef enum {
 } FdReg;
 
 typedef enum {
-#define FD_DECODE_TABLE_MNEMONICS
 #define FD_MNEMONIC(name,value) FDI_ ## name = value,
-#include <fadec-decode-table.inc>
-#undef FD_DECODE_TABLE_MNEMONICS
+#include <fadec-mnems.inc>
 #undef FD_MNEMONIC
 } FdInstrType;
 
