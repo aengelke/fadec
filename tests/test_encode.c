@@ -119,6 +119,7 @@ main(int argc, char** argv)
     TEST("\x3e\x01\x00", FE_ADD32mr|FE_SEG(FE_DS), FE_MEM(FE_AX, 0, 0, 0), FE_AX);
     TEST("\x64\x01\x00", FE_ADD32mr|FE_SEG(FE_FS), FE_MEM(FE_AX, 0, 0, 0), FE_AX);
     TEST("\x65\x01\x00", FE_ADD32mr|FE_SEG(FE_GS), FE_MEM(FE_AX, 0, 0, 0), FE_AX);
+    TEST("\x8e\xc0", FE_MOV_G2Srr, FE_ES, FE_AX);
 
     // Test ModRM encoding
     TEST("\x01\x00", FE_ADD32mr, FE_MEM(FE_AX, 0, 0, 0), FE_AX);
