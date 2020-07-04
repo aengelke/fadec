@@ -86,9 +86,9 @@ main(int argc, char** argv)
     TEST64("\x0f\x20\xd0", "[MOV_CR reg8:r0 reg0:r2]");
     TEST64("\x44\x0f\x20\x08", "UD");
     TEST64("\x44\x0f\x21\x00", "UD");
-    TEST("\x8c\xc0", "[MOV_S2G reg4:r0 reg0:r0]");
-    TEST64("\x44\x8c\xc0", "[MOV_S2G reg4:r0 reg0:r0]");
-    TEST("\x8e\xc0", "[MOV_G2S reg0:r0 reg4:r0]");
+    TEST("\x8c\xc0", "[MOV_S2G reg2:r0 reg2:r0]");
+    TEST64("\x44\x8c\xc0", "[MOV_S2G reg2:r0 reg2:r0]");
+    TEST("\x8e\xc0", "[MOV_G2S reg2:r0 reg2:r0]");
     TEST("\x8e\xc8", "UD"); // No mov cs, eax
     TEST("\xd8\xc1", "[FADD reg0:r0 reg0:r1]");
     TEST64("\x41\xd8\xc1", "[FADD reg0:r0 reg0:r1]");

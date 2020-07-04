@@ -139,9 +139,9 @@
 89                    MR    GP     GP     -      -      MOV
 8a                    RM    GP     GP     -      -      MOV SIZE_8
 8b                    RM    GP     GP     -      -      MOV
-8c                    MR    GP     SREG   -      -      MOV_S2G
+8c                    MR    GP16   SREG   -      -      MOV_S2G
 8d                    RM    GP     MEMZ   -      -      LEA
-8e                    RM    SREG   GP     -      -      MOV_G2S
+8e                    RM    SREG   GP16   -      -      MOV_G2S
 8f/0                  M     GP     -      -      -      POP DEF64
 # Against frequent belief, only, XCHG (r/e)AX, (r)AX with 90 is NOP.
 # As a lacking REX.B cannot be specified here, this is hardcoded.

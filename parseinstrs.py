@@ -110,7 +110,7 @@ OPKINDS = {
     "XMM64": OpKind(8, "XMM"),
     "XMM128": OpKind(16, "XMM"),
     "XMM256": OpKind(32, "XMM"),
-    "SREG": OpKind(0, "SEG"),
+    "SREG": OpKind(2, "SEG"),
     "FPU": OpKind(10, "FPU"),
     "MEM": OpKind(OpKind.SZ_OP, OpKind.K_MEM),
     "MEMV": OpKind(OpKind.SZ_VEC, OpKind.K_MEM),
