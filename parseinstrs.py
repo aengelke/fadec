@@ -491,20 +491,15 @@ def encode_table(entries):
                 continue
 
             imm_size = 0
-            if desc.encoding == "M1":
-                imm_size = 0
-            elif "IMM_8" in desc.flags:
-                imm_size = 1
-            elif desc.mnemonic in ("RET", "RETF"):
-                imm_size = 2
-            elif desc.mnemonic == "ENTER":
-                imm_size = 3
-            elif opsize == 16:
-                imm_size = 2
-            elif opsize == 64 and desc.mnemonic == "MOVABS":
-                imm_size = 8
-            else:
-                imm_size = 4
+            if enc.imm_control >= 4:
+                if desc.mnemonic == "ENTER":
+                    imm_size = 3
+                elif "IMM_8" in desc.flags:
+                    imm_size = 1
+                else:
+                    max_imm_size = 4 if desc.mnemonic != "MOVABS" else 8
+                    imm_opsize = desc.operands[enc.imm_idx^3].abssize(opsize//8)
+                    imm_size = min(max_imm_size, imm_opsize)
 
             tys = [] # operands that require special handling
             for ot, op in zip(ots, desc.operands):
