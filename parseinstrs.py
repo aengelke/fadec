@@ -470,7 +470,7 @@ def encode_table(entries):
             opsizes, vecsizes = {0}, {0}
 
         # Where to put the operand size in the mnemonic
-        separate_opsize = desc.mnemonic in ("MOVSX", "MOVZX")
+        separate_opsize = "ENC_SEPSZ" in desc.flags
         prepend_opsize = max(opsizes) > 0 and not separate_opsize
         prepend_vecsize = hasvex and max(vecsizes) > 0 and not separate_opsize
 

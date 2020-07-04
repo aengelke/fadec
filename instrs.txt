@@ -70,7 +70,7 @@
 61                    NP    -      -      -      -      POPA ONLY32 INSTR_WIDTH
 62                    RM    GP     MEM    -      -      BOUND ONLY32
 63                    MR    GP16   GP16   -      -      ARPL ONLY32
-63                    RM    GP     GP32   -      -      MOVSX ONLY64
+63                    RM    GP     GP32   -      -      MOVSX ONLY64 ENC_SEPSZ
 #64    SEG=FS prefix
 #65    SEG=GS prefix
 #66    operand size prefix
@@ -435,8 +435,8 @@ NP.0f37               NP    -      -      -      -      GETSEC
 0fb3                  MR    GP     GP     -      -      BTR LOCK
 0fb4                  RM    GP     MEM    -      -      LFS
 0fb5                  RM    GP     MEM    -      -      LGS
-0fb6                  RM    GP     GP8    -      -      MOVZX
-0fb7                  RM    GP     GP16   -      -      MOVZX
+0fb6                  RM    GP     GP8    -      -      MOVZX ENC_SEPSZ
+0fb7                  RM    GP     GP16   -      -      MOVZX ENC_SEPSZ
 RF3.0fb8              RM    GP     GP     -      -      POPCNT
 0fb9                  RM    GP     GP     -      -      UD1
 0fba/4                MI    GP     IMM8   -      -      BT
@@ -450,8 +450,8 @@ RF3.0fbc              RM    GP     GP     -      -      TZCNT
 RNP.0fbd              RM    GP     GP     -      -      BSR
 RF2.0fbd              RM    GP     GP     -      -      BSR
 RF3.0fbd              RM    GP     GP     -      -      LZCNT
-0fbe                  RM    GP     GP8    -      -      MOVSX
-0fbf                  RM    GP     GP16   -      -      MOVSX
+0fbe                  RM    GP     GP8    -      -      MOVSX ENC_SEPSZ
+0fbf                  RM    GP     GP16   -      -      MOVSX ENC_SEPSZ
 0fc0                  MR    GP     GP     -      -      XADD SIZE_8 LOCK
 0fc1                  MR    GP     GP     -      -      XADD LOCK
 NP.0fc3               MR    MEM    GP     -      -      MOVNTI
@@ -1258,14 +1258,14 @@ VEX.F3.L0.0f38f7      RMV   GP     GP     GP     -      SARX
 F3.0f38f6             RM    GP     GP     -      -      ADOX
 #
 # FPU
-d8//0                 M     MEM32  -      -      -      FADD
-d8//1                 M     MEM32  -      -      -      FMUL
-d8//2                 M     MEM32  -      -      -      FCOM
-d8//3                 M     MEM32  -      -      -      FCOMP
-d8//4                 M     MEM32  -      -      -      FSUB
-d8//5                 M     MEM32  -      -      -      FSUBR
-d8//6                 M     MEM32  -      -      -      FDIV
-d8//7                 M     MEM32  -      -      -      FDIVR
+d8//0                 M     MEM32  -      -      -      FADD ENC_SEPSZ
+d8//1                 M     MEM32  -      -      -      FMUL ENC_SEPSZ
+d8//2                 M     MEM32  -      -      -      FCOM ENC_SEPSZ
+d8//3                 M     MEM32  -      -      -      FCOMP ENC_SEPSZ
+d8//4                 M     MEM32  -      -      -      FSUB ENC_SEPSZ
+d8//5                 M     MEM32  -      -      -      FSUBR ENC_SEPSZ
+d8//6                 M     MEM32  -      -      -      FDIV ENC_SEPSZ
+d8//7                 M     MEM32  -      -      -      FDIVR ENC_SEPSZ
 d8//c0+               AO    FPU    FPU    -      -      FADD
 d8//c8+               AO    FPU    FPU    -      -      FMUL
 d8//d0+               AO    FPU    FPU    -      -      FCOM
@@ -1274,9 +1274,9 @@ d8//e0+               AO    FPU    FPU    -      -      FSUB
 d8//e8+               AO    FPU    FPU    -      -      FSUBR
 d8//f0+               AO    FPU    FPU    -      -      FDIV
 d8//f8+               AO    FPU    FPU    -      -      FDIVR
-d9//0                 M     MEM32  -      -      -      FLD
-d9//2                 M     MEM32  -      -      -      FST
-d9//3                 M     MEM32  -      -      -      FSTP
+d9//0                 M     MEM32  -      -      -      FLD ENC_SEPSZ
+d9//2                 M     MEM32  -      -      -      FST ENC_SEPSZ
+d9//3                 M     MEM32  -      -      -      FSTP ENC_SEPSZ
 d9//4                 M     MEMZ   -      -      -      FLDENV
 d9//5                 M     MEM16  -      -      -      FLDCW
 d9//6                 M     MEMZ   -      -      -      FSTENV
@@ -1310,23 +1310,23 @@ d9//fc                NP    -      -      -      -      FRNDINT
 d9//fd                NP    -      -      -      -      FSCALE
 d9//fe                NP    -      -      -      -      FSIN
 d9//ff                NP    -      -      -      -      FCOS
-da//0                 M     MEM32  -      -      -      FIADD
-da//1                 M     MEM32  -      -      -      FIMUL
-da//2                 M     MEM32  -      -      -      FICOM
-da//3                 M     MEM32  -      -      -      FICOMP
-da//4                 M     MEM32  -      -      -      FISUB
-da//5                 M     MEM32  -      -      -      FISUBR
-da//6                 M     MEM32  -      -      -      FIDIV
-da//7                 M     MEM32  -      -      -      FIDIVR
+da//0                 M     MEM32  -      -      -      FIADD ENC_SEPSZ
+da//1                 M     MEM32  -      -      -      FIMUL ENC_SEPSZ
+da//2                 M     MEM32  -      -      -      FICOM ENC_SEPSZ
+da//3                 M     MEM32  -      -      -      FICOMP ENC_SEPSZ
+da//4                 M     MEM32  -      -      -      FISUB ENC_SEPSZ
+da//5                 M     MEM32  -      -      -      FISUBR ENC_SEPSZ
+da//6                 M     MEM32  -      -      -      FIDIV ENC_SEPSZ
+da//7                 M     MEM32  -      -      -      FIDIVR ENC_SEPSZ
 da//c0+               O     FPU    -      -      -      FCMOVB
 da//c8+               O     FPU    -      -      -      FCMOVE
 da//d0+               O     FPU    -      -      -      FCMOVBE
 da//d8+               O     FPU    -      -      -      FCMOVU
 da//e9                NP    -      -      -      -      FUCOMPP
-db//0                 M     MEM32  -      -      -      FILD
-db//1                 M     MEM32  -      -      -      FISTTP
-db//2                 M     MEM32  -      -      -      FIST
-db//3                 M     MEM32  -      -      -      FISTP
+db//0                 M     MEM32  -      -      -      FILD ENC_SEPSZ
+db//1                 M     MEM32  -      -      -      FISTTP ENC_SEPSZ
+db//2                 M     MEM32  -      -      -      FIST ENC_SEPSZ
+db//3                 M     MEM32  -      -      -      FISTP ENC_SEPSZ
 db//5                 M     FPU    -      -      -      FLD
 db//7                 M     FPU    -      -      -      FSTP
 db//c0+               O     FPU    -      -      -      FCMOVNB
@@ -1337,24 +1337,24 @@ db//e2                NP    -      -      -      -      FCLEX
 db//e3                NP    -      -      -      -      FINIT
 db//e8+               O     FPU    -      -      -      FUCOMI
 db//f0+               O     FPU    -      -      -      FCOMI
-dc//0                 M     MEM64  -      -      -      FADD
-dc//1                 M     MEM64  -      -      -      FMUL
-dc//2                 M     MEM64  -      -      -      FCOM
-dc//3                 M     MEM64  -      -      -      FCOMP
-dc//4                 M     MEM64  -      -      -      FSUB
-dc//5                 M     MEM64  -      -      -      FSUBR
-dc//6                 M     MEM64  -      -      -      FDIV
-dc//7                 M     MEM64  -      -      -      FDIVR
+dc//0                 M     MEM64  -      -      -      FADD ENC_SEPSZ
+dc//1                 M     MEM64  -      -      -      FMUL ENC_SEPSZ
+dc//2                 M     MEM64  -      -      -      FCOM ENC_SEPSZ
+dc//3                 M     MEM64  -      -      -      FCOMP ENC_SEPSZ
+dc//4                 M     MEM64  -      -      -      FSUB ENC_SEPSZ
+dc//5                 M     MEM64  -      -      -      FSUBR ENC_SEPSZ
+dc//6                 M     MEM64  -      -      -      FDIV ENC_SEPSZ
+dc//7                 M     MEM64  -      -      -      FDIVR ENC_SEPSZ
 dc//c0+               OA    FPU    FPU    -      -      FADD
 dc//c8+               OA    FPU    FPU    -      -      FMUL
 dc//e0+               OA    FPU    FPU    -      -      FSUBR
 dc//e8+               OA    FPU    FPU    -      -      FSUB
 dc//f0+               OA    FPU    FPU    -      -      FDIVR
 dc//f8+               OA    FPU    FPU    -      -      FDIV
-dd//0                 M     MEM64  -      -      -      FLD
-dd//1                 M     MEM64  -      -      -      FISTTP
-dd//2                 M     MEM64  -      -      -      FST
-dd//3                 M     MEM64  -      -      -      FSTP
+dd//0                 M     MEM64  -      -      -      FLD ENC_SEPSZ
+dd//1                 M     MEM64  -      -      -      FISTTP ENC_SEPSZ
+dd//2                 M     MEM64  -      -      -      FST ENC_SEPSZ
+dd//3                 M     MEM64  -      -      -      FSTP ENC_SEPSZ
 dd//4                 M     MEMZ   -      -      -      FRSTOR
 dd//6                 M     MEMZ   -      -      -      FSAVE
 dd//7                 M     MEM16  -      -      -      FSTSW
@@ -1363,14 +1363,14 @@ dd//d0+               O     FPU    -      -      -      FST
 dd//d8+               O     FPU    -      -      -      FSTP
 dd//e0+               O     FPU    -      -      -      FUCOM
 dd//e8+               O     FPU    -      -      -      FUCOMP
-de//0                 M     MEM16  -      -      -      FIADD
-de//1                 M     MEM16  -      -      -      FIMUL
-de//2                 M     MEM16  -      -      -      FICOM
-de//3                 M     MEM16  -      -      -      FICOMP
-de//4                 M     MEM16  -      -      -      FISUB
-de//5                 M     MEM16  -      -      -      FISUBR
-de//6                 M     MEM16  -      -      -      FIDIV
-de//7                 M     MEM16  -      -      -      FIDIVR
+de//0                 M     MEM16  -      -      -      FIADD ENC_SEPSZ
+de//1                 M     MEM16  -      -      -      FIMUL ENC_SEPSZ
+de//2                 M     MEM16  -      -      -      FICOM ENC_SEPSZ
+de//3                 M     MEM16  -      -      -      FICOMP ENC_SEPSZ
+de//4                 M     MEM16  -      -      -      FISUB ENC_SEPSZ
+de//5                 M     MEM16  -      -      -      FISUBR ENC_SEPSZ
+de//6                 M     MEM16  -      -      -      FIDIV ENC_SEPSZ
+de//7                 M     MEM16  -      -      -      FIDIVR ENC_SEPSZ
 de//c0+               OA    FPU    FPU    -      -      FADDP
 de//c8+               OA    FPU    FPU    -      -      FMULP
 de//d9                NP    -      -      -      -      FCOMPP
@@ -1378,14 +1378,14 @@ de//e0+               OA    FPU    FPU    -      -      FSUBRP
 de//e8+               OA    FPU    FPU    -      -      FSUBP
 de//f0+               OA    FPU    FPU    -      -      FDIVRP
 de//f8+               OA    FPU    FPU    -      -      FDIVP
-df//0                 M     MEM16  -      -      -      FILD
-df//1                 M     MEM16  -      -      -      FISTTP
-df//2                 M     MEM16  -      -      -      FIST
-df//3                 M     MEM16  -      -      -      FISTP
+df//0                 M     MEM16  -      -      -      FILD ENC_SEPSZ
+df//1                 M     MEM16  -      -      -      FISTTP ENC_SEPSZ
+df//2                 M     MEM16  -      -      -      FIST ENC_SEPSZ
+df//3                 M     MEM16  -      -      -      FISTP ENC_SEPSZ
 df//4                 M     FPU    -      -      -      FBLD
-df//5                 M     MEM64  -      -      -      FILD
+df//5                 M     MEM64  -      -      -      FILD ENC_SEPSZ
 df//6                 M     FPU    -      -      -      FBSTP
-df//7                 M     MEM64  -      -      -      FISTP
+df//7                 M     MEM64  -      -      -      FISTP ENC_SEPSZ
 # FSTSW AX
 df//e0                A     GP16   -      -      -      FSTSW
 df//f0+               AO    FPU    FPU    -      -      FCOMIP
