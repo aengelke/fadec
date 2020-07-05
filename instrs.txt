@@ -139,9 +139,9 @@
 89                    MR    GP     GP     -      -      MOV
 8a                    RM    GP     GP     -      -      MOV SIZE_8
 8b                    RM    GP     GP     -      -      MOV
-8c                    MR    GP16   SREG   -      -      MOV_S2G ENC_NOSZ
+8c                    MR    GP16   SREG   -      -      MOV_S2G
 8d                    RM    GP     MEMZ   -      -      LEA
-8e                    RM    SREG   GP16   -      -      MOV_G2S ENC_NOSZ
+8e                    RM    SREG   GP16   -      -      MOV_G2S
 8f/0                  M     GP     -      -      -      POP DEF64
 # Against frequent belief, only, XCHG (r/e)AX, (r)AX with 90 is NOP.
 # As a lacking REX.B cannot be specified here, this is hardcoded.
@@ -301,8 +301,8 @@ ff/6                  M     GP     -      -      -      PUSH DEF64
 0f01//1               M     MEMZ   -      -      -      SIDT
 0f01//2               M     MEMZ   -      -      -      LGDT
 0f01//3               M     MEMZ   -      -      -      LIDT
-0f01//4               M     GP16   -      -      -      SMSW ENC_NOSZ
-0f01//6               M     GP16   -      -      -      LMSW ENC_NOSZ
+0f01//4               M     GP16   -      -      -      SMSW
+0f01//6               M     GP16   -      -      -      LMSW
 0f01//7               M     GP     -      -      -      INVLPG SIZE_8
 0f01//c8              NP    -      -      -      -      MONITOR
 0f01//c9              NP    -      -      -      -      MWAIT
@@ -352,14 +352,14 @@ RF3.0f09              NP    -      -      -      -      WBINVD
 0f18//f0+             O     GP     -      -      -      RESERVED_NOP
 0f18//f8+             O     GP     -      -      -      RESERVED_NOP
 0f1f                  M     GP     -      -      -      NOP
-0f20                  MR    GP32   CR     -      -      MOV_CR NOMEM ONLY32 ENC_NOSZ
-0f20                  MR    GP64   CR     -      -      MOV_CR NOMEM ONLY64 DEF64 ENC_NOSZ
-0f21                  MR    GP32   DR     -      -      MOV_DR NOMEM ONLY32 ENC_NOSZ
-0f21                  MR    GP64   DR     -      -      MOV_DR NOMEM ONLY64 DEF64 ENC_NOSZ
-0f22                  RM    CR     GP32   -      -      MOV_CR NOMEM ONLY32 ENC_NOSZ
-0f22                  RM    CR     GP64   -      -      MOV_CR NOMEM ONLY64 DEF64 ENC_NOSZ
-0f23                  RM    DR     GP32   -      -      MOV_DR NOMEM ONLY32 ENC_NOSZ
-0f23                  RM    DR     GP64   -      -      MOV_DR NOMEM ONLY64 DEF64 ENC_NOSZ
+0f20                  MR    GP32   CR     -      -      MOV_CR NOMEM ONLY32
+0f20                  MR    GP64   CR     -      -      MOV_CR NOMEM ONLY64 DEF64
+0f21                  MR    GP32   DR     -      -      MOV_DR NOMEM ONLY32
+0f21                  MR    GP64   DR     -      -      MOV_DR NOMEM ONLY64 DEF64
+0f22                  RM    CR     GP32   -      -      MOV_CR NOMEM ONLY32
+0f22                  RM    CR     GP64   -      -      MOV_CR NOMEM ONLY64 DEF64
+0f23                  RM    DR     GP32   -      -      MOV_DR NOMEM ONLY32
+0f23                  RM    DR     GP64   -      -      MOV_DR NOMEM ONLY64 DEF64
 0f30                  NP    -      -      -      -      WRMSR
 0f31                  NP    -      -      -      -      RDTSC
 0f32                  NP    -      -      -      -      RDMSR
@@ -501,7 +501,7 @@ NP.0f77               NP    -      -      -      -      MMX_EMMS
 NP.W0.0f7e            MR    GP32   MMX    -      -      MMX_MOVD
 NP.W1.0f7e            MR    GP64   MMX    -      -      MMX_MOVQ
 NP.0f7f               MR    MMX    MMX    -      -      MMX_MOVQ
-NP.0fc4               RMI   MMX    GP     IMM8   -      MMX_PINSRW
+NP.0fc4               RMI   MMX    GP     IMM8   -      MMX_PINSRW ENC_NOSZ
 NP.0fc5               RMI   GP     MMX    IMM8   -      MMX_PEXTRW DEF64 NOMEM
 NP.0fd1               RM    MMX    MMX    -      -      MMX_PSRLW
 NP.0fd2               RM    MMX    MMX    -      -      MMX_PSRLD
@@ -982,8 +982,8 @@ VEX.66.0f73/7         VMI   XMM    XMM    IMM8   -      VPSLLDQ NOMEM
 VEX.66.0f74           RVM   XMM    XMM    XMM    -      VPCMPEQB
 VEX.66.0f75           RVM   XMM    XMM    XMM    -      VPCMPEQW
 VEX.66.0f76           RVM   XMM    XMM    XMM    -      VPCMPEQD
-VEX.NP.L0.0f77        NP    -      -      -      -      VZEROUPPER ENC_NOSZ
-VEX.NP.L1.0f77        NP    -      -      -      -      VZEROALL ENC_NOSZ
+VEX.NP.L0.0f77        NP    -      -      -      -      VZEROUPPER
+VEX.NP.L1.0f77        NP    -      -      -      -      VZEROALL
 VEX.66.0f7c           RVM   XMM    XMM    XMM    -      VHADDPD
 VEX.F2.0f7c           RVM   XMM    XMM    XMM    -      VHADDPS
 VEX.66.0f7d           RVM   XMM    XMM    XMM    -      VHSUBPD
@@ -1011,7 +1011,7 @@ VEX.66.0fd2           RVM   XMM    XMM    XMM    -      VPSRLD
 VEX.66.0fd3           RVM   XMM    XMM    XMM    -      VPSRLQ
 VEX.66.0fd4           RVM   XMM    XMM    XMM    -      VPADDQ
 VEX.66.0fd5           RVM   XMM    XMM    XMM    -      VPMULLW
-VEX.66.L0.0fd6        MR    XMM64  XMM64  -      -      VMOVQ ENC_NOSZ
+VEX.66.L0.0fd6        MR    XMM64  XMM64  -      -      VMOVQ
 VEX.66.0fd7           RM    GP     XMM    -      -      VPMOVMSKB DEF64 NOMEM
 VEX.66.0fd8           RVM   XMM    XMM    XMM    -      VPSUBUSB
 VEX.66.0fd9           RVM   XMM    XMM    XMM    -      VPSUBUSW
@@ -1122,7 +1122,7 @@ VEX.66.W0.0f3847      RVM   XMM    XMM    XMM    -      VPSLLVD
 VEX.66.W1.0f3847      RVM   XMM    XMM    XMM    -      VPSLLVQ
 VEX.66.W0.0f3858      RM    XMM    XMM32  -      -      VPBROADCASTD
 VEX.66.W0.0f3859      RM    XMM    XMM64  -      -      VPBROADCASTQ
-VEX.66.W0.L1.0f385a   RM    XMM    MEM128 -      -      VBROADCASTI128
+VEX.66.W0.L1.0f385a   RM    XMM    MEM128 -      -      VBROADCASTI128 ENC_NOSZ
 VEX.66.W0.0f3878      RM    XMM    XMM8   -      -      VPBROADCASTB
 VEX.66.W0.0f3879      RM    XMM    XMM16  -      -      VPBROADCASTW
 VEX.66.W0.0f388c      RVM   XMM    XMM    XMM    -      VPMASKMOVD
@@ -1233,10 +1233,10 @@ VEX.66.0f3a41         RVMI  XMM    XMM    XMM    IMM8   VDPPD
 VEX.66.0f3a42         RVMI  XMM    XMM    XMM    IMM8   VMPSADBW
 VEX.66.0f3a44         RVMI  XMM    XMM    XMM    IMM8   VPCLMULQDQ
 VEX.66.W0.L1.0f3a46   RVMI  XMM    XMM    XMM    IMM8   VPERM2I128
-VEX.66.L0.0f3a60      RMI   XMM    XMM    IMM8   -      VPCMPESTRM
-VEX.66.L0.0f3a61      RMI   XMM    XMM    IMM8   -      VPCMPESTRI
-VEX.66.L0.0f3a62      RMI   XMM    XMM    IMM8   -      VPCMPISTRM
-VEX.66.L0.0f3a63      RMI   XMM    XMM    IMM8   -      VPCMPISTRI
+VEX.66.L0.0f3a60      RMI   XMM    XMM    IMM8   -      VPCMPESTRM ENC_NOSZ
+VEX.66.L0.0f3a61      RMI   XMM    XMM    IMM8   -      VPCMPESTRI ENC_NOSZ
+VEX.66.L0.0f3a62      RMI   XMM    XMM    IMM8   -      VPCMPISTRM ENC_NOSZ
+VEX.66.L0.0f3a63      RMI   XMM    XMM    IMM8   -      VPCMPISTRI ENC_NOSZ
 #
 # BMI1
 VEX.NP.L0.0f38f2      RVM   GP     GP     GP     -      ANDN
@@ -1422,9 +1422,9 @@ NP.0f01//c4           NP    -      -      -      -      VMXOFF
 F3.0fc7//6            M     MEMZ   -      -      -      VMXON
 
 # WAITPKG
-66.0fae//f0+          O     GP32   -      -      -      TPAUSE ENC_NOSZ
+66.0fae//f0+          O     GP32   -      -      -      TPAUSE
 F3.0fae//f0+          O     GP     -      -      -      UMONITOR
-F2.0fae//f0+          O     GP32   -      -      -      UMWAIT ENC_NOSZ
+F2.0fae//f0+          O     GP32   -      -      -      UMWAIT
 
 # PRWRITE
 F3.0fae//4            M     GP     -      -      -      PTWRITE
