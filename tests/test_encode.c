@@ -129,7 +129,6 @@ main(int argc, char** argv)
     TEST("\x41\x01\x45\x80", FE_ADD32mr, FE_MEM(FE_R13, 0, 0, -0x80), FE_AX);
     TEST("\x41\x01\x85\x80\x00\x00\x00", FE_ADD32mr, FE_MEM(FE_R13, 0, 0, 0x80), FE_AX);
     TEST("\x01\x04\x25\x01\x00\x00\x00", FE_ADD32mr, FE_MEM(0, 0, 0, 0x1), FE_AX);
-    TEST("\x01\x05\x01\x00\x00\x00", FE_ADD32mr, FE_MEM(FE_IP, 0, 0, 0x1), FE_AX);
     TEST("\x01\x04\x25\x00\x00\x00\x00", FE_ADD32mr, FE_MEM(0, 0, 0, 0), FE_AX);
     TEST("", FE_ADD32mr, FE_MEM(0, 0, FE_AX, 0), FE_AX);
     TEST("", FE_ADD32mr, FE_MEM(0, 3, FE_AX, 0), FE_AX);
@@ -138,6 +137,14 @@ main(int argc, char** argv)
     TEST("\x01\x04\xc5\x00\x00\x00\x00", FE_ADD32mr, FE_MEM(0, 8, FE_AX, 0), FE_AX);
     TEST("", FE_ADD32mr, FE_MEM(0, 8, FE_SP, 0), FE_AX);
     TEST("\x42\x01\x04\x05\x00\x00\x00\x00", FE_ADD32mr, FE_MEM(0, 1, FE_R8, 0), FE_AX);
+    // RIP-relative addressing, adds instruction size to offset.
+    TEST("\x01\x05\x01\x00\x00\x00", FE_ADD32mr, FE_MEM(FE_IP, 0, 0, 0x7), FE_AX);
+    TEST("", FE_ADD32mr, FE_MEM(FE_IP, 1, FE_AX, 0x7), FE_AX);
+    TEST("\x0f\xaf\x05\xf9\xff\xff\xff", FE_IMUL32rm, FE_AX, FE_MEM(FE_IP, 0, 0, 0));
+    TEST("\x6b\x05\xf9\xff\xff\xff\x02", FE_IMUL32rmi, FE_AX, FE_MEM(FE_IP, 0, 0, 0), 2);
+    TEST("\x66\x6b\x05\xf8\xff\xff\xff\x02", FE_IMUL16rmi, FE_AX, FE_MEM(FE_IP, 0, 0, 0), 2);
+    TEST("\x69\x05\xf6\xff\xff\xff\x80\x00\x00\x00", FE_IMUL32rmi, FE_AX, FE_MEM(FE_IP, 0, 0, 0), 0x80);
+    TEST("\x66\x69\x05\xf7\xff\xff\xff\x80\x00", FE_IMUL16rmi, FE_AX, FE_MEM(FE_IP, 0, 0, 0), 0x80);
 
     puts(failed ? "Some tests FAILED" : "All tests PASSED");
     return failed ? EXIT_FAILURE : EXIT_SUCCESS;

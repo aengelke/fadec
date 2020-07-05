@@ -121,7 +121,8 @@ enc_o(uint8_t** restrict buf, uint64_t opc, uint64_t op0)
 
 static
 int
-enc_mr(uint8_t** restrict buf, uint64_t opc, uint64_t op0, uint64_t op1)
+enc_mr(uint8_t** restrict buf, uint64_t opc, uint64_t op0, uint64_t op1,
+       unsigned immsz)
 {
     // If !op_reg(op1), it is a constant value for ModRM.reg
     if (op_reg(op0) && (op_reg_idx(op0) & 0x8)) opc |= OPC_REXB;
@@ -134,6 +135,7 @@ enc_mr(uint8_t** restrict buf, uint64_t opc, uint64_t op0, uint64_t op1)
 
     int mod = 0, reg = op1 & 7, rm;
     int scale = 0, idx = 4, base = 0;
+    int32_t off = 0;
     bool withsib = false, mod0off = false;
     if (op_reg(op0))
     {
@@ -142,6 +144,8 @@ enc_mr(uint8_t** restrict buf, uint64_t opc, uint64_t op0, uint64_t op1)
     }
     else
     {
+        off = op_mem_offset(op0);
+
         if (!!op_mem_idx(op0) != !!op_mem_scale(op0)) return -1;
         if (op_mem_idx(op0))
         {
@@ -164,6 +168,8 @@ enc_mr(uint8_t** restrict buf, uint64_t opc, uint64_t op0, uint64_t op1)
         {
             rm = 5;
             mod0off = true;
+            // Adjust offset, caller doesn't know instruction length.
+            off -= opc_size(opc) + 5 + immsz;
             if (withsib) return -1;
         }
         else
@@ -173,9 +179,9 @@ enc_mr(uint8_t** restrict buf, uint64_t opc, uint64_t op0, uint64_t op1)
             if (rm == 5) mod = 1;
         }
 
-        if (op_mem_offset(op0) && op_imm_n(op_mem_offset(op0), 1) && !mod0off)
+        if (off && op_imm_n(off, 1) && !mod0off)
             mod = 1;
-        else if (op_mem_offset(op0) && !mod0off)
+        else if (off && !mod0off)
             mod = 2;
 
         if (withsib || rm == 4)
@@ -189,8 +195,8 @@ enc_mr(uint8_t** restrict buf, uint64_t opc, uint64_t op0, uint64_t op1)
     *(*buf)++ = (mod << 6) | (reg << 3) | rm;
     if (mod != 3 && rm == 4)
         *(*buf)++ = (scale << 6) | (idx << 3) | base;
-    if (mod == 1) return enc_imm(buf, op_mem_offset(op0), 1);
-    if (mod == 2 || mod0off) return enc_imm(buf, op_mem_offset(op0), 4);
+    if (mod == 1) return enc_imm(buf, off, 1);
+    if (mod == 2 || mod0off) return enc_imm(buf, off, 4);
     return 0;
 }
 
@@ -312,7 +318,7 @@ fe_enc64_impl(uint8_t** restrict buf, uint64_t mnem, FeOp op0, FeOp op1,
 
         if (ei->modrm) {
             FeOp modreg = ei->modreg ? ops[ei->modreg^3] : (opc & 0xff00) >> 8;
-            if (enc_mr(buf, opc, ops[ei->modrm^3], modreg)) goto fail;
+            if (enc_mr(buf, opc, ops[ei->modrm^3], modreg, desc->immsz)) goto fail;
         } else if (ei->modreg) {
             if (enc_o(buf, opc, ops[ei->modreg^3])) goto fail;
         } else {
