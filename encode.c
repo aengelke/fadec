@@ -297,6 +297,7 @@ fe_enc64_impl(uint8_t** restrict buf, uint64_t mnem, FeOp op0, FeOp op1,
             if (ty == 0x4 && !op_reg_fpu(op)) goto next;
             if (ty == 0x5 && !op_reg_mmx(op)) goto next;
             if (ty == 0x6 && !op_reg_xmm(op)) goto next;
+            if (UNLIKELY(ty >= 7 && ty < 0xf)) goto next; // TODO: support BND, CR, DR
         }
 
         if (UNLIKELY(mnem & FE_ADDR32))

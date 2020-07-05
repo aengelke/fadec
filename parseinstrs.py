@@ -512,6 +512,7 @@ def encode_table(entries):
                 else:
                     tys.append({
                         "imm": 0, "SEG": 3, "FPU": 4, "MMX": 5, "XMM": 6,
+                        "BND": 8, "CR": 9, "DR": 10,
                     }.get(op.kind, -1))
 
             tys_i = sum(ty << (4*i) for i, ty in enumerate(tys))
