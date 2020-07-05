@@ -442,35 +442,32 @@ def encode_table(entries):
         opsizes = {8} if "SIZE_8" in desc.flags else {16, 32, 64}
         hasvex, vecsizes = False, {128}
 
-        opc_i = -1
+        opc_i = opcode.opc | (opcode.opcext[1] << 8 if opcode.opcext else 0)
         opc_flags = ""
-        for kind, val in opcode:
-            if kind == EntryKind.TABLE_ROOT:
-                opc_flags += ["","|OPC_0F","|OPC_0F38","|OPC_0F3A"][val & 3]
-                if (val >> 2) == 1:
-                    hasvex, vecsizes = True, {128, 256}
-                    opc_flags += "|OPC_VEX"
-            elif kind == EntryKind.TABLE256:
-                opc_i = val
-            elif kind in (EntryKind.TABLE8, EntryKind.TABLE72):
-                opc_i |= (val if val < 8 else val + 0xb8) << 8
-            elif kind in (EntryKind.TABLE_PREFIX, EntryKind.TABLE_PREFIX_REP):
-                opc_flags += ["", "|OPC_66", "|OPC_F3", "|OPC_F2"][val]
-                if kind == EntryKind.TABLE_PREFIX: opsizes -= {16}
-            elif kind == EntryKind.TABLE_VEX:
-                opc_flags += ["", "|OPC_VEXL"][hasvex and val >> 1]
-                vecsizes -= {128 if hasvex and val >> 1 else 256}
-                opc_flags += ["", "|OPC_REXW"][val & 1]
-                opsizes -= {64 if val & 1 else 32}
-            else:
-                raise Exception("invalid opcode table")
+        opc_flags += ["","|OPC_0F","|OPC_0F38","|OPC_0F3A"][opcode.escape]
+        if opcode.vex:
+            hasvex, vecsizes = True, {128, 256}
+            opc_flags += "|OPC_VEX"
+        if opcode.prefix:
+            opc_flags += ["", "|OPC_66", "|OPC_F3", "|OPC_F2"][opcode.prefix[1]]
+            if not opcode.prefix[0]: opsizes -= {16}
+        if opcode.vexl == "IG":
+            vecsizes = {0}
+        elif opcode.vexl:
+            vecsizes -= {128 if opcode.vexl == "1" else 256}
+            if opcode.vexl == "1": opc_flags += "|OPC_VEXL"
+        if opcode.rexw == "IG":
+            opsizes = {0}
+        elif opcode.rexw:
+            opsizes -= {32 if opcode.rexw == "1" else 64}
+            if opcode.rexw == "1": opc_flags += "|OPC_REXW"
 
         if "DEF64" in desc.flags:
             opsizes -= {32}
         if "INSTR_WIDTH" not in desc.flags and all(op.size != OpKind.SZ_OP for op in desc.operands):
             opsizes = {0}
-        if "VEXLIG" in desc.flags or all(op.size != OpKind.SZ_VEC for op in desc.operands):
-            vecsizes = {0}
+        if all(op.size != OpKind.SZ_VEC for op in desc.operands):
+            vecsizes = {0} # for VEX-encoded general-purpose instructions.
         if "ENC_NOSZ" in desc.flags:
             opsizes, vecsizes = {0}, {0}
 
@@ -479,7 +476,7 @@ def encode_table(entries):
         prepend_opsize = max(opsizes) > 0 and not separate_opsize
         prepend_vecsize = hasvex and max(vecsizes) > 0 and not separate_opsize
 
-        mustmem = "MUSTMEM" in desc.flags or any(kind == EntryKind.TABLE72 and val < 8 for kind, val in opcode)
+        mustmem = opcode.opcext and opcode.opcext[0] and opcode.opcext[1] < 8
         rm = "r" if "NOMEM" in desc.flags else "m" if mustmem else "rm"
         optypes = ["", "", "", ""]
         enc = ENCODINGS[desc.encoding]
