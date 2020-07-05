@@ -487,9 +487,17 @@ def encode_table(entries):
         if enc.imm_control: optypes[enc.imm_idx^3] = " iariioo"[enc.imm_control]
         optypes = product(*(ot for ot in optypes if ot))
 
-        lock = ["", "LOCK_"] if "LOCK" in desc.flags else [""]
-        for opsize, vecsize, lock_p, ots in product(opsizes, vecsizes, lock, optypes):
-            if lock_p and ots[0] != "m":
+        prefixes = [("", "")]
+        if "LOCK" in desc.flags:
+            prefixes.append(("LOCK_", "|OPC_LOCK"))
+        if "ENC_REP" in desc.flags:
+            prefixes.append(("REP_", "|OPC_F3"))
+        if "ENC_REPCC" in desc.flags:
+            prefixes.append(("REPNZ_", "|OPC_F2"))
+            prefixes.append(("REPZ_", "|OPC_F3"))
+
+        for opsize, vecsize, prefix, ots in product(opsizes, vecsizes, prefixes, optypes):
+            if prefix[1] == "|OPC_LOCK" and ots[0] != "m":
                 continue
 
             imm_size = 0
@@ -516,14 +524,13 @@ def encode_table(entries):
                     }.get(op.kind, -1))
 
             tys_i = sum(ty << (4*i) for i, ty in enumerate(tys))
-            opc_s = hex(opc_i) + opc_flags
-            if lock_p: opc_s += "|OPC_LOCK"
+            opc_s = hex(opc_i) + opc_flags + prefix[1]
             if opsize == 16: opc_s += "|OPC_66"
             if opsize == 64 and "DEF64" not in desc.flags: opc_s += "|OPC_REXW"
 
             # Construct mnemonic name
             mnem_name = {"MOVABS": "MOV", "XCHG_NOP": "XCHG"}.get(desc.mnemonic, desc.mnemonic)
-            name = "FE_" + lock_p + mnem_name
+            name = "FE_" + prefix[0] + mnem_name
             if prepend_opsize and not ("DEF64" in desc.flags and opsize == 64):
                 name += f"_{opsize}"[name[-1] not in "0123456789":]
             if prepend_vecsize:

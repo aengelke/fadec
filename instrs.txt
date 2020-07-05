@@ -79,10 +79,10 @@
 69                    RMI   GP     GP     IMM    -      IMUL
 6a                    I     IMM    -      -      -      PUSH DEF64 IMM_8
 6b                    RMI   GP     GP     IMM    -      IMUL IMM_8
-6c                    NP    -      -      -      -      INS SIZE_8 INSTR_WIDTH
-6d                    NP    -      -      -      -      INS INSTR_WIDTH
-6e                    NP    -      -      -      -      OUTS SIZE_8 INSTR_WIDTH
-6f                    NP    -      -      -      -      OUTS INSTR_WIDTH
+6c                    NP    -      -      -      -      INS SIZE_8 INSTR_WIDTH ENC_REP
+6d                    NP    -      -      -      -      INS INSTR_WIDTH ENC_REP
+6e                    NP    -      -      -      -      OUTS SIZE_8 INSTR_WIDTH ENC_REP
+6f                    NP    -      -      -      -      OUTS INSTR_WIDTH ENC_REP
 70                    D     IMM    -      -      -      JO DEF64 IMM_8
 71                    D     IMM    -      -      -      JNO DEF64 IMM_8
 72                    D     IMM    -      -      -      JC DEF64 IMM_8
@@ -158,18 +158,18 @@ a0                    FD    GP     GP     -      -      MOV SIZE_8
 a1                    FD    GP     GP     -      -      MOV
 a2                    TD    GP     GP     -      -      MOV SIZE_8
 a3                    TD    GP     GP     -      -      MOV
-a4                    NP    -      -      -      -      MOVS SIZE_8 INSTR_WIDTH
-a5                    NP    -      -      -      -      MOVS INSTR_WIDTH
-a6                    NP    -      -      -      -      CMPS SIZE_8 INSTR_WIDTH
-a7                    NP    -      -      -      -      CMPS INSTR_WIDTH
+a4                    NP    -      -      -      -      MOVS SIZE_8 INSTR_WIDTH ENC_REP
+a5                    NP    -      -      -      -      MOVS INSTR_WIDTH ENC_REP
+a6                    NP    -      -      -      -      CMPS SIZE_8 INSTR_WIDTH ENC_REPCC
+a7                    NP    -      -      -      -      CMPS INSTR_WIDTH ENC_REPCC
 a8                    IA    GP     IMM    -      -      TEST SIZE_8
 a9                    IA    GP     IMM    -      -      TEST
-aa                    NP    -      -      -      -      STOS SIZE_8 INSTR_WIDTH
-ab                    NP    -      -      -      -      STOS INSTR_WIDTH
-ac                    NP    -      -      -      -      LODS SIZE_8 INSTR_WIDTH
-ad                    NP    -      -      -      -      LODS INSTR_WIDTH
-ae                    NP    -      -      -      -      SCAS SIZE_8 INSTR_WIDTH
-af                    NP    -      -      -      -      SCAS INSTR_WIDTH
+aa                    NP    -      -      -      -      STOS SIZE_8 INSTR_WIDTH ENC_REP
+ab                    NP    -      -      -      -      STOS INSTR_WIDTH ENC_REP
+ac                    NP    -      -      -      -      LODS SIZE_8 INSTR_WIDTH ENC_REP
+ad                    NP    -      -      -      -      LODS INSTR_WIDTH ENC_REP
+ae                    NP    -      -      -      -      SCAS SIZE_8 INSTR_WIDTH ENC_REPCC
+af                    NP    -      -      -      -      SCAS INSTR_WIDTH ENC_REPCC
 b0+                   OI    GP     IMM8   -      -      MOVABS SIZE_8
 b8+                   OI    GP     IMM    -      -      MOVABS
 c0/0                  MI    GP     IMM8   -      -      ROL SIZE_8

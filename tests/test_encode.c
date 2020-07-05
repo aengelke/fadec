@@ -120,6 +120,15 @@ main(int argc, char** argv)
     TEST("\x64\x01\x00", FE_ADD32mr|FE_SEG(FE_FS), FE_MEM(FE_AX, 0, 0, 0), FE_AX);
     TEST("\x65\x01\x00", FE_ADD32mr|FE_SEG(FE_GS), FE_MEM(FE_AX, 0, 0, 0), FE_AX);
     TEST("\x8e\xc0", FE_MOV_G2Srr, FE_ES, FE_AX);
+    TEST("\xae", FE_SCAS8);
+    TEST("\xf2\xae", FE_REPNZ_SCAS8);
+    TEST("\xf3\xae", FE_REPZ_SCAS8);
+    TEST("\x66\xab", FE_STOS16);
+    TEST("\x66\xf3\xab", FE_REP_STOS16);
+    TEST("\xab", FE_STOS32);
+    TEST("\xf3\xab", FE_REP_STOS32);
+    TEST("\x48\xab", FE_STOS64);
+    TEST("\xf3\x48\xab", FE_REP_STOS64);
 
     // Test ModRM encoding
     TEST("\x01\x00", FE_ADD32mr, FE_MEM(FE_AX, 0, 0, 0), FE_AX);
