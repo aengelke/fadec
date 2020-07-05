@@ -212,6 +212,8 @@ main(int argc, char** argv)
     TEST("\x66\x0f\xc6\xc0\x01", "[SSE_SHUFPD reg16:r0 reg16:r0 imm1:0x1]");
 
     TEST("\xf3\x0f\x7e\x5c\x24\x08", "[SSE_MOVQ reg16:r3 mem8:r4+0x8]");
+    TEST32("\xc4\xe1\x00\x58\xc1", "[VADDPS reg16:r0 reg16:r7 reg16:r1]"); // MSB in vvvv ignored
+    TEST64("\xc4\xe1\x00\x58\xc1", "[VADDPS reg16:r0 reg16:r15 reg16:r1]");
     TEST("\xc5\xf9\x6e\xc8", "[VMOVD reg4:r1 reg4:r0]");
     TEST64("\xc4\xe1\xf9\x6e\xc8", "[VMOVQ reg8:r1 reg8:r0]");
     TEST32("\xc4\xe1\xf9\x6e\xc8", "[VMOVD reg4:r1 reg4:r0]");
@@ -219,6 +221,41 @@ main(int argc, char** argv)
     TEST32("\xc4\xe1\xf2\x2a\xc0", "[VCVTSI2SS reg16:r0 reg16:r1 reg4:r0]");
     TEST64("\xc4\xe1\xf2\x2a\xc0", "[VCVTSI2SS reg16:r0 reg16:r1 reg8:r0]");
     TEST64("\xc4\xe2\x75\x90\x04\xe7", "[VPGATHERDD reg32:r0 mem32:r7+8*r4 reg32:r1]");
+
+    TEST("\xc4\xe3\x79\x14\xc0\x00", "[VPEXTRB reg1:r0 reg16:r0 imm1:0x0]");
+    TEST("\xc4\xe3\xf9\x14\xc0\x00", "[VPEXTRB reg1:r0 reg16:r0 imm1:0x0]");
+    TEST("\xc4\xe3\x79\x15\xc0\x00", "[VPEXTRW reg2:r0 reg16:r0 imm1:0x0]");
+    TEST("\xc4\xe3\xf9\x15\xc0\x00", "[VPEXTRW reg2:r0 reg16:r0 imm1:0x0]");
+    TEST32("\xc4\xe1\x79\xc5\xc0\x00", "[VPEXTRW reg4:r0 reg16:r0 imm1:0x0]");
+    TEST64("\xc4\xe1\x79\xc5\xc0\x00", "[VPEXTRW reg8:r0 reg16:r0 imm1:0x0]");
+    TEST("\xc4\xe3\x79\x16\xc0\x00", "[VPEXTRD reg4:r0 reg16:r0 imm1:0x0]");
+    TEST32("\xc4\xe3\xf9\x16\xc0\x00", "[VPEXTRD reg4:r0 reg16:r0 imm1:0x0]");
+    TEST64("\xc4\xe3\xf9\x16\xc0\x00", "[VPEXTRQ reg8:r0 reg16:r0 imm1:0x0]");
+
+    TEST("\xc4\xe3\x71\x20\xc0\x00", "[VPINSRB reg16:r0 reg16:r1 reg1:r0 imm1:0x0]");
+    TEST("\xc4\xe3\xf1\x20\xc0\x00", "[VPINSRB reg16:r0 reg16:r1 reg1:r0 imm1:0x0]");
+    TEST("\xc4\xe1\x71\xc4\xc0\x00", "[VPINSRW reg16:r0 reg16:r1 reg2:r0 imm1:0x0]");
+    TEST("\xc4\xe1\xf1\xc4\xc0\x00", "[VPINSRW reg16:r0 reg16:r1 reg2:r0 imm1:0x0]");
+    TEST("\xc4\xe3\x71\x22\xc0\x00", "[VPINSRD reg16:r0 reg16:r1 reg4:r0 imm1:0x0]");
+    TEST32("\xc4\xe3\xf1\x22\xc0\x00", "[VPINSRD reg16:r0 reg16:r1 reg4:r0 imm1:0x0]");
+    TEST64("\xc4\xe3\xf1\x22\xc0\x00", "[VPINSRQ reg16:r0 reg16:r1 reg8:r0 imm1:0x0]");
+    TEST("\xc4\xe3\x75\x20\xc0\x00", "UD"); // VEX.L != 0
+    TEST("\xc4\xe1\x75\xc4\xc0\x00", "UD"); // VEX.L != 0
+    TEST("\xc4\xe1\xf5\xc4\xc0\x00", "UD"); // VEX.L != 0
+    TEST("\xc4\xe3\x75\x22\xc0\x00", "UD"); // VEX.L != 0
+    TEST("\xc4\xe3\xf5\x22\xc0\x00", "UD"); // VEX.L != 0
+
+    TEST("\xc4\xe2\x71\x45\xc2", "[VPSRLVD reg16:r0 reg16:r1 reg16:r2]");
+    TEST("\xc4\xe2\x75\x45\xc2", "[VPSRLVD reg32:r0 reg32:r1 reg32:r2]");
+    TEST("\xc4\xe2\xf1\x45\xc2", "[VPSRLVQ reg16:r0 reg16:r1 reg16:r2]");
+    TEST("\xc4\xe2\xf5\x45\xc2", "[VPSRLVQ reg32:r0 reg32:r1 reg32:r2]");
+
+    TEST("\xc4\xe2\x7d\x5a\x20", "[VBROADCASTI128 reg32:r4 mem16:r0]");
+    TEST64("\xc4\x62\x7d\x5a\x20", "[VBROADCASTI128 reg32:r12 mem16:r0]");
+    TEST("\xc4\xe2\x75\x5a\x20", "UD"); // VEX.vvvv != 1111
+    TEST("\xc4\xe2\x7d\x5a\xc0", "UD"); // ModRM.mod != 11
+    TEST("\xc4\xe2\x79\x5a\x20", "UD"); // VEX.L != 1
+    TEST("\xc4\xe2\xfd\x5a\x20", "UD"); // VEX.W != 0
 
     puts(failed ? "Some tests FAILED" : "All tests PASSED");
     return failed ? EXIT_FAILURE : EXIT_SUCCESS;
