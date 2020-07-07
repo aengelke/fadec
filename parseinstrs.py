@@ -476,11 +476,16 @@ def encode_table(entries):
         prepend_opsize = max(opsizes) > 0 and not separate_opsize
         prepend_vecsize = hasvex and max(vecsizes) > 0 and not separate_opsize
 
-        mustmem = opcode.opcext and opcode.opcext[0] and opcode.opcext[1] < 8
-        rm = "r" if "NOMEM" in desc.flags else "m" if mustmem else "rm"
         optypes = ["", "", "", ""]
         enc = ENCODINGS[desc.encoding]
-        if enc.modrm_idx: optypes[enc.modrm_idx^3] = rm
+        if enc.modrm_idx:
+            if "NOMEM" in desc.flags:
+                optypes[enc.modrm_idx^3] = "r"
+            elif ((opcode.opcext and opcode.opcext[0] and opcode.opcext[1] < 8)
+                  or desc.operands[enc.modrm_idx^3].kind == OpKind.K_MEM):
+                optypes[enc.modrm_idx^3] = "m"
+            else:
+                optypes[enc.modrm_idx^3] = "rm"
         if enc.modreg_idx: optypes[enc.modreg_idx^3] = "r"
         if enc.vexreg_idx: optypes[enc.vexreg_idx^3] = "r"
         if enc.zeroreg_idx: optypes[enc.zeroreg_idx^3] = "r"
