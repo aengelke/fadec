@@ -297,35 +297,35 @@ ff/6                  M     GP     -      -      -      PUSH DEF64
 0f00/3                M     GP16   -      -      -      LTR
 0f00/4                M     GP16   -      -      -      VERR
 0f00/5                M     GP16   -      -      -      VERW
-0f01//0               M     MEMZ   -      -      -      SGDT
-0f01//1               M     MEMZ   -      -      -      SIDT
-0f01//2               M     MEMZ   -      -      -      LGDT
-0f01//3               M     MEMZ   -      -      -      LIDT
-0f01//4               M     GP16   -      -      -      SMSW
-0f01//6               M     GP16   -      -      -      LMSW
-0f01//7               M     GP     -      -      -      INVLPG SIZE_8
-0f01//c8              NP    -      -      -      -      MONITOR
-0f01//c9              NP    -      -      -      -      MWAIT
-0f01//ca              NP    -      -      -      -      CLAC
-0f01//cb              NP    -      -      -      -      STAC
-0f01//cf              NP    -      -      -      -      ENCLS
-0f01//d0              NP    -      -      -      -      XGETBV
-0f01//d1              NP    -      -      -      -      XSETBV
-0f01//d5              NP    -      -      -      -      XEND
-0f01//d6              NP    -      -      -      -      XTEST
-0f01//d7              NP    -      -      -      -      ENCLU
-0f01//e0+             O     GP     -      -      -      SMSW
-0f01//f0+             O     GP16   -      -      -      LMSW
-0f01//f8              NP    -      -      -      -      SWAPGS ONLY64
-0f01//f9              NP    -      -      -      -      RDTSCP
+NFx.0f01//0           M     MEMZ   -      -      -      SGDT
+NFx.0f01//1           M     MEMZ   -      -      -      SIDT
+NFx.0f01//2           M     MEMZ   -      -      -      LGDT
+NFx.0f01//3           M     MEMZ   -      -      -      LIDT
+NFx.0f01//4           M     GP16   -      -      -      SMSW
+NFx.0f01//6           M     GP16   -      -      -      LMSW
+NFx.0f01//7           M     GP     -      -      -      INVLPG SIZE_8
+NFx.0f01//c8          NP    -      -      -      -      MONITOR
+NFx.0f01//c9          NP    -      -      -      -      MWAIT
+NP.0f01//ca           NP    -      -      -      -      CLAC
+NP.0f01//cb           NP    -      -      -      -      STAC
+NP.0f01//cf           NP    -      -      -      -      ENCLS
+NP.0f01//d0           NP    -      -      -      -      XGETBV
+NP.0f01//d1           NP    -      -      -      -      XSETBV
+NP.0f01//d5           NP    -      -      -      -      XEND
+NP.0f01//d6           NP    -      -      -      -      XTEST
+NP.0f01//d7           NP    -      -      -      -      ENCLU
+NFx.0f01//e0+         O     GP     -      -      -      SMSW
+NFx.0f01//f0+         O     GP16   -      -      -      LMSW
+NFx.0f01//f8          NP    -      -      -      -      SWAPGS ONLY64
+NFx.0f01//f9          NP    -      -      -      -      RDTSCP
 0f02                  RM    GP     GP16   -      -      LAR
 0f03                  RM    GP     GP16   -      -      LSL
 0f05                  NP    -      -      -      -      SYSCALL ONLY64
 0f06                  NP    -      -      -      -      CLTS
 0f07                  NP    -      -      -      -      SYSRET ONLY64
 0f08                  NP    -      -      -      -      INVD
-RNP.0f09              NP    -      -      -      -      WBINVD
-RF3.0f09              NP    -      -      -      -      WBINVD
+NFx.0f09              NP    -      -      -      -      WBINVD
+F2.0f09               NP    -      -      -      -      WBINVD
 0f0b                  NP    -      -      -      -      UD2
 0f0d//0               M     MEM8   -      -      -      PREFETCH
 0f0d//1               M     MEM8   -      -      -      PREFETCHW
@@ -437,32 +437,32 @@ NP.0f37               NP    -      -      -      -      GETSEC
 0fb5                  RM    GP     MEM    -      -      LGS
 0fb6                  RM    GP     GP8    -      -      MOVZX ENC_SEPSZ
 0fb7                  RM    GP     GP16   -      -      MOVZX ENC_SEPSZ
-RF3.0fb8              RM    GP     GP     -      -      POPCNT
+F3.0fb8               RM    GP     GP     -      -      POPCNT USE66
 0fb9                  RM    GP     GP     -      -      UD1
 0fba/4                MI    GP     IMM8   -      -      BT
 0fba/5                MI    GP     IMM8   -      -      BTS LOCK
 0fba/6                MI    GP     IMM8   -      -      BTR LOCK
 0fba/7                MI    GP     IMM8   -      -      BTC LOCK
 0fbb                  MR    GP     GP     -      -      BTC LOCK
-RNP.0fbc              RM    GP     GP     -      -      BSF
-RF2.0fbc              RM    GP     GP     -      -      BSF
-RF3.0fbc              RM    GP     GP     -      -      TZCNT
-RNP.0fbd              RM    GP     GP     -      -      BSR
-RF2.0fbd              RM    GP     GP     -      -      BSR
-RF3.0fbd              RM    GP     GP     -      -      LZCNT
+NFx.0fbc              RM    GP     GP     -      -      BSF
+F2.0fbc               RM    GP     GP     -      -      BSF USE66
+F3.0fbc               RM    GP     GP     -      -      TZCNT USE66
+NFx.0fbd              RM    GP     GP     -      -      BSR
+F2.0fbd               RM    GP     GP     -      -      BSR USE66
+F3.0fbd               RM    GP     GP     -      -      LZCNT USE66
 0fbe                  RM    GP     GP8    -      -      MOVSX ENC_SEPSZ
 0fbf                  RM    GP     GP16   -      -      MOVSX ENC_SEPSZ
 0fc0                  MR    GP     GP     -      -      XADD SIZE_8 LOCK
 0fc1                  MR    GP     GP     -      -      XADD LOCK
 NP.0fc3               MR    MEM    GP     -      -      MOVNTI
-0fc7//1               M     MEMZ   -      -      -      CMPXCHGD LOCK
+NP.0fc7//1            M     MEMZ   -      -      -      CMPXCHGD LOCK
 0fc8+                 O     GP     -      -      -      BSWAP
 0fff                  RM    GP     GP     -      -      UD0
 #
-RNP.0f38f0            RM    GP     MEM    -      -      MOVBE
-RF2.0f38f0            RM    GP32   GP     -      -      CRC32 SIZE_8
-RNP.0f38f1            MR    MEM    GP     -      -      MOVBE
-RF2.0f38f1            RM    GP32   GP     -      -      CRC32
+NFx.0f38f0            RM    GP     MEM    -      -      MOVBE
+F2.0f38f0             RM    GP32   GP     -      -      CRC32 USE66 SIZE_8
+NFx.0f38f1            MR    MEM    GP     -      -      MOVBE
+F2.0f38f1             RM    GP32   GP     -      -      CRC32 USE66
 #
 # MMX
 NP.0f2a               RM    XMM64  MMX    -      -      MMX_CVTPI2PS
@@ -1443,7 +1443,7 @@ F3.0f38f8             RM    GP     MEMZ   -      -      ENQCMDS
 NP.0f01//c5           NP    -      -      -      -      PCONFIG
 
 # WBNOINVD
-RF2.0f09              NP    -      -      -      -      WBNOINVD
+F3.0f09               NP    -      -      -      -      WBNOINVD
 
 NP.0f01//ee           NP    -      -      -      -      RDPKRU
 NP.0f01//ef           NP    -      -      -      -      WRPKRU
@@ -1460,9 +1460,9 @@ NP.0fae//7            M     MEM8   -      -      -      CLFLUSH
 NP.0fc7//3            M     MEMZ   -      -      -      XRSTORS INSTR_WIDTH
 NP.0fc7//4            M     MEMZ   -      -      -      XSAVEC INSTR_WIDTH
 NP.0fc7//5            M     MEMZ   -      -      -      XSAVES INSTR_WIDTH
-RNP.0fc7//f0+         O     GP     -      -      -      RDRAND
-RNP.0fc7//f8+         O     GP     -      -      -      RDSEED
-RF3.0fc7//f8+         O     GP     -      -      -      RDPID DEF64
+NFx.0fc7//f0+         O     GP     -      -      -      RDRAND
+NFx.0fc7//f8+         O     GP     -      -      -      RDSEED
+F3.0fc7//f8+          O     GP     -      -      -      RDPID DEF64
 66.0f3882             RM    GP     MEMZ   -      -      INVPCID DEF64
 NP.0f38c8             RM    XMM    XMM    -      -      SHA1NEXTE
 NP.0f38c9             RM    XMM    XMM    -      -      SHA1MSG1

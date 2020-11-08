@@ -34,7 +34,6 @@ typedef enum DecodeMode DecodeMode;
 #define ENTRY_TABLE72 4
 #define ENTRY_TABLE_PREFIX 5
 #define ENTRY_TABLE_VEX 6
-#define ENTRY_TABLE_PREFIX_REP 7
 #define ENTRY_TABLE_ROOT 8
 #define ENTRY_MASK 7
 
@@ -326,6 +325,7 @@ struct InstrDesc
 #define DESC_SIZE_FIX1(desc) (((desc)->operand_sizes >> 10) & 7)
 #define DESC_SIZE_FIX2(desc) (((desc)->operand_sizes >> 13) & 3)
 #define DESC_INSTR_WIDTH(desc) (((desc)->operand_sizes >> 15) & 1)
+#define DESC_IGN66(desc) (((desc)->reg_types >> 15) & 1)
 
 int
 fd_decode(const uint8_t* buffer, size_t len_sz, int mode_int, uintptr_t address,
@@ -409,18 +409,12 @@ fd_decode(const uint8_t* buffer, size_t len_sz, int mode_int, uintptr_t address,
     if (kind == ENTRY_TABLE_PREFIX)
     {
         // If a prefix is mandatory and used as opcode extension, it has no
-        // further effect on the instruction. This is especially important
-        // for the 0x66 prefix, which could otherwise override the operand
-        // size of general purpose registers.
-        prefixes &= ~(PREFIX_OPSZ | PREFIX_REPNZ | PREFIX_REP);
-        ENTRY_UNPACK(table, kind, table[mandatory_prefix]);
-    }
-    else if (kind == ENTRY_TABLE_PREFIX_REP)
-    {
-        // Discard 66h mandatory prefix
-        uint8_t index = mandatory_prefix != 1 ? mandatory_prefix : 0;
+        // further effect on the instruction. This, however, does not completely
+        // apply to the 66 prefix: in rare cases it may affect the size of
+        // general purpose registers. The instruction descriptor encodes whether
+        // the 66 prefix has an effect on the instruction (IGN66).
         prefixes &= ~(PREFIX_REPNZ | PREFIX_REP);
-        ENTRY_UNPACK(table, kind, table[index]);
+        ENTRY_UNPACK(table, kind, table[mandatory_prefix]);
     }
 
     // For VEX prefix, we have to distinguish between VEX.W and VEX.L which may
@@ -437,6 +431,9 @@ fd_decode(const uint8_t* buffer, size_t len_sz, int mode_int, uintptr_t address,
         return kind == 0 ? FD_ERR_UD : FD_ERR_PARTIAL;
 
     struct InstrDesc* desc = (struct InstrDesc*) table;
+
+    if (DESC_IGN66(desc))
+        prefixes &= ~PREFIX_OPSZ;
 
     instr->type = desc->type;
     instr->flags = prefixes & 0x7f;

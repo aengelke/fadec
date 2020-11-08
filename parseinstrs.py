@@ -47,7 +47,8 @@ InstrFlags = bitstruct("InstrFlags", [
     "op0_regty:3",
     "op1_regty:3",
     "op2_regty:3",
-    "_unused:7",
+    "_unused:6",
+    "ign66:1",
 ])
 
 ENCODINGS = {
@@ -154,7 +155,7 @@ class InstrDesc(NamedTuple):
         operands = tuple(OPKINDS[op] for op in desc[1:5] if op != "-")
         return cls(desc[5], desc[0], operands, frozenset(desc[6:]))
 
-    def encode(self):
+    def encode(self, ign66):
         flags = copy(ENCODINGS[self.encoding])
 
         opsz = set(self.OPKIND_SIZES[opkind.size] for opkind in self.operands)
@@ -183,6 +184,9 @@ class InstrDesc(NamedTuple):
         if "LOCK" in self.flags:        flags.lock = 1
         if "VSIB" in self.flags:        flags.vsib = 1
 
+        if "USE66" not in self.flags and (ign66 or "IGN66" in self.flags):
+            flags.ign66 = 1
+
         if flags.imm_control >= 4:
             imm_op = next(op for op in self.operands if op.kind == OpKind.K_IMM)
             if ("IMM_8" in self.flags or imm_op.size == 1 or
@@ -202,7 +206,6 @@ class EntryKind(Enum):
     TABLE72 = 4
     TABLE_PREFIX = 5
     TABLE_VEX = 6
-    TABLE_PREFIX_REP = 7
     TABLE_ROOT = -1
 
 class TrieEntry(NamedTuple):
@@ -216,7 +219,6 @@ class TrieEntry(NamedTuple):
         EntryKind.TABLE72: 72,
         EntryKind.TABLE_PREFIX: 4,
         EntryKind.TABLE_VEX: 4,
-        EntryKind.TABLE_PREFIX_REP: 4,
         EntryKind.TABLE_ROOT: 8,
     }
     @classmethod
@@ -241,9 +243,8 @@ class TrieEntry(NamedTuple):
 
 import re
 opcode_regex = re.compile(
-    r"^(?:(?P<prefixes>(?P<vex>VEX\.)?(?P<legacy>NP|66|F2|F3)\." +
-                     r"(?:W(?P<rexw>[01]|IG)\.)?(?:L(?P<vexl>[01]|IG)\.)?)" +
-        r"|R(?P<repprefix>NP|F2|F3).)?" +
+    r"^(?:(?P<prefixes>(?P<vex>VEX\.)?(?P<legacy>NP|66|F2|F3|NFx)\." +
+                     r"(?:W(?P<rexw>[01]|IG)\.)?(?:L(?P<vexl>[01]|IG)\.)?))?" +
      r"(?P<opcode>(?:[0-9a-f]{2})+)" +
      r"(?P<modrm>//?[0-7]|//[c-f][0-9a-f])?" +
      r"(?P<extended>\+)?$")
@@ -272,13 +273,8 @@ class Opcode(NamedTuple):
         if match.group("extended") and opcext and not opcext[0]:
             raise Exception("invalid opcode extension: {}".format(opcode_string))
 
-        prefix_strs = match.group("legacy"), match.group("repprefix")
-        prefix = prefix_strs[0] or prefix_strs[1]
-        if prefix:
-            prefix = prefix_strs[1] is not None, ["NP", "66", "F3", "F2"].index(prefix)
-
         return cls(
-            prefix=prefix,
+            prefix=match.group("legacy"),
             escape=["", "0f", "0f38", "0f3a"].index(match.group("opcode")[:-2]),
             opc=int(match.group("opcode")[-2:], 16),
             opcext=opcext,
@@ -300,9 +296,11 @@ class Opcode(NamedTuple):
             last_type, last_indices = opcode[-1]
             opcode[-1] = last_type, [last_indices[0] + i for i in range(8)]
         if self.prefix:
-            prefix_kind = [EntryKind.TABLE_PREFIX, EntryKind.TABLE_PREFIX_REP][self.prefix[0]]
-            prefix_val = self.prefix[1]
-            opcode.append((prefix_kind, [prefix_val]))
+            if self.prefix == "NFx":
+                opcode.append((EntryKind.TABLE_PREFIX, [0, 1]))
+            else:
+                prefix_val = ["NP", "66", "F3", "F2"].index(self.prefix)
+                opcode.append((EntryKind.TABLE_PREFIX, [prefix_val]))
         if self.vexl in ("0", "1") or self.rexw in ("0", "1"):
             rexw = {"0": [0], "1": [1<<0], "IG": [0, 1<<0]}[self.rexw or "IG"]
             vexl = {"0": [0], "1": [1<<1], "IG": [0, 1<<1]}[self.vexl or "IG"]
@@ -327,8 +325,6 @@ def format_opcode(opcode):
             if byte & 4:
                 prefix += "VEX."
             prefix += ["NP.", "66.", "F3.", "F2."][byte&3]
-        elif kind == EntryKind.TABLE_PREFIX_REP:
-            prefix += ["RNP.", "??.", "RF3.", "RF2."][byte&3]
         elif kind == EntryKind.TABLE_VEX:
             prefix += "W{}.L{}.".format(byte & 1, byte >> 1)
         else:
@@ -449,8 +445,10 @@ def encode_table(entries):
             hasvex, vecsizes = True, {128, 256}
             opc_flags += "|OPC_VEX"
         if opcode.prefix:
-            opc_flags += ["", "|OPC_66", "|OPC_F3", "|OPC_F2"][opcode.prefix[1]]
-            if not opcode.prefix[0]: opsizes -= {16}
+            if opcode.prefix in ("66", "F2", "F3"):
+                opc_flags += "|OPC_" + opcode.prefix
+            if "USE66" not in desc.flags and opcode.prefix != "NFx":
+                opsizes -= {16}
         if opcode.vexl == "IG":
             vecsizes = {0}
         elif opcode.vexl:
@@ -596,8 +594,9 @@ if __name__ == "__main__":
     for opcode, desc in entries:
         for i, mode in enumerate(args.modes):
             if "ONLY%d"%(96-mode) not in desc.flags:
+                ign66 = opcode.prefix in ("NP", "66", "F2", "F3")
                 for opcode_path in opcode.for_trie():
-                    table.add_opcode(opcode_path, desc.encode(), i)
+                    table.add_opcode(opcode_path, desc.encode(ign66), i)
 
     table.deduplicate()
     table_data, annotations, root_offsets = table.compile()

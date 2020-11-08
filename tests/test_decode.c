@@ -80,7 +80,12 @@ main(int argc, char** argv)
     TEST("\x0f\x38", "PARTIAL");
     TEST("\x0f\x3a", "PARTIAL");
     TEST("\x80", "PARTIAL");
+    TEST("\x0F\x01\x22", "[SMSW mem2:r2]");
+    TEST64("\x48\x0F\x01\x22", "[SMSW mem2:r2]");
+    TEST("\x66\x0F\x01\x22", "[SMSW mem2:r2]");
     TEST("\x0F\x01\xE2", "[SMSW reg4:r2]");
+    TEST("\x66\x0F\x01\xE2", "[SMSW reg2:r2]");
+    TEST64("\x66\x48\x0F\x01\xE2", "[SMSW reg8:r2]");
     TEST64("\x66\x0f\x20\x00", "[MOV_CR reg8:r0 reg0:r0]");
     TEST64("\x0f\x20\xc8", "UD");
     TEST64("\x0f\x20\xd0", "[MOV_CR reg8:r0 reg0:r2]");
@@ -209,6 +214,35 @@ main(int argc, char** argv)
     TEST64("\xc2\x0d\x00", "[RET_8 imm2:0xd]");
     TEST64("\xc2\x0d\xff", "[RET_8 imm2:0xff0d]");
 
+    // NFx/66+F2/F3 combinations
+    TEST("\x0f\xc7\xf0", "[RDRAND reg4:r0]");
+    TEST64("\x48\x0f\xc7\xf0", "[RDRAND reg8:r0]");
+    TEST("\x66\x0f\xc7\xf0", "[RDRAND reg2:r0]");
+    TEST64("\x66\x48\x0f\xc7\xf0", "[RDRAND reg8:r0]");
+    TEST("\x0f\xc7\xf8", "[RDSEED reg4:r0]");
+    TEST64("\x48\x0f\xc7\xf8", "[RDSEED reg8:r0]");
+    TEST("\x66\x0f\xc7\xf8", "[RDSEED reg2:r0]");
+    TEST64("\x66\x48\x0f\xc7\xf8", "[RDSEED reg8:r0]");
+    TEST32("\xf3\x0f\xc7\xf8", "[RDPID reg4:r0]");
+    TEST32("\x66\xf3\x0f\xc7\xf8", "[RDPID reg4:r0]");
+    TEST32("\xf3\x66\x0f\xc7\xf8", "[RDPID reg4:r0]");
+    TEST64("\xf3\x0f\xc7\xf8", "[RDPID reg8:r0]");
+    TEST64("\x66\xf3\x0f\xc7\xf8", "[RDPID reg8:r0]");
+    TEST64("\xf3\x66\x0f\xc7\xf8", "[RDPID reg8:r0]");
+    TEST64("\xf3\x0f\xc7\x00", "UD");
+    TEST64("\x0f\xc7\x30", "[VMPTRLD mem0:r0]");
+    TEST64("\x66\x0f\xc7\x30", "[VMCLEAR mem0:r0]");
+    TEST64("\xf3\x0f\xc7\x30", "[VMXON mem0:r0]");
+
+    TEST64("\x0f\x09", "[WBINVD]");
+    TEST64("\xf3\x0f\x09", "[WBNOINVD]");
+
+    TEST("\xf3\x0f\x2a\xc1", "[SSE_CVTSI2SS reg4:r0 reg4:r1]");
+    TEST("\xf3\x66\x0f\x2a\xc1", "[SSE_CVTSI2SS reg4:r0 reg4:r1]");
+    TEST("\x66\xf3\x0f\x2a\xc1", "[SSE_CVTSI2SS reg4:r0 reg4:r1]");
+    TEST64("\xf3\x48\x0f\x2a\xc1", "[SSE_CVTSI2SS reg4:r0 reg8:r1]");
+    TEST64("\x66\xf3\x48\x0f\x2a\xc1", "[SSE_CVTSI2SS reg4:r0 reg8:r1]");
+    TEST64("\x66\x0f\x50\xc1", "[SSE_MOVMSKPD reg8:r0 reg16:r1]");
     TEST("\x66\x0f\xc6\xc0\x01", "[SSE_SHUFPD reg16:r0 reg16:r0 imm1:0x1]");
 
     TEST("\xf3\x0f\x7e\x5c\x24\x08", "[SSE_MOVQ reg16:r3 mem8:r4+0x8]");
