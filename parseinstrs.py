@@ -288,6 +288,12 @@ class Opcode(NamedTuple):
         opcode = []
         opcode.append((EntryKind.TABLE_ROOT, [self.escape | self.vex << 2]))
         opcode.append((EntryKind.TABLE256, [self.opc]))
+        if self.prefix:
+            if self.prefix == "NFx":
+                opcode.append((EntryKind.TABLE_PREFIX, [0, 1]))
+            else:
+                prefix_val = ["NP", "66", "F3", "F2"].index(self.prefix)
+                opcode.append((EntryKind.TABLE_PREFIX, [prefix_val]))
         if self.opcext:
             opcext_kind = [EntryKind.TABLE8, EntryKind.TABLE72][self.opcext[0]]
             opcext_val = self.opcext[1] - (0 if self.opcext[1] < 8 else 0xb8)
@@ -295,12 +301,6 @@ class Opcode(NamedTuple):
         if self.extended:
             last_type, last_indices = opcode[-1]
             opcode[-1] = last_type, [last_indices[0] + i for i in range(8)]
-        if self.prefix:
-            if self.prefix == "NFx":
-                opcode.append((EntryKind.TABLE_PREFIX, [0, 1]))
-            else:
-                prefix_val = ["NP", "66", "F3", "F2"].index(self.prefix)
-                opcode.append((EntryKind.TABLE_PREFIX, [prefix_val]))
         if self.vexl in ("0", "1") or self.rexw in ("0", "1"):
             rexw = {"0": [0], "1": [1<<0], "IG": [0, 1<<0]}[self.rexw or "IG"]
             vexl = {"0": [0], "1": [1<<1], "IG": [0, 1<<1]}[self.vexl or "IG"]

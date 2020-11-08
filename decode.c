@@ -396,15 +396,6 @@ fd_decode(const uint8_t* buffer, size_t len_sz, int mode_int, uintptr_t address,
     if (LIKELY(off < len))
         ENTRY_UNPACK(table, kind, table[buffer[off++]]);
 
-    // Then, walk through ModR/M-encoded opcode extensions.
-    if ((kind == ENTRY_TABLE8 || kind == ENTRY_TABLE72) && LIKELY(off < len))
-    {
-        if (kind == ENTRY_TABLE72 && (buffer[off] & 0xc0) == 0xc0)
-            ENTRY_UNPACK(table, kind, table[buffer[off++] - 0xb8]);
-        else
-            ENTRY_UNPACK(table, kind, table[(buffer[off] >> 3) & 7]);
-    }
-
     // Handle mandatory prefixes (which behave like an opcode ext.).
     if (kind == ENTRY_TABLE_PREFIX)
     {
@@ -415,6 +406,15 @@ fd_decode(const uint8_t* buffer, size_t len_sz, int mode_int, uintptr_t address,
         // the 66 prefix has an effect on the instruction (IGN66).
         prefixes &= ~(PREFIX_REPNZ | PREFIX_REP);
         ENTRY_UNPACK(table, kind, table[mandatory_prefix]);
+    }
+
+    // Then, walk through ModR/M-encoded opcode extensions.
+    if ((kind == ENTRY_TABLE8 || kind == ENTRY_TABLE72) && LIKELY(off < len))
+    {
+        if (kind == ENTRY_TABLE72 && (buffer[off] & 0xc0) == 0xc0)
+            ENTRY_UNPACK(table, kind, table[buffer[off++] - 0xb8]);
+        else
+            ENTRY_UNPACK(table, kind, table[(buffer[off] >> 3) & 7]);
     }
 
     // For VEX prefix, we have to distinguish between VEX.W and VEX.L which may
