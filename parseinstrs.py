@@ -202,8 +202,8 @@ class EntryKind(Enum):
     NONE = 0
     INSTR = 1
     TABLE256 = 2
-    TABLE8 = 3
-    TABLE72 = 4
+    TABLE16 = 3
+    TABLE8E = 4
     TABLE_PREFIX = 5
     TABLE_VEX = 6
     TABLE_ROOT = -1
@@ -215,8 +215,8 @@ class TrieEntry(NamedTuple):
 
     TABLE_LENGTH = {
         EntryKind.TABLE256: 256,
-        EntryKind.TABLE8: 8,
-        EntryKind.TABLE72: 72,
+        EntryKind.TABLE16: 16,
+        EntryKind.TABLE8E: 8,
         EntryKind.TABLE_PREFIX: 4,
         EntryKind.TABLE_VEX: 4,
         EntryKind.TABLE_ROOT: 8,
@@ -296,10 +296,18 @@ class Opcode(NamedTuple):
                 prefix_val = ["NP", "66", "F3", "F2"].index(self.prefix)
                 opcode.append((EntryKind.TABLE_PREFIX, [prefix_val]))
         if self.opcext:
-            opcext_kind = [EntryKind.TABLE8, EntryKind.TABLE72][self.opcext[0]]
-            opcext_val = self.opcext[1] - (0 if self.opcext[1] < 8 else 0xb8)
-            opcode.append((opcext_kind, [opcext_val]))
-        if self.extended:
+            opcext_val = self.opcext[1]
+            if not self.opcext[0]:
+                opcode.append((EntryKind.TABLE16, [opcext_val, opcext_val | 8]))
+            elif opcext_val < 8:
+                opcode.append((EntryKind.TABLE16, [opcext_val]))
+            else:
+                opcode.append((EntryKind.TABLE16, [((opcext_val - 0xc0) >> 3) | 8]))
+                if not self.extended:
+                    opcode.append((EntryKind.TABLE8E, [opcext_val & 7]))
+                else:
+                    opcode.append((EntryKind.TABLE8E, list(range(8))))
+        if self.extended and not self.opcext:
             last_type, last_indices = opcode[-1]
             opcode[-1] = last_type, [last_indices[0] + i for i in range(8)]
         if self.vexl in ("0", "1") or self.rexw in ("0", "1"):
@@ -320,8 +328,10 @@ def format_opcode(opcode):
             prefix += ["", "VEX."][byte >> 2]
         elif kind == EntryKind.TABLE256:
             opcode_string += "{:02x}".format(byte)
-        elif kind in (EntryKind.TABLE8, EntryKind.TABLE72):
-            opcode_string += "/{:x}".format(byte)
+        elif kind == EntryKind.TABLE16:
+            opcode_string += "/{:x}{}".format(byte & 7, "mr"[byte >> 3])
+        elif kind == EntryKind.TABLE8E:
+            opcode_string += "+rm={:x}".format(byte)
         elif kind == EntryKind.TABLE_PREFIX:
             if byte & 4:
                 prefix += "VEX."

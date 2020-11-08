@@ -30,8 +30,8 @@ typedef enum DecodeMode DecodeMode;
 #define ENTRY_NONE 0
 #define ENTRY_INSTR 1
 #define ENTRY_TABLE256 2
-#define ENTRY_TABLE8 3
-#define ENTRY_TABLE72 4
+#define ENTRY_TABLE16 3
+#define ENTRY_TABLE8E 4
 #define ENTRY_TABLE_PREFIX 5
 #define ENTRY_TABLE_VEX 6
 #define ENTRY_TABLE_ROOT 8
@@ -409,13 +409,12 @@ fd_decode(const uint8_t* buffer, size_t len_sz, int mode_int, uintptr_t address,
     }
 
     // Then, walk through ModR/M-encoded opcode extensions.
-    if ((kind == ENTRY_TABLE8 || kind == ENTRY_TABLE72) && LIKELY(off < len))
-    {
-        if (kind == ENTRY_TABLE72 && (buffer[off] & 0xc0) == 0xc0)
-            ENTRY_UNPACK(table, kind, table[buffer[off++] - 0xb8]);
-        else
-            ENTRY_UNPACK(table, kind, table[(buffer[off] >> 3) & 7]);
+    if (kind == ENTRY_TABLE16 && LIKELY(off < len)) {
+        unsigned isreg = (buffer[off] & 0xc0) == 0xc0 ? 8 : 0;
+        ENTRY_UNPACK(table, kind, table[((buffer[off] >> 3) & 7) | isreg]);
     }
+    if (kind == ENTRY_TABLE8E && LIKELY(off < len))
+        ENTRY_UNPACK(table, kind, table[buffer[off++] & 7]);
 
     // For VEX prefix, we have to distinguish between VEX.W and VEX.L which may
     // be part of the opcode.
