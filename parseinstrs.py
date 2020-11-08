@@ -245,7 +245,8 @@ import re
 opcode_regex = re.compile(
     r"^(?:(?P<prefixes>(?P<vex>VEX\.)?(?P<legacy>NP|66|F2|F3|NFx)\." +
                      r"(?:W(?P<rexw>[01]|IG)\.)?(?:L(?P<vexl>[01]|IG)\.)?))?" +
-     r"(?P<opcode>(?:[0-9a-f]{2})+)" +
+     r"(?P<escape>(?:0f|0f38|0f3a)?)" +
+     r"(?P<opcode>[0-9a-f]{2})" +
      r"(?P<modrm>//?[0-7]|//[c-f][0-9a-f])?" +
      r"(?P<extended>\+)?$")
 
@@ -275,8 +276,8 @@ class Opcode(NamedTuple):
 
         return cls(
             prefix=match.group("legacy"),
-            escape=["", "0f", "0f38", "0f3a"].index(match.group("opcode")[:-2]),
-            opc=int(match.group("opcode")[-2:], 16),
+            escape=["", "0f", "0f38", "0f3a"].index(match.group("escape")),
+            opc=int(match.group("opcode"), 16),
             opcext=opcext,
             extended=match.group("extended") is not None,
             vex=match.group("vex") is not None,
