@@ -19,6 +19,13 @@ static const uint16_t _mnemonic_offs[] = {
 };
 #undef FD_DECODE_TABLE_STRTAB2
 
+const char*
+fdi_name(FdInstrType ty) {
+    if (ty >= sizeof(_mnemonic_offs) / sizeof(_mnemonic_offs[0]))
+        return "(invalid)";
+    return &_mnemonic_str[_mnemonic_offs[ty]];
+}
+
 #define FMT_CONCAT(buf, end, ...) do { \
             buf += snprintf(buf, end - buf, __VA_ARGS__); \
             if (buf > end) \
@@ -45,7 +52,7 @@ fd_format(const FdInstr* instr, char* buffer, size_t len)
     if (FD_HAS_LOCK(instr))
         FMT_CONCAT(buf, end, "lock:");
 
-    FMT_CONCAT(buf, end, "%s", &_mnemonic_str[_mnemonic_offs[FD_TYPE(instr)]]);
+    FMT_CONCAT(buf, end, "%s", fdi_name(FD_TYPE(instr)));
     if (FD_OPSIZE(instr))
         FMT_CONCAT(buf, end, "_%u", FD_OPSIZE(instr));
 

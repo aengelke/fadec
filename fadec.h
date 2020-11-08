@@ -135,8 +135,17 @@ int fd_decode(const uint8_t* buf, size_t len, int mode, uintptr_t address,
  **/
 void fd_format(const FdInstr* instr, char* buf, size_t len);
 
+/** Get the stringified name of an instruction type.
+ * \param ty An instruction type
+ * \return The instruction type as string, or "(invalid)".
+ **/
+const char* fdi_name(FdInstrType ty);
 
-/** Gets the type/mnemonic of the instruction. **/
+
+/** Gets the type/mnemonic of the instruction.
+ * ABI STABILITY NOTE: different versions or builds of the library may use
+ * different values. When linking as shared library, any interpretation of this
+ * value is meaningless; in such cases use  fdi_name. **/
 #define FD_TYPE(instr) ((FdInstrType) (instr)->type)
 /** DEPRECATED: This functionality is obsolete in favor of FD_OT_OFF.
  * Gets the address of the instruction. Invalid if decoded  address == 0. **/
