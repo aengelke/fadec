@@ -236,7 +236,8 @@ decode_modrm(const uint8_t* buffer, int len, DecodeMode mode, FdInstr* instr,
 
         uint8_t reg_idx = rm;
 #if defined(ARCH_X86_64)
-        if (!UNLIKELY(out_o1->misc == FD_RT_MMX || out_o1->misc == FD_RT_MASK))
+        if (!UNLIKELY(out_o1->misc == FD_RT_FPU || out_o1->misc == FD_RT_MMX ||
+                      out_o1->misc == FD_RT_MASK))
             reg_idx += prefixes & PREFIX_REXB ? 8 : 0;
 #endif
         out_o1->type = FD_OT_REG;
