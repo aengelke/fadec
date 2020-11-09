@@ -248,6 +248,8 @@ main(int argc, char** argv)
     TEST("\xf3\x0f\x7e\x5c\x24\x08", "[SSE_MOVQ reg16:r3 mem8:r4+0x8]");
     TEST32("\xc4\xe1\x00\x58\xc1", "[VADDPS reg16:r0 reg16:r7 reg16:r1]"); // MSB in vvvv ignored
     TEST64("\xc4\xe1\x00\x58\xc1", "[VADDPS reg16:r0 reg16:r15 reg16:r1]");
+    TEST32("\xc4\xc1\x78\x58\xc0", "[VADDPS reg16:r0 reg16:r0 reg16:r0]"); // VEX.B ignored in 32-bit
+    TEST64("\xc4\xc1\x78\x58\xc0", "[VADDPS reg16:r0 reg16:r0 reg16:r8]");
     TEST("\xc5\xf9\x6e\xc8", "[VMOVD reg4:r1 reg4:r0]");
     TEST64("\xc4\xe1\xf9\x6e\xc8", "[VMOVQ reg8:r1 reg8:r0]");
     TEST32("\xc4\xe1\xf9\x6e\xc8", "[VMOVD reg4:r1 reg4:r0]");

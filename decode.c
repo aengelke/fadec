@@ -139,7 +139,7 @@ decode_prefixes(const uint8_t* buffer, int len, DecodeMode mode,
             {
                 prefixes |= byte & 0x40 ? 0 : PREFIX_REXX;
                 // SDM Vol 2A 2-15 (Dec. 2016): Ignored in 32-bit mode
-                prefixes |= mode == DECODE_64 || (byte & 0x20) ? 0 : PREFIX_REXB;
+                prefixes |= mode != DECODE_64 || (byte & 0x20) ? 0 : PREFIX_REXB;
                 *out_opcode_escape = (byte & 0x1f);
 
                 // Load third byte of VEX prefix
