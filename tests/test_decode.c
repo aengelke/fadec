@@ -75,6 +75,8 @@ main(int argc, char** argv)
     TEST64("\x48\x91", "[XCHG reg8:r1 reg8:r0]");
     TEST64("\x48\x26\x91", "[es:XCHG reg4:r1 reg4:r0]");
     TEST64("\x66\x90", "[NOP]");
+    TEST("\x0f\xc7\x0f", "[CMPXCHGD_4 mem0:r7]");
+    TEST64("\x48\x0f\xc7\x0f", "[CMPXCHGD_8 mem0:r7]");
     TEST("\x66", "PARTIAL");
     TEST("\x0f", "PARTIAL");
     TEST("\x0f\x38", "PARTIAL");
@@ -96,7 +98,10 @@ main(int argc, char** argv)
     TEST("\x8e\xc0", "[MOV_G2S reg2:r0 reg2:r0]");
     TEST("\x8e\xc8", "UD"); // No mov cs, eax
     TEST("\xd8\xc1", "[FADD reg0:r0 reg0:r1]");
-    TEST64("\x41\xd8\xc1", "[FADD reg0:r0 reg0:r1]");
+    TEST("\xdc\xc1", "[FADD reg0:r1 reg0:r0]");
+    TEST64("\x41\xd8\xc1", "[FADD reg0:r0 reg0:r1]"); // REX.B ignored
+    TEST64("\xd9\xc9", "[FXCH reg0:r1]");
+    TEST64("\xd9\xd0", "[FNOP]");
     TEST64("\x41\xdf\xe0", "[FSTSW reg2:r0]");
 
     // ModRM Test cases
@@ -173,6 +178,9 @@ main(int argc, char** argv)
     TEST64("\xf2\x48\x0f\x38\xf1\xd1", "[CRC32 reg4:r2 reg8:r1]");
     TEST64("\xf2\x4c\x0f\x38\xf1\xd1", "[CRC32 reg4:r10 reg8:r1]");
 
+    TEST("\x8d\x00", "[LEA reg4:r0 mem0:r0]");
+    TEST("\x8d\xc0", "UD");
+
     TEST32("\x40", "[INC reg4:r0]");
     TEST32("\x43", "[INC reg4:r3]");
     TEST32("\x66\x47", "[INC reg2:r7]");
@@ -192,8 +200,15 @@ main(int argc, char** argv)
     TEST32("\x66\xe9\x01\x00", "[JMP off2:ip+0x1]");
     TEST64("\xe9\x00\x00\x00\x00", "[JMP off8:rip+0x0]");
     TEST64("\x66\xe9\x00\x00\x00\x00", "[JMP off8:rip+0x0]");
+    TEST64("\x66\xeb\x00", "[JMP off8:rip+0x0]");
+    TEST64("\x66\xeb\xff", "[JMP off8:rip+0xffffffffffffffff]");
     TEST("\x66\xe9\x00", "PARTIAL");
     TEST("\x66\xe9", "PARTIAL");
+
+    TEST("\xa5", "[MOVS_4]");
+    TEST("\x66\xa5", "[MOVS_2]");
+    TEST("\xf3\xa5", "[rep:MOVS_4]");
+    TEST("\xf3\x66\xa5", "[rep:MOVS_2]");
 
     TEST("\x66\x0f\xbe\xc2", "[MOVSX reg2:r0 reg1:r2]");
     TEST("\x0f\xbe\xc2", "[MOVSX reg4:r0 reg1:r2]");
@@ -237,6 +252,8 @@ main(int argc, char** argv)
     TEST64("\x0f\x09", "[WBINVD]");
     TEST64("\xf3\x0f\x09", "[WBNOINVD]");
 
+    TEST64("\x0f\xae\xe8", "[LFENCE]");
+
     TEST("\xf3\x0f\x2a\xc1", "[SSE_CVTSI2SS reg4:r0 reg4:r1]");
     TEST("\xf3\x66\x0f\x2a\xc1", "[SSE_CVTSI2SS reg4:r0 reg4:r1]");
     TEST("\x66\xf3\x0f\x2a\xc1", "[SSE_CVTSI2SS reg4:r0 reg4:r1]");
@@ -244,6 +261,8 @@ main(int argc, char** argv)
     TEST64("\x66\xf3\x48\x0f\x2a\xc1", "[SSE_CVTSI2SS reg4:r0 reg8:r1]");
     TEST64("\x66\x0f\x50\xc1", "[SSE_MOVMSKPD reg8:r0 reg16:r1]");
     TEST("\x66\x0f\xc6\xc0\x01", "[SSE_SHUFPD reg16:r0 reg16:r0 imm1:0x1]");
+    TEST("\x66\x0f\x71\xd0\x01", "[SSE_PSRLW reg16:r0 imm1:0x1]");
+    TEST("\x66\x0f\x71\x10\x01", "UD");
 
     TEST("\xf3\x0f\x7e\x5c\x24\x08", "[SSE_MOVQ reg16:r3 mem8:r4+0x8]");
     TEST32("\xc4\xe1\x00\x58\xc1", "[VADDPS reg16:r0 reg16:r7 reg16:r1]"); // MSB in vvvv ignored
