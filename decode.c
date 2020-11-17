@@ -37,11 +37,12 @@ typedef enum DecodeMode DecodeMode;
 #define ENTRY_TABLE_ROOT 8
 #define ENTRY_MASK 7
 
-#define ENTRY_UNPACK(table,kind,entry) do { \
-            uint16_t entry_copy = entry; \
-            table = &_decode_table[(entry_copy & ~7) >> 1]; \
-            kind = entry_copy & ENTRY_MASK; \
-        } while (0)
+static inline unsigned
+table_walk(unsigned cur_idx, unsigned entry_idx, unsigned* out_kind) {
+    unsigned entry = _decode_table[cur_idx + entry_idx];
+    *out_kind = entry & ENTRY_MASK;
+    return (entry & ~ENTRY_MASK) >> 1;
+}
 
 #define LOAD_LE_1(buf) ((size_t) *(uint8_t*) (buf))
 #define LOAD_LE_2(buf) (LOAD_LE_1(buf) | LOAD_LE_1((uint8_t*) (buf) + 1)<<8)
@@ -332,29 +333,22 @@ int
 fd_decode(const uint8_t* buffer, size_t len_sz, int mode_int, uintptr_t address,
           FdInstr* instr)
 {
-    const uint16_t* table = NULL;
-    DecodeMode mode;
-
     int len = len_sz > 15 ? 15 : len_sz;
 
     // Ensure that we can actually handle the decode request
-    if (mode_int == 32)
+    DecodeMode mode;
+    unsigned table_idx;
+    unsigned kind = ENTRY_TABLE_ROOT;
+    switch (mode_int)
     {
 #if defined(ARCH_386)
-        table = &_decode_table[FD_TABLE_OFFSET_32];
-        mode = DECODE_32;
+    case 32: table_idx = FD_TABLE_OFFSET_32; mode = DECODE_32; break;
 #endif
-    }
-    else if (mode_int == 64)
-    {
 #if defined(ARCH_X86_64)
-        table = &_decode_table[FD_TABLE_OFFSET_64];
-        mode = DECODE_64;
+    case 64: table_idx = FD_TABLE_OFFSET_64; mode = DECODE_64; break;
 #endif
+    default: return FD_ERR_INTERNAL;
     }
-
-    if (UNLIKELY(table == NULL))
-        return FD_ERR_INTERNAL;
 
     int retval;
     int off = 0;
@@ -371,8 +365,6 @@ fd_decode(const uint8_t* buffer, size_t len_sz, int mode_int, uintptr_t address,
     if (UNLIKELY(off + retval >= len))
         return FD_ERR_PARTIAL;
     off += retval;
-
-    uint32_t kind = ENTRY_TABLE_ROOT;
 
     if (UNLIKELY(prefixes & PREFIX_VEX))
     {
@@ -393,9 +385,9 @@ fd_decode(const uint8_t* buffer, size_t len_sz, int mode_int, uintptr_t address,
         off += opcode_escape >= 2 ? 2 : 1;
     }
 
-    ENTRY_UNPACK(table, kind, table[opcode_escape]);
+    table_idx = table_walk(table_idx, opcode_escape, &kind);
     if (LIKELY(off < len))
-        ENTRY_UNPACK(table, kind, table[buffer[off++]]);
+        table_idx = table_walk(table_idx, buffer[off++], &kind);
 
     // Handle mandatory prefixes (which behave like an opcode ext.).
     if (kind == ENTRY_TABLE_PREFIX)
@@ -406,16 +398,16 @@ fd_decode(const uint8_t* buffer, size_t len_sz, int mode_int, uintptr_t address,
         // general purpose registers. The instruction descriptor encodes whether
         // the 66 prefix has an effect on the instruction (IGN66).
         prefixes &= ~(PREFIX_REPNZ | PREFIX_REP);
-        ENTRY_UNPACK(table, kind, table[mandatory_prefix]);
+        table_idx = table_walk(table_idx, mandatory_prefix, &kind);
     }
 
     // Then, walk through ModR/M-encoded opcode extensions.
     if (kind == ENTRY_TABLE16 && LIKELY(off < len)) {
         unsigned isreg = (buffer[off] & 0xc0) == 0xc0 ? 8 : 0;
-        ENTRY_UNPACK(table, kind, table[((buffer[off] >> 3) & 7) | isreg]);
+        table_idx = table_walk(table_idx, ((buffer[off] >> 3) & 7) | isreg, &kind);
+        if (kind == ENTRY_TABLE8E)
+            table_idx = table_walk(table_idx, buffer[off++] & 7, &kind);
     }
-    if (kind == ENTRY_TABLE8E && LIKELY(off < len))
-        ENTRY_UNPACK(table, kind, table[buffer[off++] & 7]);
 
     // For VEX prefix, we have to distinguish between VEX.W and VEX.L which may
     // be part of the opcode.
@@ -424,13 +416,13 @@ fd_decode(const uint8_t* buffer, size_t len_sz, int mode_int, uintptr_t address,
         uint8_t index = 0;
         index |= prefixes & PREFIX_REXW ? (1 << 0) : 0;
         index |= prefixes & PREFIX_VEXL ? (1 << 1) : 0;
-        ENTRY_UNPACK(table, kind, table[index]);
+        table_idx = table_walk(table_idx, index, &kind);
     }
 
     if (UNLIKELY(kind != ENTRY_INSTR))
         return kind == 0 ? FD_ERR_UD : FD_ERR_PARTIAL;
 
-    struct InstrDesc* desc = (struct InstrDesc*) table;
+    struct InstrDesc* desc = (struct InstrDesc*) &_decode_table[table_idx];
 
     if (DESC_IGN66(desc))
         prefixes &= ~PREFIX_OPSZ;
