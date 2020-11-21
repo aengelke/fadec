@@ -63,7 +63,6 @@ enum PrefixSet
     PREFIX_REXR = 1 << 17,
     PREFIX_REXW = 1 << 18,
     PREFIX_VEXL = 1 << 19,
-    PREFIX_VEX = 1 << 20,
 };
 
 typedef enum PrefixSet PrefixSet;
@@ -72,8 +71,7 @@ static
 int
 decode_prefixes(const uint8_t* buffer, int len, DecodeMode mode,
                 PrefixSet* out_prefixes, uint8_t* out_mandatory,
-                uint8_t* out_segment, uint8_t* out_vex_operand,
-                int* out_opcode_escape)
+                uint8_t* out_segment)
 {
     int off = 0;
     PrefixSet prefixes = 0;
@@ -83,7 +81,6 @@ decode_prefixes(const uint8_t* buffer, int len, DecodeMode mode,
     uint8_t rep = 0;
     *out_mandatory = 0;
     *out_segment = FD_REG_NONE;
-    *out_opcode_escape = 0;
 
     while (LIKELY(off < len))
     {
@@ -120,49 +117,6 @@ decode_prefixes(const uint8_t* buffer, int len, DecodeMode mode,
             off++;
             break;
 #endif
-        case 0xc4: case 0xc5: // VEX
-            if (UNLIKELY(off + 1 >= len))
-                return FD_ERR_PARTIAL;
-            uint8_t byte = buffer[off + 1];
-            if (mode == DECODE_32 && (byte & 0xc0) != 0xc0)
-                goto out;
-
-            // VEX + 66/F2/F3/LOCK will #UD.
-            if (prefixes & (PREFIX_OPSZ|PREFIX_LOCK))
-                return FD_ERR_UD;
-            // VEX + REX will #UD.
-            if (rex_prefix || rep)
-                return FD_ERR_UD;
-
-            prefixes |= PREFIX_VEX;
-            prefixes |= byte & 0x80 ? 0 : PREFIX_REXR;
-            if (prefix == 0xc4) // 3-byte VEX
-            {
-                prefixes |= byte & 0x40 ? 0 : PREFIX_REXX;
-                // SDM Vol 2A 2-15 (Dec. 2016): Ignored in 32-bit mode
-                prefixes |= mode != DECODE_64 || (byte & 0x20) ? 0 : PREFIX_REXB;
-                *out_opcode_escape = (byte & 0x1f);
-
-                // Load third byte of VEX prefix
-                if (UNLIKELY(off + 2 >= len))
-                    return FD_ERR_PARTIAL;
-                byte = buffer[off + 2];
-                // SDM Vol 2A 2-16 (Dec. 2016) says that:
-                // - "In 32-bit modes, VEX.W is silently ignored."
-                // - VEX.W either replaces REX.W, is don't care or is reserved.
-                // This is actually incorrect, there are instructions that
-                // use VEX.W as an opcode extension even in 32-bit mode.
-                prefixes |= byte & 0x80 ? PREFIX_REXW : 0;
-            }
-            else // 2-byte VEX
-                *out_opcode_escape = 1;
-            prefixes |= byte & 0x04 ? PREFIX_VEXL : 0;
-            *out_mandatory = byte & 0x03;
-            *out_vex_operand = ((byte & 0x78) >> 3) ^ 0xf;
-
-            // VEX prefix is always the last prefix.
-            off += prefix == 0xc4 ? 3 : 2;
-            goto out;
         }
     }
 
@@ -354,25 +308,18 @@ fd_decode(const uint8_t* buffer, size_t len_sz, int mode_int, uintptr_t address,
     int off = 0;
     uint8_t vex_operand = 0;
     uint8_t mandatory_prefix;
-    int opcode_escape;
+    int opcode_escape = 0;
     PrefixSet prefixes = 0;
 
     retval = decode_prefixes(buffer + off, len - off, mode, &prefixes,
-                             &mandatory_prefix, &instr->segment, &vex_operand,
-                             &opcode_escape);
+                             &mandatory_prefix, &instr->segment);
     if (UNLIKELY(retval < 0))
         return retval;
     if (UNLIKELY(off + retval >= len))
         return FD_ERR_PARTIAL;
     off += retval;
 
-    if (UNLIKELY(prefixes & PREFIX_VEX))
-    {
-        if (opcode_escape < 0 || opcode_escape > 3)
-            return FD_ERR_UD;
-        opcode_escape |= 4;
-    }
-    else if (buffer[off] == 0x0f)
+    if (buffer[off] == 0x0f)
     {
         if (UNLIKELY(off + 1 >= len))
             return FD_ERR_PARTIAL;
@@ -384,9 +331,49 @@ fd_decode(const uint8_t* buffer, size_t len_sz, int mode_int, uintptr_t address,
             opcode_escape = 1;
         off += opcode_escape >= 2 ? 2 : 1;
     }
+    else if (UNLIKELY((buffer[off] & 0xfe) == 0xc4)) // VEX c4/c5
+    {
+        if (UNLIKELY(off + 1 >= len))
+            return FD_ERR_PARTIAL;
+        if (mode == DECODE_32 && (buffer[off + 1] & 0xc0) != 0xc0)
+            goto skipvex;
+
+        // VEX + 66/F3/F2/REX will #UD.
+        // Note: REX is also here only respected if it immediately precedes the
+        // opcode, in this case the VEX "prefix".
+        if (prefixes & (PREFIX_OPSZ|PREFIX_REP|PREFIX_REPNZ|PREFIX_REX))
+            return FD_ERR_UD;
+
+        uint8_t byte = buffer[off + 1];
+        prefixes |= byte & 0x80 ? 0 : PREFIX_REXR;
+        if (buffer[off] == 0xc4) // 3-byte VEX
+        {
+            prefixes |= byte & 0x40 ? 0 : PREFIX_REXX;
+            // SDM Vol 2A 2-15 (Dec. 2016): Ignored in 32-bit mode
+            prefixes |= mode != DECODE_64 || (byte & 0x20) ? 0 : PREFIX_REXB;
+            if (byte & 0x1c) // Bits 4:2 of opcode_escape must be clear.
+                return FD_ERR_UD;
+            opcode_escape = (byte & 0x03) | 4; // 4 is table index with VEX
+
+            // Load third byte of VEX prefix
+            if (UNLIKELY(off + 2 >= len))
+                return FD_ERR_PARTIAL;
+            byte = buffer[off + 2];
+            prefixes |= byte & 0x80 ? PREFIX_REXW : 0;
+        }
+        else // 2-byte VEX
+            opcode_escape = 1 | 4; // 4 is table index with VEX, 0f escape
+
+        prefixes |= byte & 0x04 ? PREFIX_VEXL : 0;
+        mandatory_prefix = byte & 0x03;
+        vex_operand = ((byte & 0x78) >> 3) ^ 0xf;
+
+        off += buffer[off] == 0xc4 ? 3 : 2;
+    skipvex:;
+    }
 
     table_idx = table_walk(table_idx, opcode_escape, &kind);
-    if (LIKELY(off < len))
+    if (kind == ENTRY_TABLE256 && LIKELY(off < len))
         table_idx = table_walk(table_idx, buffer[off++], &kind);
 
     // Handle mandatory prefixes (which behave like an opcode ext.).
