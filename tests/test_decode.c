@@ -264,6 +264,14 @@ main(int argc, char** argv)
     TEST("\x66\x0f\x71\xd0\x01", "[SSE_PSRLW reg16:r0 imm1:0x1]");
     TEST("\x66\x0f\x71\x10\x01", "UD");
 
+    TEST("\xc5\xf2\x2a\xc0", "[VCVTSI2SS reg16:r0 reg16:r1 reg4:r0]");
+    TEST("\xf3\xc5\xf2\x2a\xc0", "UD"); // VEX+REP
+    TEST("\xf2\xc5\xf2\x2a\xc0", "UD"); // VEX+REPNZ
+    TEST("\xf2\xf3\xc5\xf2\x2a\xc0", "UD"); // VEX+REP+REPNZ
+    TEST("\x66\xc5\xf2\x2a\xc0", "UD"); // VEX+66
+    TEST("\xf0\xc5\xf2\x2a\xc0", "UD"); // VEX+LOCK
+    TEST64("\x40\xc5\xf2\x2a\xc0", "UD"); // VEX+REX
+
     TEST("\xf3\x0f\x7e\x5c\x24\x08", "[SSE_MOVQ reg16:r3 mem8:r4+0x8]");
     TEST32("\xc4\xe1\x00\x58\xc1", "[VADDPS reg16:r0 reg16:r7 reg16:r1]"); // MSB in vvvv ignored
     TEST64("\xc4\xe1\x00\x58\xc1", "[VADDPS reg16:r0 reg16:r15 reg16:r1]");
