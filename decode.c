@@ -50,98 +50,20 @@ table_walk(unsigned cur_idx, unsigned entry_idx, unsigned* out_kind) {
 #define LOAD_LE_4(buf) (LOAD_LE_2(buf) | LOAD_LE_2((uint8_t*) (buf) + 2)<<16)
 #define LOAD_LE_8(buf) (LOAD_LE_4(buf) | LOAD_LE_4((uint8_t*) (buf) + 4)<<32)
 
-enum PrefixSet
+enum
 {
-    PREFIX_LOCK = FD_FLAG_LOCK,
-    PREFIX_REP = FD_FLAG_REP,
-    PREFIX_REPNZ = FD_FLAG_REPNZ,
-    PREFIX_REX = 1 << 8,
-    PREFIX_OPSZ = 1 << 13,
-    PREFIX_ADDRSZ = 1 << 14,
-    PREFIX_REXB = 1 << 15,
-    PREFIX_REXX = 1 << 16,
-    PREFIX_REXR = 1 << 17,
-    PREFIX_REXW = 1 << 18,
-    PREFIX_VEXL = 1 << 19,
+    PREFIX_REXB = 0x01,
+    PREFIX_REXX = 0x02,
+    PREFIX_REXR = 0x04,
+    PREFIX_REXW = 0x08,
+    PREFIX_REX = 0x40,
+    PREFIX_VEXL = 0x10,
 };
-
-typedef enum PrefixSet PrefixSet;
-
-static
-int
-decode_prefixes(const uint8_t* buffer, int len, DecodeMode mode,
-                PrefixSet* out_prefixes, uint8_t* out_mandatory,
-                uint8_t* out_segment)
-{
-    int off = 0;
-    PrefixSet prefixes = 0;
-    PrefixSet rex_prefix = 0;
-    int rex_off = -1;
-
-    uint8_t rep = 0;
-    *out_mandatory = 0;
-    *out_segment = FD_REG_NONE;
-
-    while (LIKELY(off < len))
-    {
-        uint8_t prefix = buffer[off];
-        switch (UNLIKELY(prefix))
-        {
-        default: goto out;
-        // From segment overrides, the last one wins.
-        case 0x26: *out_segment = FD_REG_ES; break;
-        case 0x2e: *out_segment = FD_REG_CS; break;
-        case 0x36: *out_segment = FD_REG_SS; break;
-        case 0x3e: *out_segment = FD_REG_DS; break;
-        case 0x64: *out_segment = FD_REG_FS; break;
-        case 0x65: *out_segment = FD_REG_GS; break;
-        case 0x67: prefixes |= PREFIX_ADDRSZ; break;
-        case 0xf0: prefixes |= PREFIX_LOCK;   break;
-        case 0x66: prefixes |= PREFIX_OPSZ;   break;
-        // From REP/REPE and REPNZ, the last one wins; and for mandatory
-        // prefixes they have a higher priority than 66h (handled below).
-        case 0xf3: rep = 2; break;
-        case 0xf2: rep = 3; break;
-#if defined(ARCH_X86_64)
-        case 0x40: case 0x41: case 0x42: case 0x43: case 0x44: case 0x45:
-        case 0x46: case 0x47: case 0x48: case 0x49: case 0x4a: case 0x4b:
-        case 0x4c: case 0x4d: case 0x4e: case 0x4f:
-            if (mode != DECODE_64)
-                goto out;
-            rex_prefix = PREFIX_REX;
-            rex_prefix |= prefix & 0x1 ? PREFIX_REXB : 0;
-            rex_prefix |= prefix & 0x2 ? PREFIX_REXX : 0;
-            rex_prefix |= prefix & 0x4 ? PREFIX_REXR : 0;
-            rex_prefix |= prefix & 0x8 ? PREFIX_REXW : 0;
-            rex_off = off;
-            break;
-#endif
-        }
-        off++;
-    }
-
-out:
-    // REX prefix is only considered if it is the last prefix.
-    if (rex_off == off - 1)
-        prefixes |= rex_prefix;
-
-    // If there is no REP/REPNZ prefix and implied opcode extension from a VEX
-    // prefix, offer 66h as mandatory prefix. If there is a REP prefix, then the
-    // 66h prefix is ignored when evaluating mandatory prefixes.
-    if (rep) {
-        *out_mandatory = rep;
-        prefixes |= rep == 3 ? PREFIX_REPNZ : PREFIX_REP;
-    } else if (prefixes & PREFIX_OPSZ)
-        *out_mandatory = 1;
-    *out_prefixes = prefixes;
-
-    return off;
-}
 
 static
 int
 decode_modrm(const uint8_t* buffer, int len, DecodeMode mode, FdInstr* instr,
-             PrefixSet prefixes, bool vsib, FdOp* out_o1, FdOp* out_o2)
+             unsigned prefixes, bool vsib, FdOp* out_o1, FdOp* out_o2)
 {
     int off = 0;
 
@@ -305,21 +227,60 @@ fd_decode(const uint8_t* buffer, size_t len_sz, int mode_int, uintptr_t address,
     default: return FD_ERR_INTERNAL;
     }
 
-    int retval;
     int off = 0;
     uint8_t vex_operand = 0;
-    uint8_t mandatory_prefix;
-    int opcode_escape = 0;
-    PrefixSet prefixes = 0;
 
-    retval = decode_prefixes(buffer + off, len - off, mode, &prefixes,
-                             &mandatory_prefix, &instr->segment);
-    if (UNLIKELY(retval < 0))
-        return retval;
-    if (UNLIKELY(off + retval >= len))
+    unsigned prefix_rep = 0;
+    bool prefix_lock = false;
+    bool prefix_66 = false;
+    bool prefix_67 = false;
+    unsigned prefix_rex = 0;
+    int rex_off = -1;
+    instr->segment = FD_REG_NONE;
+
+    while (LIKELY(off < len))
+    {
+        uint8_t prefix = buffer[off];
+        switch (UNLIKELY(prefix))
+        {
+        default: goto prefix_end;
+        // From segment overrides, the last one wins.
+        case 0x26: instr->segment = FD_REG_ES; break;
+        case 0x2e: instr->segment = FD_REG_CS; break;
+        case 0x36: instr->segment = FD_REG_SS; break;
+        case 0x3e: instr->segment = FD_REG_DS; break;
+        case 0x64: instr->segment = FD_REG_FS; break;
+        case 0x65: instr->segment = FD_REG_GS; break;
+        case 0x66: prefix_66 = true; break;
+        case 0x67: prefix_67 = true; break;
+        case 0xf0: prefix_lock = true; break;
+        // From REP/REPE and REPNZ, the last one wins; and for mandatory
+        // prefixes they have a higher priority than 66h (handled below).
+        case 0xf3: prefix_rep = 2; break;
+        case 0xf2: prefix_rep = 3; break;
+#if defined(ARCH_X86_64)
+        case 0x40: case 0x41: case 0x42: case 0x43: case 0x44: case 0x45:
+        case 0x46: case 0x47: case 0x48: case 0x49: case 0x4a: case 0x4b:
+        case 0x4c: case 0x4d: case 0x4e: case 0x4f:
+            if (mode != DECODE_64)
+                goto prefix_end;
+            prefix_rex = prefix;
+            rex_off = off;
+            break;
+#endif
+        }
+        off++;
+    }
+
+prefix_end:
+    // REX prefix is only considered if it is the last prefix.
+    if (rex_off != off - 1)
+        prefix_rex = 0;
+
+    if (UNLIKELY(off >= len))
         return FD_ERR_PARTIAL;
-    off += retval;
 
+    unsigned opcode_escape = 0;
     if (buffer[off] == 0x0f)
     {
         if (UNLIKELY(off + 1 >= len))
@@ -342,16 +303,16 @@ fd_decode(const uint8_t* buffer, size_t len_sz, int mode_int, uintptr_t address,
         // VEX + 66/F3/F2/REX will #UD.
         // Note: REX is also here only respected if it immediately precedes the
         // opcode, in this case the VEX "prefix".
-        if (prefixes & (PREFIX_OPSZ|PREFIX_REP|PREFIX_REPNZ|PREFIX_REX))
+        if (prefix_66 || prefix_rep || prefix_rex)
             return FD_ERR_UD;
 
         uint8_t byte = buffer[off + 1];
-        prefixes |= byte & 0x80 ? 0 : PREFIX_REXR;
+        prefix_rex |= byte & 0x80 ? 0 : PREFIX_REXR;
         if (buffer[off] == 0xc4) // 3-byte VEX
         {
-            prefixes |= byte & 0x40 ? 0 : PREFIX_REXX;
+            prefix_rex |= byte & 0x40 ? 0 : PREFIX_REXX;
             // SDM Vol 2A 2-15 (Dec. 2016): Ignored in 32-bit mode
-            prefixes |= mode != DECODE_64 || (byte & 0x20) ? 0 : PREFIX_REXB;
+            prefix_rex |= mode != DECODE_64 || (byte & 0x20) ? 0 : PREFIX_REXB;
             if (byte & 0x1c) // Bits 4:2 of opcode_escape must be clear.
                 return FD_ERR_UD;
             opcode_escape = (byte & 0x03) | 4; // 4 is table index with VEX
@@ -360,13 +321,14 @@ fd_decode(const uint8_t* buffer, size_t len_sz, int mode_int, uintptr_t address,
             if (UNLIKELY(off + 2 >= len))
                 return FD_ERR_PARTIAL;
             byte = buffer[off + 2];
-            prefixes |= byte & 0x80 ? PREFIX_REXW : 0;
+            prefix_rex |= byte & 0x80 ? PREFIX_REXW : 0;
         }
         else // 2-byte VEX
             opcode_escape = 1 | 4; // 4 is table index with VEX, 0f escape
 
-        prefixes |= byte & 0x04 ? PREFIX_VEXL : 0;
-        mandatory_prefix = byte & 0x03;
+        prefix_rex |= byte & 0x04 ? PREFIX_VEXL : 0;
+        prefix_rep = (byte & 2) ? (byte & 3) : 0;
+        prefix_66 = (byte & 3) == 1;
         vex_operand = ((byte & 0x78) >> 3) ^ 0xf;
 
         off += buffer[off] == 0xc4 ? 3 : 2;
@@ -380,13 +342,11 @@ fd_decode(const uint8_t* buffer, size_t len_sz, int mode_int, uintptr_t address,
     // Handle mandatory prefixes (which behave like an opcode ext.).
     if (kind == ENTRY_TABLE_PREFIX)
     {
-        // If a prefix is mandatory and used as opcode extension, it has no
-        // further effect on the instruction. This, however, does not completely
-        // apply to the 66 prefix: in rare cases it may affect the size of
-        // general purpose registers. The instruction descriptor encodes whether
-        // the 66 prefix has an effect on the instruction (IGN66).
-        prefixes &= ~(PREFIX_REPNZ | PREFIX_REP);
+        // If there is no REP/REPNZ prefix offer 66h as mandatory prefix. If
+        // there is a REP prefix, then the 66h prefix is ignored here.
+        uint8_t mandatory_prefix = prefix_rep ? prefix_rep : !!prefix_66;
         table_idx = table_walk(table_idx, mandatory_prefix, &kind);
+        prefix_rep = 0; // Don't include REP/REPNZ in instr flags
     }
 
     // Then, walk through ModR/M-encoded opcode extensions.
@@ -402,8 +362,8 @@ fd_decode(const uint8_t* buffer, size_t len_sz, int mode_int, uintptr_t address,
     if (kind == ENTRY_TABLE_VEX)
     {
         uint8_t index = 0;
-        index |= prefixes & PREFIX_REXW ? (1 << 0) : 0;
-        index |= prefixes & PREFIX_VEXL ? (1 << 1) : 0;
+        index |= prefix_rex & PREFIX_REXW ? (1 << 0) : 0;
+        index |= prefix_rex & PREFIX_VEXL ? (1 << 1) : 0;
         table_idx = table_walk(table_idx, index, &kind);
     }
 
@@ -413,7 +373,10 @@ fd_decode(const uint8_t* buffer, size_t len_sz, int mode_int, uintptr_t address,
     struct InstrDesc* desc = (struct InstrDesc*) &_decode_table[table_idx];
 
     instr->type = desc->type;
-    instr->flags = prefixes & 0x7f;
+    instr->flags = prefix_rep == 2 ? FD_FLAG_REP :
+                   prefix_rep == 3 ? FD_FLAG_REPNZ : 0;
+    if (prefix_lock)
+        instr->flags |= FD_FLAG_LOCK;
     if (mode == DECODE_64)
         instr->flags |= FD_FLAG_64;
     instr->address = address;
@@ -421,20 +384,20 @@ fd_decode(const uint8_t* buffer, size_t len_sz, int mode_int, uintptr_t address,
     unsigned op_size = 4;
     if (DESC_OPSIZE(desc) == 2 && mode == DECODE_64) // DEF64
         op_size = 8;
-    if ((prefixes & PREFIX_OPSZ) && !DESC_IGN66(desc)) // opsize override
+    if (prefix_66 && !DESC_IGN66(desc)) // opsize override
         op_size = 2;
-    if (mode == DECODE_64 && (prefixes & PREFIX_REXW || DESC_OPSIZE(desc) == 3))
+    if (mode == DECODE_64 && (prefix_rex & PREFIX_REXW || DESC_OPSIZE(desc) == 3))
         op_size = 8;
     if (DESC_OPSIZE(desc) == 1) // force byte
         op_size = 1;
 
     uint8_t vec_size = 16;
-    if (prefixes & PREFIX_VEXL)
+    if (prefix_rex & PREFIX_VEXL)
         vec_size = 32;
 
     // Compute address size.
     uint8_t addr_size = mode == DECODE_64 ? 8 : 4;
-    if (UNLIKELY(prefixes & PREFIX_ADDRSZ))
+    if (UNLIKELY(prefix_67))
         addr_size >>= 1;
     instr->addrsz = addr_size;
 
@@ -462,8 +425,9 @@ fd_decode(const uint8_t* buffer, size_t len_sz, int mode_int, uintptr_t address,
         if (DESC_HAS_MODREG(desc))
             operand2 = &instr->operands[DESC_MODREG_IDX(desc)];
 
-        retval = decode_modrm(buffer + off, len - off, mode, instr, prefixes,
-                              DESC_VSIB(desc), operand1, operand2);
+        int retval = decode_modrm(buffer + off, len - off, mode, instr,
+                                  prefix_rex, DESC_VSIB(desc), operand1,
+                                  operand2);
         if (UNLIKELY(retval < 0))
             return retval;
         off += retval;
@@ -475,7 +439,7 @@ fd_decode(const uint8_t* buffer, size_t len_sz, int mode_int, uintptr_t address,
         uint8_t reg_idx = buffer[off - 1] & 7;
 #if defined(ARCH_X86_64)
         // Only used for GP registers, therefore always apply REX.B.
-        reg_idx += prefixes & PREFIX_REXB ? 8 : 0;
+        reg_idx += prefix_rex & PREFIX_REXB ? 8 : 0;
 #endif
         operand->type = FD_OT_REG;
         operand->reg = reg_idx;
@@ -555,7 +519,7 @@ fd_decode(const uint8_t* buffer, size_t len_sz, int mode_int, uintptr_t address,
             imm_size = 3;
         else if (op_size == 2)
             imm_size = 2;
-        else if (mode == DECODE_64 && (prefixes & PREFIX_REXW) &&
+        else if (mode == DECODE_64 && (prefix_rex & PREFIX_REXW) &&
                  instr->type == FDI_MOVABS)
             imm_size = 8;
         else
@@ -600,7 +564,7 @@ fd_decode(const uint8_t* buffer, size_t len_sz, int mode_int, uintptr_t address,
         }
     }
 
-    if (UNLIKELY(prefixes & PREFIX_LOCK))
+    if (UNLIKELY(prefix_lock))
         if (!DESC_LOCK(desc) || instr->operands[0].type != FD_OT_MEM)
             return FD_ERR_UD;
 
@@ -618,7 +582,7 @@ fd_decode(const uint8_t* buffer, size_t len_sz, int mode_int, uintptr_t address,
 
         // if (operand->type == FD_OT_REG && operand->misc == FD_RT_GPL &&
         //     !(prefixes & PREFIX_REX) && operand->size == 1 && operand->reg >= 4)
-        if (!(prefixes & PREFIX_REX) && (LOAD_LE_4(operand) & 0xfffcffff) == 0x01040101)
+        if (!(prefix_rex & PREFIX_REX) && (LOAD_LE_4(operand) & 0xfffcffff) == 0x01040101)
             operand->misc = FD_RT_GPH;
     }
 
