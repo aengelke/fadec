@@ -85,23 +85,23 @@ decode_prefixes(const uint8_t* buffer, int len, DecodeMode mode,
     while (LIKELY(off < len))
     {
         uint8_t prefix = buffer[off];
-        switch (prefix)
+        switch (UNLIKELY(prefix))
         {
         default: goto out;
         // From segment overrides, the last one wins.
-        case 0x26: *out_segment = FD_REG_ES; off++; break;
-        case 0x2e: *out_segment = FD_REG_CS; off++; break;
-        case 0x36: *out_segment = FD_REG_SS; off++; break;
-        case 0x3e: *out_segment = FD_REG_DS; off++; break;
-        case 0x64: *out_segment = FD_REG_FS; off++; break;
-        case 0x65: *out_segment = FD_REG_GS; off++; break;
-        case 0x67: prefixes |= PREFIX_ADDRSZ; off++; break;
-        case 0xf0: prefixes |= PREFIX_LOCK;   off++; break;
-        case 0x66: prefixes |= PREFIX_OPSZ;   off++; break;
+        case 0x26: *out_segment = FD_REG_ES; break;
+        case 0x2e: *out_segment = FD_REG_CS; break;
+        case 0x36: *out_segment = FD_REG_SS; break;
+        case 0x3e: *out_segment = FD_REG_DS; break;
+        case 0x64: *out_segment = FD_REG_FS; break;
+        case 0x65: *out_segment = FD_REG_GS; break;
+        case 0x67: prefixes |= PREFIX_ADDRSZ; break;
+        case 0xf0: prefixes |= PREFIX_LOCK;   break;
+        case 0x66: prefixes |= PREFIX_OPSZ;   break;
         // From REP/REPE and REPNZ, the last one wins; and for mandatory
         // prefixes they have a higher priority than 66h (handled below).
-        case 0xf3: rep = PREFIX_REP;   *out_mandatory = 2; off++; break;
-        case 0xf2: rep = PREFIX_REPNZ; *out_mandatory = 3; off++; break;
+        case 0xf3: rep = 2; break;
+        case 0xf2: rep = 3; break;
 #if defined(ARCH_X86_64)
         case 0x40: case 0x41: case 0x42: case 0x43: case 0x44: case 0x45:
         case 0x46: case 0x47: case 0x48: case 0x49: case 0x4a: case 0x4b:
@@ -114,10 +114,10 @@ decode_prefixes(const uint8_t* buffer, int len, DecodeMode mode,
             rex_prefix |= prefix & 0x4 ? PREFIX_REXR : 0;
             rex_prefix |= prefix & 0x8 ? PREFIX_REXW : 0;
             rex_off = off;
-            off++;
             break;
 #endif
         }
+        off++;
     }
 
 out:
@@ -128,9 +128,12 @@ out:
     // If there is no REP/REPNZ prefix and implied opcode extension from a VEX
     // prefix, offer 66h as mandatory prefix. If there is a REP prefix, then the
     // 66h prefix is ignored when evaluating mandatory prefixes.
-    if (*out_mandatory == 0 && (prefixes & PREFIX_OPSZ))
+    if (rep) {
+        *out_mandatory = rep;
+        prefixes |= rep == 3 ? PREFIX_REPNZ : PREFIX_REP;
+    } else if (prefixes & PREFIX_OPSZ)
         *out_mandatory = 1;
-    *out_prefixes = prefixes | rep;
+    *out_prefixes = prefixes;
 
     return off;
 }
@@ -191,8 +194,7 @@ decode_modrm(const uint8_t* buffer, int len, DecodeMode mode, FdInstr* instr,
 
         uint8_t reg_idx = rm;
 #if defined(ARCH_X86_64)
-        if (!UNLIKELY(out_o1->misc == FD_RT_FPU || out_o1->misc == FD_RT_MMX ||
-                      out_o1->misc == FD_RT_MASK))
+        if (LIKELY(out_o1->misc == FD_RT_GPL || out_o1->misc == FD_RT_VEC))
             reg_idx += prefixes & PREFIX_REXB ? 8 : 0;
 #endif
         out_o1->type = FD_OT_REG;
@@ -446,7 +448,7 @@ fd_decode(const uint8_t* buffer, size_t len_sz, int mode_int, uintptr_t address,
         instr->operands[i].misc = (0xf0857641 >> (4 * reg_type)) & 0xf;
     }
 
-    if (DESC_HAS_IMPLICIT(desc))
+    if (UNLIKELY(DESC_HAS_IMPLICIT(desc)))
     {
         FdOp* operand = &instr->operands[DESC_IMPLICIT_IDX(desc)];
         operand->type = FD_OT_REG;
@@ -471,10 +473,9 @@ fd_decode(const uint8_t* buffer, size_t len_sz, int mode_int, uintptr_t address,
         // If there is no ModRM, but a Mod-Reg, its opcode-encoded.
         FdOp* operand = &instr->operands[DESC_MODREG_IDX(desc)];
         uint8_t reg_idx = buffer[off - 1] & 7;
-        // FIXME: don't apply REX.B to FPU, MMX, and MASK registers.
 #if defined(ARCH_X86_64)
-        if (!UNLIKELY(operand->misc == FD_RT_FPU))
-            reg_idx += prefixes & PREFIX_REXB ? 8 : 0;
+        // Only used for GP registers, therefore always apply REX.B.
+        reg_idx += prefixes & PREFIX_REXB ? 8 : 0;
 #endif
         operand->type = FD_OT_REG;
         operand->reg = reg_idx;

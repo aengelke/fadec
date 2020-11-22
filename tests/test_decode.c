@@ -88,11 +88,14 @@ main(int argc, char** argv)
     TEST("\x0F\x01\xE2", "[SMSW reg4:r2]");
     TEST("\x66\x0F\x01\xE2", "[SMSW reg2:r2]");
     TEST64("\x66\x48\x0F\x01\xE2", "[SMSW reg8:r2]");
-    TEST64("\x66\x0f\x20\x00", "[MOV_CR reg8:r0 reg0:r0]");
-    TEST64("\x0f\x20\xc8", "UD");
-    TEST64("\x0f\x20\xd0", "[MOV_CR reg8:r0 reg0:r2]");
-    TEST64("\x44\x0f\x20\x08", "UD");
-    TEST64("\x44\x0f\x21\x00", "UD");
+    TEST32("\x66\x0f\x20\x00", "[MOV_CR reg4:r0 reg0:r0]"); // mod=0, 66h
+    TEST64("\x66\x0f\x20\x00", "[MOV_CR reg8:r0 reg0:r0]"); // mod=0, 66h
+    TEST("\x0f\x20\xc8", "UD"); // cr1
+    TEST32("\x0f\x20\xd0", "[MOV_CR reg4:r0 reg0:r2]"); // cr2
+    TEST64("\x0f\x20\xd0", "[MOV_CR reg8:r0 reg0:r2]"); // cr2
+    TEST64("\x48\x0f\x20\xd0", "[MOV_CR reg8:r0 reg0:r2]"); // cr2 + REX.W
+    TEST64("\x44\x0f\x20\x08", "UD"); // cr9
+    TEST64("\x44\x0f\x21\x00", "UD"); // dr8
     TEST("\x8c\xc0", "[MOV_S2G reg2:r0 reg2:r0]");
     TEST64("\x44\x8c\xc0", "[MOV_S2G reg2:r0 reg2:r0]");
     TEST("\x8e\xc0", "[MOV_G2S reg2:r0 reg2:r0]");

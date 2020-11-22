@@ -346,14 +346,10 @@ F2.0f09               NP    -      -      -      -      WBINVD
 0f18/6                M     GP     -      -      -      RESERVED_NOP
 0f18/7                M     GP     -      -      -      RESERVED_NOP
 0f1f                  M     GP     -      -      -      NOP
-0f20                  MR    GP32   CR     -      -      MOV_CR NOMEM ONLY32
-0f20                  MR    GP64   CR     -      -      MOV_CR NOMEM ONLY64 DEF64
-0f21                  MR    GP32   DR     -      -      MOV_DR NOMEM ONLY32
-0f21                  MR    GP64   DR     -      -      MOV_DR NOMEM ONLY64 DEF64
-0f22                  RM    CR     GP32   -      -      MOV_CR NOMEM ONLY32
-0f22                  RM    CR     GP64   -      -      MOV_CR NOMEM ONLY64 DEF64
-0f23                  RM    DR     GP32   -      -      MOV_DR NOMEM ONLY32
-0f23                  RM    DR     GP64   -      -      MOV_DR NOMEM ONLY64 DEF64
+0f20                  MR    GP     CR     -      -      MOV_CR DEF64 IGN66
+0f21                  MR    GP     DR     -      -      MOV_DR DEF64 IGN66
+0f22                  RM    CR     GP     -      -      MOV_CR DEF64 IGN66
+0f23                  RM    DR     GP     -      -      MOV_DR DEF64 IGN66
 0f30                  NP    -      -      -      -      WRMSR
 0f31                  NP    -      -      -      -      RDTSC
 0f32                  NP    -      -      -      -      RDMSR
