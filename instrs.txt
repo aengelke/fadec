@@ -1474,3 +1474,26 @@ NP.0f1b/m             MR    MEMZ   BND    -      -      BNDSTX
 66.0f1b               MR    BND    BND    -      -      BNDMOV DEF64
 F2.0f1b               RM    BND    GP     -      -      BNDCN DEF64
 F3.0f1b/m             RM    BND    MEMZ   -      -      BNDMK
+
+# TSXLDTRK
+F2.0f01e8             NP    -      -      -      -      XSUSLDTRK
+F2.0f01e9             NP    -      -      -      -      XRESLDTRK
+
+# AVX_VNNI
+VEX.66.W0.0f3850      RVM   XMM    XMM    XMM    -      VPDPBUSD
+VEX.66.W0.0f3851      RVM   XMM    XMM    XMM    -      VPDPBUSDS
+VEX.66.W0.0f3852      RVM   XMM    XMM    XMM    -      VPDPWSSD
+VEX.66.W0.0f3853      RVM   XMM    XMM    XMM    -      VPDPWSSDS
+
+# HRESET
+F3.0f3af0c0           IA    IMM8   GP32   -      -      HRESET
+
+# SERIALIZE
+NP.0f01e8             NP    -      -      -      -      SERIALIZE
+
+# UINTR
+F3.0f01ec             NP    -      -      -      -      UIRET ONLY64
+F3.0f01ed             NP    -      -      -      -      TESTUI ONLY64
+F3.0f01ee             NP    -      -      -      -      CLUI ONLY64
+F3.0f01ef             NP    -      -      -      -      STUI ONLY64
+F3.0fc7/6r            M     GP     -      -      -      SENDUIPI DEF64 ONLY64
