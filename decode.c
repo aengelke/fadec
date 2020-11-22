@@ -238,39 +238,60 @@ fd_decode(const uint8_t* buffer, size_t len_sz, int mode_int, uintptr_t address,
     int rex_off = -1;
     instr->segment = FD_REG_NONE;
 
-    while (LIKELY(off < len))
-    {
-        uint8_t prefix = buffer[off];
-        switch (UNLIKELY(prefix))
+#if defined(ARCH_386)
+    if (mode == DECODE_32) {
+        while (LIKELY(off < len))
         {
-        default: goto prefix_end;
-        // From segment overrides, the last one wins.
-        case 0x26: instr->segment = FD_REG_ES; break;
-        case 0x2e: instr->segment = FD_REG_CS; break;
-        case 0x36: instr->segment = FD_REG_SS; break;
-        case 0x3e: instr->segment = FD_REG_DS; break;
-        case 0x64: instr->segment = FD_REG_FS; break;
-        case 0x65: instr->segment = FD_REG_GS; break;
-        case 0x66: prefix_66 = true; break;
-        case 0x67: prefix_67 = true; break;
-        case 0xf0: prefix_lock = true; break;
-        // From REP/REPE and REPNZ, the last one wins; and for mandatory
-        // prefixes they have a higher priority than 66h (handled below).
-        case 0xf3: prefix_rep = 2; break;
-        case 0xf2: prefix_rep = 3; break;
-#if defined(ARCH_X86_64)
-        case 0x40: case 0x41: case 0x42: case 0x43: case 0x44: case 0x45:
-        case 0x46: case 0x47: case 0x48: case 0x49: case 0x4a: case 0x4b:
-        case 0x4c: case 0x4d: case 0x4e: case 0x4f:
-            if (mode != DECODE_64)
-                goto prefix_end;
-            prefix_rex = prefix;
-            rex_off = off;
-            break;
-#endif
+            uint8_t prefix = buffer[off];
+            switch (UNLIKELY(prefix))
+            {
+            default: goto prefix_end;
+            // From segment overrides, the last one wins.
+            case 0x26: instr->segment = FD_REG_ES; break;
+            case 0x2e: instr->segment = FD_REG_CS; break;
+            case 0x36: instr->segment = FD_REG_SS; break;
+            case 0x3e: instr->segment = FD_REG_DS; break;
+            case 0x64: instr->segment = FD_REG_FS; break;
+            case 0x65: instr->segment = FD_REG_GS; break;
+            case 0x66: prefix_66 = true; break;
+            case 0x67: prefix_67 = true; break;
+            case 0xf0: prefix_lock = true; break;
+            case 0xf3: prefix_rep = 2; break;
+            case 0xf2: prefix_rep = 3; break;
+            }
+            off++;
         }
-        off++;
     }
+#endif
+#if defined(ARCH_X86_64)
+    if (mode == DECODE_64) {
+        while (LIKELY(off < len))
+        {
+            uint8_t prefix = buffer[off];
+            switch (UNLIKELY(prefix))
+            {
+            default: goto prefix_end;
+            // ES/CS/SS/DS overrides are ignored.
+            case 0x26: case 0x2e: case 0x36: case 0x3e: break;
+            // From segment overrides, the last one wins.
+            case 0x64: instr->segment = FD_REG_FS; break;
+            case 0x65: instr->segment = FD_REG_GS; break;
+            case 0x66: prefix_66 = true; break;
+            case 0x67: prefix_67 = true; break;
+            case 0xf0: prefix_lock = true; break;
+            case 0xf3: prefix_rep = 2; break;
+            case 0xf2: prefix_rep = 3; break;
+            case 0x40: case 0x41: case 0x42: case 0x43: case 0x44: case 0x45:
+            case 0x46: case 0x47: case 0x48: case 0x49: case 0x4a: case 0x4b:
+            case 0x4c: case 0x4d: case 0x4e: case 0x4f:
+                prefix_rex = prefix;
+                rex_off = off;
+                break;
+            }
+            off++;
+        }
+    }
+#endif
 
 prefix_end:
     // REX prefix is only considered if it is the last prefix.

@@ -58,12 +58,18 @@ main(int argc, char** argv)
 
     TEST("\x90", "[NOP]");
     TEST("\x90", "[NOP]");
-    TEST("\x2e\x90", "[cs:NOP]");
-    TEST("\x2e\x2e\x90", "[cs:NOP]");
-    TEST("\x2e\x26\x90", "[es:NOP]");
-    TEST("\x26\x2e\x90", "[cs:NOP]");
-    TEST("\x26\x65\x90", "[gs:NOP]");
-    TEST("\x65\x26\x90", "[es:NOP]");
+    TEST32("\x2e\x90", "[cs:NOP]");
+    TEST64("\x2e\x90", "[NOP]");
+    TEST32("\x2e\x2e\x90", "[cs:NOP]");
+    TEST64("\x2e\x2e\x90", "[NOP]");
+    TEST32("\x2e\x26\x90", "[es:NOP]");
+    TEST64("\x2e\x26\x90", "[NOP]");
+    TEST32("\x26\x2e\x90", "[cs:NOP]");
+    TEST64("\x26\x2e\x90", "[NOP]");
+    TEST32("\x26\x65\x90", "[gs:NOP]");
+    TEST64("\x26\x65\x90", "[gs:NOP]");
+    TEST32("\x65\x26\x90", "[es:NOP]");
+    TEST64("\x65\x26\x90", "[gs:NOP]");
     TEST("\x0f\x10\xc1", "[SSE_MOVUPS reg16:r0 reg16:r1]");
     TEST("\x66\x0f\x10\xc1", "[SSE_MOVUPD reg16:r0 reg16:r1]");
     TEST("\xf2\x66\x0f\x10\xc1", "[SSE_MOVSD reg16:r0 reg8:r1]");
@@ -73,7 +79,7 @@ main(int argc, char** argv)
     TEST64("\x48\x90", "[NOP]");
     TEST64("\x49\x90", "[XCHG reg8:r8 reg8:r0]");
     TEST64("\x48\x91", "[XCHG reg8:r1 reg8:r0]");
-    TEST64("\x48\x26\x91", "[es:XCHG reg4:r1 reg4:r0]");
+    TEST64("\x48\x26\x91", "[XCHG reg4:r1 reg4:r0]");
     TEST64("\x66\x90", "[NOP]");
     TEST("\x0f\xc7\x0f", "[CMPXCHGD_4 mem0:r7]");
     TEST64("\x48\x0f\xc7\x0f", "[CMPXCHGD_8 mem0:r7]");
@@ -285,7 +291,7 @@ main(int argc, char** argv)
     TEST("\x66\xc5\xf2\x2a\xc0", "UD"); // VEX+66
     TEST("\xf0\xc5\xf2\x2a\xc0", "UD"); // VEX+LOCK
     TEST64("\x40\xc5\xf2\x2a\xc0", "UD"); // VEX+REX
-    TEST64("\x40\x26\xc5\xf2\x2a\xc0", "[es:VCVTSI2SS reg16:r0 reg16:r1 reg4:r0]"); // VEX+REX, but REX doesn't precede VEX
+    TEST64("\x40\x26\xc5\xf2\x2a\xc0", "[VCVTSI2SS reg16:r0 reg16:r1 reg4:r0]"); // VEX+REX, but REX doesn't precede VEX
 
     TEST("\xf3\x0f\x7e\x5c\x24\x08", "[SSE_MOVQ reg16:r3 mem8:r4+0x8]");
     TEST32("\xc4\xe1\x00\x58\xc1", "[VADDPS reg16:r0 reg16:r7 reg16:r1]"); // MSB in vvvv ignored
