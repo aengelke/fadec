@@ -248,14 +248,14 @@ opcode_regex = re.compile(
                      r"(?:W(?P<rexw>[01]|IG)\.)?(?:L(?P<vexl>[01]|IG)\.)?))?" +
      r"(?P<escape>0f38|0f3a|0f|)" +
      r"(?P<opcode>[0-9a-f]{2})" +
-     r"(?:(?P<extended>\+)|/(?P<modreg>[0-7][rm]?)|(?P<opcext>[c-f][0-9a-f]))?$")
+     r"(?:(?P<extended>\+)|/(?P<modreg>[0-7]|[rm]|[0-7][rm])|(?P<opcext>[c-f][0-9a-f]))?$")
 
 class Opcode(NamedTuple):
     prefix: Union[None, str] # None/NP/66/F2/F3/NFx
     escape: int # [0, 0f, 0f38, 0f3a]
     opc: int
     extended: bool # Extend opc or opcext, if present
-    modreg: Union[None, Tuple[int, str]] # (modreg, "r"/"m"/"rm"), None
+    modreg: Union[None, Tuple[Union[None, int], str]] # (modreg, "r"/"m"/"rm"), None
     opcext: Union[None, int] # 0xc0-0xff, or 0
     vex: bool
     vexl: Union[str, None] # 0, 1, IG, None = used, both
@@ -270,7 +270,10 @@ class Opcode(NamedTuple):
 
         modreg = match.group("modreg")
         if modreg:
-            modreg = int(modreg[0]), modreg[1] if len(modreg) == 2 else "rm"
+            if modreg[0] in "rm":
+                modreg = None, modreg[0]
+            else:
+                modreg = int(modreg[0]), modreg[1] if len(modreg) == 2 else "rm"
 
         return cls(
             prefix=match.group("legacy"),
@@ -300,9 +303,11 @@ class Opcode(NamedTuple):
         if self.opcext:
             opcode.append((EntryKind.TABLE16, [((self.opcext - 0xc0) >> 3) | 8]))
             opcode.append((EntryKind.TABLE8E, [self.opcext & 7]))
-        if self.modreg:
+        if self.modreg and self.modreg[0] is not None:
+            # TODO: support for /r and /m specifiers, currently adds ~1.9kiB size
             mod = {"m": [0], "r": [1<<3], "rm": [0, 1<<3]}[self.modreg[1]]
-            opcode.append((EntryKind.TABLE16, [self.modreg[0] + x for x in mod]))
+            reg = [self.modreg[0]] if self.modreg[0] is not None else list(range(8))
+            opcode.append((EntryKind.TABLE16, [x + y for x in mod for y in reg]))
         if self.vexl in ("0", "1") or self.rexw in ("0", "1"):
             rexw = {"0": [0], "1": [1<<0], "IG": [0, 1<<0]}[self.rexw or "IG"]
             vexl = {"0": [0], "1": [1<<1], "IG": [0, 1<<1]}[self.vexl or "IG"]
@@ -445,7 +450,7 @@ def encode_table(entries):
         opc_i = opcode.opc
         if opcode.opcext:
             opc_i |= opcode.opcext << 8
-        if opcode.modreg:
+        if opcode.modreg and opcode.modreg[0] is not None:
             opc_i |= opcode.modreg[0] << 8
         opc_flags = ""
         opc_flags += ["","|OPC_0F","|OPC_0F38","|OPC_0F3A"][opcode.escape]
@@ -485,14 +490,7 @@ def encode_table(entries):
         optypes = ["", "", "", ""]
         enc = ENCODINGS[desc.encoding]
         if enc.modrm_idx:
-            if "NOMEM" in desc.flags:
-                optypes[enc.modrm_idx^3] = "r"
-            elif desc.operands[enc.modrm_idx^3].kind == OpKind.K_MEM:
-                optypes[enc.modrm_idx^3] = "m"
-            elif opcode.modreg:
-                optypes[enc.modrm_idx^3] = opcode.modreg[1]
-            else:
-                optypes[enc.modrm_idx^3] = "rm"
+            optypes[enc.modrm_idx^3] = opcode.modreg[1] if opcode.modreg else "rm"
         if enc.modreg_idx: optypes[enc.modreg_idx^3] = "r"
         if enc.vexreg_idx: optypes[enc.vexreg_idx^3] = "r"
         if enc.zeroreg_idx: optypes[enc.zeroreg_idx^3] = "r"
