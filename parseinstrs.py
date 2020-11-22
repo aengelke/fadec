@@ -213,7 +213,7 @@ class EntryKind(Enum):
 class TrieEntry(NamedTuple):
     kind: EntryKind
     items: Tuple[Optional[str]]
-    payload: Tuple[Union[int, str]]
+    descidx: Optional[int]
 
     TABLE_LENGTH = {
         EntryKind.TABLE256: 256,
@@ -227,19 +227,19 @@ class TrieEntry(NamedTuple):
     def table(cls, kind):
         return cls(kind, (None,) * cls.TABLE_LENGTH[kind], ())
     @classmethod
-    def instr(cls, payload):
-        return cls(EntryKind.INSTR, (), payload)
+    def instr(cls, descidx):
+        return cls(EntryKind.INSTR, (), descidx)
 
     @property
     def encode_length(self):
-        return len(self.payload) + len(self.items)
+        return len(self.items)
     def encode(self, encode_item) -> Tuple[Union[int, str]]:
         enc_items = (encode_item(item) if item else 0 for item in self.items)
-        return self.payload + tuple(enc_items)
+        return tuple(enc_items)
 
     def map(self, map_func):
         mapped_items = (map_func(i, v) for i, v in enumerate(self.items))
-        return TrieEntry(self.kind, tuple(mapped_items), self.payload)
+        return TrieEntry(self.kind, tuple(mapped_items), self.descidx)
     def update(self, idx, new_val):
         return self.map(lambda i, v: new_val if i == idx else v)
 
@@ -347,6 +347,7 @@ class Table:
         self.roots = ["root%d"%i for i in range(root_count)]
         for i in range(root_count):
             self.data["root%d"%i] = TrieEntry.table(EntryKind.TABLE_ROOT)
+        self.descs = []
         self.offsets = {}
         self.annotations = {}
 
@@ -375,7 +376,10 @@ class Table:
                 raise Exception("{}, have {}, want {}".format(
                                 name, self.data[tn].kind, kind))
 
-        self._update_table(tn, opcode[-1][1], name, TrieEntry.instr(instr_encoding))
+        if instr_encoding not in self.descs:
+            self.descs.append(instr_encoding)
+        desc_idx = self.descs.index(instr_encoding)
+        self._update_table(tn, opcode[-1][1], name, TrieEntry.instr(desc_idx))
 
     def deduplicate(self):
         synonyms = True
@@ -395,9 +399,12 @@ class Table:
     def calc_offsets(self):
         current = 0
         for name, entry in self.data.items():
-            self.annotations[current] = "%s(%d)" % (name, entry.kind.value)
-            self.offsets[name] = current
-            current += (entry.encode_length + 3) & ~3
+            if entry.kind == EntryKind.INSTR:
+                self.offsets[name] = entry.descidx << 2
+            else:
+                self.annotations[current] = "%s(%d)" % (name, entry.kind.value)
+                self.offsets[name] = current
+                current += (entry.encode_length + 3) & ~3
         if current >= 0x8000:
             raise Exception("maximum table size exceeded: {:x}".format(current))
 
@@ -406,7 +413,7 @@ class Table:
 
     def compile(self):
         self.calc_offsets()
-        ordered = sorted((off, self.data[k]) for k, off in self.offsets.items())
+        ordered = sorted((off, self.data[k]) for k, off in self.offsets.items() if self.data[k].encode_length)
 
         data = ()
         for off, entry in ordered:
@@ -414,7 +421,7 @@ class Table:
 
         stats = dict(Counter(entry.kind for entry in self.data.values()))
         print("%d bytes" % (2*len(data)), stats)
-        return data, self.annotations, [self.offsets[k] for k in self.roots]
+        return data, self.annotations, [self.offsets[k] for k in self.roots], self.descs
 
 def bytes_to_table(data, notes):
     strdata = tuple(d+"," if type(d) == str else "%#04x,"%d for d in data)
@@ -425,6 +432,8 @@ def bytes_to_table(data, notes):
 template = """// Auto-generated file -- do not modify!
 #if defined(FD_DECODE_TABLE_DATA)
 {hex_table}
+#elif defined(FD_DECODE_TABLE_DESCS)
+{descs}
 #elif defined(FD_DECODE_TABLE_STRTAB1)
 {mnemonic_cstr}
 #elif defined(FD_DECODE_TABLE_STRTAB2)
@@ -611,7 +620,7 @@ if __name__ == "__main__":
                     table.add_opcode(opcode_path, desc.encode(ign66), i)
 
     table.deduplicate()
-    table_data, annotations, root_offsets = table.compile()
+    table_data, annotations, root_offsets, descs = table.compile()
 
     mnemonic_tab = [0]
     for name in mnemonics:
@@ -622,6 +631,7 @@ if __name__ == "__main__":
 
     decode_table = template.format(
         hex_table=bytes_to_table(table_data, annotations),
+        descs="\n".join("{{{0},{1},{2},{3}}},".format(*desc) for desc in descs),
         mnemonic_cstr=mnemonic_cstr,
         mnemonic_offsets=",".join(str(off) for off in mnemonic_tab),
         defines="\n".join("#define " + line for line in defines),

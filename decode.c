@@ -9,12 +9,6 @@
 #define LIKELY(x) __builtin_expect((x), 1)
 #define UNLIKELY(x) __builtin_expect((x), 0)
 
-#define FD_DECODE_TABLE_DATA
-static __attribute__((aligned(16))) const uint16_t _decode_table[] = {
-#include <fadec-table.inc>
-};
-#undef FD_DECODE_TABLE_DATA
-
 // Defines FD_TABLE_OFFSET_32 and FD_TABLE_OFFSET_64, if available
 #define FD_DECODE_TABLE_DEFINES
 #include <fadec-table.inc>
@@ -39,6 +33,11 @@ typedef enum DecodeMode DecodeMode;
 
 static inline unsigned
 table_walk(unsigned cur_idx, unsigned entry_idx, unsigned* out_kind) {
+    static __attribute__((aligned(16))) const uint16_t _decode_table[] = {
+#define FD_DECODE_TABLE_DATA
+#include <fadec-table.inc>
+#undef FD_DECODE_TABLE_DATA
+    };
     unsigned entry = _decode_table[cur_idx + entry_idx];
     *out_kind = entry & ENTRY_MASK;
     return (entry & ~ENTRY_MASK) >> 1;
@@ -181,8 +180,7 @@ decode_modrm(const uint8_t* buffer, int len, DecodeMode mode, FdInstr* instr,
 struct InstrDesc
 {
     uint16_t type;
-    uint8_t operand_indices;
-    uint8_t immediate;
+    uint16_t operand_indices;
     uint16_t operand_sizes;
     uint16_t reg_types;
 } __attribute__((packed));
@@ -195,11 +193,11 @@ struct InstrDesc
 #define DESC_VEXREG_IDX(desc) ((((desc)->operand_indices >> 4) & 3) ^ 3)
 #define DESC_HAS_IMPLICIT(desc) (((desc)->operand_indices & (3 << 6)) != 0)
 #define DESC_IMPLICIT_IDX(desc) ((((desc)->operand_indices >> 6) & 3) ^ 3)
-#define DESC_IMM_CONTROL(desc) (((desc)->immediate >> 4) & 0x7)
-#define DESC_IMM_IDX(desc) (((desc)->immediate & 3) ^ 3)
-#define DESC_IMPLICIT_VAL(desc) (((desc)->immediate >> 2) & 1)
-#define DESC_LOCK(desc) (((desc)->immediate >> 3) & 1)
-#define DESC_VSIB(desc) (((desc)->immediate >> 7) & 1)
+#define DESC_IMM_CONTROL(desc) (((desc)->operand_indices >> 12) & 0x7)
+#define DESC_IMM_IDX(desc) ((((desc)->operand_indices >> 8) & 3) ^ 3)
+#define DESC_IMPLICIT_VAL(desc) (((desc)->operand_indices >> 10) & 1)
+#define DESC_LOCK(desc) (((desc)->operand_indices >> 11) & 1)
+#define DESC_VSIB(desc) (((desc)->operand_indices >> 15) & 1)
 #define DESC_OPSIZE(desc) (((desc)->operand_sizes >> 8) & 3)
 #define DESC_SIZE_FIX1(desc) (((desc)->operand_sizes >> 10) & 7)
 #define DESC_SIZE_FIX2(desc) (((desc)->operand_sizes >> 13) & 3)
@@ -391,7 +389,12 @@ prefix_end:
     if (UNLIKELY(kind != ENTRY_INSTR))
         return kind == 0 ? FD_ERR_UD : FD_ERR_PARTIAL;
 
-    struct InstrDesc* desc = (struct InstrDesc*) &_decode_table[table_idx];
+    static __attribute__((aligned(16))) const struct InstrDesc descs[] = {
+#define FD_DECODE_TABLE_DESCS
+#include <fadec-table.inc>
+#undef FD_DECODE_TABLE_DESCS
+    };
+    const struct InstrDesc* desc = &descs[table_idx >> 2];
 
     instr->type = desc->type;
     instr->flags = prefix_rep == 2 ? FD_FLAG_REP :
