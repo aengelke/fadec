@@ -276,8 +276,7 @@ struct InstrDesc
 #define DESC_IMPLICIT_VAL(desc) (((desc)->immediate >> 2) & 1)
 #define DESC_LOCK(desc) (((desc)->immediate >> 3) & 1)
 #define DESC_VSIB(desc) (((desc)->immediate >> 7) & 1)
-#define DESC_SIZE8(desc) (((desc)->operand_sizes >> 8) & 1)
-#define DESC_SIZED64(desc) (((desc)->operand_sizes >> 9) & 1)
+#define DESC_OPSIZE(desc) (((desc)->operand_sizes >> 8) & 3)
 #define DESC_SIZE_FIX1(desc) (((desc)->operand_sizes >> 10) & 7)
 #define DESC_SIZE_FIX2(desc) (((desc)->operand_sizes >> 13) & 3)
 #define DESC_INSTR_WIDTH(desc) (((desc)->operand_sizes >> 15) & 1)
@@ -411,27 +410,21 @@ fd_decode(const uint8_t* buffer, size_t len_sz, int mode_int, uintptr_t address,
 
     struct InstrDesc* desc = (struct InstrDesc*) &_decode_table[table_idx];
 
-    if (DESC_IGN66(desc))
-        prefixes &= ~PREFIX_OPSZ;
-
     instr->type = desc->type;
     instr->flags = prefixes & 0x7f;
     if (mode == DECODE_64)
         instr->flags |= FD_FLAG_64;
     instr->address = address;
 
-    uint8_t op_size = 0;
-    if (DESC_SIZE8(desc))
-        op_size = 1;
-    else if (mode == DECODE_64 && (prefixes & PREFIX_REXW))
+    unsigned op_size = 4;
+    if (DESC_OPSIZE(desc) == 2 && mode == DECODE_64) // DEF64
         op_size = 8;
-    else if (prefixes & PREFIX_OPSZ)
+    if ((prefixes & PREFIX_OPSZ) && !DESC_IGN66(desc)) // opsize override
         op_size = 2;
-    else if (mode == DECODE_64 && DESC_SIZED64(desc))
+    if (mode == DECODE_64 && (prefixes & PREFIX_REXW || DESC_OPSIZE(desc) == 3))
         op_size = 8;
-    else
-        op_size = 4;
-    // Note: operand size is updates for jumps when handling immediate operands.
+    if (DESC_OPSIZE(desc) == 1) // force byte
+        op_size = 1;
 
     uint8_t vec_size = 16;
     if (prefixes & PREFIX_VEXL)
@@ -551,10 +544,6 @@ fd_decode(const uint8_t* buffer, size_t len_sz, int mode_int, uintptr_t address,
         // 6/7 = offset, operand-sized/8 bit (used for jumps/calls)
         int imm_byte = imm_control & 1;
         int imm_offset = imm_control & 2;
-        // Jumps are always 8 or 32 bit on x86-64, and the operand size is
-        // forced to 64 bit.
-        if (mode == DECODE_64 && UNLIKELY(imm_offset))
-            op_size = 8;
 
         uint8_t imm_size;
         if (imm_byte)

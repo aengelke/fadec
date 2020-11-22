@@ -204,6 +204,11 @@ main(int argc, char** argv)
     TEST64("\x66\xeb\xff", "[JMP off8:rip+0xffffffffffffffff]");
     TEST("\x66\xe9\x00", "PARTIAL");
     TEST("\x66\xe9", "PARTIAL");
+    TEST32("\xc7\xf8\xd3\x9c\xff\xff", "[XBEGIN off4:eip+0xffff9cd3]");
+    TEST32("\x66\xc7\xf8\xd3\x9c", "[XBEGIN off4:eip+0xffff9cd3]");
+    TEST64("\xc7\xf8\xd3\x9c\xff\xff", "[XBEGIN off8:rip+0xffffffffffff9cd3]");
+    TEST64("\x66\xc7\xf8\xd3\x9c", "[XBEGIN off8:rip+0xffffffffffff9cd3]");
+
 
     TEST("\xa5", "[MOVS_4]");
     TEST("\x66\xa5", "[MOVS_2]");
@@ -216,10 +221,14 @@ main(int argc, char** argv)
     TEST64("\x48\x0f\xbf\xc2", "[MOVSX reg8:r0 reg2:r2]");
     TEST64("\x48\x63\xc2", "[MOVSX reg8:r0 reg4:r2]");
 
-    TEST("\x66\xc3", "[RET_2]");
-    TEST("\x66\xc2\x00\x00", "[RET_2 imm2:0x0]");
-    TEST("\x66\xc2\x0d\x00", "[RET_2 imm2:0xd]");
-    TEST("\x66\xc2\x0d\xff", "[RET_2 imm2:0xff0d]");
+    TEST32("\x66\xc3", "[RET_2]");
+    TEST32("\x66\xc2\x00\x00", "[RET_2 imm2:0x0]");
+    TEST32("\x66\xc2\x0d\x00", "[RET_2 imm2:0xd]");
+    TEST32("\x66\xc2\x0d\xff", "[RET_2 imm2:0xff0d]");
+    TEST64("\x66\xc3", "[RET_8]");
+    TEST64("\x66\xc2\x00\x00", "[RET_8 imm2:0x0]");
+    TEST64("\x66\xc2\x0d\x00", "[RET_8 imm2:0xd]");
+    TEST64("\x66\xc2\x0d\xff", "[RET_8 imm2:0xff0d]");
     TEST32("\xc3", "[RET_4]");
     TEST32("\xc2\x00\x00", "[RET_4 imm2:0x0]");
     TEST32("\xc2\x0d\x00", "[RET_4 imm2:0xd]");

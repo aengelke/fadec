@@ -39,8 +39,7 @@ InstrFlags = bitstruct("InstrFlags", [
     "op1_size:2",
     "op2_size:2",
     "op3_size:2",
-    "size8:1",
-    "sized64:1",
+    "opsize:2",
     "size_fix1:3",
     "size_fix2:2",
     "instr_width:1",
@@ -106,6 +105,7 @@ OPKINDS = {
     "IMM8": OpKind(1, OpKind.K_IMM),
     "IMM16": OpKind(2, OpKind.K_IMM),
     "IMM32": OpKind(4, OpKind.K_IMM),
+    "IMM64": OpKind(8, OpKind.K_IMM),
     "GP": OpKind(OpKind.SZ_OP, "GP"),
     "GP8": OpKind(1, "GP"),
     "GP16": OpKind(2, "GP"),
@@ -179,8 +179,9 @@ class InstrDesc(NamedTuple):
                 raise Exception("invalid regty for op 3, must be VEC")
 
         # Miscellaneous Flags
-        if "DEF64" in self.flags:       flags.sized64 = 1
-        if "SIZE_8" in self.flags:      flags.size8 = 1
+        if "SIZE_8" in self.flags:      flags.opsize = 1
+        if "DEF64" in self.flags:       flags.opsize = 2
+        if "FORCE64" in self.flags:     flags.opsize = 3
         if "INSTR_WIDTH" in self.flags: flags.instr_width = 1
         if "LOCK" in self.flags:        flags.lock = 1
         if "VSIB" in self.flags:        flags.vsib = 1
@@ -191,7 +192,7 @@ class InstrDesc(NamedTuple):
         if flags.imm_control >= 4:
             imm_op = next(op for op in self.operands if op.kind == OpKind.K_IMM)
             if ("IMM_8" in self.flags or imm_op.size == 1 or
-                (imm_op.size == OpKind.SZ_OP and flags.size8)):
+                (imm_op.size == OpKind.SZ_OP and "SIZE_8" in self.flags)):
                 flags.imm_control |= 1
 
         enc = flags._encode(6)
@@ -487,6 +488,10 @@ def encode_table(entries):
         prepend_opsize = max(opsizes) > 0 and not separate_opsize
         prepend_vecsize = hasvex and max(vecsizes) > 0 and not separate_opsize
 
+        if "FORCE64" in desc.flags:
+            opsizes = {64}
+            prepend_opsize = False
+
         optypes = ["", "", "", ""]
         enc = ENCODINGS[desc.encoding]
         if enc.modrm_idx:
@@ -536,7 +541,7 @@ def encode_table(entries):
             tys_i = sum(ty << (4*i) for i, ty in enumerate(tys))
             opc_s = hex(opc_i) + opc_flags + prefix[1]
             if opsize == 16: opc_s += "|OPC_66"
-            if opsize == 64 and "DEF64" not in desc.flags: opc_s += "|OPC_REXW"
+            if opsize == 64 and "DEF64" not in desc.flags and "FORCE64" not in desc.flags: opc_s += "|OPC_REXW"
 
             # Construct mnemonic name
             mnem_name = {"MOVABS": "MOV", "XCHG_NOP": "XCHG"}.get(desc.mnemonic, desc.mnemonic)

@@ -83,22 +83,22 @@
 6d                    NP    -      -      -      -      INS INSTR_WIDTH ENC_REP
 6e                    NP    -      -      -      -      OUTS SIZE_8 INSTR_WIDTH ENC_REP
 6f                    NP    -      -      -      -      OUTS INSTR_WIDTH ENC_REP
-70                    D     IMM    -      -      -      JO DEF64 IMM_8
-71                    D     IMM    -      -      -      JNO DEF64 IMM_8
-72                    D     IMM    -      -      -      JC DEF64 IMM_8
-73                    D     IMM    -      -      -      JNC DEF64 IMM_8
-74                    D     IMM    -      -      -      JZ DEF64 IMM_8
-75                    D     IMM    -      -      -      JNZ DEF64 IMM_8
-76                    D     IMM    -      -      -      JBE DEF64 IMM_8
-77                    D     IMM    -      -      -      JA DEF64 IMM_8
-78                    D     IMM    -      -      -      JS DEF64 IMM_8
-79                    D     IMM    -      -      -      JNS DEF64 IMM_8
-7a                    D     IMM    -      -      -      JP DEF64 IMM_8
-7b                    D     IMM    -      -      -      JNP DEF64 IMM_8
-7c                    D     IMM    -      -      -      JL DEF64 IMM_8
-7d                    D     IMM    -      -      -      JGE DEF64 IMM_8
-7e                    D     IMM    -      -      -      JLE DEF64 IMM_8
-7f                    D     IMM    -      -      -      JG DEF64 IMM_8
+70                    D     IMM    -      -      -      JO FORCE64 IMM_8
+71                    D     IMM    -      -      -      JNO FORCE64 IMM_8
+72                    D     IMM    -      -      -      JC FORCE64 IMM_8
+73                    D     IMM    -      -      -      JNC FORCE64 IMM_8
+74                    D     IMM    -      -      -      JZ FORCE64 IMM_8
+75                    D     IMM    -      -      -      JNZ FORCE64 IMM_8
+76                    D     IMM    -      -      -      JBE FORCE64 IMM_8
+77                    D     IMM    -      -      -      JA FORCE64 IMM_8
+78                    D     IMM    -      -      -      JS FORCE64 IMM_8
+79                    D     IMM    -      -      -      JNS FORCE64 IMM_8
+7a                    D     IMM    -      -      -      JP FORCE64 IMM_8
+7b                    D     IMM    -      -      -      JNP FORCE64 IMM_8
+7c                    D     IMM    -      -      -      JL FORCE64 IMM_8
+7d                    D     IMM    -      -      -      JGE FORCE64 IMM_8
+7e                    D     IMM    -      -      -      JLE FORCE64 IMM_8
+7f                    D     IMM    -      -      -      JG FORCE64 IMM_8
 80/0                  MI    GP     IMM    -      -      ADD SIZE_8 LOCK
 80/1                  MI    GP     IMM    -      -      OR SIZE_8 LOCK
 80/2                  MI    GP     IMM    -      -      ADC SIZE_8 LOCK
@@ -187,14 +187,15 @@ c1/4                  MI    GP     IMM8   -      -      SHL
 c1/5                  MI    GP     IMM8   -      -      SHR
 c1/7                  MI    GP     IMM8   -      -      SAR
 # RET immediate size handled in code
-c2                    I     IMM16  -      -      -      RET DEF64 INSTR_WIDTH
-c3                    NP    -      -      -      -      RET DEF64 INSTR_WIDTH
+c2                    I     IMM16  -      -      -      RET FORCE64 INSTR_WIDTH
+c3                    NP    -      -      -      -      RET FORCE64 INSTR_WIDTH
 c4/m                  RM    GP     MEMZ   -      -      LES ONLY32
 c5/m                  RM    GP     MEMZ   -      -      LDS ONLY32
 c6/0                  MI    GP     IMM    -      -      MOV SIZE_8
 c6f8                  I     IMM8   -      -      -      XABORT
 c7/0                  MI    GP     IMM    -      -      MOV
-c7f8                  D     IMM    -      -      -      XBEGIN
+c7f8                  D     IMM32  -      -      -      XBEGIN ONLY32
+c7f8                  D     IMM64  -      -      -      XBEGIN ONLY64
 # ENTER immediate handled in code
 c8                    I     IMM32  -      -      -      ENTER DEF64 INSTR_WIDTH
 c9                    NP    -      -      -      -      LEAVE DEF64 INSTR_WIDTH
@@ -238,18 +239,18 @@ d5                    I     IMM    -      -      -      AAD ONLY32 SIZE_8
 #d6 unused
 d7                    NP    -      -      -      -      XLATB
 #d8-df FPU Escape
-e0                    D     IMM    -      -      -      LOOPNZ DEF64 IMM_8
-e1                    D     IMM    -      -      -      LOOPZ DEF64 IMM_8
-e2                    D     IMM    -      -      -      LOOP DEF64 IMM_8
-e3                    D     IMM    -      -      -      JCXZ DEF64 IMM_8
+e0                    D     IMM    -      -      -      LOOPNZ FORCE64 IMM_8
+e1                    D     IMM    -      -      -      LOOPZ FORCE64 IMM_8
+e2                    D     IMM    -      -      -      LOOP FORCE64 IMM_8
+e3                    D     IMM    -      -      -      JCXZ FORCE64 IMM_8
 e4                    IA    GP     IMM8   -      -      IN SIZE_8
 e5                    IA    GP     IMM8   -      -      IN
 e6                    IA    GP     IMM8   -      -      OUT SIZE_8
 e7                    IA    GP     IMM8   -      -      OUT
-e8                    D     IMM    -      -      -      CALL DEF64
-e9                    D     IMM    -      -      -      JMP DEF64
+e8                    D     IMM    -      -      -      CALL FORCE64
+e9                    D     IMM    -      -      -      JMP FORCE64
 #ea JMPf TODO, ONLY32
-eb                    D     IMM    -      -      -      JMP DEF64 IMM_8
+eb                    D     IMM    -      -      -      JMP FORCE64 IMM_8
 ec                    NP    -      -      -      -      IN SIZE_8 INSTR_WIDTH
 ed                    NP    -      -      -      -      IN INSTR_WIDTH
 ee                    NP    -      -      -      -      OUT SIZE_8 INSTR_WIDTH
@@ -284,9 +285,9 @@ fe/0                  M     GP     -      -      -      INC SIZE_8 LOCK
 fe/1                  M     GP     -      -      -      DEC SIZE_8 LOCK
 ff/0                  M     GP     -      -      -      INC LOCK
 ff/1                  M     GP     -      -      -      DEC LOCK
-ff/2                  M     GP     -      -      -      CALL DEF64
+ff/2                  M     GP     -      -      -      CALL FORCE64
 ff/3m                 M     MEMZ   -      -      -      CALLF
-ff/4                  M     GP     -      -      -      JMP DEF64
+ff/4                  M     GP     -      -      -      JMP FORCE64
 ff/5m                 M     MEMZ   -      -      -      JMPF
 ff/6                  M     GP     -      -      -      PUSH DEF64
 0f00/0                M     GP16   -      -      -      SLDT
@@ -377,22 +378,22 @@ NP.0f37               NP    -      -      -      -      GETSEC
 0f4d                  RM    GP     GP     -      -      CMOVGE
 0f4e                  RM    GP     GP     -      -      CMOVLE
 0f4f                  RM    GP     GP     -      -      CMOVG
-0f80                  D     IMM    -      -      -      JO DEF64
-0f81                  D     IMM    -      -      -      JNO DEF64
-0f82                  D     IMM    -      -      -      JC DEF64
-0f83                  D     IMM    -      -      -      JNC DEF64
-0f84                  D     IMM    -      -      -      JZ DEF64
-0f85                  D     IMM    -      -      -      JNZ DEF64
-0f86                  D     IMM    -      -      -      JBE DEF64
-0f87                  D     IMM    -      -      -      JA DEF64
-0f88                  D     IMM    -      -      -      JS DEF64
-0f89                  D     IMM    -      -      -      JNS DEF64
-0f8a                  D     IMM    -      -      -      JP DEF64
-0f8b                  D     IMM    -      -      -      JNP DEF64
-0f8c                  D     IMM    -      -      -      JL DEF64
-0f8d                  D     IMM    -      -      -      JGE DEF64
-0f8e                  D     IMM    -      -      -      JLE DEF64
-0f8f                  D     IMM    -      -      -      JG DEF64
+0f80                  D     IMM    -      -      -      JO FORCE64
+0f81                  D     IMM    -      -      -      JNO FORCE64
+0f82                  D     IMM    -      -      -      JC FORCE64
+0f83                  D     IMM    -      -      -      JNC FORCE64
+0f84                  D     IMM    -      -      -      JZ FORCE64
+0f85                  D     IMM    -      -      -      JNZ FORCE64
+0f86                  D     IMM    -      -      -      JBE FORCE64
+0f87                  D     IMM    -      -      -      JA FORCE64
+0f88                  D     IMM    -      -      -      JS FORCE64
+0f89                  D     IMM    -      -      -      JNS FORCE64
+0f8a                  D     IMM    -      -      -      JP FORCE64
+0f8b                  D     IMM    -      -      -      JNP FORCE64
+0f8c                  D     IMM    -      -      -      JL FORCE64
+0f8d                  D     IMM    -      -      -      JGE FORCE64
+0f8e                  D     IMM    -      -      -      JLE FORCE64
+0f8f                  D     IMM    -      -      -      JG FORCE64
 0f90                  M     GP     -      -      -      SETO SIZE_8
 0f91                  M     GP     -      -      -      SETNO SIZE_8
 0f92                  M     GP     -      -      -      SETC SIZE_8

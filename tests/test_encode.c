@@ -81,7 +81,6 @@ main(int argc, char** argv)
     // TEST("\x66\x90", FE_XCHG16rr, FE_AX, FE_AX);
     TEST("\xc2\x00\x00", FE_RETi, 0);
     TEST("\xff\xd0", FE_CALLr, FE_AX);
-    TEST("\x66\xff\xd0", FE_CALL16r, FE_AX);
     TEST("\x05\x00\x01\x00\x00", FE_ADD32ri, FE_AX, 0x100);
     TEST("\x66\x05\x00\x01", FE_ADD16ri, FE_AX, 0x100);
     TEST("\xb8\x05\x00\x01\x00", FE_MOV32ri, FE_AX, 0x10005);
