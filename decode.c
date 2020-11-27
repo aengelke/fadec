@@ -128,24 +128,26 @@ decode_modrm(const uint8_t* buffer, int len, DecodeMode mode, FdInstr* instr,
         return FD_ERR_UD;
 
     // SIB byte
-    uint8_t scale = 0;
-    uint8_t idx = 4;
     uint8_t base = rm;
     if (rm == 4)
     {
         if (UNLIKELY(off >= len))
             return FD_ERR_PARTIAL;
         uint8_t sib = buffer[off++];
-        scale = (sib & 0xc0) >> 6;
-        idx = (sib & 0x38) >> 3;
+        unsigned scale = (sib & 0xc0) >> 6;
+        unsigned idx = (sib & 0x38) >> 3;
 #if defined(ARCH_X86_64)
         idx += prefixes & PREFIX_REXX ? 8 : 0;
 #endif
         base = sib & 0x07;
+        out_o1->misc = (scale << 6) | (!vsib && idx == 4 ? FD_REG_NONE : idx);
+    }
+    else
+    {
+        out_o1->misc = FD_REG_NONE;
     }
 
     out_o1->type = FD_OT_MEM;
-    out_o1->misc = (scale << 6) | (!vsib && idx == 4 ? FD_REG_NONE : idx);
 
     // RIP-relative addressing only if SIB-byte is absent
     if (mod == 0 && rm == 5 && mode == DECODE_64)
@@ -399,8 +401,6 @@ prefix_end:
     instr->type = desc->type;
     instr->flags = prefix_rep == 2 ? FD_FLAG_REP :
                    prefix_rep == 3 ? FD_FLAG_REPNZ : 0;
-    if (prefix_lock)
-        instr->flags |= FD_FLAG_LOCK;
     if (mode == DECODE_64)
         instr->flags |= FD_FLAG_64;
     instr->address = address;
@@ -588,9 +588,11 @@ prefix_end:
         }
     }
 
-    if (UNLIKELY(prefix_lock))
+    if (UNLIKELY(prefix_lock)) {
         if (!DESC_LOCK(desc) || instr->operands[0].type != FD_OT_MEM)
             return FD_ERR_UD;
+        instr->flags |= FD_FLAG_LOCK;
+    }
 
     uint8_t operand_sizes[4] = {
         1 << DESC_SIZE_FIX1(desc) >> 1, 1 << DESC_SIZE_FIX2(desc), op_size, vec_size
