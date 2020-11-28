@@ -605,11 +605,19 @@ prefix_end:
             break;
 
         operand->size = operand_sizes[(desc->operand_sizes >> 2 * i) & 3];
+    }
 
-        // if (operand->type == FD_OT_REG && operand->misc == FD_RT_GPL &&
-        //     !(prefixes & PREFIX_REX) && operand->size == 1 && operand->reg >= 4)
-        if (!(prefix_rex & PREFIX_REX) && (LOAD_LE_4(operand) & 0xfffcffff) == 0x01040101)
-            operand->misc = FD_RT_GPH;
+    if (UNLIKELY(op_size == 1 || instr->type == FDI_MOVSX || instr->type == FDI_MOVZX)) {
+        if (!(prefix_rex & PREFIX_REX)) {
+            for (int i = 0; i < 2; i++) {
+                FdOp* operand = &instr->operands[i];
+                if (operand->type == FD_OT_NONE)
+                    break;
+                if (operand->type == FD_OT_REG && operand->misc == FD_RT_GPL &&
+                    operand->size == 1 && operand->reg >= 4)
+                    operand->misc = FD_RT_GPH;
+            }
+        }
     }
 
     instr->size = off;

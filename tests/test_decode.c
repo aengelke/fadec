@@ -280,6 +280,7 @@ main(int argc, char** argv)
     TEST64("\x66\x0f\x50\xc1", "[SSE_MOVMSKPD reg8:r0 reg16:r1]");
     TEST("\x66\x0f\xc6\xc0\x01", "[SSE_SHUFPD reg16:r0 reg16:r0 imm1:0x1]");
     TEST("\x66\x0f\x71\xd0\x01", "[SSE_PSRLW reg16:r0 imm1:0x1]");
+    TEST("\x66\x0f\x3a\x20\xc4\x01", "[SSE_PINSRB reg16:r0 reg1:r4 imm1:0x1]");
     TEST("\x66\x0f\x71\x10\x01", "UD");
 
     TEST32("\xc4\x00", "[LES reg4:r0 mem0:r0]");
