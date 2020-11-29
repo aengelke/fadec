@@ -89,11 +89,7 @@ decode_modrm(const uint8_t* buffer, int len, DecodeMode mode, FdInstr* instr,
             reg_idx += prefixes & PREFIX_REXR ? 8 : 0;
 #endif
 
-        if (is_seg && reg_idx >= 6)
-            return FD_ERR_UD;
-        else if (UNLIKELY(instr->type == FDI_MOV_G2S) && reg_idx == 1)
-            return FD_ERR_UD;
-        else if (is_cr && (~0x011d >> reg_idx) & 1)
+        if (is_cr && (~0x011d >> reg_idx) & 1)
             return FD_ERR_UD;
         else if (is_dr && reg_idx >= 8)
             return FD_ERR_UD;

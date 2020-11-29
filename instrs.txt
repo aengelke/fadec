@@ -139,9 +139,18 @@
 89                    MR    GP     GP     -      -      MOV
 8a                    RM    GP     GP     -      -      MOV SIZE_8
 8b                    RM    GP     GP     -      -      MOV
-8c                    MR    GP16   SREG   -      -      MOV_S2G
+8c/0                  MR    GP16   SREG   -      -      MOV_S2G
+8c/1                  MR    GP16   SREG   -      -      MOV_S2G
+8c/2                  MR    GP16   SREG   -      -      MOV_S2G
+8c/3                  MR    GP16   SREG   -      -      MOV_S2G
+8c/4                  MR    GP16   SREG   -      -      MOV_S2G
+8c/5                  MR    GP16   SREG   -      -      MOV_S2G
 8d/m                  RM    GP     MEMZ   -      -      LEA
-8e                    RM    SREG   GP16   -      -      MOV_G2S
+8e/0                  RM    SREG   GP16   -      -      MOV_G2S
+8e/2                  RM    SREG   GP16   -      -      MOV_G2S
+8e/3                  RM    SREG   GP16   -      -      MOV_G2S
+8e/4                  RM    SREG   GP16   -      -      MOV_G2S
+8e/5                  RM    SREG   GP16   -      -      MOV_G2S
 8f/0                  M     GP     -      -      -      POP DEF64
 # Against frequent belief, only, XCHG (r/e)AX, (r)AX with 90 is NOP.
 # As a lacking REX.B cannot be specified here, this is hardcoded.

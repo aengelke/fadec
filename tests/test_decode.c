@@ -104,6 +104,8 @@ main(int argc, char** argv)
     TEST64("\x44\x0f\x21\x00", "UD"); // dr8
     TEST("\x8c\xc0", "[MOV_S2G reg2:r0 reg2:r0]");
     TEST64("\x44\x8c\xc0", "[MOV_S2G reg2:r0 reg2:r0]");
+    TEST64("\x44\x8c\xf0", "UD"); // no segment register 6
+    TEST64("\x44\x8c\xf8", "UD"); // no segment register 7
     TEST("\x8e\xc0", "[MOV_G2S reg2:r0 reg2:r0]");
     TEST("\x8e\xc8", "UD"); // No mov cs, eax
     TEST("\xd8\xc1", "[FADD reg0:r0 reg0:r1]");
