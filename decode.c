@@ -59,122 +59,6 @@ enum
     PREFIX_VEXL = 0x10,
 };
 
-static
-int
-decode_modrm(const uint8_t* buffer, int len, DecodeMode mode, FdInstr* instr,
-             unsigned prefixes, bool vsib, FdOp* out_o1, FdOp* out_o2)
-{
-    int off = 0;
-
-    if (UNLIKELY(off >= len))
-    {
-        return FD_ERR_PARTIAL;
-    }
-
-    uint8_t modrm = buffer[off++];
-    uint8_t mod = (modrm & 0xc0) >> 6;
-    uint8_t mod_reg = (modrm & 0x38) >> 3;
-    uint8_t rm = modrm & 0x07;
-
-    bool is_seg = UNLIKELY(instr->type == FDI_MOV_G2S || instr->type == FDI_MOV_S2G);
-    bool is_cr = UNLIKELY(instr->type == FDI_MOV_CR);
-    bool is_dr = UNLIKELY(instr->type == FDI_MOV_DR);
-
-    // Operand 2 may be NULL when reg field is used as opcode extension
-    if (out_o2)
-    {
-        uint8_t reg_idx = mod_reg;
-#if defined(ARCH_X86_64)
-        if (!is_seg && !UNLIKELY(out_o2->misc == FD_RT_MMX))
-            reg_idx += prefixes & PREFIX_REXR ? 8 : 0;
-#endif
-
-        if (is_cr && (~0x011d >> reg_idx) & 1)
-            return FD_ERR_UD;
-        else if (is_dr && reg_idx >= 8)
-            return FD_ERR_UD;
-
-        out_o2->type = FD_OT_REG;
-        out_o2->reg = reg_idx;
-        if (is_cr)
-            out_o2->misc = FD_RT_CR;
-        else if (is_dr)
-            out_o2->misc = FD_RT_DR;
-        else if (is_seg)
-            out_o2->misc = FD_RT_SEG;
-    }
-
-    if (mod == 3 || is_cr || is_dr)
-    {
-        if (out_o1->misc == FD_RT_MEM)
-            return FD_ERR_UD;
-
-        uint8_t reg_idx = rm;
-#if defined(ARCH_X86_64)
-        if (LIKELY(out_o1->misc == FD_RT_GPL || out_o1->misc == FD_RT_VEC))
-            reg_idx += prefixes & PREFIX_REXB ? 8 : 0;
-#endif
-        out_o1->type = FD_OT_REG;
-        out_o1->reg = reg_idx;
-        return off;
-    }
-
-    // VSIB must have a memory operand with SIB byte.
-    if (UNLIKELY(vsib) && rm != 4)
-        return FD_ERR_UD;
-
-    // SIB byte
-    uint8_t base = rm;
-    if (rm == 4)
-    {
-        if (UNLIKELY(off >= len))
-            return FD_ERR_PARTIAL;
-        uint8_t sib = buffer[off++];
-        unsigned scale = (sib & 0xc0) >> 6;
-        unsigned idx = (sib & 0x38) >> 3;
-#if defined(ARCH_X86_64)
-        idx += prefixes & PREFIX_REXX ? 8 : 0;
-#endif
-        base = sib & 0x07;
-        out_o1->misc = (scale << 6) | (!vsib && idx == 4 ? FD_REG_NONE : idx);
-    }
-    else
-    {
-        out_o1->misc = FD_REG_NONE;
-    }
-
-    out_o1->type = FD_OT_MEM;
-
-    // RIP-relative addressing only if SIB-byte is absent
-    if (mod == 0 && rm == 5 && mode == DECODE_64)
-        out_o1->reg = FD_REG_IP;
-    else if (mod == 0 && base == 5)
-        out_o1->reg = FD_REG_NONE;
-    else
-        out_o1->reg = base + (prefixes & PREFIX_REXB ? 8 : 0);
-
-    if (mod == 1)
-    {
-        if (UNLIKELY(off + 1 > len))
-            return FD_ERR_PARTIAL;
-        instr->disp = (int8_t) LOAD_LE_1(&buffer[off]);
-        off += 1;
-    }
-    else if (mod == 2 || (mod == 0 && base == 5))
-    {
-        if (UNLIKELY(off + 4 > len))
-            return FD_ERR_PARTIAL;
-        instr->disp = (int32_t) LOAD_LE_4(&buffer[off]);
-        off += 4;
-    }
-    else
-    {
-        instr->disp = 0;
-    }
-
-    return off;
-}
-
 struct InstrDesc
 {
     uint16_t type;
@@ -441,17 +325,114 @@ prefix_end:
 
     if (DESC_HAS_MODRM(desc))
     {
-        FdOp* operand1 = &instr->operands[DESC_MODRM_IDX(desc)];
-        FdOp* operand2 = NULL;
-        if (DESC_HAS_MODREG(desc))
-            operand2 = &instr->operands[DESC_MODREG_IDX(desc)];
+        if (UNLIKELY(off >= len))
+            return FD_ERR_PARTIAL;
+        unsigned modrm = buffer[off++];
+        unsigned mod = (modrm & 0xc0) >> 6;
+        unsigned mod_reg = (modrm & 0x38) >> 3;
+        unsigned rm = modrm & 0x07;
 
-        int retval = decode_modrm(buffer + off, len - off, mode, instr,
-                                  prefix_rex, DESC_VSIB(desc), operand1,
-                                  operand2);
-        if (UNLIKELY(retval < 0))
-            return retval;
-        off += retval;
+        bool is_seg = UNLIKELY(instr->type == FDI_MOV_G2S || instr->type == FDI_MOV_S2G);
+        bool is_cr = UNLIKELY(instr->type == FDI_MOV_CR);
+        bool is_dr = UNLIKELY(instr->type == FDI_MOV_DR);
+
+        if (DESC_HAS_MODREG(desc))
+        {
+            FdOp* op_modreg = &instr->operands[DESC_MODREG_IDX(desc)];
+            unsigned reg_idx = mod_reg;
+#if defined(ARCH_X86_64)
+            if (!is_seg && !UNLIKELY(op_modreg->misc == FD_RT_MMX))
+                reg_idx += prefix_rex & PREFIX_REXR ? 8 : 0;
+#endif
+
+            if (is_cr && (~0x011d >> reg_idx) & 1)
+                return FD_ERR_UD;
+            else if (is_dr && reg_idx >= 8)
+                return FD_ERR_UD;
+
+            op_modreg->type = FD_OT_REG;
+            op_modreg->reg = reg_idx;
+            if (is_cr)
+                op_modreg->misc = FD_RT_CR;
+            else if (is_dr)
+                op_modreg->misc = FD_RT_DR;
+            else if (is_seg)
+                op_modreg->misc = FD_RT_SEG;
+        }
+
+        FdOp* op_modrm = &instr->operands[DESC_MODRM_IDX(desc)];
+
+        if (mod == 3 || is_cr || is_dr)
+        {
+            if (op_modrm->misc == FD_RT_MEM)
+                return FD_ERR_UD;
+
+            uint8_t reg_idx = rm;
+#if defined(ARCH_X86_64)
+            if (LIKELY(op_modrm->misc == FD_RT_GPL || op_modrm->misc == FD_RT_VEC))
+                reg_idx += prefix_rex & PREFIX_REXB ? 8 : 0;
+#endif
+            op_modrm->type = FD_OT_REG;
+            op_modrm->reg = reg_idx;
+        }
+        else
+        {
+            bool vsib = UNLIKELY(DESC_VSIB(desc));
+
+            // SIB byte
+            uint8_t base = rm;
+            if (rm == 4)
+            {
+                if (UNLIKELY(off >= len))
+                    return FD_ERR_PARTIAL;
+                uint8_t sib = buffer[off++];
+                unsigned scale = (sib & 0xc0) >> 6;
+                unsigned idx = (sib & 0x38) >> 3;
+#if defined(ARCH_X86_64)
+                idx += prefix_rex & PREFIX_REXX ? 8 : 0;
+#endif
+                base = sib & 0x07;
+                if (!vsib && idx == 4)
+                    idx = FD_REG_NONE;
+                op_modrm->misc = (scale << 6) | idx;
+            }
+            else
+            {
+                // VSIB must have a memory operand with SIB byte.
+                if (vsib)
+                    return FD_ERR_UD;
+                op_modrm->misc = FD_REG_NONE;
+            }
+
+            op_modrm->type = FD_OT_MEM;
+
+            // RIP-relative addressing only if SIB-byte is absent
+            if (mod == 0 && rm == 5 && mode == DECODE_64)
+                op_modrm->reg = FD_REG_IP;
+            else if (mod == 0 && base == 5)
+                op_modrm->reg = FD_REG_NONE;
+            else
+                op_modrm->reg = base + (prefix_rex & PREFIX_REXB ? 8 : 0);
+
+            if (mod == 1)
+            {
+                if (UNLIKELY(off + 1 > len))
+                    return FD_ERR_PARTIAL;
+                instr->disp = (int8_t) LOAD_LE_1(&buffer[off]);
+                off += 1;
+            }
+            else if (mod == 2 || (mod == 0 && base == 5))
+            {
+                if (UNLIKELY(off + 4 > len))
+                    return FD_ERR_PARTIAL;
+                instr->disp = (int32_t) LOAD_LE_4(&buffer[off]);
+                off += 4;
+            }
+            else
+            {
+                instr->disp = 0;
+            }
+        }
     }
     else if (DESC_HAS_MODREG(desc))
     {
