@@ -380,7 +380,7 @@ prefix_end:
 
     // For VEX prefix, we have to distinguish between VEX.W and VEX.L which may
     // be part of the opcode.
-    if (kind == ENTRY_TABLE_VEX)
+    if (UNLIKELY(kind == ENTRY_TABLE_VEX))
     {
         uint8_t index = 0;
         index |= prefix_rex & PREFIX_REXW ? (1 << 0) : 0;
@@ -405,15 +405,16 @@ prefix_end:
         instr->flags |= FD_FLAG_64;
     instr->address = address;
 
-    unsigned op_size = 4;
-    if (DESC_OPSIZE(desc) == 2 && mode == DECODE_64) // DEF64
-        op_size = 8;
-    if (prefix_66 && !DESC_IGN66(desc)) // opsize override
-        op_size = 2;
-    if (mode == DECODE_64 && (prefix_rex & PREFIX_REXW || DESC_OPSIZE(desc) == 3))
-        op_size = 8;
-    if (DESC_OPSIZE(desc) == 1) // force byte
+    unsigned op_size;
+    if (DESC_OPSIZE(desc) == 1)
         op_size = 1;
+    else if (mode == DECODE_64)
+        op_size = ((prefix_rex & PREFIX_REXW) || DESC_OPSIZE(desc) == 3) ? 8 :
+                                UNLIKELY(prefix_66 && !DESC_IGN66(desc)) ? 2 :
+                                                       DESC_OPSIZE(desc) ? 8 :
+                                                                           4;
+    else
+        op_size = UNLIKELY(prefix_66 && !DESC_IGN66(desc)) ? 2 : 4;
 
     uint8_t vec_size = 16;
     if (prefix_rex & PREFIX_VEXL)
@@ -541,13 +542,10 @@ prefix_end:
             imm_size = 2;
         else if (UNLIKELY(instr->type == FDI_ENTER))
             imm_size = 3;
-        else if (op_size == 2)
-            imm_size = 2;
-        else if (mode == DECODE_64 && (prefix_rex & PREFIX_REXW) &&
-                 instr->type == FDI_MOVABS)
-            imm_size = 8;
+        else if (instr->type == FDI_MOVABS)
+            imm_size = op_size;
         else
-            imm_size = 4;
+            imm_size = op_size == 2 ? 2 : 4;
 
         if (UNLIKELY(off + imm_size > len))
             return FD_ERR_PARTIAL;
