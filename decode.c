@@ -98,10 +98,10 @@ fd_decode(const uint8_t* buffer, size_t len_sz, int mode_int, uintptr_t address,
     unsigned kind = ENTRY_TABLE_ROOT;
     switch (mode_int)
     {
-#if defined(ARCH_386)
+#if defined(FD_TABLE_OFFSET_32)
     case 32: table_idx = FD_TABLE_OFFSET_32; mode = DECODE_32; break;
 #endif
-#if defined(ARCH_X86_64)
+#if defined(FD_TABLE_OFFSET_64)
     case 64: table_idx = FD_TABLE_OFFSET_64; mode = DECODE_64; break;
 #endif
     default: return FD_ERR_INTERNAL;
@@ -118,7 +118,6 @@ fd_decode(const uint8_t* buffer, size_t len_sz, int mode_int, uintptr_t address,
     int rex_off = -1;
     instr->segment = FD_REG_NONE;
 
-#if defined(ARCH_386)
     if (mode == DECODE_32) {
         while (LIKELY(off < len))
         {
@@ -142,8 +141,6 @@ fd_decode(const uint8_t* buffer, size_t len_sz, int mode_int, uintptr_t address,
             off++;
         }
     }
-#endif
-#if defined(ARCH_X86_64)
     if (mode == DECODE_64) {
         while (LIKELY(off < len))
         {
@@ -171,7 +168,6 @@ fd_decode(const uint8_t* buffer, size_t len_sz, int mode_int, uintptr_t address,
             off++;
         }
     }
-#endif
 
 prefix_end:
     // REX prefix is only considered if it is the last prefix.
@@ -340,10 +336,8 @@ prefix_end:
         {
             FdOp* op_modreg = &instr->operands[DESC_MODREG_IDX(desc)];
             unsigned reg_idx = mod_reg;
-#if defined(ARCH_X86_64)
             if (!is_seg && !UNLIKELY(op_modreg->misc == FD_RT_MMX))
                 reg_idx += prefix_rex & PREFIX_REXR ? 8 : 0;
-#endif
 
             if (is_cr && (~0x011d >> reg_idx) & 1)
                 return FD_ERR_UD;
@@ -368,10 +362,8 @@ prefix_end:
                 return FD_ERR_UD;
 
             uint8_t reg_idx = rm;
-#if defined(ARCH_X86_64)
             if (LIKELY(op_modrm->misc == FD_RT_GPL || op_modrm->misc == FD_RT_VEC))
                 reg_idx += prefix_rex & PREFIX_REXB ? 8 : 0;
-#endif
             op_modrm->type = FD_OT_REG;
             op_modrm->reg = reg_idx;
         }
@@ -388,9 +380,7 @@ prefix_end:
                 uint8_t sib = buffer[off++];
                 unsigned scale = (sib & 0xc0) >> 6;
                 unsigned idx = (sib & 0x38) >> 3;
-#if defined(ARCH_X86_64)
                 idx += prefix_rex & PREFIX_REXX ? 8 : 0;
-#endif
                 base = sib & 0x07;
                 if (!vsib && idx == 4)
                     idx = FD_REG_NONE;
@@ -439,10 +429,8 @@ prefix_end:
         // If there is no ModRM, but a Mod-Reg, its opcode-encoded.
         FdOp* operand = &instr->operands[DESC_MODREG_IDX(desc)];
         uint8_t reg_idx = buffer[off - 1] & 7;
-#if defined(ARCH_X86_64)
         // Only used for GP registers, therefore always apply REX.B.
         reg_idx += prefix_rex & PREFIX_REXB ? 8 : 0;
-#endif
         operand->type = FD_OT_REG;
         operand->reg = reg_idx;
     }
