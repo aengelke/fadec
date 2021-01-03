@@ -428,11 +428,17 @@ prefix_end:
     {
         // If there is no ModRM, but a Mod-Reg, its opcode-encoded.
         FdOp* operand = &instr->operands[DESC_MODREG_IDX(desc)];
-        uint8_t reg_idx = buffer[off - 1] & 7;
-        // Only used for GP registers, therefore always apply REX.B.
-        reg_idx += prefix_rex & PREFIX_REXB ? 8 : 0;
         operand->type = FD_OT_REG;
-        operand->reg = reg_idx;
+        if (LIKELY(!DESC_VSIB(desc)))
+        {
+            // Only used for GP registers, therefore always apply REX.B.
+            operand->reg = (buffer[off - 1] & 7) + (prefix_rex & PREFIX_REXB ? 8 : 0);
+        }
+        else
+        {
+            operand->misc = FD_RT_SEG;
+            operand->reg = (buffer[off - 1] >> 3) & 7;
+        }
     }
 
     if (UNLIKELY(DESC_HAS_VEXREG(desc)))

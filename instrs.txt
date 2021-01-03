@@ -4,15 +4,15 @@
 03                    RM    GP     GP     -      -      ADD
 04                    IA    GP     IMM    -      -      ADD SIZE_8
 05                    IA    GP     IMM    -      -      ADD
-06                    NP    -      -      -      -      PUSH_ES ONLY32 INSTR_WIDTH
-07                    NP    -      -      -      -      POP_ES ONLY32 INSTR_WIDTH
+06                    S     SEG    -      -      -      PUSH ONLY32
+07                    S     SEG    -      -      -      POP ONLY32
 08                    MR    GP     GP     -      -      OR SIZE_8 LOCK
 09                    MR    GP     GP     -      -      OR LOCK
 0a                    RM    GP     GP     -      -      OR SIZE_8
 0b                    RM    GP     GP     -      -      OR
 0c                    IA    GP     IMM    -      -      OR SIZE_8
 0d                    IA    GP     IMM    -      -      OR
-0e                    NP    -      -      -      -      PUSH_CS ONLY32 INSTR_WIDTH
+0e                    S     SEG    -      -      -      PUSH ONLY32
 #0f    escape opcode
 10                    MR    GP     GP     -      -      ADC SIZE_8 LOCK
 11                    MR    GP     GP     -      -      ADC LOCK
@@ -20,16 +20,16 @@
 13                    RM    GP     GP     -      -      ADC
 14                    IA    GP     IMM    -      -      ADC SIZE_8
 15                    IA    GP     IMM    -      -      ADC
-16                    NP    -      -      -      -      PUSH_SS ONLY32 INSTR_WIDTH
-17                    NP    -      -      -      -      POP_SS ONLY32 INSTR_WIDTH
+16                    S     SEG    -      -      -      PUSH ONLY32
+17                    S     SEG    -      -      -      POP ONLY32
 18                    MR    GP     GP     -      -      SBB SIZE_8 LOCK
 19                    MR    GP     GP     -      -      SBB LOCK
 1a                    RM    GP     GP     -      -      SBB SIZE_8
 1b                    RM    GP     GP     -      -      SBB
 1c                    IA    GP     IMM    -      -      SBB SIZE_8
 1d                    IA    GP     IMM    -      -      SBB
-1e                    NP    -      -      -      -      PUSH_DS ONLY32 INSTR_WIDTH
-1f                    NP    -      -      -      -      POP_DS ONLY32 INSTR_WIDTH
+1e                    S     SEG    -      -      -      PUSH ONLY32
+1f                    S     SEG    -      -      -      POP ONLY32
 20                    MR    GP     GP     -      -      AND SIZE_8 LOCK
 21                    MR    GP     GP     -      -      AND LOCK
 22                    RM    GP     GP     -      -      AND SIZE_8
@@ -139,18 +139,18 @@
 89                    MR    GP     GP     -      -      MOV
 8a                    RM    GP     GP     -      -      MOV SIZE_8
 8b                    RM    GP     GP     -      -      MOV
-8c/0                  MR    GP16   SREG   -      -      MOV_S2G
-8c/1                  MR    GP16   SREG   -      -      MOV_S2G
-8c/2                  MR    GP16   SREG   -      -      MOV_S2G
-8c/3                  MR    GP16   SREG   -      -      MOV_S2G
-8c/4                  MR    GP16   SREG   -      -      MOV_S2G
-8c/5                  MR    GP16   SREG   -      -      MOV_S2G
+8c/0                  MR    GP16   SEG16  -      -      MOV_S2G
+8c/1                  MR    GP16   SEG16  -      -      MOV_S2G
+8c/2                  MR    GP16   SEG16  -      -      MOV_S2G
+8c/3                  MR    GP16   SEG16  -      -      MOV_S2G
+8c/4                  MR    GP16   SEG16  -      -      MOV_S2G
+8c/5                  MR    GP16   SEG16  -      -      MOV_S2G
 8d/m                  RM    GP     MEMZ   -      -      LEA
-8e/0                  RM    SREG   GP16   -      -      MOV_G2S
-8e/2                  RM    SREG   GP16   -      -      MOV_G2S
-8e/3                  RM    SREG   GP16   -      -      MOV_G2S
-8e/4                  RM    SREG   GP16   -      -      MOV_G2S
-8e/5                  RM    SREG   GP16   -      -      MOV_G2S
+8e/0                  RM    SEG16  GP16   -      -      MOV_G2S
+8e/2                  RM    SEG16  GP16   -      -      MOV_G2S
+8e/3                  RM    SEG16  GP16   -      -      MOV_G2S
+8e/4                  RM    SEG16  GP16   -      -      MOV_G2S
+8e/5                  RM    SEG16  GP16   -      -      MOV_G2S
 8f/0                  M     GP     -      -      -      POP DEF64
 # Against frequent belief, only, XCHG (r/e)AX, (r)AX with 90 is NOP.
 # As a lacking REX.B cannot be specified here, this is hardcoded.
@@ -415,14 +415,14 @@ NP.0f37               NP    -      -      -      -      GETSEC
 0f9d                  M     GP     -      -      -      SETGE SIZE_8
 0f9e                  M     GP     -      -      -      SETLE SIZE_8
 0f9f                  M     GP     -      -      -      SETG SIZE_8
-0fa0                  NP    -      -      -      -      PUSH_FS DEF64 INSTR_WIDTH
-0fa1                  NP    -      -      -      -      POP_FS DEF64 INSTR_WIDTH
+0fa0                  S     SEG    -      -      -      PUSH DEF64
+0fa1                  S     SEG    -      -      -      POP DEF64
 0fa2                  NP    -      -      -      -      CPUID
 0fa3                  MR    GP     GP     -      -      BT
 0fa4                  MRI   GP     GP     IMM8   -      SHLD
 0fa5                  MRC   GP     GP     GP8    -      SHLD
-0fa8                  NP    -      -      -      -      PUSH_GS DEF64 INSTR_WIDTH
-0fa9                  NP    -      -      -      -      POP_GS DEF64 INSTR_WIDTH
+0fa8                  S     SEG    -      -      -      PUSH DEF64
+0fa9                  S     SEG    -      -      -      POP DEF64
 0faa                  NP    -      -      -      -      RSM
 0fab                  MR    GP     GP     -      -      BTS LOCK
 0fac                  MRI   GP     GP     IMM8   -      SHRD

@@ -60,6 +60,7 @@ ENCODINGS = {
     "O": InstrFlags(modreg_idx=0^3),
     "OI": InstrFlags(modreg_idx=0^3, imm_idx=1^3, imm_control=4),
     "OA": InstrFlags(modreg_idx=0^3, zeroreg_idx=1^3),
+    "S": InstrFlags(modreg_idx=0^3, vsib=1), # segment register in bits 3,4,5
     "A": InstrFlags(zeroreg_idx=0^3),
     "D": InstrFlags(imm_idx=0^3, imm_control=6),
     "FD": InstrFlags(zeroreg_idx=0^3, imm_idx=1^3, imm_control=2),
@@ -110,7 +111,8 @@ OPKINDS = {
     "XMM64": OpKind(8, "XMM"),
     "XMM128": OpKind(16, "XMM"),
     "XMM256": OpKind(32, "XMM"),
-    "SREG": OpKind(2, "SEG"),
+    "SEG": OpKind(OpKind.SZ_OP, "SEG"),
+    "SEG16": OpKind(2, "SEG"),
     "FPU": OpKind(10, "FPU"),
     "MEM": OpKind(OpKind.SZ_OP, OpKind.K_MEM),
     "MEMV": OpKind(OpKind.SZ_VEC, OpKind.K_MEM),
@@ -586,6 +588,7 @@ def encode_table(entries):
     for mnem, variants in mnemonics.items():
         dedup = []
         for variant in variants:
+            # TODO: when adapting to 32-bit mode, handle S encodings.
             if not any(x[:3] == variant[:3] for x in dedup):
                 dedup.append(variant)
 

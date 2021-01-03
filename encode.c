@@ -205,7 +205,7 @@ typedef enum {
     ENC_NP,
     ENC_M, ENC_M1, ENC_MI, ENC_MC, ENC_MR, ENC_RM, ENC_RMA, ENC_MRI, ENC_RMI, ENC_MRC,
     ENC_AM, ENC_MA,
-    ENC_I, ENC_IA, ENC_O, ENC_OI, ENC_OA, ENC_A, ENC_D, ENC_FD, ENC_TD,
+    ENC_I, ENC_IA, ENC_O, ENC_OI, ENC_OA, ENC_S, ENC_A, ENC_D, ENC_FD, ENC_TD,
     ENC_RVM, ENC_RVMI, ENC_RVMR, ENC_RMV, ENC_VM, ENC_VMI, ENC_MVR,
     ENC_MAX
 } Encoding;
@@ -240,6 +240,7 @@ const struct EncodingInfo encoding_infos[ENC_MAX] = {
     [ENC_O]       = { .modreg = 0^3 },
     [ENC_OI]      = { .modreg = 0^3, .immctl = 4, .immidx = 1 },
     [ENC_OA]      = { .modreg = 0^3, .zregidx = 1^3, .zregval = 0 },
+    [ENC_S]       = { 0 },
     [ENC_A]       = { .zregidx = 0^3, .zregval = 0 },
     [ENC_D]       = { .immctl = 6, .immidx = 0 },
     [ENC_FD]      = { .immctl = 2, .immidx = 1 },
@@ -324,6 +325,8 @@ fe_enc64_impl(uint8_t** restrict buf, uint64_t mnem, FeOp op0, FeOp op1,
             if (enc_mr(buf, opc, ops[ei->modrm^3], modreg, desc->immsz)) goto fail;
         } else if (ei->modreg) {
             if (enc_o(buf, opc, ops[ei->modreg^3])) goto fail;
+        } else if (UNLIKELY(desc->enc == ENC_S)) {
+            if (enc_opc(buf, opc | (op_reg_idx(op0) << 3))) goto fail;
         } else {
             if (enc_opc(buf, opc)) goto fail;
         }
