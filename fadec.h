@@ -162,7 +162,11 @@ const char* fdi_name(FdInstrType ty);
 /** Gets the type/mnemonic of the instruction.
  * ABI STABILITY NOTE: different versions or builds of the library may use
  * different values. When linking as shared library, any interpretation of this
- * value is meaningless; in such cases use  fdi_name. **/
+ * value is meaningless; in such cases use  fdi_name.
+ *
+ * API STABILITY NOTE: a future version of this library may decode string
+ * instructions prefixed with REP/REPNZ and instructions prefixed with LOCK as
+ * separate instruction types. **/
 #define FD_TYPE(instr) ((FdInstrType) (instr)->type)
 /** DEPRECATED: This functionality is obsolete in favor of FD_OT_OFF.
  * Gets the address of the instruction. Invalid if decoded  address == 0. **/
@@ -185,6 +189,7 @@ const char* fdi_name(FdInstrType ty);
 /** Indicates whether the instruction was encoded with a LOCK prefix. Note that
  * it is not checked whether the LOCK prefix is valid for the instruction. **/
 #define FD_HAS_LOCK(instr) ((instr)->flags & FD_FLAG_LOCK)
+/** Do not use. **/
 #define FD_IS64(instr) ((instr)->flags & FD_FLAG_64)
 
 /** Gets the type of an operand at the given index. **/

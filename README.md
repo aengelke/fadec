@@ -1,56 +1,89 @@
-# Fadec — Fast Decoder for x86-32 and x86-64
+# Fadec — Fast Decoder for x86-32 and x86-64 and Encoder for x86-64
 
-Fadec is a fast and lightweight decoder for x86-32 and x86-64. To meet the goal of speed, lookup tables are used to map the opcode the (internal) description of the instruction encoding. This table currently has a size of roughly 19.5 kiB (for 32/64-bit combined).
+Fadec is a fast and lightweight decoder for x86-32 and x86-64. To meet the goal of speed, lookup tables are used to map the opcode the (internal) description of the instruction encoding. This table currently has a size of roughly 24 kiB (for 32/64-bit combined).
 
-*Note: This is not a disassembler, it does not intend to produce valid assembly.*
+Fadec-Enc (or Faenc) is a fast and lightweight encoder, currently for x86-64 only. The internal table for instruction encodings currently has a size of roughly 28 kiB.
 
 ## Key features
 
-> **Q: Why not just just use any other decoder available out there?**
+> **Q: Why not just just use any other decoding/encoding library available out there?**
 >
-> A: Because I needed to embed a small and fast decoder in a project which didn't link against a libc.
+> A: I needed to embed a small and fast decoder in a project for a freestanding environment (i.e., no libc). Further, only very few plain encoding libraries are available for x86-64; and most of them are large or make heavy use of external dependencies.
 
-- **Small size:** the compiled library uses only 40 kiB and the main decode routine is only a few hundreds lines of code.
+- **Small size:** the compiled library with a x86-64/32 decoder and a x86-64 encoder uses only 80 kiB; for specific use cases, the size can be reduced even further. The main decode/encode routines are only a few hundreds lines of code.
 - **Performance:** Fadec is significantly faster than libopcodes or Capstone due to the absence of high-level abstractions and the small lookup table.
-- **Almost no dependencies:** the formatter only uses the function `snprintf`, the decoder itself has no dependencies, making it suitable for environments without a full libc or `malloc`-style memory allocation.
-- **Correctness:** even corner cases should be handled correctly (if not, that's a bug), e.g., the order of prefixes, the presence of the `lock` prefix, or properly handling VEX.W in 32-bit mode.
+- **Zero dependencies:** the entire library has no dependencies, even on the standard library, making it suitable for freestanding environments without a full libc or `malloc`-style memory allocation.
+- **Correctness:** even corner cases should be handled correctly (if not, that's a bug), e.g., the order of prefixes, immediate sizes of jump instructions, the presence of the `lock` prefix, or properly handling VEX.W in 32-bit mode.
 
-## Basic Usage
+All components of this library target the Intel 64 implementations of x86. While AMD64 is _mostly similar_, there are some minor differences (e.g. operand sizes for jump instructions, more instructions, `cr8` can be accessed with `lock` prefix) which are currently not handled.
+
+## Decoder Usage
+
+### Example
 ```c
+uint8_t buffer[] = {0x49, 0x90};
 FdInstr instr;
-// Decode from buffer in 64-bit mode and virtual address 0x401000
-int ret = fd_decode(buffer, sizeof(buffer), 64, 0x401000, &instr);
+// Decode from buffer into instr in 64-bit mode.
+int ret = fd_decode(buffer, sizeof(buffer), 64, 0, &instr);
 // ret<0 indicates an error, ret>0 the number of decoded bytes
-// Relevant properties of instructions can now be queries using the FD_* macros.
+// Relevant properties of instructions can now be queried using the FD_* macros.
+// Or, we can format the instruction to a string buffer:
+char fmtbuf[64];
+fd_format(instr, fmtbuf, sizeof(fmtbuf));
+// fmtbuf now reads: "xchg r8, rax"
 ```
 
-## API
+### API
 
-The API consists of two functions to decode and format instructions, as well as several accessor macros (see [fadec.h](fadec.h)). Direct access of the `FdInstr` structure is not recommended.
+The API consists of two functions to decode and format instructions, as well as several accessor macros. A full documentation can be found in [fadec.h](fadec.h). Direct access of any structure fields is not recommended.
 
 - `int fd_decode(const uint8_t* buf, size_t len, int mode, uintptr_t address, FdInstr* out_instr)`
-    - Decode a single instruction
+    - Decode a single instruction. For internal performance reasons, note that:
+        - The decoded operand sizes are not always exact. However, the exact size can be reconstructed in all cases.
+        - An implicit `fwait` in FPU instructions is decoded as a separate instruction (matching the opcode layout in machine code). For example, `finit` is decoded as `FD_FWAIT` + `FD_FINIT`
     - Return value: number of bytes used, or a negative value in case of an error.
     - `buf`/`len`: buffer containing instruction bytes. At most 15 bytes will be read. If the instruction is longer than `len`, an error value is returned.
     - `mode`: architecture mode, either `32` or `64`.
-    - `address`: virtual address of the decoded instruction. This is used for computing jump targets and segment-offset-relative memory operations (MOV with moffs* encoding) and stored in the instruction.
+    - `address`: set to `0`. (Obsolete use: virtual address of the decoded instruction.)
     - `out_instr`: Pointer to the instruction buffer, might get written partially in case of an error.
 - `void fd_format(const FdInstr* instr, char* buf, size_t len)`
     - Format a single instruction to a human-readable format.
     - `instr`: decoded instruction.
     - `buf`/`len`: buffer for formatted instruction string
+- Various accessor macros: see [fadec.h](fadec.h).
 
-## Intended differences to other decoders
-To achieve higher performance, minor differences to other decoders exist, requiring special handling.
+## Encoder Usage
 
-- The decoded operand sizes are not always exact. However, the exact size can be reconstructed in all cases.
-    - For instructions with rare memory access sizes (e.g. `lgdt`), the provided size is zero. These are: `cmpxchg16b`, `cmpxchg8b`, `fbld` (for 80-bit), `fbstp` (for 80-bit), `fldenv`, `frstor`, `fsave`, `fstenv`, `fstp` (for 80-bit), `fxrstor`, `fxsave`, `lds`, `lds`, `lgdt`, `lidt`, `lldt`, `ltr`, `sgdt`, `sidt`, `sldt`, `str`
-    - For some SSE/AVX instructions, the operand size is an over-approximation of the real size, e.g. for permutations or extensions.
-    - The operand size of segment and FPU registers is always zero.
-- An implicit `fwait` in FPU instructions is decoded as a separate instruction (matching the opcode layout in machine code). For example:
-    - `finit` is decoded as `FD_FWAIT` + `FD_FINIT`
-    - `fninit` is decoded as plain `FD_FINIT`
-- For `scas` and `cmps`, the `repz` prefix can be queried using `FD_HAS_REP` (matching prefix byte in machine code).
+### Example
+
+```c
+int failed = 0;
+uint8_t buf[64];
+uint8_t* cur = buf;
+
+// xor eax, eax
+failed |= fe_enc64(&cur, FE_XOR32rr, FE_AX, FE_AX);
+// movzx ecx, byte ptr [rdi + 1*rax + 0]
+failed |= fe_enc64(&cur, FE_MOVZXr32m8, FE_CX, FE_MEM(FE_DI, 1, FE_AX, 0));
+// test ecx, ecx
+failed |= fe_enc64(&cur, FE_TEST32rr, FE_CX, FE_CX);
+// jz $
+// This will be replaced later FE_JMPL enforces use of longest offset
+uint8_t* fwd_jmp = cur;
+failed |= fe_enc64(&cur, FE_JNZ|FE_JMPL, (intptr_t) cur);
+uint8_t* loop_tgt = cur;
+// add rax, rcx
+failed |= fe_enc64(&cur, FE_ADD64rr, FE_AX, FE_CX);
+// sub ecx, 1
+failed |= fe_enc64(&cur, FE_SUB32ri, FE_CX, 1);
+// jnz loop_tgt
+failed |= fe_enc64(&cur, FE_JNZ, (intptr_t) loop_tgt);
+// Update previous jump to jump here. Note that we _must_ specify FE_JMPL too.
+failed |= fe_enc64(&fwd_jmp, FE_JNZ|FE_JMPL, (intptr_t) cur);
+// ret
+failed |= fe_enc64(&cur, FE_RET);
+// cur now points to the end of the buffer, failed indicates any failures.
+```
 
 ## Known issues
 - The EVEX prefix (AVX-512) is not supported (yet).
