@@ -2,15 +2,15 @@
 
 Fadec is a fast and lightweight decoder for x86-32 and x86-64. To meet the goal of speed, lookup tables are used to map the opcode the (internal) description of the instruction encoding. This table currently has a size of roughly 24 kiB (for 32/64-bit combined).
 
-Fadec-Enc (or Faenc) is a fast and lightweight encoder, currently for x86-64 only. The internal table for instruction encodings currently has a size of roughly 28 kiB.
+Fadec-Enc (or Faenc) is a small, lightweight and easy-to-use encoder, currently for x86-64 only.
 
 ## Key features
 
-> **Q: Why not just just use any other decoding/encoding library available out there?**
+> **Q: Why not just use any other decoding/encoding library available out there?**
 >
 > A: I needed to embed a small and fast decoder in a project for a freestanding environment (i.e., no libc). Further, only very few plain encoding libraries are available for x86-64; and most of them are large or make heavy use of external dependencies.
 
-- **Small size:** the compiled library with a x86-64/32 decoder and a x86-64 encoder uses only 80 kiB; for specific use cases, the size can be reduced even further. The main decode/encode routines are only a few hundreds lines of code.
+- **Small size:** the entire library with a x86-64/32 decoder and a x86-64 encoder uses only 80 kiB; for specific use cases, the size can be reduced even further. The main decode/encode routines are only a few hundreds lines of code.
 - **Performance:** Fadec is significantly faster than libopcodes or Capstone due to the absence of high-level abstractions and the small lookup table.
 - **Zero dependencies:** the entire library has no dependencies, even on the standard library, making it suitable for freestanding environments without a full libc or `malloc`-style memory allocation.
 - **Correctness:** even corner cases should be handled correctly (if not, that's a bug), e.g., the order of prefixes, immediate sizes of jump instructions, the presence of the `lock` prefix, or properly handling VEX.W in 32-bit mode.
@@ -85,12 +85,29 @@ failed |= fe_enc64(&cur, FE_RET);
 // cur now points to the end of the buffer, failed indicates any failures.
 ```
 
+### API
+
+The API consists of one function to handle encode requests, as well as some macros. More information can be found in [fadec-enc.h](fadec-enc.h). Usage of internals like enum values is not recommended.
+
+- `int fe_enc64(uint8_t** buf, uint64_t mnem, int64_t operands...)`
+    - Encodes an instruction for x86-64 into `*buf`.
+    - Return value: `0` on success, a negative value in error cases.
+    - `buf`: Pointer to the pointer to the instruction buffer. The pointer (`*buf`) will be advanced by the number of bytes written. The instruction buffer must have at least 15 bytes left.
+    - `mnem`: Instruction mnemonic to encode combined with extra flags:
+        - `FE_SEG(segreg)`: override segment to specified segment register.
+        - `FE_ADDR32`: override address size to 32-bit.
+        - `FE_JMPL`: use longest possible offset encoding, useful when jump target is not known.
+    - `operands...`: Up to 4 instruction operands. The operand kinds must match the requirements of the mnemonic.
+        - For register operands, use the register: `FE_AX`, `FE_AH`, `FE_XMM12`.
+        - For immediate operands, use the constant: `12`, `-0xbeef`.
+        - For memory operands, use: `FE_MEM(basereg,scale,indexreg,offset)`. Use `0` to specify _no register_. For RIP-relative addressing, the size of the instruction is added automatically.
+        - For offset operands, specify the target address.
+
 ## Known issues
+- The encoder doesn't support VEX encodings (yet).
 - The EVEX prefix (AVX-512) is not supported (yet).
-- The layout of entries in the tables can be improved to improve usage of caches. (Help needed.)
-- No Python API.
+- Prefixes for indirect jumps and calls are not properly decoded, e.g. `notrack`, `bnd`.
 - Low test coverage. (Help needed.)
-- No benchmarking has been performed yet. (Help needed.)
-- Prefixes for indirect jumps and calls are not properly decoded, e.g. `notrack`, `bnd`. This requires additional information on the prefix ordering, which is currently not decoded. (Analysis of performance impact and help needed.)
+- No Python API.
 
 If you find any other issues, please report a bug. Or, even better, send a patch fixing the issue.
