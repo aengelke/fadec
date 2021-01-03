@@ -639,12 +639,19 @@ if __name__ == "__main__":
     table.deduplicate()
     table_data, annotations, root_offsets, descs = table.compile()
 
+    mnemonics_intel = [m.replace("SSE_", "").replace("MMX_", "")
+                        .replace("MOVABS", "MOV")
+                        .replace("JMPF", "JMP FAR").replace("CALLF", "CALL FAR")
+                        .replace("_S2G", "").replace("_G2S", "")
+                        .replace("_CR", "").replace("_DR", "")
+                        .lower() for m in mnemonics]
+
     defines = ["FD_TABLE_OFFSET_%d %d"%k for k in zip(args.modes, root_offsets)]
 
     decode_table = template.format(
         hex_table=bytes_to_table(table_data, annotations),
         descs="\n".join("{{{0},{1},{2},{3}}},".format(*desc) for desc in descs),
-        mnemonics=parse_mnemonics(mnemonics),
+        mnemonics=parse_mnemonics(mnemonics_intel),
         defines="\n".join("#define " + line for line in defines),
     )
     args.decode_table.write(decode_table)

@@ -135,7 +135,24 @@ int fd_decode(const uint8_t* buf, size_t len, int mode, uintptr_t address,
  **/
 void fd_format(const FdInstr* instr, char* buf, size_t len);
 
+/** Format an instruction to a string.
+ * NOTE: API stability is currently not guaranteed for this function; its name
+ * and/or signature may change in future.
+ *
+ * \param instr The instruction.
+ * \param addr The base address to use for printing FD_OT_OFF operands.
+ * \param buf The buffer to hold the formatted string.
+ * \param len The length of the buffer.
+ **/
+void fd_format_abs(const FdInstr* instr, uint64_t addr, char* buf, size_t len);
+
 /** Get the stringified name of an instruction type.
+ * NOTE: API stability is currently not guaranteed for this function; changes
+ * to the signature and/or the returned string can be expected. E.g., a future
+ * version may take an extra parameter for the instruction operand size; or may
+ * take a complete decoded instruction as first parameter and return the
+ * mnemonic returned by fd_format.
+ *
  * \param ty An instruction type
  * \return The instruction type as string, or "(invalid)".
  **/
