@@ -265,9 +265,9 @@ main(int argc, char** argv)
     TEST64("\x66\xf3\x0f\xc7\xf8", "[RDPID reg8:r0]");
     TEST64("\xf3\x66\x0f\xc7\xf8", "[RDPID reg8:r0]");
     TEST64("\xf3\x0f\xc7\x00", "UD");
-    TEST64("\x0f\xc7\x30", "[VMPTRLD mem0:r0]");
-    TEST64("\x66\x0f\xc7\x30", "[VMCLEAR mem0:r0]");
-    TEST64("\xf3\x0f\xc7\x30", "[VMXON mem0:r0]");
+    TEST64("\x0f\xc7\x30", "[VMPTRLD mem8:r0]");
+    TEST64("\x66\x0f\xc7\x30", "[VMCLEAR mem8:r0]");
+    TEST64("\xf3\x0f\xc7\x30", "[VMXON mem8:r0]");
 
     TEST64("\x0f\x09", "[WBINVD]");
     TEST64("\xf3\x0f\x09", "[WBNOINVD]");

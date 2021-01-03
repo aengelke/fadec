@@ -61,7 +61,7 @@
 3c                    IA    GP     IMM    -      -      CMP SIZE_8
 3d                    IA    GP     IMM    -      -      CMP
 #3e    SEG=DS prefix
-3f                    NP    -      -      -      -      AAS ONLY32 INSTR_WIDTH
+3f                    NP    -      -      -      -      AAS ONLY32
 40+                   O     GP     -      -      -      INC ONLY32
 48+                   O     GP     -      -      -      DEC ONLY32
 50+                   O     GP     -      -      -      PUSH DEF64
@@ -459,7 +459,7 @@ NP.0fc7/1m            M     MEMZ   -      -      -      CMPXCHGD LOCK INSTR_WIDT
 0fff                  RM    GP     GP     -      -      UD0
 #
 NFx.0f38f0/m          RM    GP     MEM    -      -      MOVBE
-F2.0f38f0             RM    GP32   GP     -      -      CRC32 USE66 SIZE_8
+F2.0f38f0             RM    GP32   GP     -      -      CRC32 SIZE_8
 NFx.0f38f1/m          MR    MEM    GP     -      -      MOVBE
 F2.0f38f1             RM    GP32   GP     -      -      CRC32 USE66
 #
@@ -698,8 +698,8 @@ F2.0f7d               RM    XMM    XMM    -      -      SSE_HSUBPS
 F3.0f7e               RM    XMM    XMM64  -      -      SSE_MOVQ
 66.0f7f               MR    XMM    XMM    -      -      SSE_MOVDQA
 F3.0f7f               MR    XMM    XMM    -      -      SSE_MOVDQU
-NP.0fae/0m            M     MEMZ   -      -      -      FXSAVE
-NP.0fae/1m            M     MEMZ   -      -      -      FXRSTOR
+NP.0fae/0m            M     MEMZ   -      -      -      FXSAVE INSTR_WIDTH
+NP.0fae/1m            M     MEMZ   -      -      -      FXRSTOR INSTR_WIDTH
 NP.0fae/2m            M     MEM32  -      -      -      LDMXCSR
 NP.0fae/3m            M     MEM32  -      -      -      STMXCSR
 NP.0faee8             NP    -      -      -      -      LFENCE
@@ -1409,16 +1409,16 @@ NP.0f1c/0m            M     MEMZ   -      -      -      CLDEMOTE
 66.0f3880/m           RM    GP     MEMZ   -      -      INVEPT DEF64
 66.0f3881/m           RM    GP     MEMZ   -      -      INVVPID DEF64
 NP.0f01c1             NP    -      -      -      -      VMCALL
-66.0fc7/6m            M     MEMZ   -      -      -      VMCLEAR
+66.0fc7/6m            M     MEM64  -      -      -      VMCLEAR
 NP.0f01d4             NP    -      -      -      -      VMFUNC
 NP.0f01c2             NP    -      -      -      -      VMLAUNCH
 NP.0f01c3             NP    -      -      -      -      VMRESUME
-NP.0fc7/6m            M     MEMZ   -      -      -      VMPTRLD
-NP.0fc7/7m            M     MEMZ   -      -      -      VMPTRST
+NP.0fc7/6m            M     MEM64  -      -      -      VMPTRLD
+NP.0fc7/7m            M     MEM64  -      -      -      VMPTRST
 NP.0f78               MR    GP     GP     -      -      VMREAD DEF64
 NP.0f79               MR    GP     GP     -      -      VMWRITE DEF64
 NP.0f01c4             NP    -      -      -      -      VMXOFF
-F3.0fc7/6m            M     MEMZ   -      -      -      VMXON
+F3.0fc7/6m            M     MEM64  -      -      -      VMXON
 # SEAM/TDX
 66.0f01cc             NP    -      -      -      -      TDCALL
 66.0f01cd             NP    -      -      -      -      SEAMRET
