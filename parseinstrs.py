@@ -429,15 +429,34 @@ def bytes_to_table(data, notes):
     return "\n".join("".join(strdata[p:c]) + "\n//%04x "%c + notes.get(c, "")
                      for p, c in zip(offs, offs[1:]))
 
+def parse_mnemonics(mnemonics):
+    mktree = lambda: defaultdict(mktree)
+    tree = mktree()
+    for m in mnemonics:
+        cur = tree
+        for c in m[::-1]:
+            cur = cur[c]
+    def tree_walk(tree, cur="\0"):
+        if not tree:
+            yield cur
+        else:
+            for el, subtree in tree.items():
+                for path in tree_walk(subtree, el + cur):
+                    yield path
+    merged_str = "".join(sorted(tree_walk(tree)))
+    cstr = '"' + merged_str[:-1].replace("\0", '\\0') + '"'
+    tab = [merged_str.index(m + "\0") for m in mnemonics]
+    return cstr, ",".join(map(str, tab))
+
 template = """// Auto-generated file -- do not modify!
 #if defined(FD_DECODE_TABLE_DATA)
 {hex_table}
 #elif defined(FD_DECODE_TABLE_DESCS)
 {descs}
 #elif defined(FD_DECODE_TABLE_STRTAB1)
-{mnemonic_cstr}
+{mnemonics[0]}
 #elif defined(FD_DECODE_TABLE_STRTAB2)
-{mnemonic_offsets}
+{mnemonics[1]}
 #elif defined(FD_DECODE_TABLE_DEFINES)
 {defines}
 #else
@@ -622,18 +641,12 @@ if __name__ == "__main__":
     table.deduplicate()
     table_data, annotations, root_offsets, descs = table.compile()
 
-    mnemonic_tab = [0]
-    for name in mnemonics:
-        mnemonic_tab.append(mnemonic_tab[-1] + len(name) + 1)
-    mnemonic_cstr = '"' + "\\0".join(mnemonics) + '"'
-
     defines = ["FD_TABLE_OFFSET_%d %d"%k for k in zip(args.modes, root_offsets)]
 
     decode_table = template.format(
         hex_table=bytes_to_table(table_data, annotations),
         descs="\n".join("{{{0},{1},{2},{3}}},".format(*desc) for desc in descs),
-        mnemonic_cstr=mnemonic_cstr,
-        mnemonic_offsets=",".join(str(off) for off in mnemonic_tab),
+        mnemonics=parse_mnemonics(mnemonics),
         defines="\n".join("#define " + line for line in defines),
     )
     args.decode_table.write(decode_table)
