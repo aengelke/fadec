@@ -1,18 +1,31 @@
-project('fadec', ['c'], default_options: ['warning_level=3', 'c_std=c99'])
+project('fadec', ['c'], default_options: ['warning_level=3', 'c_std=c99'],
+        meson_version: '>=0.40')
 
 python3 = find_program('python3')
 
+# Check Python version
+py_version_res = run_command(python3, ['--version'])
+py_version = py_version_res.stdout().split(' ')[1]
+if py_version_res.returncode() != 0 or not py_version.version_compare('>=3.6')
+  error('Python 3.6 required, got @0@'.format(py_version))
+endif
+
 if get_option('warning_level').to_int() >= 3
-  add_project_arguments(['-Wmissing-prototypes',
-                         '-Wshadow',
-                         '-Wcast-align=strict',
-                         '-Wwrite-strings',
-                         '-Winline',
-                         '-Wswitch-default',
-                         '-Wstrict-prototypes',
-                         '-Wundef',
-                         '-Wno-overlength-strings'],
-                        language: 'c')
+  extra_warnings = [
+    '-Wmissing-prototypes', '-Wshadow',  '-Wwrite-strings', '-Wswitch-default',
+    '-Winline', '-Wstrict-prototypes', '-Wundef',
+    # We have strings longer than 4095 characters
+    '-Wno-overlength-strings',
+    # GCC 8 requires an extra option for strict cast alignment checks, Clang
+    # always warns, even on architectures without alignment requirements.
+    '-Wcast-align', '-Wcast-align=strict',
+  ]
+  cc = meson.get_compiler('c')
+  foreach warning : extra_warnings
+    if cc.has_argument(warning)
+      add_project_arguments(warning, language: 'c')
+    endif
+  endforeach
 endif
 
 generate_args = []

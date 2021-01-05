@@ -601,9 +601,9 @@ def encode_table(entries):
         for idx, alt, (enc, immsz, tys_i, opc_s) in zip(indices, alt_list, dedup):
             descs += f"[{idx}] = {{ .enc = ENC_{enc}, .immsz = {immsz}, .tys = {tys_i:#x}, .opc = {opc_s}, .alt = {alt} }},\n"
 
-    mnemonics_lut = {mnem: i for i, mnem in enumerate(sorted(mnemonics.keys()))}
-    mnemonics_tab = "\n".join("FE_MNEMONIC(%s,%d)"%entry for entry in mnemonics_lut.items())
-    return mnemonics_tab, descs
+    mnem_list = sorted(mnemonics.keys())
+    mnem_tab = "".join(f"FE_MNEMONIC({m},{i})\n" for i, m in enumerate(mnem_list))
+    return mnem_tab, descs
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -624,8 +624,8 @@ if __name__ == "__main__":
 
     mnemonics = sorted({desc.mnemonic for _, desc in entries})
 
-    decode_mnems_lines = ["FD_MNEMONIC(%s,%d)"%e[::-1] for e in enumerate(mnemonics)]
-    args.decode_mnems.write("\n".join(decode_mnems_lines))
+    decode_mnems_lines = [f"FD_MNEMONIC({m},{i})\n" for i, m in enumerate(mnemonics)]
+    args.decode_mnems.write("".join(decode_mnems_lines))
 
     modes = [32, 64]
     table = Table(root_count=len(args.modes))
