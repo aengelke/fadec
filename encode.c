@@ -27,8 +27,10 @@ enum {
     OPC_REXB = 1 << 26,
     OPC_REX = 1 << 29,
     OPC_67 = 1 << 30,
-    OPC_SEG = (1l << 31) | (1l << 32) | (1l << 33),
 };
+
+#define OPC_SEG_IDX 31
+#define OPC_SEG_MSK (0x7l << OPC_SEG_IDX)
 
 static bool op_mem(FeOp op) { return op < 0; }
 static bool op_reg(FeOp op) { return op >= 0; }
@@ -56,7 +58,7 @@ opc_size(uint64_t opc)
 {
     if (opc & OPC_VEX) return 0; // TODO: support VEX encoding
     unsigned res = 1;
-    if (opc & OPC_SEG) res++;
+    if (opc & OPC_SEG_MSK) res++;
     if (opc & OPC_67) res++;
     if (opc & OPC_66) res++;
     if (opc & OPC_F2) res++;
@@ -73,8 +75,8 @@ int
 enc_opc(uint8_t** restrict buf, uint64_t opc)
 {
     if (opc & OPC_VEX) return -1; // TODO: support VEX encoding
-    if (opc & OPC_SEG)
-        *(*buf)++ = (0x65643e362e2600 >> (8 * ((opc >> 31) & 7))) & 0xff;
+    if (opc & OPC_SEG_MSK)
+        *(*buf)++ = (0x65643e362e2600 >> (8 * ((opc >> OPC_SEG_IDX) & 7))) & 0xff;
     if (opc & OPC_67) *(*buf)++ = 0x67;
     if (opc & OPC_66) *(*buf)++ = 0x66;
     if (opc & OPC_F2) *(*buf)++ = 0xF2;
@@ -307,7 +309,7 @@ fe_enc64_impl(uint8_t** restrict buf, uint64_t mnem, FeOp op0, FeOp op1,
         if (UNLIKELY(mnem & FE_ADDR32))
             opc |= OPC_67;
         if (UNLIKELY(mnem & FE_SEG_MASK))
-            opc |= (mnem & FE_SEG_MASK) << (31 - 16);
+            opc |= (mnem & FE_SEG_MASK) << (OPC_SEG_IDX - 16);
 
         if (ei->immctl && ei->immctl != 3)
             imm = ops[ei->immidx];
