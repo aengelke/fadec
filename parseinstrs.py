@@ -558,7 +558,11 @@ def encode_table(entries):
                 if ot == "m":
                     tys.append(0xf)
                 elif op.kind == "GP":
-                    tys.append(2 if op.abssize(opsize//8) == 1 else 1)
+                    if (desc.mnemonic == "MOVSX" or desc.mnemonic == "MOVZX" or
+                        opsize == 8):
+                        tys.append(2 if op.abssize(opsize//8) == 1 else 1)
+                    else:
+                        tys.append(1)
                 else:
                     tys.append({
                         "imm": 0, "SEG": 3, "FPU": 4, "MMX": 5, "XMM": 6,

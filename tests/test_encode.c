@@ -96,6 +96,18 @@ main(int argc, char** argv)
     TEST("\xb0\xff", FE_MOV8ri, FE_AX, (int8_t) 0xff);
     TEST("\xb4\xff", FE_MOV8ri, FE_AH, -1);
     TEST("\xb7\x64", FE_MOV8ri, FE_BH, 0x64);
+    TEST("\x66\x0f\xbe\xc2", FE_MOVSXr16r8, FE_AX, FE_DX);
+    TEST("\x0f\xbe\xc2", FE_MOVSXr32r8, FE_AX, FE_DX);
+    TEST("\x48\x0f\xbe\xc2", FE_MOVSXr64r8, FE_AX, FE_DX);
+    TEST("\x66\x0f\xbe\xc6", FE_MOVSXr16r8, FE_AX, FE_DH);
+    TEST("\x0f\xbe\xc6", FE_MOVSXr32r8, FE_AX, FE_DH);
+    TEST("", FE_MOVSXr64r8, FE_AX, FE_DH);
+    TEST("\x66\x0f\xbf\xc2", FE_MOVSXr16r16, FE_AX, FE_DX);
+    TEST("\x0f\xbf\xc2", FE_MOVSXr32r16, FE_AX, FE_DX);
+    TEST("\x48\x0f\xbf\xc2", FE_MOVSXr64r16, FE_AX, FE_DX);
+    TEST("\x66\x63\xc2", FE_MOVSXr16r32, FE_AX, FE_DX);
+    TEST("\x63\xc2", FE_MOVSXr32r32, FE_AX, FE_DX);
+    TEST("\x48\x63\xc2", FE_MOVSXr64r32, FE_AX, FE_DX);
     TEST("\xc8\x33\x22\x11", FE_ENTERi, 0x112233);
     TEST("\x0f\x05", FE_SYSCALL);
     TEST("\x0f\x90\xc4", FE_SETO8r, FE_AH);
@@ -132,6 +144,9 @@ main(int argc, char** argv)
     TEST("\xf3\xab", FE_REP_STOS32);
     TEST("\x48\xab", FE_STOS64);
     TEST("\xf3\x48\xab", FE_REP_STOS64);
+    TEST("\x66\xf2\x0f\x38\xf1\xc1", FE_CRC32_16rr, FE_AX, FE_CX);
+    TEST("\x66\x0f\x3a\x14\xc1\x02", FE_SSE_PEXTRBrri, FE_CX, FE_XMM0, 2);
+    TEST("", FE_SSE_PEXTRBrri, FE_CH, FE_XMM0, 2);
 
     // Test ModRM encoding
     TEST("\x01\x00", FE_ADD32mr, FE_MEM(FE_AX, 0, 0, 0), FE_AX);
