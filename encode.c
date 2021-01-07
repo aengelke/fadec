@@ -10,9 +10,11 @@
 #define UNLIKELY(x) __builtin_expect((x), 0)
 
 enum {
+    // 16:17 = escape
     OPC_0F = 1 << 16,
-    OPC_0F38 = (1 << 17) | OPC_0F,
-    OPC_0F3A = (1 << 18) | OPC_0F,
+    OPC_0F38 = 2 << 16,
+    OPC_0F3A = 3 << 16,
+    OPC_ESCAPE_MSK = 3 << 16,
     OPC_66 = 1 << 19,
     OPC_F2 = 1 << 20,
     OPC_F3 = 1 << 21,
@@ -60,9 +62,8 @@ opc_size(uint64_t opc)
     if (opc & OPC_F2) res++;
     if (opc & OPC_F3) res++;
     if (opc & (OPC_REX|OPC_REXW|OPC_REXR|OPC_REXX|OPC_REXB)) res++;
-    if (opc & OPC_0F) res++;
-    if ((opc & OPC_0F38) == OPC_0F38) res++;
-    if ((opc & OPC_0F3A) == OPC_0F3A) res++;
+    if (opc & OPC_ESCAPE_MSK) res++;
+    if ((opc & OPC_ESCAPE_MSK) == OPC_0F38 || (opc & OPC_ESCAPE_MSK) == OPC_0F3A) res++;
     if ((opc & 0xc000) == 0xc000) res++;
     return res;
 }
@@ -87,9 +88,9 @@ enc_opc(uint8_t** restrict buf, uint64_t opc)
         if (opc & OPC_REXB) rex |= 1;
         *(*buf)++ = rex;
     }
-    if (opc & OPC_0F) *(*buf)++ = 0x0F;
-    if ((opc & OPC_0F38) == OPC_0F38) *(*buf)++ = 0x38;
-    if ((opc & OPC_0F3A) == OPC_0F3A) *(*buf)++ = 0x3A;
+    if (opc & OPC_ESCAPE_MSK) *(*buf)++ = 0x0F;
+    if ((opc & OPC_ESCAPE_MSK) == OPC_0F38) *(*buf)++ = 0x38;
+    if ((opc & OPC_ESCAPE_MSK) == OPC_0F3A) *(*buf)++ = 0x3A;
     *(*buf)++ = opc & 0xff;
     if ((opc & 0xc000) == 0xc000) *(*buf)++ = (opc >> 8) & 0xff;
     return 0;
