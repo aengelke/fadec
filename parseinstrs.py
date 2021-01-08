@@ -505,7 +505,7 @@ def encode_table(entries):
             opsizes -= {32}
         if "INSTR_WIDTH" not in desc.flags and all(op.size != OpKind.SZ_OP for op in desc.operands):
             opsizes = {0}
-        if all(op.size != OpKind.SZ_VEC for op in desc.operands):
+        if "VSIB" not in desc.flags and all(op.size != OpKind.SZ_VEC for op in desc.operands):
             vecsizes = {0} # for VEX-encoded general-purpose instructions.
         if "ENC_NOSZ" in desc.flags:
             opsizes, vecsizes = {0}, {0}

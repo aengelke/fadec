@@ -333,7 +333,6 @@ main(int argc, char** argv)
     TEST("\xc5\xf2\x2a\xc0", "vcvtsi2ss xmm0, xmm1, eax");
     TEST32("\xc4\xe1\xf2\x2a\xc0", "vcvtsi2ss xmm0, xmm1, eax");
     TEST64("\xc4\xe1\xf2\x2a\xc0", "vcvtsi2ss xmm0, xmm1, rax");
-    TEST64("\xc4\xe2\x75\x90\x04\xe7", "vpgatherdd ymm0, ymmword ptr [rdi+8*rsp], ymm1");
 
     TEST("\xc4\xe3\x79\x14\xc0\x00", "vpextrb al, xmm0, 0x0");
     TEST("\xc4\xe3\xf9\x14\xc0\x00", "vpextrb al, xmm0, 0x0");
@@ -362,6 +361,42 @@ main(int argc, char** argv)
     TEST("\xc4\xe2\x75\x45\xc2", "vpsrlvd ymm0, ymm1, ymm2");
     TEST("\xc4\xe2\xf1\x45\xc2", "vpsrlvq xmm0, xmm1, xmm2");
     TEST("\xc4\xe2\xf5\x45\xc2", "vpsrlvq ymm0, ymm1, ymm2");
+
+    TEST("\xc4\xe2\x71\x92\xc0", "UD"); // Must have memory operand
+    TEST("\xc4\xe2\x71\x92\x00", "UD"); // Must have SIB byte
+    TEST("\xc4\xe2\x71\x92\x05\x00\x00\x00\x00", "UD"); // Must have SIB byte
+    TEST32("\xc4\xe2\x71\x92\x04\xe7", "vgatherdps xmm0, dword ptr [edi+8*xmm4], xmm1");
+    TEST64("\xc4\xe2\x71\x92\x04\xe7", "vgatherdps xmm0, dword ptr [rdi+8*xmm4], xmm1");
+    TEST32("\xc4\xe2\x75\x92\x04\xe7", "vgatherdps ymm0, dword ptr [edi+8*ymm4], ymm1");
+    TEST64("\xc4\xe2\x75\x92\x04\xe7", "vgatherdps ymm0, dword ptr [rdi+8*ymm4], ymm1");
+    TEST32("\xc4\xe2\x71\x93\x04\xe7", "vgatherqps xmm0, dword ptr [edi+8*xmm4], xmm1");
+    TEST64("\xc4\xe2\x71\x93\x04\xe7", "vgatherqps xmm0, dword ptr [rdi+8*xmm4], xmm1");
+    TEST32("\xc4\xe2\x75\x93\x04\xe7", "vgatherqps xmm0, dword ptr [edi+8*ymm4], xmm1");
+    TEST64("\xc4\xe2\x75\x93\x04\xe7", "vgatherqps xmm0, dword ptr [rdi+8*ymm4], xmm1");
+    TEST32("\xc4\xe2\xf1\x92\x04\xe7", "vgatherdpd xmm0, qword ptr [edi+8*xmm4], xmm1");
+    TEST64("\xc4\xe2\xf1\x92\x04\xe7", "vgatherdpd xmm0, qword ptr [rdi+8*xmm4], xmm1");
+    TEST32("\xc4\xe2\xf5\x92\x04\xe7", "vgatherdpd ymm0, qword ptr [edi+8*xmm4], ymm1");
+    TEST64("\xc4\xe2\xf5\x92\x04\xe7", "vgatherdpd ymm0, qword ptr [rdi+8*xmm4], ymm1");
+    TEST32("\xc4\xe2\xf1\x93\x04\xe7", "vgatherqpd xmm0, qword ptr [edi+8*xmm4], xmm1");
+    TEST64("\xc4\xe2\xf1\x93\x04\xe7", "vgatherqpd xmm0, qword ptr [rdi+8*xmm4], xmm1");
+    TEST32("\xc4\xe2\xf5\x93\x04\xe7", "vgatherqpd ymm0, qword ptr [edi+8*ymm4], ymm1");
+    TEST64("\xc4\xe2\xf5\x93\x04\xe7", "vgatherqpd ymm0, qword ptr [rdi+8*ymm4], ymm1");
+    TEST32("\xc4\xe2\x71\x90\x04\xe7", "vpgatherdd xmm0, dword ptr [edi+8*xmm4], xmm1");
+    TEST64("\xc4\xe2\x71\x90\x04\xe7", "vpgatherdd xmm0, dword ptr [rdi+8*xmm4], xmm1");
+    TEST32("\xc4\xe2\x75\x90\x04\xe7", "vpgatherdd ymm0, dword ptr [edi+8*ymm4], ymm1");
+    TEST64("\xc4\xe2\x75\x90\x04\xe7", "vpgatherdd ymm0, dword ptr [rdi+8*ymm4], ymm1");
+    TEST32("\xc4\xe2\x71\x91\x04\xe7", "vpgatherqd xmm0, dword ptr [edi+8*xmm4], xmm1");
+    TEST64("\xc4\xe2\x71\x91\x04\xe7", "vpgatherqd xmm0, dword ptr [rdi+8*xmm4], xmm1");
+    TEST32("\xc4\xe2\x75\x91\x04\xe7", "vpgatherqd xmm0, dword ptr [edi+8*ymm4], xmm1");
+    TEST64("\xc4\xe2\x75\x91\x04\xe7", "vpgatherqd xmm0, dword ptr [rdi+8*ymm4], xmm1");
+    TEST32("\xc4\xe2\xf1\x90\x04\xe7", "vpgatherdq xmm0, qword ptr [edi+8*xmm4], xmm1");
+    TEST64("\xc4\xe2\xf1\x90\x04\xe7", "vpgatherdq xmm0, qword ptr [rdi+8*xmm4], xmm1");
+    TEST32("\xc4\xe2\xf5\x90\x04\xe7", "vpgatherdq ymm0, qword ptr [edi+8*xmm4], ymm1");
+    TEST64("\xc4\xe2\xf5\x90\x04\xe7", "vpgatherdq ymm0, qword ptr [rdi+8*xmm4], ymm1");
+    TEST32("\xc4\xe2\xf1\x91\x04\xe7", "vpgatherqq xmm0, qword ptr [edi+8*xmm4], xmm1");
+    TEST64("\xc4\xe2\xf1\x91\x04\xe7", "vpgatherqq xmm0, qword ptr [rdi+8*xmm4], xmm1");
+    TEST32("\xc4\xe2\xf5\x91\x04\xe7", "vpgatherqq ymm0, qword ptr [edi+8*ymm4], ymm1");
+    TEST64("\xc4\xe2\xf5\x91\x04\xe7", "vpgatherqq ymm0, qword ptr [rdi+8*ymm4], ymm1");
 
     TEST32("\xc4\xe2\x7d\x5a\x20", "vbroadcasti128 ymm4, xmmword ptr [eax]");
     TEST64("\xc4\xe2\x7d\x5a\x20", "vbroadcasti128 ymm4, xmmword ptr [rax]");

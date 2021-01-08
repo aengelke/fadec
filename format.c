@@ -263,20 +263,45 @@ fd_format_abs(const FdInstr* instr, uint64_t addr, char* buffer, size_t len)
             unsigned idx = FD_OP_REG(instr, i);
             buf = fd_strplcpy(buf, reg_name(type, idx, size), end-buf);
         } else if (op_type == FD_OT_MEM) {
-            if (FD_TYPE(instr) == FDI_CMPXCHGD)
-                size = 2 * FD_OPSIZE(instr);
-            else if (FD_TYPE(instr) == FDI_BOUND)
-                size *= 2;
-            else if (FD_TYPE(instr) == FDI_JMPF || FD_TYPE(instr) == FDI_CALLF
-                     || FD_TYPE(instr) == FDI_LDS || FD_TYPE(instr) == FDI_LES
-                     || FD_TYPE(instr) == FDI_LFS || FD_TYPE(instr) == FDI_LGS
-                     || FD_TYPE(instr) == FDI_LSS)
+            unsigned idx_rt = FD_RT_GPL;
+            unsigned idx_sz = FD_ADDRSIZE(instr);
+            switch (FD_TYPE(instr)) {
+            case FDI_CMPXCHGD: size = 2 * FD_OPSIZE(instr); break;
+            case FDI_BOUND: size = 2 * size; break;
+            case FDI_JMPF:
+            case FDI_CALLF:
+            case FDI_LDS:
+            case FDI_LES:
+            case FDI_LFS:
+            case FDI_LGS:
+            case FDI_LSS:
                 size = 6;
-            else if (!size && (FD_TYPE(instr) == FDI_FLD ||
-                               FD_TYPE(instr) == FDI_FSTP ||
-                               FD_TYPE(instr) == FDI_FBLD ||
-                               FD_TYPE(instr) == FDI_FBSTP))
-                size = 10;
+                break;
+            case FDI_FLD:
+            case FDI_FSTP:
+            case FDI_FBLD:
+            case FDI_FBSTP:
+                size = size != 0 ? size : 10;
+                break;
+            case FDI_VPGATHERQD:
+            case FDI_VGATHERQPS:
+                idx_rt = FD_RT_VEC;
+                idx_sz = FD_OP_SIZE(instr, 0) * 2;
+                break;
+            case FDI_VPGATHERDQ:
+            case FDI_VGATHERDPD:
+                idx_rt = FD_RT_VEC;
+                idx_sz = FD_OP_SIZE(instr, 0) / 2;
+                break;
+            case FDI_VPGATHERDD:
+            case FDI_VPGATHERQQ:
+            case FDI_VGATHERDPS:
+            case FDI_VGATHERQPD:
+                idx_rt = FD_RT_VEC;
+                idx_sz = FD_OP_SIZE(instr, 0);
+                break;
+            default: break;
+            }
             switch (size) {
             default: break;
             case 1: buf = fd_strplcpy(buf, "byte ptr ", end-buf); break;
@@ -303,7 +328,7 @@ fd_format_abs(const FdInstr* instr, uint64_t addr, char* buffer, size_t len)
                 if (has_base)
                     buf = fd_strplcpy(buf, "+", end-buf);
                 buf = fd_strplcpy(buf, "1*\0002*\0004*\0008*" + 3*FD_OP_SCALE(instr, i), end-buf);
-                buf = fd_strplcpy(buf, reg_name(FD_RT_GPL, FD_OP_INDEX(instr, i), FD_ADDRSIZE(instr)), end-buf);
+                buf = fd_strplcpy(buf, reg_name(idx_rt, FD_OP_INDEX(instr, i), idx_sz), end-buf);
             }
             uint64_t disp = FD_OP_DISP(instr, i);
             if (disp && (has_base || has_idx)) {
