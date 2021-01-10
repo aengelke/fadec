@@ -1523,3 +1523,16 @@ F3.0f01ed             NP    -      -      -      -      TESTUI ONLY64
 F3.0f01ee             NP    -      -      -      -      CLUI ONLY64
 F3.0f01ef             NP    -      -      -      -      STUI ONLY64
 F3.0fc7/6r            M     GP     -      -      -      SENDUIPI DEF64 ONLY64
+
+# AESKLE/KL (Key Locker)
+F3.0f38d8/0m          M     MEMZ   -      -      -      AESENCWIDE128KL
+F3.0f38d8/1m          M     MEMZ   -      -      -      AESDECWIDE128KL
+F3.0f38d8/2m          M     MEMZ   -      -      -      AESENCWIDE256KL
+F3.0f38d8/3m          M     MEMZ   -      -      -      AESDECWIDE256KL
+F3.0f38dc/m           RM    XMM    MEMZ   -      -      AESENC128KL
+F3.0f38dc/r           RM    XMM    XMM    -      -      LOADIWKEY
+F3.0f38dd/m           RM    XMM    MEMZ   -      -      AESDEC128KL
+F3.0f38de/m           RM    XMM    MEMZ   -      -      AESENC256KL
+F3.0f38df/m           RM    XMM    MEMZ   -      -      AESDEC256KL
+F3.0f38fa/r           RM    GP32   GP32   -      -      ENCODEKEY128
+F3.0f38fb/r           RM    GP32   GP32   -      -      ENCODEKEY256
