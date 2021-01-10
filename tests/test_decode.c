@@ -323,6 +323,16 @@ main(int argc, char** argv)
     TEST64("\x40\xc5\xf2\x2a\xc0", "UD"); // VEX+REX
     TEST64("\x40\x26\xc5\xf2\x2a\xc0", "vcvtsi2ss xmm0, xmm1, eax"); // VEX+REX, but REX doesn't precede VEX
 
+    TEST32("\xd9\x00", "fld dword ptr [eax]");
+    TEST64("\xd9\x00", "fld dword ptr [rax]");
+    TEST32("\xdd\x00", "fld qword ptr [eax]");
+    TEST64("\xdd\x00", "fld qword ptr [rax]");
+    TEST32("\xdb\x28", "fld tbyte ptr [eax]");
+    TEST64("\xdb\x28", "fld tbyte ptr [rax]");
+    TEST("\xd9\xc1", "fld st(1)");
+    TEST("\xdf\xe9", "fucomip st(0), st(1)");
+    TEST64("\x45\xdf\xe9", "fucomip st(0), st(1)"); // REX.RB are ignored.
+
     TEST32("\xf3\x0f\x7e\x5c\x24\x08", "movq xmm3, qword ptr [esp+0x8]");
     TEST64("\xf3\x0f\x7e\x5c\x24\x08", "movq xmm3, qword ptr [rsp+0x8]");
     TEST32("\xc4\xe1\x00\x58\xc1", "vaddps xmm0, xmm7, xmm1"); // MSB in vvvv ignored

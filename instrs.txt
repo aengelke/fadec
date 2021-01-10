@@ -1294,6 +1294,7 @@ d9/4m                 M     MEMZ   -      -      -      FLDENV
 d9/5m                 M     MEM16  -      -      -      FLDCW
 d9/6m                 M     MEMZ   -      -      -      FSTENV
 d9/7m                 M     MEM16  -      -      -      FSTCW
+d9/0r                 M     FPU    -      -      -      FLD
 d9/1r                 M     FPU    -      -      -      FXCH
 d9d0                  NP    -      -      -      -      FNOP
 d9e0                  NP    -      -      -      -      FCHS
@@ -1401,8 +1402,8 @@ df/6m                 M     FPU    -      -      -      FBSTP
 df/7m                 M     MEM64  -      -      -      FISTP ENC_SEPSZ
 # FSTSW AX
 dfe0                  A     GP16   -      -      -      FSTSW
+df/5r                 AM    FPU    FPU    -      -      FUCOMIP
 df/6r                 AM    FPU    FPU    -      -      FCOMIP
-df/7r                 AM    FPU    FPU    -      -      FUCOMIP
 #
 # Control Flow Enforcement
 F3.0f01/5m            M     GP64   -      -      -      RSTORSSP
