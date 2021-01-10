@@ -560,6 +560,16 @@ prefix_end:
         }
     }
 
+    if (UNLIKELY(instr->type == FDI_3DNOW))
+    {
+        unsigned opc3dn = instr->imm;
+        if (opc3dn & 0x40)
+            return FD_ERR_UD;
+        uint64_t msk = opc3dn & 0x80 ? 0x88d144d144d14400 : 0x30003000;
+        if (!(msk >> (opc3dn & 0x3f) & 1))
+            return FD_ERR_UD;
+    }
+
     if (UNLIKELY(prefix_lock)) {
         if (!DESC_LOCK(desc) || instr->operands[0].type != FD_OT_MEM)
             return FD_ERR_UD;

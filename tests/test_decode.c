@@ -509,6 +509,20 @@ main(int argc, char** argv)
     TEST32("\xd9\x20", "fldenv [eax]");
     TEST64("\xd9\x20", "fldenv [rax]");
 
+    // 3DNow!
+    TEST("\x0f\x0f\xc0\x00", "UD");
+    TEST("\x0f\x0f\xc0\x0c", "3dnow mm0, mm0, 0xc"); // PI2FW
+    TEST("\x0f\x0f\xc0\x0d", "3dnow mm0, mm0, 0xd"); // PI2FD
+    TEST("\x0f\x0f\xc0\x0e", "UD");
+    TEST("\x0f\x0f\xc0\x1c", "3dnow mm0, mm0, 0x1c"); // PF2IW
+    TEST("\x0f\x0f\xc0\x1d", "3dnow mm0, mm0, 0x1d"); // PF2ID
+    TEST("\x0f\x0f\xc0\x42", "UD");
+    TEST("\x0f\x0f\xc0\x80", "UD");
+    TEST("\x0f\x0f\xc0\x8a", "3dnow mm0, mm0, 0x8a"); // PFNACC
+    TEST("\x0f\x0f\xc0\xa0", "3dnow mm0, mm0, 0xa0"); // PFCMPGT
+    TEST("\x0f\x0f\xc0\xb6", "3dnow mm0, mm0, 0xb6"); // PFRCPIT2
+    TEST("\x0f\x0f\xc0\xbf", "3dnow mm0, mm0, 0xbf"); // PAVGUSB
+
     puts(failed ? "Some tests FAILED" : "All tests PASSED");
     return failed ? EXIT_FAILURE : EXIT_SUCCESS;
 }
