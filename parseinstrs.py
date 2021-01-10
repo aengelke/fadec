@@ -285,8 +285,8 @@ class Opcode(NamedTuple):
         if self.opcext:
             opcode.append((EntryKind.TABLE16, [((self.opcext - 0xc0) >> 3) | 8]))
             opcode.append((EntryKind.TABLE8E, [self.opcext & 7]))
-        if self.modreg and self.modreg[0] is not None:
-            # TODO: support for /r and /m specifiers, currently adds ~1.9kiB size
+        if self.modreg:
+            # TODO: optimize for /r and /m specifiers to reduce size
             mod = {"m": [0], "r": [1<<3], "rm": [0, 1<<3]}[self.modreg[1]]
             reg = [self.modreg[0]] if self.modreg[0] is not None else list(range(8))
             opcode.append((EntryKind.TABLE16, [x + y for x in mod for y in reg]))

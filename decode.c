@@ -358,9 +358,6 @@ prefix_end:
 
         if (mod == 3 || is_cr || is_dr)
         {
-            if (op_modrm->misc == FD_RT_MEM)
-                return FD_ERR_UD;
-
             uint8_t reg_idx = rm;
             if (LIKELY(op_modrm->misc == FD_RT_GPL || op_modrm->misc == FD_RT_VEC))
                 reg_idx += prefix_rex & PREFIX_REXB ? 8 : 0;
