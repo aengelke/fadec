@@ -178,44 +178,6 @@ fd_format_abs(const FdInstr* instr, uint64_t addr, char* buffer, size_t len)
         case 8: mnemonic = "jrcxz"; break;
         }
         break;
-    case FDI_ENTER: {
-        buf = fd_strplcpy(buf, mnemonic, end-buf);
-        if (FD_OPSIZE(instr) == 2)
-            buf = fd_strplcpy(buf, "w", end-buf);
-        char* fmt = fd_format_hex(FD_OP_IMM(instr, 0) & 0xffff, tmp + 3);
-        *--fmt = 'x';
-        *--fmt = '0';
-        *--fmt = ' ';
-        buf = fd_strplcpy(buf, fmt, end-buf);
-        fmt = fd_format_hex(FD_OP_IMM(instr, 0) >> 16, tmp + 4);
-        *--fmt = 'x';
-        *--fmt = '0';
-        *--fmt = ' ';
-        *--fmt = ',';
-        buf = fd_strplcpy(buf, fmt, end-buf);
-        return;
-    }
-    case FDI_JMPF:
-    case FDI_CALLF:
-        if (FD_OP_TYPE(instr, 0) == FD_OT_IMM) {
-            buf = fd_strplcpy(buf, mnemonic, end-buf);
-            uint32_t tgt = FD_OP_IMM(instr, 0) & 0xffffffff;
-            if (FD_OP_SIZE(instr, 0) == 2)
-                tgt &= 0xffff;
-            unsigned seg = FD_OP_IMM(instr, 0) >> 8*FD_OP_SIZE(instr, 0);
-            char* fmt = fd_format_hex(seg & 0xffff, tmp + 3);
-            *--fmt = 'x';
-            *--fmt = '0';
-            *--fmt = ' ';
-            buf = fd_strplcpy(buf, fmt, end-buf);
-            fmt = fd_format_hex(tgt, tmp + 3);
-            *--fmt = 'x';
-            *--fmt = '0';
-            *--fmt = ':';
-            buf = fd_strplcpy(buf, fmt, end-buf);
-            return;
-        }
-        break;
     case FDI_PUSH:
         if (FD_OP_SIZE(instr, 0) == 2 && FD_OP_TYPE(instr, 0) == FD_OT_IMM)
             sizesuffix[0] = 'w';
@@ -239,6 +201,7 @@ fd_format_abs(const FdInstr* instr, uint64_t addr, char* buffer, size_t len)
             sizesuffix[0] = 0;
         break;
     case FDI_RET:
+    case FDI_ENTER:
     case FDI_LEAVE:
         if (FD_OPSIZE(instr) == (FD_IS64(instr) ? 8 : 4))
             sizesuffix[0] = 0;
@@ -372,15 +335,40 @@ fd_format_abs(const FdInstr* instr, uint64_t addr, char* buffer, size_t len)
             buf = fd_strplcpy(buf, "]", end-buf);
         } else if (op_type == FD_OT_IMM || op_type == FD_OT_OFF) {
             size_t immediate = FD_OP_IMM(instr, i);
+            // Some instructions have actually two immediate operands which are
+            // decoded as a single operand. Split them here appropriately.
+            size_t splitimm = 0;
+            const char* splitsep = ", ";
+            switch (FD_TYPE(instr)) {
+            default:
+                goto nosplitimm;
+            case FDI_ENTER:
+                splitimm = immediate & 0xffff;
+                immediate = (immediate >> 16) & 0xff;
+                break;
+            case FDI_JMPF:
+            case FDI_CALLF:
+                splitsep = ":";
+                splitimm = (immediate >> 8*size) & 0xffff;
+                // immediate is masked below.
+                break;
+            }
+            char* fmt = fd_format_hex(splitimm, tmp + 2);
+            *--fmt = 'x';
+            *--fmt = '0';
+            buf = fd_strplcpy(buf, fmt, end-buf);
+            buf = fd_strplcpy(buf, splitsep, end-buf);
+
+        nosplitimm:
             if (op_type == FD_OT_OFF)
                 immediate += addr + FD_SIZE(instr);
-            if (FD_OP_SIZE(instr, i) == 1)
+            if (size == 1)
                 immediate &= 0xff;
-            else if (FD_OP_SIZE(instr, i) == 2)
+            else if (size == 2)
                 immediate &= 0xffff;
-            else if (FD_OP_SIZE(instr, i) == 4)
+            else if (size == 4)
                 immediate &= 0xffffffff;
-            char* fmt = fd_format_hex(immediate, tmp + 2);
+            fmt = fd_format_hex(immediate, tmp + 2);
             *--fmt = 'x';
             *--fmt = '0';
             buf = fd_strplcpy(buf, fmt, end-buf);
