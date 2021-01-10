@@ -35,6 +35,9 @@ endif
 if get_option('archmode') != 'only32'
   generate_args += ['--64']
 endif
+if get_option('with_undoc')
+  generate_args += ['--with-undoc']
+endif
 
 instr_data = custom_target('tables',
                            command: [python3, '@INPUT0@', '@INPUT1@', '@OUTPUT@'] + generate_args,

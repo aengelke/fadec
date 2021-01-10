@@ -471,7 +471,7 @@ def encode_table(entries):
     for opcode, desc in entries:
         if desc.mnemonic[:9] == "RESERVED_":
             continue
-        if "ONLY32" in desc.flags or "UNDOC" in desc.flags:
+        if "ONLY32" in desc.flags:
             continue
 
         opsizes = {8} if "SIZE_8" in desc.flags else {16, 32, 64}
@@ -615,6 +615,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--32", dest="modes", action="append_const", const=32)
     parser.add_argument("--64", dest="modes", action="append_const", const=64)
+    parser.add_argument("--with-undoc", action="store_true")
     parser.add_argument("table", type=argparse.FileType('r'))
     parser.add_argument("decode_mnems", type=argparse.FileType('w'))
     parser.add_argument("decode_table", type=argparse.FileType('w'))
@@ -625,8 +626,10 @@ if __name__ == "__main__":
     entries = []
     for line in args.table.read().splitlines():
         if not line or line[0] == "#": continue
-        opcode_string, desc = tuple(line.split(maxsplit=1))
-        entries.append((Opcode.parse(opcode_string), InstrDesc.parse(desc)))
+        opcode_string, desc_string = tuple(line.split(maxsplit=1))
+        opcode, desc = Opcode.parse(opcode_string), InstrDesc.parse(desc_string)
+        if "UNDOC" not in desc.flags or args.with_undoc:
+            entries.append((opcode, desc))
 
     mnemonics = sorted({desc.mnemonic for _, desc in entries})
 

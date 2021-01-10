@@ -252,7 +252,7 @@ d3/6                  MC    GP     GP8    -      -      SHL
 d3/7                  MC    GP     GP8    -      -      SAR
 d4                    I     IMM    -      -      -      AAM ONLY32 SIZE_8
 d5                    I     IMM    -      -      -      AAD ONLY32 SIZE_8
-#d6 unused
+d6                    NP    -      -      -      -      SALC ONLY32 UNDOC
 d7                    NP    -      -      -      -      XLATB
 #d8-df FPU Escape
 e0                    D     IMM    -      -      -      LOOPNZ FORCE64 IMM_8
@@ -1357,8 +1357,11 @@ db/0r                 M     FPU    -      -      -      FCMOVNB
 db/1r                 M     FPU    -      -      -      FCMOVNE
 db/2r                 M     FPU    -      -      -      FCMOVNBE
 db/3r                 M     FPU    -      -      -      FCMOVNU
+dbe0                  NP    -      -      -      -      FENI8087_NOP UNDOC
+dbe1                  NP    -      -      -      -      FDISI8087_NOP UNDOC
 dbe2                  NP    -      -      -      -      FCLEX
 dbe3                  NP    -      -      -      -      FINIT
+dbe4                  NP    -      -      -      -      FSETPM287_NOP UNDOC
 db/5r                 M     FPU    -      -      -      FUCOMI
 db/6r                 M     FPU    -      -      -      FCOMI
 dc/0m                 M     MEM64  -      -      -      FADD ENC_SEPSZ
@@ -1371,6 +1374,8 @@ dc/6m                 M     MEM64  -      -      -      FDIV ENC_SEPSZ
 dc/7m                 M     MEM64  -      -      -      FDIVR ENC_SEPSZ
 dc/0r                 MA    FPU    FPU    -      -      FADD
 dc/1r                 MA    FPU    FPU    -      -      FMUL
+dc/2r                 MA    FPU    FPU    -      -      FCOM UNDOC
+dc/3r                 MA    FPU    FPU    -      -      FCOMP UNDOC
 dc/4r                 MA    FPU    FPU    -      -      FSUBR
 dc/5r                 MA    FPU    FPU    -      -      FSUB
 dc/6r                 MA    FPU    FPU    -      -      FDIVR
@@ -1410,6 +1415,7 @@ df/4m                 M     FPU    -      -      -      FBLD
 df/5m                 M     MEM64  -      -      -      FILD ENC_SEPSZ
 df/6m                 M     FPU    -      -      -      FBSTP
 df/7m                 M     MEM64  -      -      -      FISTP ENC_SEPSZ
+df/0r                 M     FPU    -      -      -      FFREEP UNDOC
 # FSTSW AX
 dfe0                  A     GP16   -      -      -      FSTSW
 df/5r                 AM    FPU    FPU    -      -      FUCOMIP
