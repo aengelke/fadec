@@ -506,7 +506,9 @@ prefix_end:
         uint8_t imm_size;
         if (imm_byte)
             imm_size = 1;
-        else if (UNLIKELY(instr->type == FDI_RET || instr->type == FDI_RETF))
+        else if (UNLIKELY(instr->type == FDI_RET || instr->type == FDI_RETF ||
+                          instr->type == FDI_SSE_EXTRQ ||
+                          instr->type == FDI_SSE_INSERTQ))
             imm_size = 2;
         else if (UNLIKELY(desc->type == FDI_JMPF || desc->type == FDI_CALLF))
             imm_size = op_size + 2;

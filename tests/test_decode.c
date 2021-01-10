@@ -315,6 +315,8 @@ main(int argc, char** argv)
     TEST("\x66\x0f\x71\xd0\x01", "psrlw xmm0, 0x1");
     TEST("\x66\x0f\x3a\x20\xc4\x01", "pinsrb xmm0, spl, 0x1");
     TEST("\x66\x0f\x71\x10\x01", "UD");
+    TEST("\x66\x0f\x78\xc0\xab\xcd", "extrq xmm0, 0xab, 0xcd");
+    TEST("\xf2\x0f\x78\xc1\xab\xcd", "insertq xmm0, xmm1, 0xab, 0xcd");
 
     TEST32("\xc4\x00", "les eax, fword ptr [eax]");
     TEST32("\xc5\x00", "lds eax, fword ptr [eax]");

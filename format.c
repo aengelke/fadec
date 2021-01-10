@@ -342,6 +342,11 @@ fd_format_abs(const FdInstr* instr, uint64_t addr, char* buffer, size_t len)
             switch (FD_TYPE(instr)) {
             default:
                 goto nosplitimm;
+            case FDI_SSE_EXTRQ:
+            case FDI_SSE_INSERTQ:
+                splitimm = immediate & 0xff;
+                immediate = (immediate >> 8) & 0xff;
+                break;
             case FDI_ENTER:
                 splitimm = immediate & 0xffff;
                 immediate = (immediate >> 16) & 0xff;

@@ -352,6 +352,10 @@ F2.0f09               NP    -      -      -      -      WBINVD
 0f0d/5m               M     MEM8   -      -      -      RESERVED_PREFETCH
 0f0d/6m               M     MEM8   -      -      -      RESERVED_PREFETCH
 0f0d/7m               M     MEM8   -      -      -      RESERVED_PREFETCH
+0f0e                  NP    -      -      -      -      FEMMS ONLYAMD
+# TODO: actually decode 3DNow! instructions. Given that 3DNow! no longer exists,
+# this is unlikely to happen, though.
+0f0f                  RMI   MMX    MMX    IMM8   -      3DNOW ONLYAMD
 0f18/0m               M     MEM8   -      -      -      PREFETCHNTA
 0f18/1m               M     MEM8   -      -      -      PREFETCHT0
 0f18/2m               M     MEM8   -      -      -      PREFETCHT1
@@ -703,6 +707,11 @@ F2.0f70               RMI   XMM    XMM    IMM8   -      SSE_PSHUFLW
 66.0f74               RM    XMM    XMM    -      -      SSE_PCMPEQB
 66.0f75               RM    XMM    XMM    -      -      SSE_PCMPEQW
 66.0f76               RM    XMM    XMM    -      -      SSE_PCMPEQD
+# EXTRQ/INSERTQ immediate size handled in code.
+66.0f78/0r            MI    XMM    IMM16  -      -      SSE_EXTRQ ONLYAMD
+F2.0f78/r             RMI   XMM    XMM    IMM16  -      SSE_INSERTQ ONLYAMD
+66.0f79/r             RM    XMM    XMM    -      -      SSE_EXTRQ ONLYAMD
+F2.0f79/r             RM    XMM    XMM    -      -      SSE_INSERTQ ONLYAMD
 66.0f7c               RM    XMM    XMM    -      -      SSE_HADDPD
 F2.0f7c               RM    XMM    XMM    -      -      SSE_HADDPS
 66.0f7d               RM    XMM    XMM    -      -      SSE_HSUBPD
@@ -1455,6 +1464,27 @@ F3.0fc7/6m            M     MEM64  -      -      -      VMXON
 66.0f01cd             NP    -      -      -      -      SEAMRET
 66.0f01ce             NP    -      -      -      -      SEAMOPS
 66.0f01cf             NP    -      -      -      -      SEAMCALL
+
+# AMD SVM
+NP.0f01d8             NP    -      -      -      -      VMRUN ONLYAMD
+NP.0f01d9             NP    -      -      -      -      VMMCALL ONLYAMD
+NP.0f01da             NP    -      -      -      -      VMLOAD ONLYAMD
+NP.0f01db             NP    -      -      -      -      VMSAVE ONLYAMD
+NP.0f01dc             NP    -      -      -      -      STGI ONLYAMD
+NP.0f01dd             NP    -      -      -      -      CLGI ONLYAMD
+NP.0f01de             NP    -      -      -      -      SKINIT ONLYAMD
+NP.0f01df             NP    -      -      -      -      INVLPGA ONLYAMD
+NP.0f01fa             NP    -      -      -      -      MONITORX ONLYAMD
+F3.0f01fa             NP    -      -      -      -      MCOMMIT ONLYAMD
+NP.0f01fb             NP    -      -      -      -      MWAITX ONLYAMD
+NP.0f01fe             NP    -      -      -      -      INVLPGB ONLYAMD
+NP.0f01ff             NP    -      -      -      -      TLBSYNC ONLYAMD
+
+# AMD SNP
+F3.0f01fe             NP    -      -      -      -      RMPADJUST ONLYAMD ONLY64
+F2.0f01fe             NP    -      -      -      -      RMPUPDATE ONLYAMD ONLY64
+F3.0f01ff             NP    -      -      -      -      PSMASH ONLYAMD ONLY64
+F2.0f01ff             NP    -      -      -      -      PVALIDATE ONLYAMD ONLY64
 
 # WAITPKG
 66.0fae/6r            M     GP32   -      -      -      TPAUSE
