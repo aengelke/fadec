@@ -296,6 +296,8 @@ main(int argc, char** argv)
 
     TEST64("\x0f\xae\xe8", "lfence");
 
+    TEST("\x0f\x70\xc0\x85", "pshufw mm0, mm0, 0x85");
+
     TEST("\xf3\x0f\x2a\xc1", "cvtsi2ss xmm0, ecx");
     TEST("\xf3\x66\x0f\x2a\xc1", "cvtsi2ss xmm0, ecx");
     TEST("\x66\xf3\x0f\x2a\xc1", "cvtsi2ss xmm0, ecx");

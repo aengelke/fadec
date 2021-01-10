@@ -487,6 +487,7 @@ NP.0f6b               RM    MMX    MMX    -      -      MMX_PACKSSDW
 NP.W0.0f6e            RM    MMX    GP32   -      -      MMX_MOVD
 NP.W1.0f6e            RM    MMX    GP64   -      -      MMX_MOVQ
 NP.0f6f               RM    MMX    MMX    -      -      MMX_MOVQ
+NP.0f70               RMI   MMX    MMX    IMM8   -      MMX_PSHUFW
 NP.0f71/2r            MI    MMX    IMM8   -      -      MMX_PSRLW
 NP.0f71/4r            MI    MMX    IMM8   -      -      MMX_PSRAW
 NP.0f71/6r            MI    MMX    IMM8   -      -      MMX_PSLLW
