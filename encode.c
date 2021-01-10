@@ -15,6 +15,7 @@ enum {
     OPC_0F38 = 2 << 16,
     OPC_0F3A = 3 << 16,
     OPC_ESCAPE_MSK = 3 << 16,
+    OPC_VSIB = 1 << 18,
     OPC_66 = 1 << 19,
     OPC_F2 = 1 << 20,
     OPC_F3 = 1 << 21,
@@ -31,6 +32,8 @@ enum {
 
 #define OPC_SEG_IDX 31
 #define OPC_SEG_MSK (0x7l << OPC_SEG_IDX)
+#define OPC_VEXOP_IDX 34
+#define OPC_VEXOP_MSK (0xfl << OPC_VEXOP_IDX)
 
 static bool op_mem(FeOp op) { return op < 0; }
 static bool op_reg(FeOp op) { return op >= 0; }
@@ -56,16 +59,22 @@ static
 unsigned
 opc_size(uint64_t opc)
 {
-    if (opc & OPC_VEX) return 0; // TODO: support VEX encoding
     unsigned res = 1;
+    if (opc & OPC_VEX) {
+        if ((opc & (OPC_REXW|OPC_REXX|OPC_REXB|OPC_ESCAPE_MSK)) != OPC_0F)
+            res += 3;
+        else
+            res += 2;
+    } else {
+        if (opc & OPC_66) res++;
+        if (opc & OPC_F2) res++;
+        if (opc & OPC_F3) res++;
+        if (opc & (OPC_REX|OPC_REXW|OPC_REXR|OPC_REXX|OPC_REXB)) res++;
+        if (opc & OPC_ESCAPE_MSK) res++;
+        if ((opc & OPC_ESCAPE_MSK) == OPC_0F38 || (opc & OPC_ESCAPE_MSK) == OPC_0F3A) res++;
+    }
     if (opc & OPC_SEG_MSK) res++;
     if (opc & OPC_67) res++;
-    if (opc & OPC_66) res++;
-    if (opc & OPC_F2) res++;
-    if (opc & OPC_F3) res++;
-    if (opc & (OPC_REX|OPC_REXW|OPC_REXR|OPC_REXX|OPC_REXB)) res++;
-    if (opc & OPC_ESCAPE_MSK) res++;
-    if ((opc & OPC_ESCAPE_MSK) == OPC_0F38 || (opc & OPC_ESCAPE_MSK) == OPC_0F3A) res++;
     if ((opc & 0xc000) == 0xc000) res++;
     return res;
 }
@@ -74,25 +83,46 @@ static
 int
 enc_opc(uint8_t** restrict buf, uint64_t opc)
 {
-    if (opc & OPC_VEX) return -1; // TODO: support VEX encoding
     if (opc & OPC_SEG_MSK)
         *(*buf)++ = (0x65643e362e2600 >> (8 * ((opc >> OPC_SEG_IDX) & 7))) & 0xff;
     if (opc & OPC_67) *(*buf)++ = 0x67;
-    if (opc & OPC_66) *(*buf)++ = 0x66;
-    if (opc & OPC_F2) *(*buf)++ = 0xF2;
-    if (opc & OPC_F3) *(*buf)++ = 0xF3;
-    if (opc & (OPC_REX|OPC_REXW|OPC_REXR|OPC_REXX|OPC_REXB))
-    {
-        unsigned rex = 0x40;
-        if (opc & OPC_REXW) rex |= 8;
-        if (opc & OPC_REXR) rex |= 4;
-        if (opc & OPC_REXX) rex |= 2;
-        if (opc & OPC_REXB) rex |= 1;
-        *(*buf)++ = rex;
+    if (opc & OPC_VEX) {
+        bool vex3 = (opc & (OPC_REXW|OPC_REXX|OPC_REXB|OPC_ESCAPE_MSK)) != OPC_0F;
+        unsigned pp = 0;
+        if (opc & OPC_66) pp = 1;
+        if (opc & OPC_F3) pp = 2;
+        if (opc & OPC_F2) pp = 3;
+        *(*buf)++ = 0xc4 | !vex3;
+        unsigned b2 = pp | (opc & OPC_VEXL ? 0x4 : 0);
+        if (vex3) {
+            unsigned b1 = (opc & OPC_ESCAPE_MSK) >> 16;
+            if (!(opc & OPC_REXR)) b1 |= 0x80;
+            if (!(opc & OPC_REXX)) b1 |= 0x40;
+            if (!(opc & OPC_REXB)) b1 |= 0x20;
+            *(*buf)++ = b1;
+            if (opc & OPC_REXW) b2 |= 0x80;
+        } else {
+            if (!(opc & OPC_REXR)) b2 |= 0x80;
+        }
+        b2 |= (~((opc & OPC_VEXOP_MSK) >> OPC_VEXOP_IDX) & 0xf) << 3;
+        *(*buf)++ = b2;
+    } else {
+        if (opc & OPC_66) *(*buf)++ = 0x66;
+        if (opc & OPC_F2) *(*buf)++ = 0xF2;
+        if (opc & OPC_F3) *(*buf)++ = 0xF3;
+        if (opc & (OPC_REX|OPC_REXW|OPC_REXR|OPC_REXX|OPC_REXB))
+        {
+            unsigned rex = 0x40;
+            if (opc & OPC_REXW) rex |= 8;
+            if (opc & OPC_REXR) rex |= 4;
+            if (opc & OPC_REXX) rex |= 2;
+            if (opc & OPC_REXB) rex |= 1;
+            *(*buf)++ = rex;
+        }
+        if (opc & OPC_ESCAPE_MSK) *(*buf)++ = 0x0F;
+        if ((opc & OPC_ESCAPE_MSK) == OPC_0F38) *(*buf)++ = 0x38;
+        if ((opc & OPC_ESCAPE_MSK) == OPC_0F3A) *(*buf)++ = 0x3A;
     }
-    if (opc & OPC_ESCAPE_MSK) *(*buf)++ = 0x0F;
-    if ((opc & OPC_ESCAPE_MSK) == OPC_0F38) *(*buf)++ = 0x38;
-    if ((opc & OPC_ESCAPE_MSK) == OPC_0F3A) *(*buf)++ = 0x3A;
     *(*buf)++ = opc & 0xff;
     if ((opc & 0xc000) == 0xc000) *(*buf)++ = (opc >> 8) & 0xff;
     return 0;
@@ -150,10 +180,18 @@ enc_mr(uint8_t** restrict buf, uint64_t opc, uint64_t op0, uint64_t op1,
         off = op_mem_offset(op0);
 
         if (!!op_mem_idx(op0) != !!op_mem_scale(op0)) return -1;
+        if (!op_mem_idx(op0) && (opc & OPC_VSIB)) return -1;
         if (op_mem_idx(op0))
         {
-            if (!op_reg_gpl(op_mem_idx(op0))) return -1;
-            if (op_reg_idx(op_mem_idx(op0)) == 4) return -1;
+            if (opc & OPC_VSIB)
+            {
+                if (!op_reg_xmm(op_mem_idx(op0))) return -1;
+            }
+            else
+            {
+                if (!op_reg_gpl(op_mem_idx(op0))) return -1;
+                if (op_reg_idx(op_mem_idx(op0)) == 4) return -1;
+            }
             idx = op_mem_idx(op0) & 7;
             int scalabs = op_mem_scale(op0);
             if (scalabs & (scalabs - 1)) return -1;
@@ -322,6 +360,9 @@ fe_enc64_impl(uint8_t** restrict buf, uint64_t mnem, FeOp op0, FeOp op1,
 
         // NOP has no operands, so this must be the 32-bit OA XCHG
         if ((desc->opc & ~7) == 0x90 && ops[0] == FE_AX) goto next;
+
+        if (ei->vexreg)
+            opc |= ((uint64_t) op_reg_idx(ops[ei->vexreg^3])) << OPC_VEXOP_IDX;
 
         if (ei->modrm) {
             FeOp modreg = ei->modreg ? ops[ei->modreg^3] : (opc & 0xff00) >> 8;

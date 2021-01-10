@@ -484,6 +484,8 @@ def encode_table(entries):
             opc_i |= opcode.modreg[0] << 8
         opc_flags = ""
         opc_flags += ["","|OPC_0F","|OPC_0F38","|OPC_0F3A"][opcode.escape]
+        if "VSIB" in desc.flags:
+            opc_flags += "|OPC_VSIB"
         if opcode.vex:
             hasvex, vecsizes = True, {128, 256}
             opc_flags += "|OPC_VEX"
@@ -574,6 +576,7 @@ def encode_table(entries):
             tys_i = sum(ty << (4*i) for i, ty in enumerate(tys))
             opc_s = hex(opc_i) + opc_flags + prefix[1]
             if opsize == 16: opc_s += "|OPC_66"
+            if vecsize == 256: opc_s += "|OPC_VEXL"
             if opsize == 64 and "DEF64" not in desc.flags and "FORCE64" not in desc.flags: opc_s += "|OPC_REXW"
 
             # Construct mnemonic name
