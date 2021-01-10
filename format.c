@@ -334,6 +334,7 @@ fd_format_abs(const FdInstr* instr, uint64_t addr, char* buffer, size_t len)
             case 10: buf = fd_strplcpy(buf, "tbyte ptr ", end-buf); break;
             case 16: buf = fd_strplcpy(buf, "xmmword ptr ", end-buf); break;
             case 32: buf = fd_strplcpy(buf, "ymmword ptr ", end-buf); break;
+            case 64: buf = fd_strplcpy(buf, "zmmword ptr ", end-buf); break;
             }
             unsigned seg = FD_SEGMENT(instr);
             if (seg != FD_REG_NONE) {

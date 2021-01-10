@@ -503,6 +503,7 @@ NP.0f77               NP    -      -      -      -      MMX_EMMS
 NP.W0.0f7e            MR    GP32   MMX    -      -      MMX_MOVD
 NP.W1.0f7e            MR    GP64   MMX    -      -      MMX_MOVQ
 NP.0f7f               MR    MMX    MMX    -      -      MMX_MOVQ
+# TODO: GP operand is actually GP16
 NP.0fc4               RMI   MMX    GP     IMM8   -      MMX_PINSRW ENC_NOSZ
 NP.0fc5/r             RMI   GP     MMX    IMM8   -      MMX_PEXTRW DEF64
 NP.0fd1               RM    MMX    MMX    -      -      MMX_PSRLW
@@ -816,7 +817,8 @@ F2.0ff0/m             RM    XMM    MEMV   -      -      SSE_LDDQU
 66.0f383f             RM    XMM    XMM    -      -      SSE_PMAXUD
 66.0f3840             RM    XMM    XMM    -      -      SSE_PMULLD
 66.0f3841             RM    XMM    XMM    -      -      SSE_PHMINPOSUW
-66.0f38f8/m           RM    GP     MEMZ   -      -      MOVDIR64B
+# TODO: GP operand has address size
+66.0f38f8/m           RM    GP     MEM512 -      -      MOVDIR64B DEF64
 NP.0f38f9/m           MR    MEM    GP     -      -      MOVDIRI
 #
 66.0f3a08             RMI   XMM    XMM    IMM8   -      SSE_ROUNDPS
@@ -1418,7 +1420,7 @@ F3.0fae/6m            M     GP     -      -      -      CLRSSBSY
 F3.0fae/5r            M     GP     -      -      -      INCSSP
 #
 # CLDEMOTE
-NP.0f1c/0m            M     MEMZ   -      -      -      CLDEMOTE
+NP.0f1c/0m            M     MEM8   -      -      -      CLDEMOTE
 
 # VMX
 66.0f3880/m           RM    GP     MEMZ   -      -      INVEPT DEF64
@@ -1454,8 +1456,8 @@ F3.0fae/4             M     GP     -      -      -      PTWRITE
 66.0f3acf             RMI   XMM    XMM    IMM8   -      GF2P8AFFINEINVQB
 
 # ENQCMD
-F2.0f38f8/m           RM    GP     MEMZ   -      -      ENQCMD
-F3.0f38f8/m           RM    GP     MEMZ   -      -      ENQCMDS
+F2.0f38f8/m           RM    GP     MEM512 -      -      ENQCMD
+F3.0f38f8/m           RM    GP     MEM512 -      -      ENQCMDS
 
 # PCONFIG
 NP.0f01c5             NP    -      -      -      -      PCONFIG
@@ -1481,7 +1483,7 @@ NP.0fc7/5m            M     MEMZ   -      -      -      XSAVES INSTR_WIDTH
 NFx.0fc7/6r           M     GP     -      -      -      RDRAND
 NFx.0fc7/7r           M     GP     -      -      -      RDSEED
 F3.0fc7/7r            M     GP     -      -      -      RDPID DEF64
-66.0f3882/m           RM    GP     MEMZ   -      -      INVPCID DEF64
+66.0f3882/m           RM    GP     MEM128 -      -      INVPCID DEF64
 NP.0f38c8             RM    XMM    XMM    -      -      SHA1NEXTE
 NP.0f38c9             RM    XMM    XMM    -      -      SHA1MSG1
 NP.0f38ca             RM    XMM    XMM    -      -      SHA1MSG2

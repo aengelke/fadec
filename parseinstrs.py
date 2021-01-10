@@ -122,6 +122,8 @@ OPKINDS = {
     "MEM32": OpKind(4, OpKind.K_MEM),
     "MEM64": OpKind(8, OpKind.K_MEM),
     "MEM128": OpKind(16, OpKind.K_MEM),
+    "MEM256": OpKind(32, OpKind.K_MEM),
+    "MEM512": OpKind(64, OpKind.K_MEM),
     "MASK8": OpKind(1, "MASK"),
     "MASK16": OpKind(2, "MASK"),
     "MASK32": OpKind(4, "MASK"),
@@ -139,7 +141,7 @@ class InstrDesc(NamedTuple):
 
     OPKIND_REGTYS = {"GP": 0, "FPU": 1, "XMM": 2, "MASK": 3, "MMX": 4, "BND": 5}
     OPKIND_SIZES = {
-        0: 0, 1: 1, 2: 2, 4: 3, 8: 4, 16: 5, 32: 6, 10: 0,
+        0: 0, 1: 1, 2: 2, 4: 3, 8: 4, 16: 5, 32: 6, 64: 7, 10: 0,
         OpKind.SZ_OP: -2, OpKind.SZ_VEC: -3,
     }
 
