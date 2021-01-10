@@ -111,6 +111,8 @@ main(int argc, char** argv)
     TEST64("\x44\x8c\xf8", "UD"); // no segment register 7
     TEST("\x8e\xc0", "mov es, ax");
     TEST("\x8e\xc8", "UD"); // No mov cs, eax
+    TEST("\x0f\x1e\xc0", "nop eax, eax"); // reserved nop
+    TEST("\x0f\x1e\x04\x25\x01\x00\x00\x00", "nop dword ptr [0x1], eax"); // reserved nop
     TEST("\xd8\xc1", "fadd st(0), st(1)");
     TEST("\xdc\xc1", "fadd st(1), st(0)");
     TEST64("\x41\xd8\xc1", "fadd st(0), st(1)"); // REX.B ignored

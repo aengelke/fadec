@@ -347,11 +347,8 @@ F2.0f09               NP    -      -      -      -      WBINVD
 0f0d/0m               M     MEM8   -      -      -      PREFETCH
 0f0d/1m               M     MEM8   -      -      -      PREFETCHW
 0f0d/2m               M     MEM8   -      -      -      PREFETCHWT1
-0f0d/3m               M     MEM8   -      -      -      RESERVED_PREFETCH
-0f0d/4m               M     MEM8   -      -      -      RESERVED_PREFETCH
-0f0d/5m               M     MEM8   -      -      -      RESERVED_PREFETCH
-0f0d/6m               M     MEM8   -      -      -      RESERVED_PREFETCH
-0f0d/7m               M     MEM8   -      -      -      RESERVED_PREFETCH
+# All other slots are reserved, AMD maps them to /0
+*0f0d/m               M     MEM8   -      -      -      RESERVED_PREFETCH ONLYAMD
 0f0e                  NP    -      -      -      -      FEMMS ONLYAMD
 # TODO: actually decode 3DNow! instructions. Given that 3DNow! no longer exists,
 # this is unlikely to happen, though.
@@ -360,15 +357,16 @@ F2.0f09               NP    -      -      -      -      WBINVD
 0f18/1m               M     MEM8   -      -      -      PREFETCHT0
 0f18/2m               M     MEM8   -      -      -      PREFETCHT1
 0f18/3m               M     MEM8   -      -      -      PREFETCHT2
-0f18/0r               M     GP     -      -      -      RESERVED_NOP
-0f18/1r               M     GP     -      -      -      RESERVED_NOP
-0f18/2r               M     GP     -      -      -      RESERVED_NOP
-0f18/3r               M     GP     -      -      -      RESERVED_NOP
-0f18/4                M     GP     -      -      -      RESERVED_NOP
-0f18/5                M     GP     -      -      -      RESERVED_NOP
-0f18/6                M     GP     -      -      -      RESERVED_NOP
-0f18/7                M     GP     -      -      -      RESERVED_NOP
-0f1f                  M     GP     -      -      -      NOP
+# Reserved NOPs are weak, they can be overridden by other instructions.
+*0f18                 MR    GP     GP     -      -      RESERVED_NOP
+*0f19                 MR    GP     GP     -      -      RESERVED_NOP
+*0f1a                 MR    GP     GP     -      -      RESERVED_NOP
+*0f1b                 MR    GP     GP     -      -      RESERVED_NOP
+*0f1c                 MR    GP     GP     -      -      RESERVED_NOP
+*0f1d                 MR    GP     GP     -      -      RESERVED_NOP
+*0f1e                 MR    GP     GP     -      -      RESERVED_NOP
+*0f1f                 MR    GP     GP     -      -      RESERVED_NOP
+0f1f/0                M     GP     -      -      -      NOP
 0f20                  MR    GP     CR     -      -      MOV_CR DEF64 IGN66
 0f21                  MR    GP     DR     -      -      MOV_DR DEF64 IGN66
 0f22                  RM    CR     GP     -      -      MOV_CR DEF64 IGN66

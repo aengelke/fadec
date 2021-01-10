@@ -345,7 +345,7 @@ class Table:
         new_items = old.items[:idx] + (entry_name,) + old.items[idx+1:]
         self.data[name] = TrieEntry(old.kind, new_items, None)
 
-    def add_opcode(self, opcode, instr_encoding, root_idx=0):
+    def _walk_opcode(self, opcode, root_idx):
         name = "t{},{}".format(root_idx, format_opcode(opcode))
 
         tn = "root%d"%root_idx
@@ -361,12 +361,33 @@ class Table:
             if self.data[tn].kind != kind:
                 raise Exception("{}, have {}, want {}".format(
                                 name, self.data[tn].kind, kind))
+        return tn
 
+    def _add_encoding(self, instr_encoding):
         desc_idx = self.descs_map.get(instr_encoding)
         if desc_idx is None:
             desc_idx = self.descs_map[instr_encoding] = len(self.descs)
             self.descs.append(instr_encoding)
-        self._update_table(tn, opcode[-1][1], name, TrieEntry.instr(desc_idx))
+        return TrieEntry.instr(desc_idx)
+
+    def add_opcode(self, opcode, instr_encoding, root_idx=0):
+        name = "t{},{}".format(root_idx, format_opcode(opcode))
+        tn = self._walk_opcode(opcode, root_idx)
+        desc_entry = self._add_encoding(instr_encoding)
+        self._update_table(tn, opcode[-1][1], name, desc_entry)
+
+    def fill_free(self, opcode, instr_encoding, root_idx=0):
+        desc_entry = self._add_encoding(instr_encoding)
+        tn = self._walk_opcode(opcode, root_idx)
+        queue = [(tn, opcode[-1][1])]
+        while queue:
+            tn, idx = queue.pop()
+            entry = self.data[tn].items[idx]
+            if not entry:
+                self._update_table(tn, idx, f"tn,*{idx:x}", desc_entry)
+            else:
+                for i in range(len(self.data[entry].items)):
+                    queue.append((entry, i))
 
     def deduplicate(self):
         parents = defaultdict(set)
@@ -468,10 +489,8 @@ template = """// Auto-generated file -- do not modify!
 def encode_table(entries):
     mnemonics = defaultdict(list)
     mnemonics["FE_NOP"].append(("NP", 0, 0, "0x90"))
-    for opcode, desc in entries:
-        if desc.mnemonic[:9] == "RESERVED_":
-            continue
-        if "ONLY32" in desc.flags:
+    for weak, opcode, desc in entries:
+        if weak or "ONLY32" in desc.flags:
             continue
 
         opsizes = {8} if "SIZE_8" in desc.flags else {16, 32, 64}
@@ -629,30 +648,37 @@ if __name__ == "__main__":
     entries = []
     for line in args.table.read().splitlines():
         if not line or line[0] == "#": continue
+        line, weak = (line, False) if line[0] != "*" else (line[1:], True)
         opcode_string, desc_string = tuple(line.split(maxsplit=1))
         opcode, desc = Opcode.parse(opcode_string), InstrDesc.parse(desc_string)
         if "UNDOC" not in desc.flags or args.with_undoc:
-            entries.append((opcode, desc))
+            entries.append((weak, opcode, desc))
 
-    mnemonics = sorted({desc.mnemonic for _, desc in entries})
+    mnemonics = sorted({desc.mnemonic for _, _, desc in entries})
 
     decode_mnems_lines = [f"FD_MNEMONIC({m},{i})\n" for i, m in enumerate(mnemonics)]
     args.decode_mnems.write("".join(decode_mnems_lines))
 
     modes = [32, 64]
     table = Table(root_count=len(args.modes))
-    for opcode, desc in entries:
+    weak_opcodes = []
+    for weak, opcode, desc in entries:
         for i, mode in enumerate(args.modes):
             if "ONLY%d"%(96-mode) not in desc.flags:
                 ign66 = opcode.prefix in ("NP", "66", "F2", "F3")
                 for opcode_path in opcode.for_trie():
-                    table.add_opcode(opcode_path, desc.encode(ign66), i)
+                    if weak:
+                        weak_opcodes.append((opcode_path, desc.encode(ign66), i))
+                    else:
+                        table.add_opcode(opcode_path, desc.encode(ign66), i)
+    for k in weak_opcodes:
+        table.fill_free(*k)
 
     table.deduplicate()
     table_data, annotations, root_offsets, descs = table.compile()
 
     mnemonics_intel = [m.replace("SSE_", "").replace("MMX_", "")
-                        .replace("MOVABS", "MOV")
+                        .replace("MOVABS", "MOV").replace("RESERVED_", "")
                         .replace("JMPF", "JMP FAR").replace("CALLF", "CALL FAR")
                         .replace("_S2G", "").replace("_G2S", "")
                         .replace("_CR", "").replace("_DR", "")
