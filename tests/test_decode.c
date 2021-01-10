@@ -334,10 +334,10 @@ main(int argc, char** argv)
     TEST32("\xc4\xe1\xf2\x2a\xc0", "vcvtsi2ss xmm0, xmm1, eax");
     TEST64("\xc4\xe1\xf2\x2a\xc0", "vcvtsi2ss xmm0, xmm1, rax");
 
-    TEST("\xc4\xe3\x79\x14\xc0\x00", "vpextrb al, xmm0, 0x0");
-    TEST("\xc4\xe3\xf9\x14\xc0\x00", "vpextrb al, xmm0, 0x0");
-    TEST("\xc4\xe3\x79\x15\xc0\x00", "vpextrw ax, xmm0, 0x0");
-    TEST("\xc4\xe3\xf9\x15\xc0\x00", "vpextrw ax, xmm0, 0x0");
+    TEST("\xc4\xe3\x79\x14\xc0\x00", "vpextrb eax, xmm0, 0x0");
+    TEST("\xc4\xe3\xf9\x14\xc0\x00", "vpextrb eax, xmm0, 0x0");
+    TEST("\xc4\xe3\x79\x15\xc0\x00", "vpextrw eax, xmm0, 0x0");
+    TEST("\xc4\xe3\xf9\x15\xc0\x00", "vpextrw eax, xmm0, 0x0");
     TEST32("\xc4\xe1\x79\xc5\xc0\x00", "vpextrw eax, xmm0, 0x0");
     TEST64("\xc4\xe1\x79\xc5\xc0\x00", "vpextrw rax, xmm0, 0x0");
     TEST("\xc4\xe3\x79\x16\xc0\x00", "vpextrd eax, xmm0, 0x0");
