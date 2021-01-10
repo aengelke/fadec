@@ -66,18 +66,6 @@ reg_name(unsigned rt, unsigned ri, unsigned size)
     return ri < max ? table[ri] : "(inv-idx)";
 }
 
-#define FD_DECODE_TABLE_STRTAB1
-static const char* _mnemonic_str =
-#include <fadec-table.inc>
-;
-#undef FD_DECODE_TABLE_STRTAB1
-
-#define FD_DECODE_TABLE_STRTAB2
-static const uint16_t _mnemonic_offs[] = {
-#include <fadec-table.inc>
-};
-#undef FD_DECODE_TABLE_STRTAB2
-
 static char*
 fd_strplcpy(char* dst, const char* src, size_t size)
 {
@@ -89,21 +77,34 @@ fd_strplcpy(char* dst, const char* src, size_t size)
 }
 
 static char*
-fd_format_hex(uint64_t val, char buf[static 17]) {
-    unsigned idx = 17;
+fd_format_hex(uint64_t val, char buf[static 19]) {
+    unsigned idx = 19;
     buf[--idx] = 0;
     do {
         buf[--idx] = "0123456789abcdef"[val % 16];
         val /= 16;
     } while (val);
+    buf[--idx] = 'x', buf[--idx] = '0';
     return &buf[idx];
 }
 
 const char*
 fdi_name(FdInstrType ty) {
-    if (ty >= sizeof(_mnemonic_offs) / sizeof(_mnemonic_offs[0]))
+#define FD_DECODE_TABLE_STRTAB1
+    static const char* mnemonic_str =
+#include <fadec-table.inc>
+    ;
+#undef FD_DECODE_TABLE_STRTAB1
+
+#define FD_DECODE_TABLE_STRTAB2
+    static const uint16_t mnemonic_offs[] = {
+#include <fadec-table.inc>
+    };
+#undef FD_DECODE_TABLE_STRTAB2
+
+    if (ty >= sizeof(mnemonic_offs) / sizeof(mnemonic_offs[0]))
         return "(invalid)";
-    return &_mnemonic_str[_mnemonic_offs[ty]];
+    return &mnemonic_str[mnemonic_offs[ty]];
 }
 
 void
@@ -239,7 +240,7 @@ fd_format_abs(const FdInstr* instr, uint64_t addr, char* buffer, size_t len)
         FdOpType op_type = FD_OP_TYPE(instr, i);
         if (op_type == FD_OT_NONE)
             break;
-        buf = fd_strplcpy(buf, ", " + (i == 0), end-buf);
+        buf = fd_strplcpy(buf, &", "[i == 0], end-buf);
 
         unsigned size = FD_OP_SIZE(instr, i);
 
@@ -287,17 +288,22 @@ fd_format_abs(const FdInstr* instr, uint64_t addr, char* buffer, size_t len)
                 break;
             default: break;
             }
+            const char* ptrsize = NULL;
             switch (size) {
             default: break;
-            case 1: buf = fd_strplcpy(buf, "byte ptr ", end-buf); break;
-            case 2: buf = fd_strplcpy(buf, "word ptr ", end-buf); break;
-            case 4: buf = fd_strplcpy(buf, "dword ptr ", end-buf); break;
-            case 6: buf = fd_strplcpy(buf, "fword ptr ", end-buf); break;
-            case 8: buf = fd_strplcpy(buf, "qword ptr ", end-buf); break;
-            case 10: buf = fd_strplcpy(buf, "tbyte ptr ", end-buf); break;
-            case 16: buf = fd_strplcpy(buf, "xmmword ptr ", end-buf); break;
-            case 32: buf = fd_strplcpy(buf, "ymmword ptr ", end-buf); break;
-            case 64: buf = fd_strplcpy(buf, "zmmword ptr ", end-buf); break;
+            case 1: ptrsize = "byte"; break;
+            case 2: ptrsize = "word"; break;
+            case 4: ptrsize = "dword"; break;
+            case 6: ptrsize = "fword"; break;
+            case 8: ptrsize = "qword"; break;
+            case 10: ptrsize = "tbyte"; break;
+            case 16: ptrsize = "xmmword"; break;
+            case 32: ptrsize = "ymmword"; break;
+            case 64: ptrsize = "zmmword"; break;
+            }
+            if (ptrsize) {
+                buf = fd_strplcpy(buf, ptrsize, end-buf);
+                buf = fd_strplcpy(buf, " ptr ", end-buf);
             }
             unsigned seg = FD_SEGMENT(instr);
             if (seg != FD_REG_NONE) {
@@ -326,12 +332,8 @@ fd_format_abs(const FdInstr* instr, uint64_t addr, char* buffer, size_t len)
                 disp &= 0xffff;
             else if (FD_ADDRSIZE(instr) == 4)
                 disp &= 0xffffffff;
-            if (disp || (!has_base && !has_idx)) {
-                char* fmt = fd_format_hex(disp, tmp + 2);
-                *--fmt = 'x';
-                *--fmt = '0';
-                buf = fd_strplcpy(buf, fmt, end-buf);
-            }
+            if (disp || (!has_base && !has_idx))
+                buf = fd_strplcpy(buf, fd_format_hex(disp, tmp), end-buf);
             buf = fd_strplcpy(buf, "]", end-buf);
         } else if (op_type == FD_OT_IMM || op_type == FD_OT_OFF) {
             size_t immediate = FD_OP_IMM(instr, i);
@@ -358,10 +360,7 @@ fd_format_abs(const FdInstr* instr, uint64_t addr, char* buffer, size_t len)
                 // immediate is masked below.
                 break;
             }
-            char* fmt = fd_format_hex(splitimm, tmp + 2);
-            *--fmt = 'x';
-            *--fmt = '0';
-            buf = fd_strplcpy(buf, fmt, end-buf);
+            buf = fd_strplcpy(buf, fd_format_hex(splitimm, tmp), end-buf);
             buf = fd_strplcpy(buf, splitsep, end-buf);
 
         nosplitimm:
@@ -373,10 +372,7 @@ fd_format_abs(const FdInstr* instr, uint64_t addr, char* buffer, size_t len)
                 immediate &= 0xffff;
             else if (size == 4)
                 immediate &= 0xffffffff;
-            fmt = fd_format_hex(immediate, tmp + 2);
-            *--fmt = 'x';
-            *--fmt = '0';
-            buf = fd_strplcpy(buf, fmt, end-buf);
+            buf = fd_strplcpy(buf, fd_format_hex(immediate, tmp), end-buf);
         }
     }
 }
