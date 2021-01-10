@@ -616,6 +616,8 @@ F3.0f2a               RM    XMM32  GP     -      -      SSE_CVTSI2SS
 F2.0f2a               RM    XMM64  GP     -      -      SSE_CVTSI2SD
 NP.0f2b/m             MR    MEMV   XMM    -      -      SSE_MOVNTPS
 66.0f2b/m             MR    MEMV   XMM    -      -      SSE_MOVNTPD
+F3.0f2b/m             MR    MEM32  XMM32  -      -      SSE_MOVNTSS ONLYAMD
+F2.0f2b/m             MR    MEM64  XMM64  -      -      SSE_MOVNTSD ONLYAMD
 F3.0f2c               RM    GP     XMM32  -      -      SSE_CVTTSS2SI
 F2.0f2c               RM    GP     XMM64  -      -      SSE_CVTTSD2SI
 F3.0f2d               RM    GP     XMM32  -      -      SSE_CVTSS2SI
