@@ -349,6 +349,7 @@ F2.0f09               NP    -      -      -      -      WBINVD
 0f0d/2m               M     MEM8   -      -      -      PREFETCHWT1
 # All other slots are reserved, AMD maps them to /0
 *0f0d/m               M     MEM8   -      -      -      RESERVED_PREFETCH ONLYAMD
+*0f0d/r               MR    GP     GP     -      -      RESERVED_NOP
 0f0e                  NP    -      -      -      -      FEMMS ONLYAMD
 # TODO: actually decode 3DNow! instructions. Given that 3DNow! no longer exists,
 # this is unlikely to happen, though.
