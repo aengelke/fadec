@@ -311,7 +311,7 @@ main(int argc, char** argv)
     TEST32("\xc5\x00", "lds eax, fword ptr [eax]");
     TEST32("\x0f\xb2\x00", "lss eax, fword ptr [eax]");
     TEST64("\x0f\xb2\x00", "lss eax, fword ptr [rax]");
-    TEST64("\x48\x0f\xb2\x00", "lss rax, fword ptr [rax]");
+    TEST64("\x48\x0f\xb2\x00", "lss rax, tbyte ptr [rax]");
     TEST("\xc5\xf2\x2a\xc0", "vcvtsi2ss xmm0, xmm1, eax");
     TEST("\xf3\xc5\xf2\x2a\xc0", "UD"); // VEX+REP
     TEST("\xf2\xc5\xf2\x2a\xc0", "UD"); // VEX+REPNZ
@@ -429,6 +429,19 @@ main(int argc, char** argv)
     TEST64("\xe3\xfe", "jrcxz 0x0");
     TEST32("\x67\xe3\xfd", "jcxz 0x0");
     TEST64("\x67\xe3\xfd", "jecxz 0x0");
+    TEST32("\x66\x9a\x23\x01\x23\x00", "call far 0x23:0x123");
+    TEST32("\x9a\x67\x45\x23\x01\x23\x00", "call far 0x23:0x1234567");
+    TEST32("\x9a\xff\xff\xff\xff\xff\xff", "call far 0xffff:0xffffffff");
+    TEST32("\x66\xff\x1f", "call far dword ptr [edi]");
+    TEST64("\x66\xff\x1f", "call far dword ptr [rdi]");
+    TEST32("\xff\x1f", "call far fword ptr [edi]");
+    TEST64("\xff\x1f", "call far fword ptr [rdi]");
+    TEST64("\x48\xff\x1f", "call far tbyte ptr [rdi]");
+    TEST32("\x66\x0f\xb4\x07", "lfs ax, dword ptr [edi]");
+    TEST64("\x66\x0f\xb4\x07", "lfs ax, dword ptr [rdi]");
+    TEST32("\x0f\xb4\x07", "lfs eax, fword ptr [edi]");
+    TEST64("\x0f\xb4\x07", "lfs eax, fword ptr [rdi]");
+    TEST64("\x48\x0f\xb4\x07", "lfs rax, tbyte ptr [rdi]");
     TEST("\xa5", "movsd");
     TEST("\x64\xa5", "fs movsd");
     TEST32("\x2e\xa5", "cs movsd");

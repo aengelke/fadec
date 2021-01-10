@@ -508,6 +508,8 @@ prefix_end:
             imm_size = 1;
         else if (UNLIKELY(instr->type == FDI_RET || instr->type == FDI_RETF))
             imm_size = 2;
+        else if (UNLIKELY(desc->type == FDI_JMPF || desc->type == FDI_CALLF))
+            imm_size = op_size + 2;
         else if (UNLIKELY(instr->type == FDI_ENTER))
             imm_size = 3;
         else if (instr->type == FDI_MOVABS)
@@ -526,6 +528,8 @@ prefix_end:
             instr->imm = LOAD_LE_3(&buffer[off]);
         else if (imm_size == 4)
             instr->imm = (int32_t) LOAD_LE_4(&buffer[off]);
+        else if (imm_size == 6)
+            instr->imm = LOAD_LE_4(&buffer[off]) | LOAD_LE_2(&buffer[off+4]) << 32;
         else if (imm_size == 8)
             instr->imm = (int64_t) LOAD_LE_8(&buffer[off]);
         off += imm_size;

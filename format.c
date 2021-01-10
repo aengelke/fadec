@@ -178,7 +178,7 @@ fd_format_abs(const FdInstr* instr, uint64_t addr, char* buffer, size_t len)
         case 8: mnemonic = "jrcxz"; break;
         }
         break;
-    case FDI_ENTER:
+    case FDI_ENTER: {
         buf = fd_strplcpy(buf, mnemonic, end-buf);
         if (FD_OPSIZE(instr) == 2)
             buf = fd_strplcpy(buf, "w", end-buf);
@@ -194,6 +194,28 @@ fd_format_abs(const FdInstr* instr, uint64_t addr, char* buffer, size_t len)
         *--fmt = ',';
         buf = fd_strplcpy(buf, fmt, end-buf);
         return;
+    }
+    case FDI_JMPF:
+    case FDI_CALLF:
+        if (FD_OP_TYPE(instr, 0) == FD_OT_IMM) {
+            buf = fd_strplcpy(buf, mnemonic, end-buf);
+            uint32_t tgt = FD_OP_IMM(instr, 0) & 0xffffffff;
+            if (FD_OP_SIZE(instr, 0) == 2)
+                tgt &= 0xffff;
+            unsigned seg = FD_OP_IMM(instr, 0) >> 8*FD_OP_SIZE(instr, 0);
+            char* fmt = fd_format_hex(seg & 0xffff, tmp + 3);
+            *--fmt = 'x';
+            *--fmt = '0';
+            *--fmt = ' ';
+            buf = fd_strplcpy(buf, fmt, end-buf);
+            fmt = fd_format_hex(tgt, tmp + 3);
+            *--fmt = 'x';
+            *--fmt = '0';
+            *--fmt = ':';
+            buf = fd_strplcpy(buf, fmt, end-buf);
+            return;
+        }
+        break;
     case FDI_PUSH:
         if (FD_OP_SIZE(instr, 0) == 2 && FD_OP_TYPE(instr, 0) == FD_OT_IMM)
             sizesuffix[0] = 'w';
@@ -275,7 +297,7 @@ fd_format_abs(const FdInstr* instr, uint64_t addr, char* buffer, size_t len)
             case FDI_LFS:
             case FDI_LGS:
             case FDI_LSS:
-                size = 6;
+                size += 2;
                 break;
             case FDI_FLD:
             case FDI_FSTP:

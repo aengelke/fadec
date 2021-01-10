@@ -157,7 +157,8 @@
 90+                   OA    GP     GP     -      -      XCHG_NOP
 98                    NP    -      -      -      -      C_EX INSTR_WIDTH
 99                    NP    -      -      -      -      C_SEP INSTR_WIDTH
-#9a CALLF TODO
+# Far jmp/call immediate size adjusted in code
+9a                    I     IMM    -      -      -      CALLF ONLY32
 9b                    NP    -      -      -      -      FWAIT
 9c                    NP    -      -      -      -      PUSHF DEF64 INSTR_WIDTH
 9d                    NP    -      -      -      -      POPF DEF64 INSTR_WIDTH
@@ -198,8 +199,8 @@ c1/7                  MI    GP     IMM8   -      -      SAR
 # RET immediate size handled in code
 c2                    I     IMM16  -      -      -      RET FORCE64 INSTR_WIDTH
 c3                    NP    -      -      -      -      RET FORCE64 INSTR_WIDTH
-c4/m                  RM    GP     MEMZ   -      -      LES ONLY32
-c5/m                  RM    GP     MEMZ   -      -      LDS ONLY32
+c4/m                  RM    GP     MEM    -      -      LES ONLY32
+c5/m                  RM    GP     MEM    -      -      LDS ONLY32
 c6/0                  MI    GP     IMM    -      -      MOV SIZE_8
 c6f8                  I     IMM8   -      -      -      XABORT
 c7/0                  MI    GP     IMM    -      -      MOV
@@ -258,7 +259,8 @@ e6                    IA    GP     IMM8   -      -      OUT SIZE_8
 e7                    IA    GP     IMM8   -      -      OUT
 e8                    D     IMM    -      -      -      CALL FORCE64
 e9                    D     IMM    -      -      -      JMP FORCE64
-#ea JMPf TODO, ONLY32
+# Far jmp/call immediate size adjusted in code
+ea                    I     IMM    -      -      -      JMPF ONLY32
 eb                    D     IMM    -      -      -      JMP FORCE64 IMM_8
 ec                    NP    -      -      -      -      IN SIZE_8 INSTR_WIDTH
 ed                    NP    -      -      -      -      IN INSTR_WIDTH
@@ -295,9 +297,9 @@ fe/1                  M     GP     -      -      -      DEC SIZE_8 LOCK
 ff/0                  M     GP     -      -      -      INC LOCK
 ff/1                  M     GP     -      -      -      DEC LOCK
 ff/2                  M     GP     -      -      -      CALL FORCE64
-ff/3m                 M     MEMZ   -      -      -      CALLF
+ff/3m                 M     MEM    -      -      -      CALLF
 ff/4                  M     GP     -      -      -      JMP FORCE64
-ff/5m                 M     MEMZ   -      -      -      JMPF
+ff/5m                 M     MEM    -      -      -      JMPF
 ff/6                  M     GP     -      -      -      PUSH DEF64
 0f00/0                M     GP16   -      -      -      SLDT
 0f00/1                M     GP16   -      -      -      STR
