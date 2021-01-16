@@ -84,6 +84,7 @@ struct InstrDesc
 #define DESC_SIZE_FIX1(desc) (((desc)->operand_sizes >> 10) & 7)
 #define DESC_SIZE_FIX2(desc) (((desc)->operand_sizes >> 13) & 3)
 #define DESC_INSTR_WIDTH(desc) (((desc)->operand_sizes >> 15) & 1)
+#define DESC_MODRM(desc) (((desc)->reg_types >> 14) & 1)
 #define DESC_IGN66(desc) (((desc)->reg_types >> 15) & 1)
 
 int
@@ -251,7 +252,7 @@ prefix_end:
         unsigned isreg = (buffer[off] & 0xc0) == 0xc0 ? 8 : 0;
         table_idx = table_walk(table_idx, ((buffer[off] >> 3) & 7) | isreg, &kind);
         if (kind == ENTRY_TABLE8E)
-            table_idx = table_walk(table_idx, buffer[off++] & 7, &kind);
+            table_idx = table_walk(table_idx, buffer[off] & 7, &kind);
     }
 
     // For VEX prefix, we have to distinguish between VEX.W and VEX.L which may
@@ -308,8 +309,32 @@ prefix_end:
     for (int i = 0; i < 3; i++)
     {
         uint32_t reg_type = (desc->reg_types >> 3 * i) & 0x7;
-        // GPL FPU VEC MSK MMX BND ??? NVR
-        instr->operands[i].misc = (0xf0857641 >> (4 * reg_type)) & 0xf;
+        // GPL FPU VEC MSK MMX BND SEG NVR
+        instr->operands[i].misc = (0xf3857641 >> (4 * reg_type)) & 0xf;
+    }
+
+    if (DESC_MODRM(desc) && UNLIKELY(off++ >= len))
+        return FD_ERR_PARTIAL;
+    unsigned op_byte = buffer[off - 1] | (!DESC_MODRM(desc) ? 0xc0 : 0);
+
+    if (UNLIKELY(instr->type == FDI_MOV_CR || instr->type == FDI_MOV_DR)) {
+        unsigned modreg = (op_byte >> 3) & 0x7;
+        unsigned modrm = op_byte & 0x7;
+
+        FdOp* op_modreg = &instr->operands[DESC_MODREG_IDX(desc)];
+        op_modreg->type = FD_OT_REG;
+        op_modreg->reg = modreg | (prefix_rex & PREFIX_REXR ? 8 : 0);
+        op_modreg->misc = instr->type == FDI_MOV_CR ? FD_RT_CR : FD_RT_DR;
+        if (instr->type == FDI_MOV_CR && (~0x011d >> op_modreg->reg) & 1)
+            return FD_ERR_UD;
+        else if (instr->type == FDI_MOV_DR && prefix_rex & PREFIX_REXR)
+            return FD_ERR_UD;
+
+        FdOp* op_modrm = &instr->operands[DESC_MODRM_IDX(desc)];
+        op_modrm->type = FD_OT_REG;
+        op_modrm->reg = modrm | (prefix_rex & PREFIX_REXB ? 8 : 0);
+        op_modrm->misc = FD_RT_GPL;
+        goto op_sizes;
     }
 
     if (UNLIKELY(DESC_HAS_IMPLICIT(desc)))
@@ -319,44 +344,23 @@ prefix_end:
         operand->reg = DESC_IMPLICIT_VAL(desc);
     }
 
+    if (DESC_HAS_MODREG(desc))
+    {
+        FdOp* op_modreg = &instr->operands[DESC_MODREG_IDX(desc)];
+        unsigned reg_idx = (op_byte & 0x38) >> 3;
+        if (!UNLIKELY(op_modreg->misc == FD_RT_MMX || op_modreg->misc == FD_RT_SEG))
+            reg_idx += prefix_rex & PREFIX_REXR ? 8 : 0;
+        op_modreg->type = FD_OT_REG;
+        op_modreg->reg = reg_idx;
+    }
+
     if (DESC_HAS_MODRM(desc))
     {
-        if (UNLIKELY(off >= len))
-            return FD_ERR_PARTIAL;
-        unsigned modrm = buffer[off++];
-        unsigned mod = (modrm & 0xc0) >> 6;
-        unsigned mod_reg = (modrm & 0x38) >> 3;
-        unsigned rm = modrm & 0x07;
-
-        bool is_seg = UNLIKELY(instr->type == FDI_MOV_G2S || instr->type == FDI_MOV_S2G);
-        bool is_cr = UNLIKELY(instr->type == FDI_MOV_CR);
-        bool is_dr = UNLIKELY(instr->type == FDI_MOV_DR);
-
-        if (DESC_HAS_MODREG(desc))
-        {
-            FdOp* op_modreg = &instr->operands[DESC_MODREG_IDX(desc)];
-            unsigned reg_idx = mod_reg;
-            if (!is_seg && !UNLIKELY(op_modreg->misc == FD_RT_MMX))
-                reg_idx += prefix_rex & PREFIX_REXR ? 8 : 0;
-
-            if (is_cr && (~0x011d >> reg_idx) & 1)
-                return FD_ERR_UD;
-            else if (is_dr && reg_idx >= 8)
-                return FD_ERR_UD;
-
-            op_modreg->type = FD_OT_REG;
-            op_modreg->reg = reg_idx;
-            if (is_cr)
-                op_modreg->misc = FD_RT_CR;
-            else if (is_dr)
-                op_modreg->misc = FD_RT_DR;
-            else if (is_seg)
-                op_modreg->misc = FD_RT_SEG;
-        }
-
         FdOp* op_modrm = &instr->operands[DESC_MODRM_IDX(desc)];
 
-        if (mod == 3 || is_cr || is_dr)
+        unsigned mod = (op_byte & 0xc0) >> 6;
+        unsigned rm = op_byte & 0x07;
+        if (mod == 3)
         {
             uint8_t reg_idx = rm;
             if (LIKELY(op_modrm->misc == FD_RT_GPL || op_modrm->misc == FD_RT_VEC))
@@ -419,22 +423,6 @@ prefix_end:
             {
                 instr->disp = 0;
             }
-        }
-    }
-    else if (DESC_HAS_MODREG(desc))
-    {
-        // If there is no ModRM, but a Mod-Reg, its opcode-encoded.
-        FdOp* operand = &instr->operands[DESC_MODREG_IDX(desc)];
-        operand->type = FD_OT_REG;
-        if (LIKELY(!DESC_VSIB(desc)))
-        {
-            // Only used for GP registers, therefore always apply REX.B.
-            operand->reg = (buffer[off - 1] & 7) + (prefix_rex & PREFIX_REXB ? 8 : 0);
-        }
-        else
-        {
-            operand->misc = FD_RT_SEG;
-            operand->reg = (buffer[off - 1] >> 3) & 7;
         }
     }
 
@@ -576,6 +564,7 @@ prefix_end:
         instr->flags |= FD_FLAG_LOCK;
     }
 
+op_sizes:;
     uint8_t operand_sizes[4] = {
         1 << DESC_SIZE_FIX1(desc) >> 1, 1 << DESC_SIZE_FIX2(desc), op_size, vec_size
     };

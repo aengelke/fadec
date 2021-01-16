@@ -726,9 +726,9 @@ NP.0fae/0m            M     MEMZ   -      -      -      FXSAVE INSTR_WIDTH
 NP.0fae/1m            M     MEMZ   -      -      -      FXRSTOR INSTR_WIDTH
 NP.0fae/2m            M     MEM32  -      -      -      LDMXCSR
 NP.0fae/3m            M     MEM32  -      -      -      STMXCSR
-NP.0faee8             NP    -      -      -      -      LFENCE
-NP.0faef0             NP    -      -      -      -      MFENCE
-NP.0faef8             NP    -      -      -      -      SFENCE
+NP.0fae/5r            NP    -      -      -      -      LFENCE
+NP.0fae/6r            NP    -      -      -      -      MFENCE
+NP.0fae/7r            NP    -      -      -      -      SFENCE
 NP.0fc2               RMI   XMM    XMM    IMM8   -      SSE_CMPPS
 66.0fc2               RMI   XMM    XMM    IMM8   -      SSE_CMPPD
 F3.0fc2               RMI   XMM    XMM32  IMM8   -      SSE_CMPSS

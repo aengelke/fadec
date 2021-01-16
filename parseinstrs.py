@@ -28,7 +28,8 @@ INSTR_FLAGS_FIELDS, INSTR_FLAGS_SIZES = zip(*[
     ("op0_regty", 3),
     ("op1_regty", 3),
     ("op2_regty", 3),
-    ("unused", 6),
+    ("unused", 5),
+    ("modrm", 1),
     ("ign66", 1),
 ][::-1])
 class InstrFlags(namedtuple("InstrFlags", INSTR_FLAGS_FIELDS)):
@@ -43,36 +44,36 @@ class InstrFlags(namedtuple("InstrFlags", INSTR_FLAGS_FIELDS)):
 
 ENCODINGS = {
     "NP": InstrFlags(),
-    "M": InstrFlags(modrm_idx=0^3),
-    "M1": InstrFlags(modrm_idx=0^3, imm_idx=1^3, imm_control=1),
-    "MI": InstrFlags(modrm_idx=0^3, imm_idx=1^3, imm_control=4),
-    "MC": InstrFlags(modrm_idx=0^3, zeroreg_idx=1^3, zeroreg_val=1),
-    "MR": InstrFlags(modrm_idx=0^3, modreg_idx=1^3),
-    "RM": InstrFlags(modrm_idx=1^3, modreg_idx=0^3),
-    "RMA": InstrFlags(modrm_idx=1^3, modreg_idx=0^3, zeroreg_idx=2^3),
-    "MRI": InstrFlags(modrm_idx=0^3, modreg_idx=1^3, imm_idx=2^3, imm_control=4),
-    "RMI": InstrFlags(modrm_idx=1^3, modreg_idx=0^3, imm_idx=2^3, imm_control=4),
-    "MRC": InstrFlags(modrm_idx=0^3, modreg_idx=1^3, zeroreg_idx=2^3, zeroreg_val=1),
-    "AM": InstrFlags(modrm_idx=1^3, zeroreg_idx=0^3),
-    "MA": InstrFlags(modrm_idx=0^3, zeroreg_idx=1^3),
+    "M": InstrFlags(modrm=1, modrm_idx=0^3),
+    "M1": InstrFlags(modrm=1, modrm_idx=0^3, imm_idx=1^3, imm_control=1),
+    "MI": InstrFlags(modrm=1, modrm_idx=0^3, imm_idx=1^3, imm_control=4),
+    "MC": InstrFlags(modrm=1, modrm_idx=0^3, zeroreg_idx=1^3, zeroreg_val=1),
+    "MR": InstrFlags(modrm=1, modrm_idx=0^3, modreg_idx=1^3),
+    "RM": InstrFlags(modrm=1, modrm_idx=1^3, modreg_idx=0^3),
+    "RMA": InstrFlags(modrm=1, modrm_idx=1^3, modreg_idx=0^3, zeroreg_idx=2^3),
+    "MRI": InstrFlags(modrm=1, modrm_idx=0^3, modreg_idx=1^3, imm_idx=2^3, imm_control=4),
+    "RMI": InstrFlags(modrm=1, modrm_idx=1^3, modreg_idx=0^3, imm_idx=2^3, imm_control=4),
+    "MRC": InstrFlags(modrm=1, modrm_idx=0^3, modreg_idx=1^3, zeroreg_idx=2^3, zeroreg_val=1),
+    "AM": InstrFlags(modrm=1, modrm_idx=1^3, zeroreg_idx=0^3),
+    "MA": InstrFlags(modrm=1, modrm_idx=0^3, zeroreg_idx=1^3),
     "I": InstrFlags(imm_idx=0^3, imm_control=4),
     "IA": InstrFlags(zeroreg_idx=0^3, imm_idx=1^3, imm_control=4),
-    "O": InstrFlags(modreg_idx=0^3),
-    "OI": InstrFlags(modreg_idx=0^3, imm_idx=1^3, imm_control=4),
-    "OA": InstrFlags(modreg_idx=0^3, zeroreg_idx=1^3),
-    "S": InstrFlags(modreg_idx=0^3, vsib=1), # segment register in bits 3,4,5
+    "O": InstrFlags(modrm_idx=0^3),
+    "OI": InstrFlags(modrm_idx=0^3, imm_idx=1^3, imm_control=4),
+    "OA": InstrFlags(modrm_idx=0^3, zeroreg_idx=1^3),
+    "S": InstrFlags(modreg_idx=0^3), # segment register in bits 3,4,5
     "A": InstrFlags(zeroreg_idx=0^3),
     "D": InstrFlags(imm_idx=0^3, imm_control=6),
     "FD": InstrFlags(zeroreg_idx=0^3, imm_idx=1^3, imm_control=2),
     "TD": InstrFlags(zeroreg_idx=1^3, imm_idx=0^3, imm_control=2),
 
-    "RVM": InstrFlags(modrm_idx=2^3, modreg_idx=0^3, vexreg_idx=1^3),
-    "RVMI": InstrFlags(modrm_idx=2^3, modreg_idx=0^3, vexreg_idx=1^3, imm_idx=3^3, imm_control=4),
-    "RVMR": InstrFlags(modrm_idx=2^3, modreg_idx=0^3, vexreg_idx=1^3, imm_idx=3^3, imm_control=3),
-    "RMV": InstrFlags(modrm_idx=1^3, modreg_idx=0^3, vexreg_idx=2^3),
-    "VM": InstrFlags(modrm_idx=1^3, vexreg_idx=0^3),
-    "VMI": InstrFlags(modrm_idx=1^3, vexreg_idx=0^3, imm_idx=2^3, imm_control=4),
-    "MVR": InstrFlags(modrm_idx=0^3, modreg_idx=2^3, vexreg_idx=1^3),
+    "RVM": InstrFlags(modrm=1, modrm_idx=2^3, modreg_idx=0^3, vexreg_idx=1^3),
+    "RVMI": InstrFlags(modrm=1, modrm_idx=2^3, modreg_idx=0^3, vexreg_idx=1^3, imm_idx=3^3, imm_control=4),
+    "RVMR": InstrFlags(modrm=1, modrm_idx=2^3, modreg_idx=0^3, vexreg_idx=1^3, imm_idx=3^3, imm_control=3),
+    "RMV": InstrFlags(modrm=1, modrm_idx=1^3, modreg_idx=0^3, vexreg_idx=2^3),
+    "VM": InstrFlags(modrm=1, modrm_idx=1^3, vexreg_idx=0^3),
+    "VMI": InstrFlags(modrm=1, modrm_idx=1^3, vexreg_idx=0^3, imm_idx=2^3, imm_control=4),
+    "MVR": InstrFlags(modrm=1, modrm_idx=0^3, modreg_idx=2^3, vexreg_idx=1^3),
 }
 
 class OpKind(NamedTuple):
@@ -139,7 +140,8 @@ class InstrDesc(NamedTuple):
     operands: Tuple[str, ...]
     flags: FrozenSet[str]
 
-    OPKIND_REGTYS = {"GP": 0, "FPU": 1, "XMM": 2, "MASK": 3, "MMX": 4, "BND": 5}
+    OPKIND_REGTYS = {"GP": 0, "FPU": 1, "XMM": 2, "MASK": 3, "MMX": 4, "BND": 5,
+                     "SEG": 6}
     OPKIND_SIZES = {
         0: 0, 1: 1, 2: 2, 4: 3, 8: 4, 16: 5, 32: 6, 64: 7, 10: 0,
         OpKind.SZ_OP: -2, OpKind.SZ_VEC: -3,
@@ -151,7 +153,7 @@ class InstrDesc(NamedTuple):
         operands = tuple(OPKINDS[op] for op in desc[1:5] if op != "-")
         return cls(desc[5], desc[0], operands, frozenset(desc[6:]))
 
-    def encode(self, ign66):
+    def encode(self, ign66, modrm):
         flags = ENCODINGS[self.encoding]
         extraflags = {}
 
@@ -181,6 +183,7 @@ class InstrDesc(NamedTuple):
         if "INSTR_WIDTH" in self.flags: extraflags["instr_width"] = 1
         if "LOCK" in self.flags:        extraflags["lock"] = 1
         if "VSIB" in self.flags:        extraflags["vsib"] = 1
+        if modrm:                       extraflags["modrm"] = 1
 
         if "USE66" not in self.flags and (ign66 or "IGN66" in self.flags):
             extraflags["ign66"] = 1
@@ -666,11 +669,12 @@ if __name__ == "__main__":
         for i, mode in enumerate(args.modes):
             if "ONLY%d"%(96-mode) not in desc.flags:
                 ign66 = opcode.prefix in ("NP", "66", "F2", "F3")
+                modrm = opcode.modreg or opcode.opcext
                 for opcode_path in opcode.for_trie():
                     if weak:
-                        weak_opcodes.append((opcode_path, desc.encode(ign66), i))
+                        weak_opcodes.append((opcode_path, desc.encode(ign66, modrm), i))
                     else:
-                        table.add_opcode(opcode_path, desc.encode(ign66), i)
+                        table.add_opcode(opcode_path, desc.encode(ign66, modrm), i)
     for k in weak_opcodes:
         table.fill_free(*k)
 
