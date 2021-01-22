@@ -135,6 +135,16 @@ class InstrDesc(NamedTuple):
         max_imm_size = 4 if self.mnemonic != "MOVABS" else 8
         return min(max_imm_size, self.operands[flags.imm_idx^3].abssize(opsz))
 
+    def optype_str(self):
+        optypes = ["", "", "", ""]
+        flags = ENCODINGS[self.encoding]
+        if flags.modrm_idx:   optypes[flags.modrm_idx^3] = "M"
+        if flags.modreg_idx:  optypes[flags.modreg_idx^3] = "r"
+        if flags.vexreg_idx:  optypes[flags.vexreg_idx^3] = "r"
+        if flags.zeroreg_idx: optypes[flags.zeroreg_idx^3] = "r"
+        if flags.imm_control: optypes[flags.imm_idx^3] = " iariioo"[flags.imm_control]
+        return "".join(optypes)
+
     def encode(self, ign66, modrm):
         flags = ENCODINGS[self.encoding]
         extraflags = {}
@@ -523,15 +533,9 @@ def encode_table(entries):
             opsizes = {64}
             prepend_opsize = False
 
-        optypes = ["", "", "", ""]
-        enc = ENCODINGS[desc.encoding]
-        if enc.modrm_idx:
-            optypes[enc.modrm_idx^3] = opcode.modreg[1] if opcode.modreg else "rm"
-        if enc.modreg_idx: optypes[enc.modreg_idx^3] = "r"
-        if enc.vexreg_idx: optypes[enc.vexreg_idx^3] = "r"
-        if enc.zeroreg_idx: optypes[enc.zeroreg_idx^3] = "r"
-        if enc.imm_control: optypes[enc.imm_idx^3] = " iariioo"[enc.imm_control]
-        optypes = product(*(ot for ot in optypes if ot))
+        modrm_type = opcode.modreg[1] if opcode.modreg else "rm"
+        optypes_base = desc.optype_str()
+        optypes = [optypes_base.replace("M", t) for t in modrm_type]
 
         prefixes = [("", "")]
         if "LOCK" in desc.flags:
