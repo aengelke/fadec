@@ -1557,7 +1557,7 @@ VEX.66.W0.0f3852      RVM   XMM    XMM    XMM    -      VPDPWSSD
 VEX.66.W0.0f3853      RVM   XMM    XMM    XMM    -      VPDPWSSDS
 
 # HRESET
-F3.0f3af0c0           IA    IMM8   GP32   -      -      HRESET
+#F3.0f3af0c0           IA    IMM8   GP32   -      -      HRESET
 
 # SERIALIZE
 NP.0f01e8             NP    -      -      -      -      SERIALIZE
