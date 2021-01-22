@@ -124,6 +124,17 @@ class InstrDesc(NamedTuple):
         operands = tuple(OpKind.parse(op) for op in desc[1:5] if op != "-")
         return cls(desc[5], desc[0], operands, frozenset(desc[6:]))
 
+    def imm_size(self, opsz):
+        flags = ENCODINGS[self.encoding]
+        if flags.imm_control < 4:
+            return 0
+        if self.mnemonic == "ENTER":
+            return 3
+        if "IMM_8" in self.flags:
+            return 1
+        max_imm_size = 4 if self.mnemonic != "MOVABS" else 8
+        return min(max_imm_size, self.operands[flags.imm_idx^3].abssize(opsz))
+
     def encode(self, ign66, modrm):
         flags = ENCODINGS[self.encoding]
         extraflags = {}
@@ -159,11 +170,8 @@ class InstrDesc(NamedTuple):
         if "USE66" not in self.flags and (ign66 or "IGN66" in self.flags):
             extraflags["ign66"] = 1
 
-        if flags.imm_control >= 4:
-            imm_op = self.operands[flags.imm_idx^3]
-            if ("IMM_8" in self.flags or imm_op.size == 1 or
-                (imm_op.size == OpKind.SZ_OP and "SIZE_8" in self.flags)):
-                extraflags["imm_control"] = flags.imm_control | 1
+        if self.imm_size(1 if "SIZE_8" in self.flags else 8) == 1:
+            extraflags["imm_control"] = flags.imm_control | 1
 
         enc = flags._replace(**extraflags)._encode()
         enc = tuple((enc >> i) & 0xffff for i in range(0, 48, 16))
@@ -538,16 +546,7 @@ def encode_table(entries):
             if prefix[1] == "|OPC_LOCK" and ots[0] != "m":
                 continue
 
-            imm_size = 0
-            if enc.imm_control >= 4:
-                if desc.mnemonic == "ENTER":
-                    imm_size = 3
-                elif "IMM_8" in desc.flags:
-                    imm_size = 1
-                else:
-                    max_imm_size = 4 if desc.mnemonic != "MOVABS" else 8
-                    imm_opsize = desc.operands[enc.imm_idx^3].abssize(opsize//8)
-                    imm_size = min(max_imm_size, imm_opsize)
+            imm_size = desc.imm_size(opsize//8)
 
             tys = [] # operands that require special handling
             for ot, op in zip(ots, desc.operands):
