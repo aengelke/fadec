@@ -170,6 +170,20 @@ main(int argc, char** argv)
     // [reg+s*reg+disp32]
     TEST64("\x42\x01\x84\x25\x01\x00\x00\x00", "add dword ptr [rbp+1*r12+0x1], eax");
 
+    TEST("\x0f\xbc\xc0", "bsf eax, eax");
+    TEST("\x66\x0f\xbc\xc0", "bsf ax, ax");
+    TEST("\xf2\x0f\xbc\xc0", "bsf eax, eax");
+    TEST("\x66\xf2\x0f\xbc\xc0", "bsf ax, ax");
+    TEST("\xf3\x0f\xbc\xc0", "tzcnt eax, eax");
+    TEST("\x66\xf3\x0f\xbc\xc0", "tzcnt ax, ax");
+    TEST32("\x0f\x01\x00", "sgdt [eax]");
+    TEST64("\x0f\x01\x00", "sgdt [rax]");
+    TEST32("\x66\x0f\x01\x00", "sgdt [eax]");
+    TEST64("\x66\x0f\x01\x00", "sgdt [rax]");
+    TEST32("\xf2\x0f\x01\x00", "sgdt [eax]");
+    TEST64("\xf2\x0f\x01\x00", "sgdt [rax]");
+    TEST32("\xf3\x0f\x01\x00", "sgdt [eax]");
+    TEST64("\xf3\x0f\x01\x00", "sgdt [rax]");
     TEST("\x04\x01", "add al, 0x1");
     TEST("\x66\x68\xff\xad", "pushw 0xadff");
     TEST32("\x68\xff\xad\x90\xbc", "push 0xbc90adff");

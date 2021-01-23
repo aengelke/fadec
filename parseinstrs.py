@@ -440,7 +440,7 @@ def encode_table(entries):
     mnemonics = defaultdict(list)
     mnemonics["FE_NOP"].append(("NP", 0, 0, "0x90"))
     for weak, opcode, desc in entries:
-        if weak or "ONLY32" in desc.flags:
+        if "ONLY32" in desc.flags or desc.mnemonic[:9] == "RESERVED_":
             continue
 
         opsizes = {8} if "SIZE_8" in desc.flags else {16, 32, 64}
