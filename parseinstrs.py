@@ -113,6 +113,8 @@ class InstrDesc(NamedTuple):
 
     OPKIND_REGTYS = {"GP": 0, "FPU": 1, "XMM": 2, "MASK": 3, "MMX": 4, "BND": 5,
                      "SEG": 6}
+    OPKIND_REGTYS_ENC = {"SEG": 3, "FPU": 4, "MMX": 5, "XMM": 6, "BND": 8,
+                         "CR": 9, "DR": 10}
     OPKIND_SIZES = {
         0: 0, 1: 1, 2: 2, 4: 3, 8: 4, 16: 5, 32: 6, 64: 7, 10: 0,
         OpKind.SZ_OP: -2, OpKind.SZ_VEC: -3,
@@ -144,6 +146,23 @@ class InstrDesc(NamedTuple):
         if flags.zeroreg_idx: optypes[flags.zeroreg_idx^3] = "r"
         if flags.imm_control: optypes[flags.imm_idx^3] = " iariioo"[flags.imm_control]
         return "".join(optypes)
+
+    def encode_regtys(self, ots, opsz):
+        tys = []
+        for ot, op in zip(ots, self.operands):
+            if ot == "m":
+                tys.append(0xf)
+            elif ot in "io":
+                tys.append(0)
+            elif op.kind == "GP":
+                if (self.mnemonic == "MOVSX" or self.mnemonic == "MOVZX" or
+                    opsz == 1):
+                    tys.append(2 if op.abssize(opsz) == 1 else 1)
+                else:
+                    tys.append(1)
+            else:
+                tys.append(self.OPKIND_REGTYS_ENC[op.kind])
+        return sum(ty << (4*i) for i, ty in enumerate(tys))
 
     def encode(self, ign66, modrm):
         flags = ENCODINGS[self.encoding]
@@ -525,26 +544,7 @@ def encode_table(entries):
                 continue
 
             imm_size = desc.imm_size(opsize//8)
-
-            tys = [] # operands that require special handling
-            for ot, op in zip(ots, desc.operands):
-                if ot == "m":
-                    tys.append(0xf)
-                elif ot in "io":
-                    tys.append(0)
-                elif op.kind == "GP":
-                    if (desc.mnemonic == "MOVSX" or desc.mnemonic == "MOVZX" or
-                        opsize == 8):
-                        tys.append(2 if op.abssize(opsize//8) == 1 else 1)
-                    else:
-                        tys.append(1)
-                else:
-                    tys.append({
-                        "SEG": 3, "FPU": 4, "MMX": 5, "XMM": 6,
-                        "BND": 8, "CR": 9, "DR": 10,
-                    }[op.kind])
-
-            tys_i = sum(ty << (4*i) for i, ty in enumerate(tys))
+            tys_i = desc.encode_regtys(ots, opsize//8)
             opc_s = hex(opc_i) + opc_flags + prefix[1]
             if opsize == 16: opc_s += "|OPC_66"
             if vecsize == 256: opc_s += "|OPC_VEXL"
