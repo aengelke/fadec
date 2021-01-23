@@ -106,6 +106,7 @@ main(int argc, char** argv)
     TEST64("\x48\x0f\x20\xd0", "mov rax, cr2"); // cr2 + REX.W
     TEST64("\x44\x0f\x20\x08", "UD"); // cr9
     TEST64("\x44\x0f\x21\x00", "UD"); // dr8
+    TEST32("\xf0\x0f\x20\x00", "UD"); // LOCK
     TEST("\x8c\xc0", "mov ax, es");
     TEST64("\x44\x8c\xc0", "mov ax, es");
     TEST64("\x44\x8c\xf0", "UD"); // no segment register 6

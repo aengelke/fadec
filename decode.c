@@ -334,7 +334,7 @@ prefix_end:
         op_modrm->type = FD_OT_REG;
         op_modrm->reg = modrm | (prefix_rex & PREFIX_REXB ? 8 : 0);
         op_modrm->misc = FD_RT_GPL;
-        goto op_sizes;
+        goto skip_modrm;
     }
 
     if (UNLIKELY(DESC_HAS_IMPLICIT(desc)))
@@ -425,6 +425,7 @@ prefix_end:
             }
         }
     }
+skip_modrm:
 
     if (UNLIKELY(DESC_HAS_VEXREG(desc)))
     {
@@ -564,7 +565,6 @@ prefix_end:
         instr->flags |= FD_FLAG_LOCK;
     }
 
-op_sizes:;
     uint8_t operand_sizes[4] = {
         1 << DESC_SIZE_FIX1(desc) >> 1, 1 << DESC_SIZE_FIX2(desc), op_size, vec_size
     };
