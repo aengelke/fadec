@@ -45,6 +45,7 @@ reg_name(unsigned rt, unsigned ri, unsigned size)
     TABLE(FD_RT_MMX, "mm0","mm1","mm2","mm3","mm4","mm5","mm6","mm7")
     TABLE(FD_RT_CR, "cr0","(inv)","cr2","cr3","cr4","(inv)","(inv)","(inv)","cr8")
     TABLE(FD_RT_DR, "dr0","dr1","dr2","dr3","dr4","dr5","dr6","dr7")
+    TABLE(FD_RT_BND, "bnd0","bnd1","bnd2","bnd3")
 
     case FD_RT_VEC:
         switch (size) {
