@@ -100,6 +100,8 @@ main(int argc, char** argv)
     TEST64("\x66\x48\x0F\x01\xE2", "smsw rdx");
     TEST32("\x66\x0f\x20\x00", "mov eax, cr0"); // mod=0, 66h
     TEST64("\x66\x0f\x20\x00", "mov rax, cr0"); // mod=0, 66h
+    TEST32("\xf3\x0f\x20\x00", "mov eax, cr0"); // REP
+    TEST64("\xf3\x0f\x20\x00", "mov rax, cr0"); // REP
     TEST("\x0f\x20\xc8", "UD"); // cr1
     TEST32("\x0f\x20\xd0", "mov eax, cr2"); // cr2
     TEST64("\x0f\x20\xd0", "mov rax, cr2"); // cr2

@@ -122,15 +122,9 @@ fd_format_abs(const FdInstr* instr, uint64_t addr, char* buffer, size_t len)
     char* buf = buffer;
     char* end = buffer + len;
 
-    if (FD_HAS_REP(instr))
-        buf = fd_strplcpy(buf, "rep ", end-buf);
-    if (FD_HAS_REPNZ(instr))
-        buf = fd_strplcpy(buf, "repnz ", end-buf);
-    if (FD_HAS_LOCK(instr))
-        buf = fd_strplcpy(buf, "lock ", end-buf);
-
     const char* mnemonic = fdi_name(FD_TYPE(instr));
 
+    bool prefix_rep = false;
     bool prefix_addrsize = false;
     bool prefix_segment = false;
 
@@ -218,10 +212,19 @@ fd_format_abs(const FdInstr* instr, uint64_t addr, char* buffer, size_t len)
     case FDI_SCAS:
     case FDI_INS:
         prefix_addrsize = true;
+        prefix_rep = true;
         break;
     default: break;
     }
 
+    if (prefix_rep) {
+        if (FD_HAS_REP(instr))
+            buf = fd_strplcpy(buf, "rep ", end-buf);
+        if (FD_HAS_REPNZ(instr))
+            buf = fd_strplcpy(buf, "repnz ", end-buf);
+    }
+    if (FD_HAS_LOCK(instr))
+        buf = fd_strplcpy(buf, "lock ", end-buf);
     if (prefix_addrsize) {
         if (FD_IS64(instr) && FD_ADDRSIZE(instr) == 4)
             buf = fd_strplcpy(buf, "addr32 ", end-buf);
