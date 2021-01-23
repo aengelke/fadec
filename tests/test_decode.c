@@ -413,6 +413,8 @@ main(int argc, char** argv)
     TEST32("\xc4\xe1\xf9\x6e\xc8", "vmovd xmm1, eax");
     TEST("\xc5\xf2\x10\xc2", "vmovss xmm0, xmm1, xmm2");
     TEST("\xc5\xf6\x10\xc2", "vmovss xmm0, xmm1, xmm2"); // VEX.L=1
+    TEST("\xc5\xfa\x10\x04\x25\x34\x12\x00\x00", "vmovss xmm0, dword ptr [0x1234]");
+    TEST("\xc5\xf2\x10\x04\x25\x34\x12\x00\x00", "UD"); // VEX.vvvv != 0
     TEST("\xc5\xfa\x11\x04\x25\x34\x12\x00\x00", "vmovss dword ptr [0x1234], xmm0");
     TEST("\xc5\xf2\x11\x04\x25\x34\x12\x00\x00", "UD"); // VEX.vvvv != 0
     TEST("\xc5\xf2\x2a\xc0", "vcvtsi2ss xmm0, xmm1, eax");

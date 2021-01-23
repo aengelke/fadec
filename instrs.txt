@@ -881,8 +881,10 @@ VEX.66.L0.0f3adf      RMI   XMM    XMM    IMM8   -      VAESKEYGENASSIST
 # AVX
 VEX.NP.0f10           RM    XMM    XMM    -      -      VMOVUPS
 VEX.66.0f10           RM    XMM    XMM    -      -      VMOVUPD
-VEX.F3.LIG.0f10       RVM   XMM128 XMM128 XMM32  -      VMOVSS
-VEX.F2.LIG.0f10       RVM   XMM128 XMM128 XMM64  -      VMOVSD
+VEX.F3.LIG.0f10/m     RM    XMM128 XMM32  -      -      VMOVSS
+VEX.F3.LIG.0f10/r     RVM   XMM128 XMM128 XMM32  -      VMOVSS
+VEX.F2.LIG.0f10/m     RM    XMM128 XMM64  -      -      VMOVSD
+VEX.F2.LIG.0f10/r     RVM   XMM128 XMM128 XMM64  -      VMOVSD
 VEX.NP.0f11           MR    XMM    XMM    -      -      VMOVUPS
 VEX.66.0f11           MR    XMM    XMM    -      -      VMOVUPD
 VEX.F3.LIG.0f11/m     MR    XMM32  XMM32  -      -      VMOVSS
