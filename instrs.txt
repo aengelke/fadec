@@ -324,8 +324,8 @@ ff/6                  M     GP     -      -      -      PUSH DEF64
 0f01/6                M     GP16   -      -      -      LMSW
 0f01/7m               M     GP     -      -      -      INVLPG SIZE_8
 NP.0f01c0             NP    -      -      -      -      ENCLV
-0f01c8                NP    -      -      -      -      MONITOR
-0f01c9                NP    -      -      -      -      MWAIT
+NP.0f01c8             NP    -      -      -      -      MONITOR
+NP.0f01c9             NP    -      -      -      -      MWAIT
 NP.0f01ca             NP    -      -      -      -      CLAC
 NP.0f01cb             NP    -      -      -      -      STAC
 NP.0f01cf             NP    -      -      -      -      ENCLS
@@ -1473,14 +1473,14 @@ F3.0fc7/6m            M     MEM64  -      -      -      VMXON
 66.0f01cf             NP    -      -      -      -      SEAMCALL
 
 # AMD SVM
-NP.0f01d8             NP    -      -      -      -      VMRUN ONLYAMD
-NP.0f01d9             NP    -      -      -      -      VMMCALL ONLYAMD
-NP.0f01da             NP    -      -      -      -      VMLOAD ONLYAMD
-NP.0f01db             NP    -      -      -      -      VMSAVE ONLYAMD
-NP.0f01dc             NP    -      -      -      -      STGI ONLYAMD
-NP.0f01dd             NP    -      -      -      -      CLGI ONLYAMD
-NP.0f01de             NP    -      -      -      -      SKINIT ONLYAMD
-NP.0f01df             NP    -      -      -      -      INVLPGA ONLYAMD
+0f01d8                NP    -      -      -      -      VMRUN ONLYAMD
+0f01d9                NP    -      -      -      -      VMMCALL ONLYAMD
+0f01da                NP    -      -      -      -      VMLOAD ONLYAMD
+0f01db                NP    -      -      -      -      VMSAVE ONLYAMD
+0f01dc                NP    -      -      -      -      STGI ONLYAMD
+0f01dd                NP    -      -      -      -      CLGI ONLYAMD
+0f01de                NP    -      -      -      -      SKINIT ONLYAMD
+0f01df                NP    -      -      -      -      INVLPGA ONLYAMD
 NP.0f01fa             NP    -      -      -      -      MONITORX ONLYAMD
 F3.0f01fa             NP    -      -      -      -      MCOMMIT ONLYAMD
 NP.0f01fb             NP    -      -      -      -      MWAITX ONLYAMD
