@@ -611,19 +611,19 @@ if __name__ == "__main__":
     decode_mnems_lines = [f"FD_MNEMONIC({m},{i})\n" for i, m in enumerate(mnemonics)]
     args.decode_mnems.write("".join(decode_mnems_lines))
 
-    modes = [32, 64]
     table = Table(root_count=len(args.modes))
     weak_opcodes = []
     for weak, opcode, desc in entries:
+        ign66 = opcode.prefix in ("NP", "66", "F2", "F3")
+        modrm = opcode.modreg or opcode.opcext
+        descenc = desc.encode(ign66, modrm)
         for i, mode in enumerate(args.modes):
             if "ONLY%d"%(96-mode) not in desc.flags:
-                ign66 = opcode.prefix in ("NP", "66", "F2", "F3")
-                modrm = opcode.modreg or opcode.opcext
                 for opcode_path in opcode.for_trie():
                     if weak:
-                        weak_opcodes.append((opcode_path, desc.encode(ign66, modrm), i))
+                        weak_opcodes.append((opcode_path, descenc, i))
                     else:
-                        table.add_opcode(opcode_path, desc.encode(ign66, modrm), i)
+                        table.add_opcode(opcode_path, descenc, i)
     for k in weak_opcodes:
         table.fill_free(*k)
 
