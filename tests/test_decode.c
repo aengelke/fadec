@@ -597,6 +597,14 @@ main(int argc, char** argv)
     TEST("\x0f\x0f\xc0\xb6", "3dnow mm0, mm0, 0xb6"); // PFRCPIT2
     TEST("\x0f\x0f\xc0\xbf", "3dnow mm0, mm0, 0xbf"); // PAVGUSB
 
+    // VIA PadLock
+    TEST("\x0f\xa7\xc0", "xstore");
+    TEST("\xf3\x0f\xa7\xc0", "rep xstore");
+    TEST("\xf2\x0f\xa7\xc0", "UD");
+    TEST("\x0f\xa7\xe8 ", "UD");
+    TEST("\xf2\x0f\xa7\xe8", "UD");
+    TEST("\xf3\x0f\xa7\xe8", "rep xcryptofb");
+
     puts(failed ? "Some tests FAILED" : "All tests PASSED");
     return failed ? EXIT_FAILURE : EXIT_SUCCESS;
 }

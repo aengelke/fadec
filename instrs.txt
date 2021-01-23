@@ -1454,6 +1454,18 @@ F3.0fae/5r            M     GP     -      -      -      INCSSP
 # CLDEMOTE
 NP.0f1c/0m            M     MEM8   -      -      -      CLDEMOTE
 
+# VIA PadLock
+F3.0fa6c0             NP    -      -      -      -      REP_MONTMUL ONLYVIA
+F3.0fa6c8             NP    -      -      -      -      REP_XSHA1 ONLYVIA
+F3.0fa6d0             NP    -      -      -      -      REP_XSHA256 ONLYVIA
+NFx.0fa7c0            NP    -      -      -      -      XSTORE ONLYVIA
+F3.0fa7c0             NP    -      -      -      -      REP_XSTORE ONLYVIA
+F3.0fa7c8             NP    -      -      -      -      REP_XCRYPTECB ONLYVIA
+F3.0fa7d0             NP    -      -      -      -      REP_XCRYPTCBC ONLYVIA
+F3.0fa7d8             NP    -      -      -      -      REP_XCRYPTCTR ONLYVIA
+F3.0fa7e0             NP    -      -      -      -      REP_XCRYPTCFB ONLYVIA
+F3.0fa7e8             NP    -      -      -      -      REP_XCRYPTOFB ONLYVIA
+
 # VMX
 66.0f3880/m           RM    GP     MEMZ   -      -      INVEPT DEF64
 66.0f3881/m           RM    GP     MEMZ   -      -      INVVPID DEF64
@@ -1473,6 +1485,9 @@ F3.0fc7/6m            M     MEM64  -      -      -      VMXON
 66.0f01cd             NP    -      -      -      -      SEAMRET
 66.0f01ce             NP    -      -      -      -      SEAMOPS
 66.0f01cf             NP    -      -      -      -      SEAMCALL
+
+# AMD RDPRU
+0f01fd                NP    -      -      -      -      RDPRU ONLYAMD
 
 # AMD SVM
 0f01d8                NP    -      -      -      -      VMRUN ONLYAMD

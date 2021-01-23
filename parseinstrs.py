@@ -456,6 +456,7 @@ def decode_table(entries, modes):
                         .replace("JMPF", "JMP FAR").replace("CALLF", "CALL FAR")
                         .replace("_S2G", "").replace("_G2S", "")
                         .replace("_CR", "").replace("_DR", "")
+                        .replace("REP_", "REP ")
                         .lower() for m in mnems]
 
     defines = ["FD_TABLE_OFFSET_%d %d"%k for k in zip(modes, root_offsets)]
