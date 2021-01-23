@@ -418,6 +418,7 @@ main(int argc, char** argv)
     TEST("\xc5\xf2\x2a\xc0", "vcvtsi2ss xmm0, xmm1, eax");
     TEST32("\xc4\xe1\xf2\x2a\xc0", "vcvtsi2ss xmm0, xmm1, eax");
     TEST64("\xc4\xe1\xf2\x2a\xc0", "vcvtsi2ss xmm0, xmm1, rax");
+    TEST("\xc5\xf8\x53\xc0", "vrcpps xmm0, xmm0");
 
     TEST("\xc4\xe3\x79\x14\xc0\x00", "vpextrb eax, xmm0, 0x0");
     TEST("\xc4\xe3\xf9\x14\xc0\x00", "vpextrb eax, xmm0, 0x0");

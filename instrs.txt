@@ -924,13 +924,13 @@ VEX.NP.LIG.0f2f       RM    XMM32  XMM32  -      -      VCOMISS
 VEX.66.LIG.0f2f       RM    XMM64  XMM64  -      -      VCOMISD
 VEX.NP.0f50/r         RM    GP     XMM    -      -      VMOVMSKPS DEF64
 VEX.66.0f50/r         RM    GP     XMM    -      -      VMOVMSKPD DEF64
-VEX.NP.0f51           RVM   XMM    XMM    XMM    -      VSQRTPS
-VEX.66.0f51           RVM   XMM    XMM    XMM    -      VSQRTPD
+VEX.NP.0f51           RM    XMM    XMM    -      -      VSQRTPS
+VEX.66.0f51           RM    XMM    XMM    -      -      VSQRTPD
 VEX.F3.LIG.0f51       RVM   XMM128 XMM128 XMM32  -      VSQRTSS
 VEX.F2.LIG.0f51       RVM   XMM128 XMM128 XMM64  -      VSQRTSD
-VEX.NP.0f52           RVM   XMM    XMM    XMM    -      VRSQRTPS
+VEX.NP.0f52           RM    XMM    XMM    -      -      VRSQRTPS
 VEX.F3.LIG.0f52       RVM   XMM128 XMM128 XMM32  -      VRSQRTSS
-VEX.NP.0f53           RVM   XMM    XMM    XMM    -      VRCPPS
+VEX.NP.0f53           RM    XMM    XMM    -      -      VRCPPS
 VEX.F3.LIG.0f53       RVM   XMM128 XMM128 XMM32  -      VRCPSS
 VEX.NP.0f54           RVM   XMM    XMM    XMM    -      VANDPS
 VEX.66.0f54           RVM   XMM    XMM    XMM    -      VANDPD
