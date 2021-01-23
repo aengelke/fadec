@@ -323,6 +323,7 @@ ff/6                  M     GP     -      -      -      PUSH DEF64
 0f01/4r               M     GP     -      -      -      SMSW
 0f01/6                M     GP16   -      -      -      LMSW
 0f01/7m               M     GP     -      -      -      INVLPG SIZE_8
+NP.0f01c0             NP    -      -      -      -      ENCLV
 0f01c8                NP    -      -      -      -      MONITOR
 0f01c9                NP    -      -      -      -      MWAIT
 NP.0f01ca             NP    -      -      -      -      CLAC
@@ -1288,6 +1289,7 @@ VEX.F3.L0.0f38f7      RMV   GP     GP     GP     -      SARX
 F3.0f38f6             RM    GP     GP     -      -      ADOX
 #
 # FPU
+# Source for UNDOC opcodes: https://www.sandpile.org/x86/opc_fpu.htm
 d8/0m                 M     MEM32  -      -      -      FADD ENC_SEPSZ
 d8/1m                 M     MEM32  -      -      -      FMUL ENC_SEPSZ
 d8/2m                 M     MEM32  -      -      -      FCOM ENC_SEPSZ
@@ -1314,6 +1316,7 @@ d9/7m                 M     MEM16  -      -      -      FSTCW
 d9/0r                 M     FPU    -      -      -      FLD
 d9/1r                 M     FPU    -      -      -      FXCH
 d9d0                  NP    -      -      -      -      FNOP
+d9/3r                 MA    FPU    FPU    -      -      FSTPNCE UNDOC
 d9e0                  NP    -      -      -      -      FCHS
 d9e1                  NP    -      -      -      -      FABS
 d9e4                  NP    -      -      -      -      FTST
@@ -1369,6 +1372,7 @@ dbe1                  NP    -      -      -      -      FDISI8087_NOP UNDOC
 dbe2                  NP    -      -      -      -      FCLEX
 dbe3                  NP    -      -      -      -      FINIT
 dbe4                  NP    -      -      -      -      FSETPM287_NOP UNDOC
+dbe5                  NP    -      -      -      -      FSETPM287_NOP UNDOC
 db/5r                 M     FPU    -      -      -      FUCOMI
 db/6r                 M     FPU    -      -      -      FCOMI
 dc/0m                 M     MEM64  -      -      -      FADD ENC_SEPSZ
@@ -1395,6 +1399,7 @@ dd/4m                 M     MEMZ   -      -      -      FRSTOR
 dd/6m                 M     MEMZ   -      -      -      FSAVE
 dd/7m                 M     MEM16  -      -      -      FSTSW
 dd/0r                 M     FPU    -      -      -      FFREE
+dd/1r                 AM    FPU    FPU    -      -      FXCH UNDOC
 dd/2r                 M     FPU    -      -      -      FST
 dd/3r                 M     FPU    -      -      -      FSTP
 dd/4r                 M     FPU    -      -      -      FUCOM
@@ -1409,6 +1414,7 @@ de/6m                 M     MEM16  -      -      -      FIDIV ENC_SEPSZ
 de/7m                 M     MEM16  -      -      -      FIDIVR ENC_SEPSZ
 de/0r                 MA    FPU    FPU    -      -      FADDP
 de/1r                 MA    FPU    FPU    -      -      FMULP
+de/2r                 AM    FPU    FPU    -      -      FCOMP UNDOC
 ded9                  NP    -      -      -      -      FCOMPP
 de/4r                 MA    FPU    FPU    -      -      FSUBRP
 de/5r                 MA    FPU    FPU    -      -      FSUBP
@@ -1423,6 +1429,9 @@ df/5m                 M     MEM64  -      -      -      FILD ENC_SEPSZ
 df/6m                 M     FPU    -      -      -      FBSTP
 df/7m                 M     MEM64  -      -      -      FISTP ENC_SEPSZ
 df/0r                 M     FPU    -      -      -      FFREEP UNDOC
+df/1r                 AM    FPU    FPU    -      -      FXCH UNDOC
+df/2r                 MA    FPU    FPU    -      -      FSTP UNDOC
+df/3r                 MA    FPU    FPU    -      -      FSTP UNDOC
 # FSTSW AX
 dfe0                  A     GP16   -      -      -      FSTSW
 df/5r                 AM    FPU    FPU    -      -      FUCOMIP
