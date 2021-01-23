@@ -568,6 +568,19 @@ main(int argc, char** argv)
     TEST32("\xd9\x20", "fldenv [eax]");
     TEST64("\xd9\x20", "fldenv [rax]");
 
+    // MPX
+#if 0
+    TEST("\x66\x0f\x1a\xc1", "bndmov bnd0, bnd1");
+    TEST("\x66\x0f\x1a\xc4", "UD"); // ModRM bnd4 is undefined
+    TEST64("\x41\x66\x0f\x1a\xc0", "UD"); // ModRM bnd8 is undefined
+    TEST32("\xf3\x0f\x1b\x00", "bndmk bnd0, [eax]");
+    TEST64("\xf3\x0f\x1b\x00", "bndmk bnd0, [rax]");
+    TEST64("\x0f\x1a\x05\x00\x00\x00\x00", "UD"); // BNDSTX+RIP-rel = UD
+    TEST64("\x0f\x1b\x05\x00\x00\x00\x00", "UD"); // BNDLDX+RIP-rel = UD
+    TEST64("\xf3\x0f\x1b\x05\x00\x00\x00\x00", "UD"); // BNDMK+RIP-rel = UD
+#endif
+    TEST("\xf3\x0f\x1b\xc0", "nop eax, eax"); // BNDMK with reg/reg remains NOP
+
     // 3DNow!
     TEST("\x0f\x0f\xc0\x00", "UD");
     TEST("\x0f\x0f\xc0\x0c", "3dnow mm0, mm0, 0xc"); // PI2FW

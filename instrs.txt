@@ -1543,14 +1543,14 @@ NP.0f38cc             RM    XMM    XMM    -      -      SHA256MSG1
 NP.0f38cd             RM    XMM    XMM    -      -      SHA256MSG2
 NP.0f3acc             RMI   XMM    XMM    IMM8   -      SHA1RNDS4
 
-NP.0f1a/m             RM    BND    MEMZ   -      -      BNDLDX
-66.0f1a               RM    BND    BND    -      -      BNDMOV DEF64
-F2.0f1a               RM    BND    GP     -      -      BNDCU DEF64
-F3.0f1a               RM    BND    GP     -      -      BNDCL DEF64
-NP.0f1b/m             MR    MEMZ   BND    -      -      BNDSTX
-66.0f1b               MR    BND    BND    -      -      BNDMOV DEF64
-F2.0f1b               RM    BND    GP     -      -      BNDCN DEF64
-F3.0f1b/m             RM    BND    MEMZ   -      -      BNDMK
+#NP.0f1a/m             RM    BND    MEMZ   -      -      BNDLDX
+#66.0f1a               RM    BND    BND    -      -      BNDMOV DEF64
+#F2.0f1a               RM    BND    GP     -      -      BNDCU DEF64
+#F3.0f1a               RM    BND    GP     -      -      BNDCL DEF64
+#NP.0f1b/m             MR    MEMZ   BND    -      -      BNDSTX
+#66.0f1b               MR    BND    BND    -      -      BNDMOV DEF64
+#F2.0f1b               RM    BND    GP     -      -      BNDCN DEF64
+#F3.0f1b/m             RM    BND    MEMZ   -      -      BNDMK
 
 # TSXLDTRK
 F2.0f01e8             NP    -      -      -      -      XSUSLDTRK
