@@ -265,34 +265,6 @@ class Opcode(NamedTuple):
             rexw=match.group("rexw"),
         )
 
-    def for_trie(self):
-        opcode = []
-        opcode.append((EntryKind.TABLE_ROOT, [self.escape | self.vex << 2]))
-        if not self.extended:
-            opcode.append((EntryKind.TABLE256, [self.opc]))
-        else:
-            opcode.append((EntryKind.TABLE256, [self.opc + i for i in range(8)]))
-        if self.prefix:
-            if self.prefix == "NFx":
-                opcode.append((EntryKind.TABLE_PREFIX, [0, 1]))
-            else:
-                prefix_val = ["NP", "66", "F3", "F2"].index(self.prefix)
-                opcode.append((EntryKind.TABLE_PREFIX, [prefix_val]))
-        if self.opcext:
-            opcode.append((EntryKind.TABLE16, [((self.opcext - 0xc0) >> 3) | 8]))
-            opcode.append((EntryKind.TABLE8E, [self.opcext & 7]))
-        if self.modreg:
-            # TODO: optimize for /r and /m specifiers to reduce size
-            mod = {"m": [0], "r": [1<<3], "rm": [0, 1<<3]}[self.modreg[1]]
-            reg = [self.modreg[0]] if self.modreg[0] is not None else list(range(8))
-            opcode.append((EntryKind.TABLE16, [x + y for x in mod for y in reg]))
-        if self.vexl in ("0", "1") or self.rexw in ("0", "1"):
-            rexw = {"0": [0], "1": [1<<0], "IG": [0, 1<<0]}[self.rexw or "IG"]
-            vexl = {"0": [0], "1": [1<<1], "IG": [0, 1<<1]}[self.vexl or "IG"]
-            entries = list(map(sum, product(rexw, vexl)))
-            opcode.append((EntryKind.TABLE_VEX, entries))
-        return opcode
-
 class Trie:
     KIND_ORDER = (EntryKind.TABLE_ROOT, EntryKind.TABLE256,
                   EntryKind.TABLE_PREFIX, EntryKind.TABLE16,
@@ -316,16 +288,35 @@ class Trie:
         self.kindmap[kind].append(len(self.trie) - 1)
         return len(self.trie) - 1
 
-    def _transform_opcode(self, opcode):
-        vals = {k: v for k, v in opcode.for_trie()}
-        return [vals.get(kind) for kind in self.KIND_ORDER]
-
     def _clone(self, elem):
         if not elem or elem[0].is_instr:
             return elem
         new_num = self._add_table(elem[0])
         self.trie[new_num] = [self._clone(e) for e in self.trie[elem[1]]]
         return elem[0], new_num
+
+    def _transform_opcode(self, opc):
+        troot = [opc.escape | opc.vex << 2]
+        t256 = [opc.opc + i for i in range(8 if opc.extended else 1)]
+        tprefix, t16, t8e, tvex = None, None, None, None
+        if opc.prefix == "NFx":
+            tprefix = [0, 1]
+        elif opc.prefix:
+            tprefix = [["NP", "66", "F3", "F2"].index(opc.prefix)]
+        if opc.opcext:
+            t16 = [((opc.opcext - 0xc0) >> 3) | 8]
+            t8e = [opc.opcext & 7]
+        elif opc.modreg:
+            # TODO: optimize for /r and /m specifiers to reduce size
+            mod = {"m": [0], "r": [1<<3], "rm": [0, 1<<3]}[opc.modreg[1]]
+            reg = [opc.modreg[0]] if opc.modreg[0] is not None else list(range(8))
+            t16 = [x + y for x in mod for y in reg]
+        if opc.vexl in ("0", "1") or opc.rexw in ("0", "1"):
+            rexw = {"0": [0], "1": [1<<0], "IG": [0, 1<<0]}[opc.rexw or "IG"]
+            vexl = {"0": [0], "1": [1<<1], "IG": [0, 1<<1]}[opc.vexl or "IG"]
+            tvex = list(map(sum, product(rexw, vexl)))
+        # Order must match KIND_ORDER.
+        return troot, t256, tprefix, t16, t8e, tvex
 
     def add_opcode(self, opcode, descidx, root_idx, weak=False):
         opcode = self._transform_opcode(opcode)
