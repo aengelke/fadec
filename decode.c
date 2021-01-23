@@ -244,7 +244,6 @@ prefix_end:
         // there is a REP prefix, then the 66h prefix is ignored here.
         uint8_t mandatory_prefix = prefix_rep ? prefix_rep : !!prefix_66;
         table_idx = table_walk(table_idx, mandatory_prefix, &kind);
-        prefix_rep = 0; // Don't include REP/REPNZ in instr flags
     }
 
     // Then, walk through ModR/M-encoded opcode extensions.

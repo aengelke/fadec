@@ -125,6 +125,7 @@ fd_format_abs(const FdInstr* instr, uint64_t addr, char* buffer, size_t len)
     const char* mnemonic = fdi_name(FD_TYPE(instr));
 
     bool prefix_rep = false;
+    bool prefix_xacq_xrel = false;
     bool prefix_addrsize = false;
     bool prefix_segment = false;
 
@@ -183,6 +184,16 @@ fd_format_abs(const FdInstr* instr, uint64_t addr, char* buffer, size_t len)
             FD_OP_REG_TYPE(instr, 0) == FD_RT_SEG)
             sizesuffix[0] = 'w';
         break;
+    case FDI_XCHG:
+        if (FD_OP_TYPE(instr, 0) == FD_OT_MEM)
+            prefix_xacq_xrel = true;
+        break;
+    case FDI_MOV:
+        // MOV C6h/C7h can have XRELEASE prefix.
+        if (FD_HAS_REP(instr) && FD_OP_TYPE(instr, 0) == FD_OT_MEM &&
+            FD_OP_TYPE(instr, 1) == FD_OT_IMM)
+            prefix_xacq_xrel = true;
+        break;
     case FDI_FXSAVE:
     case FDI_FXRSTOR:
     case FDI_XSAVE:
@@ -217,7 +228,12 @@ fd_format_abs(const FdInstr* instr, uint64_t addr, char* buffer, size_t len)
     default: break;
     }
 
-    if (prefix_rep) {
+    if (prefix_xacq_xrel || FD_HAS_LOCK(instr)) {
+        if (FD_HAS_REP(instr))
+            buf = fd_strplcpy(buf, "xrelease ", end-buf);
+        if (FD_HAS_REPNZ(instr))
+            buf = fd_strplcpy(buf, "xacquire ", end-buf);
+    } else if (prefix_rep) {
         if (FD_HAS_REP(instr))
             buf = fd_strplcpy(buf, "rep ", end-buf);
         if (FD_HAS_REPNZ(instr))

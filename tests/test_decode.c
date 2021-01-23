@@ -90,6 +90,32 @@ main(int argc, char** argv)
     TEST64("\xf2\x0f\xc7\x0f", "cmpxchg8b qword ptr [rdi]");
     TEST32("\xf3\x0f\xc7\x0f", "cmpxchg8b qword ptr [edi]");
     TEST64("\xf3\x0f\xc7\x0f", "cmpxchg8b qword ptr [rdi]");
+    TEST32("\xf2\xf0\x0f\xc7\x0f", "xacquire lock cmpxchg8b qword ptr [edi]");
+    TEST64("\xf2\xf0\x0f\xc7\x0f", "xacquire lock cmpxchg8b qword ptr [rdi]");
+    TEST32("\xf3\xf0\x0f\xc7\x0f", "xrelease lock cmpxchg8b qword ptr [edi]");
+    TEST64("\xf3\xf0\x0f\xc7\x0f", "xrelease lock cmpxchg8b qword ptr [rdi]");
+    TEST32("\x87\x0f", "xchg dword ptr [edi], ecx");
+    TEST64("\x87\x0f", "xchg dword ptr [rdi], ecx");
+    TEST32("\xf2\x87\x0f", "xacquire xchg dword ptr [edi], ecx");
+    TEST64("\xf2\x87\x0f", "xacquire xchg dword ptr [rdi], ecx");
+    TEST32("\xf3\x87\x0f", "xrelease xchg dword ptr [edi], ecx");
+    TEST64("\xf3\x87\x0f", "xrelease xchg dword ptr [rdi], ecx");
+    TEST32("\xf2\xf0\x87\x0f", "xacquire lock xchg dword ptr [edi], ecx");
+    TEST64("\xf2\xf0\x87\x0f", "xacquire lock xchg dword ptr [rdi], ecx");
+    TEST32("\xf3\xf0\x87\x0f", "xrelease lock xchg dword ptr [edi], ecx");
+    TEST64("\xf3\xf0\x87\x0f", "xrelease lock xchg dword ptr [rdi], ecx");
+    TEST32("\xc6\x07\x12", "mov byte ptr [edi], 0x12");
+    TEST64("\xc6\x07\x12", "mov byte ptr [rdi], 0x12");
+    TEST32("\xf2\xc6\x07\x12", "mov byte ptr [edi], 0x12"); // no xacquire
+    TEST64("\xf2\xc6\x07\x12", "mov byte ptr [rdi], 0x12"); // no xacquire
+    TEST32("\xf3\xc6\x07\x12", "xrelease mov byte ptr [edi], 0x12");
+    TEST64("\xf3\xc6\x07\x12", "xrelease mov byte ptr [rdi], 0x12");
+    TEST32("\x66\xc7\x07\x34\x12", "mov word ptr [edi], 0x1234");
+    TEST64("\x66\xc7\x07\x34\x12", "mov word ptr [rdi], 0x1234");
+    TEST32("\x66\xf2\xc7\x07\x34\x12", "mov word ptr [edi], 0x1234"); // no xacquire
+    TEST64("\x66\xf2\xc7\x07\x34\x12", "mov word ptr [rdi], 0x1234"); // no xacquire
+    TEST32("\x66\xf3\xc7\x07\x34\x12", "xrelease mov word ptr [edi], 0x1234");
+    TEST64("\x66\xf3\xc7\x07\x34\x12", "xrelease mov word ptr [rdi], 0x1234");
     TEST("\x66", "PARTIAL");
     TEST("\xf0", "PARTIAL");
     TEST("\x0f", "PARTIAL");
