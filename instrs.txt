@@ -464,7 +464,7 @@ F3.0fbd               RM    GP     GP     -      -      LZCNT USE66
 0fc0                  MR    GP     GP     -      -      XADD SIZE_8 LOCK
 0fc1                  MR    GP     GP     -      -      XADD LOCK
 NP.0fc3/m             MR    MEM    GP     -      -      MOVNTI
-NP.0fc7/1m            M     MEMZ   -      -      -      CMPXCHGD LOCK INSTR_WIDTH
+0fc7/1m               M     MEMZ   -      -      -      CMPXCHGD LOCK IGN66 INSTR_WIDTH
 0fc8+                 O     GP     -      -      -      BSWAP
 0fff                  RM    GP     GP     -      -      UD0
 #

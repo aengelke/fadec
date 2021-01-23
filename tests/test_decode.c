@@ -83,7 +83,13 @@ main(int argc, char** argv)
     TEST64("\x66\x90", "nop");
     TEST32("\x0f\xc7\x0f", "cmpxchg8b qword ptr [edi]");
     TEST64("\x0f\xc7\x0f", "cmpxchg8b qword ptr [rdi]");
+    TEST32("\x66\x0f\xc7\x0f", "cmpxchg8b qword ptr [edi]"); // 66h is ignored
+    TEST64("\x66\x0f\xc7\x0f", "cmpxchg8b qword ptr [rdi]"); // 66h is ignored
     TEST64("\x48\x0f\xc7\x0f", "cmpxchg16b xmmword ptr [rdi]");
+    TEST32("\xf2\x0f\xc7\x0f", "cmpxchg8b qword ptr [edi]");
+    TEST64("\xf2\x0f\xc7\x0f", "cmpxchg8b qword ptr [rdi]");
+    TEST32("\xf3\x0f\xc7\x0f", "cmpxchg8b qword ptr [edi]");
+    TEST64("\xf3\x0f\xc7\x0f", "cmpxchg8b qword ptr [rdi]");
     TEST("\x66", "PARTIAL");
     TEST("\xf0", "PARTIAL");
     TEST("\x0f", "PARTIAL");
