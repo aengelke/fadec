@@ -395,12 +395,6 @@ class Trie:
         print("%d bytes" % (2*len(data)), stats)
         return tuple(data), [offsets[v] for _, v in self.trie[0]]
 
-def bytes_to_table(data, notes):
-    strdata = tuple(d+"," if type(d) == str else "%#04x,"%d for d in data)
-    offs = [0] + sorted(notes.keys()) + [len(data)]
-    return "\n".join("".join(strdata[p:c]) + "\n//%04x "%c + notes.get(c, "")
-                     for p, c in zip(offs, offs[1:]))
-
 def parse_mnemonics(mnemonics):
     mktree = lambda: defaultdict(mktree)
     tree = mktree()
@@ -420,7 +414,7 @@ def parse_mnemonics(mnemonics):
     tab = [merged_str.index(m + "\0") for m in mnemonics]
     return cstr, ",".join(map(str, tab))
 
-template = """// Auto-generated file -- do not modify!
+DECODE_TABLE_TEMPLATE = """// Auto-generated file -- do not modify!
 #if defined(FD_DECODE_TABLE_DATA)
 {hex_table}
 #elif defined(FD_DECODE_TABLE_DESCS)
@@ -435,6 +429,43 @@ template = """// Auto-generated file -- do not modify!
 #error "unspecified decode table"
 #endif
 """
+
+def decode_table(entries, modes):
+    mnems = sorted({desc.mnemonic for _, _, desc in entries})
+    decode_mnems_lines = [f"FD_MNEMONIC({m},{i})\n" for i, m in enumerate(mnems)]
+
+    trie = Trie(root_count=len(modes))
+    descs, desc_map = [], {}
+    for weak, opcode, desc in entries:
+        ign66 = opcode.prefix in ("NP", "66", "F2", "F3")
+        modrm = opcode.modreg or opcode.opcext
+        descenc = desc.encode(ign66, modrm)
+        desc_idx = desc_map.get(descenc)
+        if desc_idx is None:
+            desc_idx = desc_map[descenc] = len(descs)
+            descs.append(descenc)
+        for i, mode in enumerate(modes):
+            if "ONLY%d"%(96-mode) not in desc.flags:
+                trie.add_opcode(opcode, desc_idx, i, weak)
+
+    trie.deduplicate()
+    table_data, root_offsets = trie.compile()
+
+    mnemonics_intel = [m.replace("SSE_", "").replace("MMX_", "")
+                        .replace("MOVABS", "MOV").replace("RESERVED_", "")
+                        .replace("JMPF", "JMP FAR").replace("CALLF", "CALL FAR")
+                        .replace("_S2G", "").replace("_G2S", "")
+                        .replace("_CR", "").replace("_DR", "")
+                        .lower() for m in mnems]
+
+    defines = ["FD_TABLE_OFFSET_%d %d"%k for k in zip(modes, root_offsets)]
+
+    return "".join(decode_mnems_lines), DECODE_TABLE_TEMPLATE.format(
+        hex_table="".join(f"{e:#06x}," for e in table_data),
+        descs="\n".join("{{{0},{1},{2},{3}}},".format(*desc) for desc in descs),
+        mnemonics=parse_mnemonics(mnemonics_intel),
+        defines="\n".join("#define " + line for line in defines),
+    )
 
 def encode_table(entries):
     mnemonics = defaultdict(list)
@@ -572,44 +603,9 @@ if __name__ == "__main__":
         if "UNDOC" not in desc.flags or args.with_undoc:
             entries.append((weak, opcode, desc))
 
-    mnemonics = sorted({desc.mnemonic for _, _, desc in entries})
-
-    decode_mnems_lines = [f"FD_MNEMONIC({m},{i})\n" for i, m in enumerate(mnemonics)]
-    args.decode_mnems.write("".join(decode_mnems_lines))
-
-    trie = Trie(root_count=len(args.modes))
-    descs, desc_map = [], {}
-    for weak, opcode, desc in entries:
-        ign66 = opcode.prefix in ("NP", "66", "F2", "F3")
-        modrm = opcode.modreg or opcode.opcext
-        descenc = desc.encode(ign66, modrm)
-        desc_idx = desc_map.get(descenc)
-        if desc_idx is None:
-            desc_idx = desc_map[descenc] = len(descs)
-            descs.append(descenc)
-        for i, mode in enumerate(args.modes):
-            if "ONLY%d"%(96-mode) not in desc.flags:
-                trie.add_opcode(opcode, desc_idx, i, weak)
-
-    trie.deduplicate()
-    table_data, root_offsets = trie.compile()
-
-    mnemonics_intel = [m.replace("SSE_", "").replace("MMX_", "")
-                        .replace("MOVABS", "MOV").replace("RESERVED_", "")
-                        .replace("JMPF", "JMP FAR").replace("CALLF", "CALL FAR")
-                        .replace("_S2G", "").replace("_G2S", "")
-                        .replace("_CR", "").replace("_DR", "")
-                        .lower() for m in mnemonics]
-
-    defines = ["FD_TABLE_OFFSET_%d %d"%k for k in zip(args.modes, root_offsets)]
-
-    decode_table = template.format(
-        hex_table=bytes_to_table(table_data, {}),
-        descs="\n".join("{{{0},{1},{2},{3}}},".format(*desc) for desc in descs),
-        mnemonics=parse_mnemonics(mnemonics_intel),
-        defines="\n".join("#define " + line for line in defines),
-    )
-    args.decode_table.write(decode_table)
+    fd_mnem_list, fd_table = decode_table(entries, args.modes)
+    args.decode_mnems.write(fd_mnem_list)
+    args.decode_table.write(fd_table)
 
     fe_mnem_list, fe_code = encode_table(entries)
     args.encode_mnems.write(fe_mnem_list)
