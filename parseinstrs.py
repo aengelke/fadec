@@ -292,35 +292,12 @@ class Opcode(NamedTuple):
         kinds, values = zip(*opcode)
         return [tuple(zip(kinds, prod)) for prod in product(*values)]
 
-def format_opcode(opcode):
-    opcode_string = ""
-    prefix = ""
-    for kind, byte in opcode:
-        if kind == EntryKind.TABLE_ROOT:
-            opcode_string += ["", "0f", "0f38", "0f3a"][byte & 3]
-            prefix += ["", "VEX."][byte >> 2]
-        elif kind == EntryKind.TABLE256:
-            opcode_string += "{:02x}".format(byte)
-        elif kind == EntryKind.TABLE16:
-            opcode_string += "/{:x}{}".format(byte & 7, "mr"[byte >> 3])
-        elif kind == EntryKind.TABLE8E:
-            opcode_string += "+rm={:x}".format(byte)
-        elif kind == EntryKind.TABLE_PREFIX:
-            if byte & 4:
-                prefix += "VEX."
-            prefix += ["NP.", "66.", "F3.", "F2."][byte&3]
-        elif kind == EntryKind.TABLE_VEX:
-            prefix += "W{}.L{}.".format(byte & 1, byte >> 1)
-        else:
-            raise Exception("unsupported opcode kind {}".format(kind))
-    return prefix + opcode_string
-
 class Table:
     def __init__(self, root_count=1):
         self.data = OrderedDict()
-        self.roots = ["root%d"%i for i in range(root_count)]
+        self.roots = [(i,) for i in range(root_count)]
         for i in range(root_count):
-            self.data["root%d"%i] = TrieEntry.table(EntryKind.TABLE_ROOT)
+            self.data[i,] = TrieEntry.table(EntryKind.TABLE_ROOT)
         self.descs = []
         self.descs_map = {}
         self.offsets = {}
@@ -337,21 +314,19 @@ class Table:
         self.data[name] = TrieEntry(old.kind, new_items, None)
 
     def _walk_opcode(self, opcode, root_idx):
-        name = "t{},{}".format(root_idx, format_opcode(opcode))
-
-        tn = "root%d"%root_idx
+        tn = root_idx,
         for i in range(len(opcode) - 1):
             # kind is the table kind that we want to point to in the _next_.
             kind, byte = opcode[i+1][0], opcode[i][1]
             # Retain prev_tn name so that we can update it.
             prev_tn, tn = tn, self.data[tn].items[byte]
             if tn is None:
-                tn = "t{},{}".format(root_idx, format_opcode(opcode[:i+1]))
+                tn = prev_tn + (byte,)
                 self._update_table(prev_tn, byte, tn, TrieEntry.table(kind))
 
             if self.data[tn].kind != kind:
                 raise Exception("{}, have {}, want {}".format(
-                                name, self.data[tn].kind, kind))
+                                opcode, self.data[tn].kind, kind))
         return tn
 
     def _add_encoding(self, instr_encoding):
@@ -362,10 +337,9 @@ class Table:
         return TrieEntry.instr(desc_idx)
 
     def add_opcode(self, opcode, instr_encoding, root_idx=0):
-        name = "t{},{}".format(root_idx, format_opcode(opcode))
         tn = self._walk_opcode(opcode, root_idx)
         desc_entry = self._add_encoding(instr_encoding)
-        self._update_table(tn, opcode[-1][1], name, desc_entry)
+        self._update_table(tn, opcode[-1][1], desc_entry.descidx, desc_entry)
 
     def fill_free(self, opcode, instr_encoding, root_idx=0):
         desc_entry = self._add_encoding(instr_encoding)
@@ -375,7 +349,7 @@ class Table:
             tn, idx = queue.pop()
             entry = self.data[tn].items[idx]
             if not entry:
-                self._update_table(tn, idx, f"tn,*{idx:x}", desc_entry)
+                self._update_table(tn, idx, desc_entry.descidx, desc_entry)
             else:
                 for i in range(len(self.data[entry].items)):
                     queue.append((entry, i))
