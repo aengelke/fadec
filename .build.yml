@@ -1,0 +1,12 @@
+image: alpine/edge
+sources:
+- https://git.sr.ht/~aengelke/fadec
+packages:
+- meson
+tasks:
+- build: |
+    mkdir fadec-build
+    meson fadec-build fadec
+    ninja -C fadec-build
+- check: |
+    ninja -C fadec-build test
