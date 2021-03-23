@@ -70,6 +70,14 @@ main(int argc, char** argv)
     TEST("\x54", FE_PUSHr, FE_SP);
     TEST("\x41\x57", FE_PUSHr, FE_R15);
     TEST("\x41\x50", FE_PUSHr, FE_R8);
+    TEST("", FE_PUSHr, FE_ES);
+    TEST("", FE_PUSH16r, FE_ES);
+    TEST("", FE_PUSHr, FE_CS);
+    TEST("", FE_PUSH16r, FE_CS);
+    TEST("", FE_PUSHr, FE_SS);
+    TEST("", FE_PUSH16r, FE_SS);
+    TEST("", FE_PUSHr, FE_DS);
+    TEST("", FE_PUSH16r, FE_DS);
     TEST("\x0f\xa0", FE_PUSHr, FE_FS);
     TEST("\x66\x0f\xa0", FE_PUSH16r, FE_FS);
     TEST("\x0f\xa8", FE_PUSHr, FE_GS);

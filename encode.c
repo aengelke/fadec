@@ -348,6 +348,10 @@ fe_enc64_impl(uint8_t** restrict buf, uint64_t mnem, FeOp op0, FeOp op1,
             opc |= OPC_67;
         if (UNLIKELY(mnem & FE_SEG_MASK))
             opc |= (mnem & FE_SEG_MASK) << (OPC_SEG_IDX - 16);
+        if (UNLIKELY(desc->enc == ENC_S)) {
+            if ((op_reg_idx(op0) << 3 & 0x20) != (opc & 0x20)) goto next;
+            opc |= op_reg_idx(op0) << 3;
+        }
 
         if (ei->immctl > 0) {
             imm = ops[ei->immidx];
@@ -372,8 +376,6 @@ fe_enc64_impl(uint8_t** restrict buf, uint64_t mnem, FeOp op0, FeOp op1,
             if (enc_mr(buf, opc, ops[ei->modrm^3], modreg, desc->immsz)) goto fail;
         } else if (ei->modreg) {
             if (enc_o(buf, opc, ops[ei->modreg^3])) goto fail;
-        } else if (UNLIKELY(desc->enc == ENC_S)) {
-            if (enc_opc(buf, opc | (op_reg_idx(op0) << 3))) goto fail;
         } else {
             if (enc_opc(buf, opc)) goto fail;
         }
