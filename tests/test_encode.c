@@ -160,6 +160,12 @@ main(int argc, char** argv)
     TEST("\xc4\xe2\x71\x9d\xc2", FE_VFNMADD132SSrrr, FE_XMM0, FE_XMM1, FE_XMM2);
     TEST("\xc4\xe2\xf1\x9d\xc2", FE_VFNMADD132SDrrr, FE_XMM0, FE_XMM1, FE_XMM2);
 
+    // Test RVMR encoding
+    TEST("\xc4\xe3\x71\x4a\xc2\x30", FE_VBLENDVPS128rrrr, FE_XMM0, FE_XMM1, FE_XMM2, FE_XMM3);
+    TEST("\xc4\xe3\x75\x4a\xc2\x30", FE_VBLENDVPS256rrrr, FE_XMM0, FE_XMM1, FE_XMM2, FE_XMM3);
+    TEST("\xc4\xe3\x71\x4a\x05\x00\x00\x00\x00\x20", FE_VBLENDVPS128rrmr, FE_XMM0, FE_XMM1, FE_MEM(FE_IP, 0, 0, 10), FE_XMM2);
+    TEST("\xc4\xe3\x75\x4a\x05\x00\x00\x00\x00\x20", FE_VBLENDVPS256rrmr, FE_XMM0, FE_XMM1, FE_MEM(FE_IP, 0, 0, 10), FE_XMM2);
+
     // VSIB encodings
     TEST("", FE_VGATHERDPS128rmr, FE_XMM0, FE_XMM0, FE_XMM1); // must have memory operand
     TEST("", FE_VGATHERDPS128rmr, FE_XMM0, FE_MEM(FE_DI, 8, 0, 0), FE_XMM1); // must have SIB

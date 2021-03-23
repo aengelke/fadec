@@ -322,7 +322,7 @@ fe_enc64_impl(uint8_t** restrict buf, uint64_t mnem, FeOp op0, FeOp op1,
         const struct EncodeDesc* desc = &descs[desc_idx];
         const struct EncodingInfo* ei = &encoding_infos[desc->enc];
         uint64_t opc = desc->opc;
-        int64_t imm;
+        int64_t imm = 0xcc;
 
         if (UNLIKELY(desc->enc == ENC_INVALID)) goto fail;
 
@@ -349,14 +349,17 @@ fe_enc64_impl(uint8_t** restrict buf, uint64_t mnem, FeOp op0, FeOp op1,
         if (UNLIKELY(mnem & FE_SEG_MASK))
             opc |= (mnem & FE_SEG_MASK) << (OPC_SEG_IDX - 16);
 
-        if (ei->immctl && ei->immctl != 3)
+        if (ei->immctl > 0) {
             imm = ops[ei->immidx];
-        if (ei->immctl == 6) {
-            if (UNLIKELY(mnem & FE_JMPL) && desc->alt) goto next;
-            imm -= (int64_t) *buf + opc_size(opc) + desc->immsz;
+            if (ei->immctl == 3)
+                imm = op_reg_idx(imm) << 4;
+            if (ei->immctl == 6) {
+                if (UNLIKELY(mnem & FE_JMPL) && desc->alt) goto next;
+                imm -= (int64_t) *buf + opc_size(opc) + desc->immsz;
+            }
+            if (UNLIKELY(ei->immctl == 1) && imm != 1) goto next;
+            if (ei->immctl >= 4 && !op_imm_n(imm, desc->immsz)) goto next;
         }
-        if (UNLIKELY(ei->immctl == 1) && imm != 1) goto next;
-        if (ei->immctl >= 2 && !op_imm_n(imm, desc->immsz)) goto next;
 
         // NOP has no operands, so this must be the 32-bit OA XCHG
         if ((desc->opc & ~7) == 0x90 && ops[0] == FE_AX) goto next;

@@ -128,8 +128,10 @@ class InstrDesc(NamedTuple):
 
     def imm_size(self, opsz):
         flags = ENCODINGS[self.encoding]
-        if flags.imm_control < 4:
+        if flags.imm_control < 3:
             return 0
+        if flags.imm_control == 3:
+            return 1
         if self.mnemonic == "ENTER":
             return 3
         if "IMM_8" in self.flags:
