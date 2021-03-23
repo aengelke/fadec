@@ -450,6 +450,13 @@ main(int argc, char** argv)
     TEST("\xc4\xe2\xf1\x45\xc2", "vpsrlvq xmm0, xmm1, xmm2");
     TEST("\xc4\xe2\xf5\x45\xc2", "vpsrlvq ymm0, ymm1, ymm2");
 
+    TEST("\xc4\xe3\x71\x4a\xc2\x30", "vblendvps xmm0, xmm1, xmm2, xmm3");
+    TEST32("\xc4\xe3\x75\x4a\xc2\xf0", "vblendvps ymm0, ymm1, ymm2, ymm7"); // Bit 7 is ignored
+    TEST64("\xc4\xe3\x75\x4a\xc2\xf0", "vblendvps ymm0, ymm1, ymm2, ymm15");
+    TEST("\xc4\xe3\x71\x4b\xc2\x70", "vblendvpd xmm0, xmm1, xmm2, xmm7");
+    TEST32("\xc4\xe3\x75\x4b\xc2\x80", "vblendvpd ymm0, ymm1, ymm2, ymm0"); // Bit 7 is ignored
+    TEST64("\xc4\xe3\x75\x4b\xc2\x80", "vblendvpd ymm0, ymm1, ymm2, ymm8");
+
     TEST("\xc4\xe2\x71\x92\xc0", "UD"); // Must have memory operand
     TEST("\xc4\xe2\x71\x92\x00", "UD"); // Must have SIB byte
     TEST("\xc4\xe2\x71\x92\x05\x00\x00\x00\x00", "UD"); // Must have SIB byte

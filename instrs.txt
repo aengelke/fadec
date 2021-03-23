@@ -1101,8 +1101,6 @@ VEX.66.W0.0f380d      RVM   XMM    XMM    XMM    -      VPERMILPD
 VEX.66.W0.0f380e      RM    XMM    XMM    -      -      VTESTPS
 VEX.66.W0.0f380f      RM    XMM    XMM    -      -      VTESTPD
 VEX.66.W0.0f3813      RM    XMM    XMM    -      -      VCVTPH2PS
-VEX.66.W0.0f3814      RVMR  XMM    XMM    XMM    XMM    VBLENDVPS
-VEX.66.W0.0f3815      RVMR  XMM    XMM    XMM    XMM    VBLENDVPD
 VEX.66.W0.L1.0f3816   RVM   XMM    XMM    XMM    -      VPERMPS
 VEX.66.0f3817         RM    XMM    XMM    -      -      VPTEST
 VEX.66.W0.0f3818      RM    XMM    XMM32  -      -      VBROADCASTSS
@@ -1266,6 +1264,8 @@ VEX.66.0f3a41         RVMI  XMM    XMM    XMM    IMM8   VDPPD
 VEX.66.0f3a42         RVMI  XMM    XMM    XMM    IMM8   VMPSADBW
 VEX.66.0f3a44         RVMI  XMM    XMM    XMM    IMM8   VPCLMULQDQ
 VEX.66.W0.L1.0f3a46   RVMI  XMM    XMM    XMM    IMM8   VPERM2I128
+VEX.66.W0.0f3a4a      RVMR  XMM    XMM    XMM    XMM    VBLENDVPS
+VEX.66.W0.0f3a4b      RVMR  XMM    XMM    XMM    XMM    VBLENDVPD
 VEX.66.L0.0f3a60      RMI   XMM    XMM    IMM8   -      VPCMPESTRM ENC_NOSZ
 VEX.66.L0.0f3a61      RMI   XMM    XMM    IMM8   -      VPCMPESTRI ENC_NOSZ
 VEX.66.L0.0f3a62      RMI   XMM    XMM    IMM8   -      VPCMPISTRM ENC_NOSZ
