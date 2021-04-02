@@ -66,6 +66,7 @@ opc_size(uint64_t opc)
         else
             res += 2;
     } else {
+        if (opc & OPC_LOCK) res++;
         if (opc & OPC_66) res++;
         if (opc & OPC_F2) res++;
         if (opc & OPC_F3) res++;
@@ -107,6 +108,7 @@ enc_opc(uint8_t** restrict buf, uint64_t opc)
         b2 |= (~((opc & OPC_VEXOP_MSK) >> OPC_VEXOP_IDX) & 0xf) << 3;
         *(*buf)++ = b2;
     } else {
+        if (opc & OPC_LOCK) *(*buf)++ = 0xF0;
         if (opc & OPC_66) *(*buf)++ = 0x66;
         if (opc & OPC_F2) *(*buf)++ = 0xF2;
         if (opc & OPC_F3) *(*buf)++ = 0xF3;

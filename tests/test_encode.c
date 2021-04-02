@@ -239,6 +239,11 @@ main(int argc, char** argv)
     TEST("\x69\x05\xf6\xff\xff\xff\x80\x00\x00\x00", FE_IMUL32rmi, FE_AX, FE_MEM(FE_IP, 0, 0, 0), 0x80);
     TEST("\x66\x69\x05\xf7\xff\xff\xff\x80\x00", FE_IMUL16rmi, FE_AX, FE_MEM(FE_IP, 0, 0, 0), 0x80);
 
+    // Test LOCK prefix
+    TEST("\xf0\x87\x08", FE_LOCK_XCHG32mr, FE_MEM(FE_AX, 0, 0, 0), FE_CX);
+    TEST("\xf0\x0f\xc1\x01", FE_LOCK_XADD32mr, FE_MEM(FE_CX, 0, 0, 0), FE_AX);
+    TEST("\x64\x67\xf0\x41\x81\x84\x00\x00\xff\xff\xff\x78\x56\x34\x12", FE_LOCK_ADD32mi|FE_ADDR32|FE_SEG(FE_FS), FE_MEM(FE_R8, 1, FE_AX, -0x100), 0x12345678);
+
     puts(failed ? "Some tests FAILED" : "All tests PASSED");
     return failed ? EXIT_FAILURE : EXIT_SUCCESS;
 }
