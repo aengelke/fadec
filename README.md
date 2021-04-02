@@ -67,8 +67,8 @@ failed |= fe_enc64(&cur, FE_XOR32rr, FE_AX, FE_AX);
 failed |= fe_enc64(&cur, FE_MOVZXr32m8, FE_CX, FE_MEM(FE_DI, 1, FE_AX, 0));
 // test ecx, ecx
 failed |= fe_enc64(&cur, FE_TEST32rr, FE_CX, FE_CX);
-// jz $
-// This will be replaced later FE_JMPL enforces use of longest offset
+// jnz $
+// This will be replaced later; FE_JMPL enforces use of longest offset
 uint8_t* fwd_jmp = cur;
 failed |= fe_enc64(&cur, FE_JNZ|FE_JMPL, (intptr_t) cur);
 uint8_t* loop_tgt = cur;
@@ -104,8 +104,9 @@ The API consists of one function to handle encode requests, as well as some macr
         - For offset operands, specify the target address.
 
 ## Known issues
-- The encoder doesn't support VEX encodings (yet).
 - The EVEX prefix (AVX-512) is not supported (yet).
+- MPX instructions are not supported.
+- HLE prefixes `xacquire`/`xrelease` are not supported by the encoder (yet).
 - Prefixes for indirect jumps and calls are not properly decoded, e.g. `notrack`, `bnd`.
 - Low test coverage. (Help needed.)
 - No Python API.

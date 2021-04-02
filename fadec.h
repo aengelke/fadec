@@ -42,6 +42,7 @@ enum {
     FD_FLAG_64 = 1 << 7,
 };
 
+/** Operand types. **/
 typedef enum {
     FD_OT_NONE = 0,
     FD_OT_REG = 1,
@@ -186,8 +187,7 @@ const char* fdi_name(FdInstrType ty);
 #define FD_HAS_REP(instr) ((instr)->flags & FD_FLAG_REP)
 /** Indicates whether the instruction was encoded with a REPNZ prefix. **/
 #define FD_HAS_REPNZ(instr) ((instr)->flags & FD_FLAG_REPNZ)
-/** Indicates whether the instruction was encoded with a LOCK prefix. Note that
- * it is not checked whether the LOCK prefix is valid for the instruction. **/
+/** Indicates whether the instruction was encoded with a LOCK prefix. **/
 #define FD_HAS_LOCK(instr) ((instr)->flags & FD_FLAG_LOCK)
 /** Do not use. **/
 #define FD_IS64(instr) ((instr)->flags & FD_FLAG_64)
@@ -204,7 +204,7 @@ const char* fdi_name(FdInstrType ty);
 #define FD_OP_SIZE(instr,idx) ((instr)->operands[idx].size)
 /** Gets the accessed register index of a register operand. Note that /only/ the
  * index is returned, no further interpretation of the index (which depends on
- * the instruction type) is done. The register type can be fetches using
+ * the instruction type) is done. The register type can be fetched using
  * FD_OP_REG_TYPE, e.g. for distinguishing high-byte registers.
  * Only valid if  FD_OP_TYPE == FD_OT_REG  **/
 #define FD_OP_REG(instr,idx) ((FdReg) (instr)->operands[idx].reg)
@@ -236,7 +236,7 @@ const char* fdi_name(FdInstrType ty);
  * Only valid if  FD_OP_TYPE == FD_OT_MEM  **/
 #define FD_OP_DISP(instr,idx) ((int64_t) (instr)->disp)
 /** Gets the (sign-extended) encoded constant for an immediate operand.
- * Only valid if  FD_OP_TYPE == FD_OT_IMM  **/
+ * Only valid if  FD_OP_TYPE == FD_OT_IMM  or  FD_OP_TYPE == FD_OT_OFF  **/
 #define FD_OP_IMM(instr,idx) ((instr)->imm)
 
 #ifdef __cplusplus
