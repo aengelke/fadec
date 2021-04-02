@@ -1363,8 +1363,8 @@ db/0m                 M     MEM32  -      -      -      FILD ENC_SEPSZ
 db/1m                 M     MEM32  -      -      -      FISTTP ENC_SEPSZ
 db/2m                 M     MEM32  -      -      -      FIST ENC_SEPSZ
 db/3m                 M     MEM32  -      -      -      FISTP ENC_SEPSZ
-db/5m                 M     FPU    -      -      -      FLD
-db/7m                 M     FPU    -      -      -      FSTP
+db/5m                 M     FPU    -      -      -      FLD ENC_SEPSZ
+db/7m                 M     FPU    -      -      -      FSTP ENC_SEPSZ
 db/0r                 M     FPU    -      -      -      FCMOVNB
 db/1r                 M     FPU    -      -      -      FCMOVNE
 db/2r                 M     FPU    -      -      -      FCMOVNBE

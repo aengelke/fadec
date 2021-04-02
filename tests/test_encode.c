@@ -85,6 +85,18 @@ main(int argc, char** argv)
     TEST("\xff\x30", FE_PUSHm, FE_MEM(FE_AX, 0, 0, 0));
     TEST("\xff\x31", FE_PUSHm, FE_MEM(FE_CX, 0, 0, 0));
     TEST("\x9c", FE_PUSHF);
+    TEST("\x8c\xc0", FE_MOV_S2Grr, FE_AX, FE_ES);
+    TEST("\x8c\xc8", FE_MOV_S2Grr, FE_AX, FE_CS);
+    TEST("\x8c\xd0", FE_MOV_S2Grr, FE_AX, FE_SS);
+    TEST("\x8c\xd8", FE_MOV_S2Grr, FE_AX, FE_DS);
+    TEST("\x8c\xe0", FE_MOV_S2Grr, FE_AX, FE_FS);
+    TEST("\x8c\xe8", FE_MOV_S2Grr, FE_AX, FE_GS);
+    TEST("\x8e\xc0", FE_MOV_G2Srr, FE_ES, FE_AX);
+    // TEST("", FE_MOV_G2Srr, FE_CS, FE_AX);
+    TEST("\x8e\xd0", FE_MOV_G2Srr, FE_SS, FE_AX);
+    TEST("\x8e\xd8", FE_MOV_G2Srr, FE_DS, FE_AX);
+    TEST("\x8e\xe0", FE_MOV_G2Srr, FE_FS, FE_AX);
+    TEST("\x8e\xe8", FE_MOV_G2Srr, FE_GS, FE_AX);
     TEST("\xd2\xe4", FE_SHL8rr, FE_AH, FE_CX);
     TEST("", FE_SHL8rr, FE_AH, FE_DX);
     TEST("\xd0\xe0", FE_SHL8ri, FE_AX, 1);
@@ -200,6 +212,27 @@ main(int argc, char** argv)
     TEST("", FE_MOV32ar|FE_ADDR32, 0xfedcba98, FE_CX);
     TEST("", FE_MOV64ar, 0xfedcba9876543210, FE_CX);
     TEST("", FE_MOV64ar|FE_ADDR32, 0xfedcba98, FE_CX);
+
+    // Test FPU instructions
+    TEST("\xd8\x00", FE_FADDm32, FE_MEM(FE_AX, 0, 0, 0));
+    TEST("\xdc\x00", FE_FADDm64, FE_MEM(FE_AX, 0, 0, 0));
+    TEST("\xd8\xc0", FE_FADDrr, FE_ST0, FE_ST0);
+    TEST("\xd8\xc1", FE_FADDrr, FE_ST0, FE_ST1);
+    TEST("\xdc\xc1", FE_FADDrr, FE_ST1, FE_ST0);
+    TEST("", FE_FADDrr, FE_ST1, FE_ST1);
+    TEST("\xde\xc1", FE_FADDPrr, FE_ST1, FE_ST0);
+    TEST("\xda\x00", FE_FIADDm32, FE_MEM(FE_AX, 0, 0, 0));
+    TEST("\xde\x00", FE_FIADDm16, FE_MEM(FE_AX, 0, 0, 0));
+    TEST("\xd9\x00", FE_FLDm32, FE_MEM(FE_AX, 0, 0, 0));
+    TEST("\xdd\x00", FE_FLDm64, FE_MEM(FE_AX, 0, 0, 0));
+    TEST("\xdb\x28", FE_FLDm80, FE_MEM(FE_AX, 0, 0, 0));
+    TEST("\xdf\x00", FE_FILDm16, FE_MEM(FE_AX, 0, 0, 0));
+    TEST("\xdb\x00", FE_FILDm32, FE_MEM(FE_AX, 0, 0, 0));
+    TEST("\xdf\x28", FE_FILDm64, FE_MEM(FE_AX, 0, 0, 0));
+    TEST("\xd9\xc1", FE_FLDr, FE_ST1);
+    TEST("\xd9\xe8", FE_FLD1);
+    TEST("\xdf\xe0", FE_FSTSWr, FE_AX);
+    TEST("", FE_FSTSWr, FE_CX);
 
     // Test VEX encoding
     TEST("\xc5\xfc\x77", FE_VZEROALL);

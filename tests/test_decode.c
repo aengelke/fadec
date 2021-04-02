@@ -130,6 +130,7 @@ main(int argc, char** argv)
     TEST("\x0F\x01\xE2", "smsw edx");
     TEST("\x66\x0F\x01\xE2", "smsw dx");
     TEST64("\x66\x48\x0F\x01\xE2", "smsw rdx");
+    TEST64("\xf2\x66\x0f\x01\x23", "smsw word ptr [rbx]");
     TEST32("\x66\x0f\x20\x00", "mov eax, cr0"); // mod=0, 66h
     TEST64("\x66\x0f\x20\x00", "mov rax, cr0"); // mod=0, 66h
     TEST32("\xf3\x0f\x20\x00", "mov eax, cr0"); // REP
@@ -155,6 +156,7 @@ main(int argc, char** argv)
     TEST64("\x41\xd8\xc1", "fadd st(0), st(1)"); // REX.B ignored
     TEST64("\xd9\xc9", "fxch st(1)");
     TEST64("\xd9\xd0", "fnop");
+    TEST("\xdf\xe0", "fstsw ax");
     TEST64("\x41\xdf\xe0", "fstsw ax");
 
     // ModRM Test cases
@@ -226,6 +228,8 @@ main(int argc, char** argv)
     TEST("\x66\x6a\xff", "pushw 0xffff");
     TEST32("\x6a\xff", "push 0xffffffff");
     TEST64("\x6a\xff", "push 0xffffffffffffffff");
+    TEST32("\x60", "pushad");
+    TEST32("\x66\x60", "pushaw");
     TEST("\xb0\xf0", "mov al, 0xf0");
     TEST("\x66\xb8\xf0\xf0", "mov ax, 0xf0f0");
     TEST("\xb8\xf0\xf0\xab\xff", "mov eax, 0xffabf0f0");
