@@ -159,6 +159,48 @@ main(int argc, char** argv)
     TEST("\x66\x0f\x3a\x14\xc1\x02", FE_SSE_PEXTRBrri, FE_CX, FE_XMM0, 2);
     TEST("", FE_SSE_PEXTRBrri, FE_CH, FE_XMM0, 2);
 
+    // Test FD/TD encodings
+    TEST("\xa0\x00\x00\x00\x00\x00\x00\x00\x00", FE_MOV8ra, FE_AX, 0);
+    TEST("\x67\xa0\x00\x00\x00\x00", FE_MOV8ra|FE_ADDR32, FE_AX, 0);
+    TEST("\x66\xa1\x00\x00\x00\x00\x00\x00\x00\x00", FE_MOV16ra, FE_AX, 0);
+    TEST("\x67\x66\xa1\x00\x00\x00\x00", FE_MOV16ra|FE_ADDR32, FE_AX, 0);
+    TEST("\x66\xa1\x10\x32\x54\x76\x98\xba\xdc\xfe", FE_MOV16ra, FE_AX, 0xfedcba9876543210);
+    TEST("\x67\x66\xa1\x98\xba\xdc\xfe", FE_MOV16ra|FE_ADDR32, FE_AX, 0xfedcba98);
+    TEST("\xa1\x10\x32\x54\x76\x98\xba\xdc\xfe", FE_MOV32ra, FE_AX, 0xfedcba9876543210);
+    TEST("\x67\xa1\x98\xba\xdc\xfe", FE_MOV32ra|FE_ADDR32, FE_AX, 0xfedcba98);
+    TEST("\x48\xa1\x10\x32\x54\x76\x98\xba\xdc\xfe", FE_MOV64ra, FE_AX, 0xfedcba9876543210);
+    TEST("\x67\x48\xa1\x98\xba\xdc\xfe", FE_MOV64ra|FE_ADDR32, FE_AX, 0xfedcba98);
+    TEST("\xa2\x00\x00\x00\x00\x00\x00\x00\x00", FE_MOV8ar, 0, FE_AX);
+    TEST("\x67\xa2\x00\x00\x00\x00", FE_MOV8ar|FE_ADDR32, 0, FE_AX);
+    TEST("\x66\xa3\x00\x00\x00\x00\x00\x00\x00\x00", FE_MOV16ar, 0, FE_AX);
+    TEST("\x67\x66\xa3\x00\x00\x00\x00", FE_MOV16ar|FE_ADDR32, 0, FE_AX);
+    TEST("\x66\xa3\x10\x32\x54\x76\x98\xba\xdc\xfe", FE_MOV16ar, 0xfedcba9876543210, FE_AX);
+    TEST("\x67\x66\xa3\x98\xba\xdc\xfe", FE_MOV16ar|FE_ADDR32, 0xfedcba98, FE_AX);
+    TEST("\xa3\x10\x32\x54\x76\x98\xba\xdc\xfe", FE_MOV32ar, 0xfedcba9876543210, FE_AX);
+    TEST("\x67\xa3\x98\xba\xdc\xfe", FE_MOV32ar|FE_ADDR32, 0xfedcba98, FE_AX);
+    TEST("\x48\xa3\x10\x32\x54\x76\x98\xba\xdc\xfe", FE_MOV64ar, 0xfedcba9876543210, FE_AX);
+    TEST("\x67\x48\xa3\x98\xba\xdc\xfe", FE_MOV64ar|FE_ADDR32, 0xfedcba98, FE_AX);
+    TEST("", FE_MOV8ra, FE_CX, 0);
+    TEST("", FE_MOV8ra|FE_ADDR32, FE_CX, 0);
+    TEST("", FE_MOV16ra, FE_CX, 0);
+    TEST("", FE_MOV16ra|FE_ADDR32, FE_CX, 0);
+    TEST("", FE_MOV16ra, FE_CX, 0xfedcba9876543210);
+    TEST("", FE_MOV16ra|FE_ADDR32, FE_CX, 0xfedcba98);
+    TEST("", FE_MOV32ra, FE_CX, 0xfedcba9876543210);
+    TEST("", FE_MOV32ra|FE_ADDR32, FE_CX, 0xfedcba98);
+    TEST("", FE_MOV64ra, FE_CX, 0xfedcba9876543210);
+    TEST("", FE_MOV64ra|FE_ADDR32, FE_CX, 0xfedcba98);
+    TEST("", FE_MOV8ar, 0, FE_CX);
+    TEST("", FE_MOV8ar|FE_ADDR32, 0, FE_CX);
+    TEST("", FE_MOV16ar, 0, FE_CX);
+    TEST("", FE_MOV16ar|FE_ADDR32, 0, FE_CX);
+    TEST("", FE_MOV16ar, 0xfedcba9876543210, FE_CX);
+    TEST("", FE_MOV16ar|FE_ADDR32, 0xfedcba98, FE_CX);
+    TEST("", FE_MOV32ar, 0xfedcba9876543210, FE_CX);
+    TEST("", FE_MOV32ar|FE_ADDR32, 0xfedcba98, FE_CX);
+    TEST("", FE_MOV64ar, 0xfedcba9876543210, FE_CX);
+    TEST("", FE_MOV64ar|FE_ADDR32, 0xfedcba98, FE_CX);
+
     // Test VEX encoding
     TEST("\xc5\xfc\x77", FE_VZEROALL);
     TEST("\xc5\xf8\x77", FE_VZEROUPPER);

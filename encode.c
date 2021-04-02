@@ -291,8 +291,8 @@ const struct EncodingInfo encoding_infos[ENC_MAX] = {
     [ENC_S]       = { 0 },
     [ENC_A]       = { .zregidx = 0^3, .zregval = 0 },
     [ENC_D]       = { .immctl = 6, .immidx = 0 },
-    [ENC_FD]      = { .immctl = 2, .immidx = 1 },
-    [ENC_TD]      = { .immctl = 2, .immidx = 0 },
+    [ENC_FD]      = { .zregidx = 0^3, .zregval = 0, .immctl = 2, .immidx = 1 },
+    [ENC_TD]      = { .zregidx = 1^3, .zregval = 0, .immctl = 2, .immidx = 0 },
     [ENC_RVM]     = { .modrm = 2^3, .modreg = 0^3, .vexreg = 1^3 },
     [ENC_RVMI]    = { .modrm = 2^3, .modreg = 0^3, .vexreg = 1^3, .immctl = 4, .immidx = 3 },
     [ENC_RVMR]    = { .modrm = 2^3, .modreg = 0^3, .vexreg = 1^3, .immctl = 3, .immidx = 3 },
@@ -330,6 +330,7 @@ fe_enc64_impl(uint8_t** restrict buf, uint64_t mnem, FeOp op0, FeOp op1,
         const struct EncodingInfo* ei = &encoding_infos[desc->enc];
         uint64_t opc = desc->opc;
         int64_t imm = 0xcc;
+        unsigned immsz = desc->immsz;
 
         if (UNLIKELY(desc->enc == ENC_INVALID)) goto fail;
 
@@ -362,14 +363,18 @@ fe_enc64_impl(uint8_t** restrict buf, uint64_t mnem, FeOp op0, FeOp op1,
 
         if (ei->immctl > 0) {
             imm = ops[ei->immidx];
+            if (ei->immctl == 2) {
+                immsz = UNLIKELY(mnem & FE_ADDR32) ? 4 : 8;
+                if (immsz == 4) imm = (int32_t) imm; // address are zero-extended
+            }
             if (ei->immctl == 3)
                 imm = op_reg_idx(imm) << 4;
             if (ei->immctl == 6) {
                 if (UNLIKELY(mnem & FE_JMPL) && desc->alt) goto next;
-                imm -= (int64_t) *buf + opc_size(opc) + desc->immsz;
+                imm -= (int64_t) *buf + opc_size(opc) + immsz;
             }
             if (UNLIKELY(ei->immctl == 1) && imm != 1) goto next;
-            if (ei->immctl >= 4 && !op_imm_n(imm, desc->immsz)) goto next;
+            if (ei->immctl >= 2 && !op_imm_n(imm, immsz)) goto next;
         }
 
         // NOP has no operands, so this must be the 32-bit OA XCHG
@@ -380,7 +385,7 @@ fe_enc64_impl(uint8_t** restrict buf, uint64_t mnem, FeOp op0, FeOp op1,
 
         if (ei->modrm) {
             FeOp modreg = ei->modreg ? ops[ei->modreg^3] : (opc & 0xff00) >> 8;
-            if (enc_mr(buf, opc, ops[ei->modrm^3], modreg, desc->immsz)) goto fail;
+            if (enc_mr(buf, opc, ops[ei->modrm^3], modreg, immsz)) goto fail;
         } else if (ei->modreg) {
             if (enc_o(buf, opc, ops[ei->modreg^3])) goto fail;
         } else {
@@ -388,7 +393,7 @@ fe_enc64_impl(uint8_t** restrict buf, uint64_t mnem, FeOp op0, FeOp op1,
         }
 
         if (ei->immctl >= 2)
-            if (enc_imm(buf, imm, desc->immsz)) goto fail;
+            if (enc_imm(buf, imm, immsz)) goto fail;
 
         return 0;
 

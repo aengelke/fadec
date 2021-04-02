@@ -154,7 +154,7 @@ class InstrDesc(NamedTuple):
         for ot, op in zip(ots, self.operands):
             if ot == "m":
                 tys.append(0xf)
-            elif ot in "io":
+            elif ot in "ioa":
                 tys.append(0)
             elif op.kind == "GP":
                 if (self.mnemonic == "MOVSX" or self.mnemonic == "MOVZX" or
