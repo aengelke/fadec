@@ -49,10 +49,13 @@ static unsigned op_mem_idx(FeOp op) { return (op >> 44) & 0xfff; }
 static unsigned op_mem_scale(FeOp op) { return (op >> 56) & 0xf; }
 static unsigned op_reg_idx(FeOp op) { return op & 0xff; }
 static bool op_imm_n(FeOp imm, unsigned immsz) {
-    if (immsz == 1 && (int8_t) imm != imm) return false;
-    if (immsz == 2 && (int16_t) imm != imm) return false;
-    if (immsz == 4 && (int32_t) imm != imm) return false;
-    return true;
+    if (immsz == 0 && !imm) return true;
+    if (immsz == 1 && (int8_t) imm == imm) return true;
+    if (immsz == 2 && (int16_t) imm == imm) return true;
+    if (immsz == 3 && (imm&0xffffff) == imm) return true;
+    if (immsz == 4 && (int32_t) imm == imm) return true;
+    if (immsz == 8 && (int64_t) imm == imm) return true;
+    return false;
 }
 
 static
@@ -167,6 +170,7 @@ enc_mr(uint8_t** restrict buf, uint64_t opc, uint64_t op0, uint64_t op1,
 
     bool has_rex = !!(opc & (OPC_REX|OPC_REXW|OPC_REXR|OPC_REXX|OPC_REXB));
     if (has_rex && (op_reg_gph(op0) || op_reg_gph(op1))) return -1;
+    unsigned opcsz = opc_size(opc);
 
     int mod = 0, reg = op1 & 7, rm;
     int scale = 0, idx = 4, base = 0;
@@ -212,7 +216,7 @@ enc_mr(uint8_t** restrict buf, uint64_t opc, uint64_t op0, uint64_t op1,
             rm = 5;
             mod0off = true;
             // Adjust offset, caller doesn't know instruction length.
-            off -= opc_size(opc) + 5 + immsz;
+            off -= opcsz + 5 + immsz;
             if (withsib) return -1;
         }
         else
@@ -234,13 +238,14 @@ enc_mr(uint8_t** restrict buf, uint64_t opc, uint64_t op0, uint64_t op1,
         }
     }
 
+    unsigned dispsz = mod == 1 ? 1 : (mod == 2 || mod0off) ? 4 : 0;
+    if (opcsz + 1 + (mod != 3 && rm == 4) + dispsz + immsz > 15) return -1;
+
     if (enc_opc(buf, opc)) return -1;
     *(*buf)++ = (mod << 6) | (reg << 3) | rm;
     if (mod != 3 && rm == 4)
         *(*buf)++ = (scale << 6) | (idx << 3) | base;
-    if (mod == 1) return enc_imm(buf, off, 1);
-    if (mod == 2 || mod0off) return enc_imm(buf, off, 4);
-    return 0;
+    return enc_imm(buf, off, dispsz);
 }
 
 typedef enum {
