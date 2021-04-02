@@ -142,7 +142,7 @@ class InstrDesc(NamedTuple):
     def optype_str(self):
         optypes = ["", "", "", ""]
         flags = ENCODINGS[self.encoding]
-        if flags.modrm_idx:   optypes[flags.modrm_idx^3] = "M"
+        if flags.modrm_idx:   optypes[flags.modrm_idx^3] = "rM"[flags.modrm]
         if flags.modreg_idx:  optypes[flags.modreg_idx^3] = "r"
         if flags.vexreg_idx:  optypes[flags.vexreg_idx^3] = "r"
         if flags.zeroreg_idx: optypes[flags.zeroreg_idx^3] = "r"

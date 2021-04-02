@@ -82,6 +82,8 @@ main(int argc, char** argv)
     TEST("\x66\x0f\xa0", FE_PUSH16r, FE_FS);
     TEST("\x0f\xa8", FE_PUSHr, FE_GS);
     TEST("\x66\x0f\xa8", FE_PUSH16r, FE_GS);
+    TEST("\xff\x30", FE_PUSHm, FE_MEM(FE_AX, 0, 0, 0));
+    TEST("\xff\x31", FE_PUSHm, FE_MEM(FE_CX, 0, 0, 0));
     TEST("\x9c", FE_PUSHF);
     TEST("\xd2\xe4", FE_SHL8rr, FE_AH, FE_CX);
     TEST("", FE_SHL8rr, FE_AH, FE_DX);
@@ -90,7 +92,6 @@ main(int argc, char** argv)
     TEST("\xc1\xe0\x02", FE_SHL32ri, FE_AX, 2);
     TEST("\x48\xc1\xe0\x02", FE_SHL64ri, FE_AX, 2);
     TEST("\x48\xf7\x28", FE_IMUL64m, FE_MEM(FE_AX, 0, 0, 0));
-    // TEST("\x66\x90", FE_XCHG16rr, FE_AX, FE_AX);
     TEST("\xc2\x00\x00", FE_RETi, 0);
     TEST("\xff\xd0", FE_CALLr, FE_AX);
     TEST("\x05\x00\x01\x00\x00", FE_ADD32ri, FE_AX, 0x100);
@@ -134,6 +135,8 @@ main(int argc, char** argv)
     TEST("\x66\x90", FE_XCHG16rr, FE_AX, FE_AX);
     TEST("\x87\xc0", FE_XCHG32rr, FE_AX, FE_AX);
     TEST("\x48\x90", FE_XCHG64rr, FE_AX, FE_AX);
+    TEST("\x87\x00", FE_XCHG32mr, FE_MEM(FE_AX, 0, 0, 0), FE_AX);
+    TEST("\x87\x08", FE_XCHG32mr, FE_MEM(FE_AX, 0, 0, 0), FE_CX);
     TEST("\x90", FE_NOP);
     TEST("\x0f\x1f\xc0", FE_NOP32r, FE_AX);
     TEST("\x26\x01\x00", FE_ADD32mr|FE_SEG(FE_ES), FE_MEM(FE_AX, 0, 0, 0), FE_AX);
