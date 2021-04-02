@@ -26,10 +26,11 @@ INSTR_FLAGS_FIELDS, INSTR_FLAGS_SIZES = zip(*[
     ("size_fix1", 3),
     ("size_fix2", 2),
     ("instr_width", 1),
-    ("op0_regty", 3),
-    ("op1_regty", 3),
-    ("op2_regty", 3),
-    ("unused", 5),
+    ("modrm_ty", 3),
+    ("modreg_ty", 3),
+    ("vexreg_ty", 2),
+    ("zeroreg_ty", 2),
+    ("unused", 4),
     ("modrm", 1),
     ("ign66", 1),
 ][::-1])
@@ -76,6 +77,8 @@ ENCODINGS = {
     "VMI": InstrFlags(modrm=1, modrm_idx=1^3, vexreg_idx=0^3, imm_idx=2^3, imm_control=4),
     "MVR": InstrFlags(modrm=1, modrm_idx=0^3, modreg_idx=2^3, vexreg_idx=1^3),
 }
+ENCODING_OPTYS = ["modrm", "modreg", "vexreg", "zeroreg", "imm"]
+ENCODING_OPORDER = { enc: sorted(ENCODING_OPTYS, key=lambda ty: getattr(ENCODINGS[enc], ty+"_idx")^3) for enc in ENCODINGS}
 
 OPKIND_REGEX = re.compile(r"^([A-Z]+)([0-9]+)?$")
 OPKIND_DEFAULTS = {"GP": -1, "IMM": -1, "SEG": -1, "MEM": -1, "XMM": -2, "MMX": 8, "FPU": 10}
@@ -111,8 +114,11 @@ class InstrDesc(NamedTuple):
     operands: Tuple[str, ...]
     flags: FrozenSet[str]
 
-    OPKIND_REGTYS = {"GP": 0, "FPU": 1, "XMM": 2, "MASK": 3, "MMX": 4, "BND": 5,
-                     "SEG": 6}
+    OPKIND_REGTYS_MODRM = { "GP": 0, "XMM": 1, "MMX": 4, "FPU": 5, "MASK": 6,  }
+    OPKIND_REGTYS_MODREG = { "GP": 0, "XMM": 1, "MASK": 2, "MMX": 4, "SEG": 5,
+                             "CR": 0, "DR": 0 } # CR/DR handled in code.
+    OPKIND_REGTYS_VEXREG = { "GP": 0, "XMM": 1, "MASK": 2 }
+    OPKIND_REGTYS_ZEROREG = { "GP": 0, "XMM": 1, "FPU": 2 }
     OPKIND_REGTYS_ENC = {"SEG": 3, "FPU": 4, "MMX": 5, "XMM": 6, "BND": 8,
                          "CR": 9, "DR": 10}
     OPKIND_SIZES = {
@@ -175,19 +181,30 @@ class InstrDesc(NamedTuple):
         # Sort fixed sizes encodable in size_fix2 as second element.
         fixed = sorted((x for x in opsz if x >= 0), key=lambda x: 1 <= x <= 4)
         if len(fixed) > 2 or (len(fixed) == 2 and not (1 <= fixed[1] <= 4)):
-            raise Exception("invalid fixed operand sizes: %r"%fixed)
+            raise Exception(f"invalid fixed sizes {fixed} in {self}")
         sizes = (fixed + [1, 1])[:2] + [-2, -3] # See operand_sizes in decode.c.
         extraflags["size_fix1"] = sizes[0]
         extraflags["size_fix2"] = sizes[1] - 1
 
         for i, opkind in enumerate(self.operands):
             sz = self.OPKIND_SIZES[opkind.size]
-            reg_type = self.OPKIND_REGTYS.get(opkind.kind, 7)
             extraflags["op%d_size"%i] = sizes.index(sz)
-            if i < 3:
-                extraflags["op%d_regty"%i] = reg_type
-            elif reg_type not in (7, 2):
-                raise Exception("invalid regty for op 3, must be VEC")
+            if i >= 3:
+                continue
+            opname = ENCODING_OPORDER[self.encoding][i]
+            if opname == "modrm":
+                if opkind.kind == "MEM":
+                    continue
+                extraflags["modrm_ty"] = self.OPKIND_REGTYS_MODRM[opkind.kind]
+            elif opname == "modreg":
+                extraflags["modreg_ty"] = self.OPKIND_REGTYS_MODREG[opkind.kind]
+            elif opname == "vexreg":
+                extraflags["vexreg_ty"] = self.OPKIND_REGTYS_VEXREG[opkind.kind]
+            elif opname == "zeroreg":
+                extraflags["zeroreg_ty"] = self.OPKIND_REGTYS_ZEROREG[opkind.kind]
+            else:
+                if opkind.kind not in ("IMM", "MEM", "XMM"):
+                    raise Exception("invalid regty for op 3, must be VEC")
 
         # Miscellaneous Flags
         if "SIZE_8" in self.flags:      extraflags["opsize"] = 1

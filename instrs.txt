@@ -164,10 +164,10 @@
 9d                    NP    -      -      -      -      POPF DEF64 INSTR_WIDTH
 9e                    NP    -      -      -      -      SAHF
 9f                    NP    -      -      -      -      LAHF
-a0                    FD    GP     GP     -      -      MOV SIZE_8
-a1                    FD    GP     GP     -      -      MOV
-a2                    TD    GP     GP     -      -      MOV SIZE_8
-a3                    TD    GP     GP     -      -      MOV
+a0                    FD    GP     MEM    -      -      MOV SIZE_8
+a1                    FD    GP     MEM    -      -      MOV
+a2                    TD    MEM    GP     -      -      MOV SIZE_8
+a3                    TD    MEM    GP     -      -      MOV
 a4                    NP    -      -      -      -      MOVS SIZE_8 INSTR_WIDTH ENC_REP
 a5                    NP    -      -      -      -      MOVS INSTR_WIDTH ENC_REP
 a6                    NP    -      -      -      -      CMPS SIZE_8 INSTR_WIDTH ENC_REPCC

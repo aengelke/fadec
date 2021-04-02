@@ -86,6 +86,10 @@ struct InstrDesc
 #define DESC_INSTR_WIDTH(desc) (((desc)->operand_sizes >> 15) & 1)
 #define DESC_MODRM(desc) (((desc)->reg_types >> 14) & 1)
 #define DESC_IGN66(desc) (((desc)->reg_types >> 15) & 1)
+#define DESC_REGTY_MODRM(desc) (((desc)->reg_types >> 0) & 7)
+#define DESC_REGTY_MODREG(desc) (((desc)->reg_types >> 3) & 7)
+#define DESC_REGTY_VEXREG(desc) (((desc)->reg_types >> 6) & 3)
+#define DESC_REGTY_ZEROREG(desc) (((desc)->reg_types >> 8) & 3)
 
 int
 fd_decode(const uint8_t* buffer, size_t len_sz, int mode_int, uintptr_t address,
@@ -304,14 +308,6 @@ prefix_end:
 
     __builtin_memset(instr->operands, 0, sizeof(instr->operands));
 
-    // Reg operand 4 is only possible with RVMR encoding, which implies VEC.
-    for (int i = 0; i < 3; i++)
-    {
-        uint32_t reg_type = (desc->reg_types >> 3 * i) & 0x7;
-        // GPL FPU VEC MSK MMX BND SEG NVR
-        instr->operands[i].misc = (0xf3857641 >> (4 * reg_type)) & 0xf;
-    }
-
     if (DESC_MODRM(desc) && UNLIKELY(off++ >= len))
         return FD_ERR_PARTIAL;
     unsigned op_byte = buffer[off - 1] | (!DESC_MODRM(desc) ? 0xc0 : 0);
@@ -341,13 +337,17 @@ prefix_end:
         FdOp* operand = &instr->operands[DESC_IMPLICIT_IDX(desc)];
         operand->type = FD_OT_REG;
         operand->reg = DESC_IMPLICIT_VAL(desc);
+        unsigned reg_ty = DESC_REGTY_ZEROREG(desc); // GPL VEC FPU
+        operand->misc = (0461 >> (3 * reg_ty)) & 0x7;
     }
 
     if (DESC_HAS_MODREG(desc))
     {
         FdOp* op_modreg = &instr->operands[DESC_MODREG_IDX(desc)];
         unsigned reg_idx = (op_byte & 0x38) >> 3;
-        if (!UNLIKELY(op_modreg->misc == FD_RT_MMX || op_modreg->misc == FD_RT_SEG))
+        unsigned reg_ty = DESC_REGTY_MODREG(desc); // GPL VEC MSK - MMX SEG
+        op_modreg->misc = (0350761 >> (3 * reg_ty)) & 0x7;
+        if (LIKELY(!(reg_ty & 4)))
             reg_idx += prefix_rex & PREFIX_REXR ? 8 : 0;
         op_modreg->type = FD_OT_REG;
         op_modreg->reg = reg_idx;
@@ -362,7 +362,9 @@ prefix_end:
         if (mod == 3)
         {
             uint8_t reg_idx = rm;
-            if (LIKELY(op_modrm->misc == FD_RT_GPL || op_modrm->misc == FD_RT_VEC))
+            unsigned reg_ty = DESC_REGTY_MODRM(desc); // GPL VEC - - MMX FPU MSK
+            op_modrm->misc = (07450061 >> (3 * reg_ty)) & 0x7;
+            if (LIKELY(!(reg_ty & 4)))
                 reg_idx += prefix_rex & PREFIX_REXB ? 8 : 0;
             op_modrm->type = FD_OT_REG;
             op_modrm->reg = reg_idx;
@@ -433,6 +435,9 @@ skip_modrm:
         if (mode == DECODE_32)
             vex_operand &= 0x7;
         operand->reg = vex_operand;
+
+        unsigned reg_ty = DESC_REGTY_VEXREG(desc); // GPL VEC MSK
+        operand->misc = (0761 >> (3 * reg_ty)) & 0x7;
     }
     else if (vex_operand != 0)
     {
@@ -498,7 +503,7 @@ skip_modrm:
                           instr->type == FDI_SSE_EXTRQ ||
                           instr->type == FDI_SSE_INSERTQ))
             imm_size = 2;
-        else if (UNLIKELY(desc->type == FDI_JMPF || desc->type == FDI_CALLF))
+        else if (UNLIKELY(instr->type == FDI_JMPF || instr->type == FDI_CALLF))
             imm_size = op_size + 2;
         else if (UNLIKELY(instr->type == FDI_ENTER))
             imm_size = 3;
