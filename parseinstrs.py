@@ -430,8 +430,8 @@ def parse_mnemonics(mnemonics):
                     yield path
     merged_str = "".join(sorted(tree_walk(tree)))
     cstr = '"' + merged_str[:-1].replace("\0", '\\0') + '"'
-    tab = [merged_str.index(m + "\0") for m in mnemonics]
-    return cstr, ",".join(map(str, tab))
+    tab = [(merged_str.index(m + "\0"), len(m)) for m in mnemonics]
+    return cstr, ",".join(map(lambda e: f"{e[0]}", tab)), ",".join(map(lambda e: f"{e[1]}", tab))
 
 DECODE_TABLE_TEMPLATE = """// Auto-generated file -- do not modify!
 #if defined(FD_DECODE_TABLE_DATA)
@@ -442,6 +442,8 @@ DECODE_TABLE_TEMPLATE = """// Auto-generated file -- do not modify!
 {mnemonics[0]}
 #elif defined(FD_DECODE_TABLE_STRTAB2)
 {mnemonics[1]}
+#elif defined(FD_DECODE_TABLE_STRTAB3)
+{mnemonics[2]}
 #elif defined(FD_DECODE_TABLE_DEFINES)
 {defines}
 #else
@@ -475,7 +477,10 @@ def decode_table(entries, modes):
                         .replace("JMPF", "JMP FAR").replace("CALLF", "CALL FAR")
                         .replace("_S2G", "").replace("_G2S", "")
                         .replace("_CR", "").replace("_DR", "")
-                        .replace("REP_", "REP ")
+                        .replace("REP_", "REP ").replace("CMPXCHGD", "CMPXCHG")
+                        .replace("JCXZ", "JCXZ JECXZJRCXZ")
+                        .replace("C_SEP", "CWD CDQ CQO")
+                        .replace("C_EX", "CBW CWDECDQE")
                         .lower() for m in mnems]
 
     defines = ["FD_TABLE_OFFSET_%d %d"%k for k in zip(modes, root_offsets)]
