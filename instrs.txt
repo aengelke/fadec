@@ -1604,3 +1604,8 @@ F3.0f38de/m           RM    XMM    MEMZ   -      -      AESENC256KL
 F3.0f38df/m           RM    XMM    MEMZ   -      -      AESDEC256KL
 F3.0f38fa/r           RM    GP32   GP32   -      -      ENCODEKEY128
 F3.0f38fb/r           RM    GP32   GP32   -      -      ENCODEKEY256
+
+# FRED
+F2.0f00/6             M     GP16   -      -      -      LKGS
+F3.0f01ca             NP    -      -      -      -      ERETU
+F2.0f01ca             NP    -      -      -      -      ERETS
