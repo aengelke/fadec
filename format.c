@@ -74,36 +74,50 @@ fd_strpcatnum(char dst[static 18], uint64_t val) {
 
 static char*
 fd_strpcatreg(char* restrict dst, unsigned rt, unsigned ri, unsigned size) {
-    static const char nametabidx[] = {
-        [FD_RT_GPL] = 0, // 1, 2, 4
-        [FD_RT_GPH] = 3,
-        [FD_RT_SEG] = 5,
-        [FD_RT_FPU] = 6,
-        [FD_RT_MMX] = 7,
-        [FD_RT_VEC] = 8,
-        [FD_RT_CR]  = 9,
-        [FD_RT_DR]  = 10,
+    const char* nametab =
+        "\2al\4bnd0\2cl\4bnd1\2dl\4bnd2\2bl\4bnd3"
+        "\3spl\0   \3bpl\0   \3sil\0   \3dil\0   "
+        "\3r8b\0   \3r9b\0   \4r10b\0  \4r11b\0  "
+        "\4r12b\2ah\4r13b\2ch\4r14b\2dh\4r15b\2bh\0\0      "
+
+        "\2ax\4tmm0\2cx\4tmm1\2dx\4tmm2\2bx\4tmm3"
+        "\2sp\4tmm4\2bp\4tmm5\2si\4tmm6\2di\4tmm7"
+        "\3r8w \2es\3r9w \2cs\4r10w\2ss\4r11w\2ds"
+        "\4r12w\2fs\4r13w\2gs\4r14w\0  \4r15w\0  \2ip\0    "
+
+        "\3eax\3mm0\3ecx\3mm1\3edx\3mm2\3ebx\3mm3"
+        "\3esp\3mm4\3ebp\3mm5\3esi\3mm6\3edi\3mm7"
+        "\3r8d \2k0\3r9d \2k1\4r10d\2k2\4r11d\2k3"
+        "\4r12d\2k4\4r13d\2k5\4r14d\2k6\4r15d\2k7\3eip\0   "
+
+        "\4xmm0\0  \4xmm1\0  \4xmm2\0  \4xmm3\0  "
+        "\4xmm4\0  \4xmm5\0  \4xmm6\0  \4xmm7\0  "
+        "\4xmm8\0  \4xmm9\0  \5xmm10\0 \5xmm11\0 "
+        "\5xmm12\0 \5xmm13\0 \5xmm14\0 \5xmm15\0 \0\0      "
+
+        "\3rax\3cr0\3rcx\0   \3rdx\3cr2\3rbx\3cr3"
+        "\3rsp\3cr4\3rbp\0   \3rsi\0   \3rdi\0   "
+        "\2r8 \3cr8\2r9 \3dr0\3r10\3dr1\3r11\3dr2"
+        "\3r12\3dr3\3r13\3dr4\3r14\3dr5\3r15\3dr6\3rip\3dr7"
+
+        "\5st(0)\0 \5st(1)\0 \5st(2)\0 \5st(3)\0 "
+        "\5st(4)\0 \5st(5)\0 \5st(6)\0 \5st(7)\0 ";
+
+    static const uint16_t nametabidx[] = {
+        [FD_RT_GPL] = 0 * 17*8 + 0 * 8 + 0, // 1 * 17*8, 2 * 17*8, 4 * 17*8
+        [FD_RT_GPH] = 0 * 17*8 + 8 * 8 + 5,
+        [FD_RT_SEG] = 1 * 17*8 + 8 * 8 + 5,
+        [FD_RT_FPU] = 5 * 17*8 + 0 * 8 + 0,
+        [FD_RT_MMX] = 2 * 17*8 + 0 * 8 + 4,
+        [FD_RT_VEC] = 3 * 17*8 + 0 * 8 + 0,
+        [FD_RT_MASK]= 2 * 17*8 + 8 * 8 + 5,
+        [FD_RT_BND] = 0 * 17*8 + 0 * 8 + 3,
+        [FD_RT_CR]  = 4 * 17*8 + 0 * 8 + 4,
+        [FD_RT_DR]  = 4 * 17*8 + 9 * 8 + 4,
+        // [FD_RT_TMM] = 1 * 17*8 + 0 * 8 + 3,
     };
-    static const char nametab[11][17][9] = {
-        [0] = { "\2al","\2cl","\2dl","\2bl","\3spl","\3bpl","\3sil","\3dil",
-                "\3r8b","\3r9b","\4r10b","\4r11b","\4r12b","\4r13b","\4r14b","\4r15b" },
-        [1] = { "\2ax","\2cx","\2dx","\2bx","\2sp","\2bp","\2si","\2di",
-                "\3r8w","\3r9w","\4r10w","\4r11w","\4r12w","\4r13w","\4r14w","\4r15w","\2ip" },
-        [2] = { "\3eax","\3ecx","\3edx","\3ebx","\3esp","\3ebp","\3esi","\3edi",
-                "\3r8d","\3r9d","\4r10d","\4r11d","\4r12d","\4r13d","\4r14d","\4r15d","\3eip" },
-        [4] = { "\3rax","\3rcx","\3rdx","\3rbx","\3rsp","\3rbp","\3rsi","\3rdi",
-                "\2r8","\2r9","\3r10","\3r11","\3r12","\3r13","\3r14","\3r15","\3rip" },
-        [3] = { "","","","","\2ah","\2ch","\2dh","\2bh" },
-        [5] = { "\2es","\2cs","\2ss","\2ds","\2fs","\2gs" },
-        [6] = { "\5st(0)","\5st(1)","\5st(2)","\5st(3)","\5st(4)","\5st(5)","\5st(6)","\5st(7)" },
-        [7] = { "\3mm0","\3mm1","\3mm2","\3mm3","\3mm4","\3mm5","\3mm6","mm7" },
-        [8] = { "\4xmm0","\4xmm1","\4xmm2","\4xmm3","\4xmm4","\4xmm5","\4xmm6","\4xmm7",
-                "\4xmm8","\4xmm9","\5xmm10","\5xmm11","\5xmm12","\5xmm13","\5xmm14","\5xmm15" },
-        [9] = { "\3cr0","","\3cr2","\3cr3","\3cr4","","","","\3cr8" },
-        [10] = { "\3dr0","\3dr1","\3dr2","\3dr3","\3dr4","\3dr5","\3dr6","\3dr7" },
-    };
-    unsigned idx = nametabidx[rt] + (rt == FD_RT_GPL ? size >> 1 : 0);
-    const char* name = nametab[idx][ri];
+    unsigned idx = nametabidx[rt] + (rt == FD_RT_GPL ? (size >> 1) * 17*8 : 0);
+    const char* name = nametab + idx + 8*ri;
     for (unsigned i = 0; i < 8; i++)
         dst[i] = name[i+1];
     if (UNLIKELY(rt == FD_RT_VEC))
