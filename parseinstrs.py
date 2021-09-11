@@ -80,12 +80,64 @@ ENCODINGS = {
 ENCODING_OPTYS = ["modrm", "modreg", "vexreg", "zeroreg", "imm"]
 ENCODING_OPORDER = { enc: sorted(ENCODING_OPTYS, key=lambda ty: getattr(ENCODINGS[enc], ty+"_idx")^3) for enc in ENCODINGS}
 
-OPKIND_REGEX = re.compile(r"^([A-Z]+)([0-9]+)?$")
-OPKIND_DEFAULTS = {"GP": -1, "IMM": -1, "SEG": -1, "MEM": -1, "XMM": -2, "MMX": 8, "FPU": 10}
-OPKIND_KINDS = ("IMM", "MEM", "GP", "MMX", "XMM", "SEG", "FPU", "MEM", "MASK", "CR", "DR", "TMM", "BND")
+OPKIND_CANONICALIZE = {
+    "I": "IMM", # immediate
+        "A": "IMM", # Direct address, far jmp
+    "J": "IMM", # RIP-relative address
+    "M": "MEM", # ModRM.r/m selects memory only
+        "O": "MEM", # Direct address, FD/TD encoding
+    "R": "GP", # ModRM.r/m selects GP
+        "B": "GP", # VEX.vvvv selects GP
+        "E": "GP", # ModRM.r/m selects GP or memory
+        "G": "GP", # ModRM.reg selects GP
+    "P": "MMX", # ModRM.reg selects MMX
+        "N": "MMX", # ModRM.r/m selects MMX
+        "Q": "MMX", # ModRM.r/m selects MMX or memory
+    "V": "XMM", # ModRM.reg selects XMM
+        "H": "XMM", # VEX.vvvv selects XMM
+        "L": "XMM", # bits7:4 of imm8 select XMM
+        "U": "XMM", # ModRM.r/m selects XMM
+        "W": "XMM", # ModRM.r/m selects XMM or memory
+    "S": "SEG", # ModRM.reg selects SEG
+    "C": "CR", # ModRM.reg selects CR
+    "D": "DR", # ModRM.reg selects DR
+
+    # Custom names
+    "F": "FPU", # F is used for RFLAGS by Intel
+    "K": "MASK",
+    "T": "TMM",
+    "Z": "BND",
+}
+OPKIND_SIZES = {
+    "b": 1,
+    "w": 2,
+    "d": 4,
+    "ss": 4, # Scalar single of XMM
+    "q": 8,
+    "sd": 8, # Scalar double of XMM
+    "t": 10, # FPU/ten-byte
+    "dq": 16,
+    "qq": 32,
+    "oq": 64, # oct-quadword
+    "": 0, # for MEMZ
+    "v": -1,
+    "y": -1, # actually, dword or qword
+    "z": -1, # actually, op-size maxed at 4 (immediates)
+    "a": -1, # actually, twice the size
+    "p": -1, # actually, far pointer = SZ_OP + 2
+    "x": -2,
+    "pd": -2, # packed double
+    "ps": -2, # packed single
+
+    # Custom names
+    "bs": -1, # sign-extended immediate
+    "zd": 4, # z-immediate, but always 4-byte operand
+    "zq": 8, # z-immediate, but always 8-byte operand
+}
 class OpKind(NamedTuple):
-    size: int
     kind: str
+    sizestr: str
+    size: int
 
     SZ_OP = -1
     SZ_VEC = -2
@@ -96,17 +148,12 @@ class OpKind(NamedTuple):
         if res is None:
             raise Exception("unspecified operand size")
         return res
+    def immsize(self, opsz):
+        maxsz = 1 if self.sizestr == "bs" else 4 if self.sizestr[0] == "z" else 8
+        return min(maxsz, self.abssize(opsz))
     @classmethod
     def parse(cls, op):
-        op = {"MEMZ": "MEM0", "MEMV": "XMM"}.get(op, op)
-        match = OPKIND_REGEX.match(op)
-        if not match:
-            raise Exception(f"invalid opkind str: {op}")
-        kind, size = match.groups()
-        size = int(size) // 8 if size else OPKIND_DEFAULTS.get(kind, 0)
-        if kind not in OPKIND_KINDS:
-            raise Exception(f"invalid opkind kind: {op}")
-        return cls(size, kind)
+        return cls(OPKIND_CANONICALIZE[op[0]], op[1:], OPKIND_SIZES[op[1:]])
 
 class InstrDesc(NamedTuple):
     mnemonic: str
@@ -129,6 +176,9 @@ class InstrDesc(NamedTuple):
     @classmethod
     def parse(cls, desc):
         desc = desc.split()
+        if desc[5][-2:] == "+w":
+            desc[5] = desc[5][:-2]
+            desc.append("INSTR_WIDTH")
         operands = tuple(OpKind.parse(op) for op in desc[1:5] if op != "-")
         return cls(desc[5], desc[0], operands, frozenset(desc[6:]))
 
@@ -140,10 +190,7 @@ class InstrDesc(NamedTuple):
             return 1
         if self.mnemonic == "ENTER":
             return 3
-        if "IMM_8" in self.flags:
-            return 1
-        max_imm_size = 4 if self.mnemonic != "MOVABS" else 8
-        return min(max_imm_size, self.operands[flags.imm_idx^3].abssize(opsz))
+        return self.operands[flags.imm_idx^3].immsize(opsz)
 
     def optype_str(self):
         optypes = ["", "", "", ""]
@@ -207,18 +254,18 @@ class InstrDesc(NamedTuple):
                     raise Exception("invalid regty for op 3, must be VEC")
 
         # Miscellaneous Flags
-        if "SIZE_8" in self.flags:      extraflags["opsize"] = 1
-        if "DEF64" in self.flags:       extraflags["opsize"] = 2
-        if "FORCE64" in self.flags:     extraflags["opsize"] = 3
+        if "SZ8" in self.flags:         extraflags["opsize"] = 1
+        if "D64" in self.flags:         extraflags["opsize"] = 2
+        if "F64" in self.flags:         extraflags["opsize"] = 3
         if "INSTR_WIDTH" in self.flags: extraflags["instr_width"] = 1
         if "LOCK" in self.flags:        extraflags["lock"] = 1
         if "VSIB" in self.flags:        extraflags["vsib"] = 1
         if modrm:                       extraflags["modrm"] = 1
 
-        if "USE66" not in self.flags and (ign66 or "IGN66" in self.flags):
+        if "U66" not in self.flags and (ign66 or "I66" in self.flags):
             extraflags["ign66"] = 1
 
-        if self.imm_size(1 if "SIZE_8" in self.flags else 8) == 1:
+        if self.imm_size(1 if "SZ8" in self.flags else 8) == 1:
             extraflags["imm_control"] = flags.imm_control | 1
 
         enc = flags._replace(**extraflags)._encode()
@@ -455,7 +502,7 @@ def decode_table(entries, modes):
             desc_idx = desc_map[descenc] = len(descs)
             descs.append(descenc)
         for i, mode in enumerate(modes):
-            if "ONLY%d"%(96-mode) not in desc.flags:
+            if "IO"[mode <= 32]+"64" not in desc.flags:
                 trie.add_opcode(opcode, desc_idx, i, weak)
 
     trie.deduplicate()
@@ -497,10 +544,10 @@ def encode_table(entries):
     mnemonics = defaultdict(list)
     mnemonics["FE_NOP"].append(("NP", 0, 0, "0x90"))
     for weak, opcode, desc in entries:
-        if "ONLY32" in desc.flags or desc.mnemonic[:9] == "RESERVED_":
+        if "I64" in desc.flags or desc.mnemonic[:9] == "RESERVED_":
             continue
 
-        opsizes = {8} if "SIZE_8" in desc.flags else {16, 32, 64}
+        opsizes = {8} if "SZ8" in desc.flags else {16, 32, 64}
         hasvex, vecsizes = False, {128}
 
         opc_i = opcode.opc
@@ -518,7 +565,7 @@ def encode_table(entries):
         if opcode.prefix:
             if opcode.prefix in ("66", "F2", "F3"):
                 opc_flags += "|OPC_" + opcode.prefix
-            if "USE66" not in desc.flags and opcode.prefix != "NFx":
+            if "U66" not in desc.flags and opcode.prefix != "NFx":
                 opsizes -= {16}
         if opcode.vexl == "IG":
             vecsizes = {0}
@@ -531,9 +578,9 @@ def encode_table(entries):
             opsizes -= {32 if opcode.rexw == "1" else 64}
             if opcode.rexw == "1": opc_flags += "|OPC_REXW"
 
-        if "DEF64" in desc.flags:
+        if "D64" in desc.flags:
             opsizes -= {32}
-        if "INSTR_WIDTH" not in desc.flags and all(op.size != OpKind.SZ_OP for op in desc.operands):
+        if "SZ8" not in desc.flags and "INSTR_WIDTH" not in desc.flags and all(op.size != OpKind.SZ_OP for op in desc.operands):
             opsizes = {0}
         if "VSIB" not in desc.flags and all(op.size != OpKind.SZ_VEC for op in desc.operands):
             vecsizes = {0} # for VEX-encoded general-purpose instructions.
@@ -545,7 +592,7 @@ def encode_table(entries):
         prepend_opsize = max(opsizes) > 0 and not separate_opsize
         prepend_vecsize = hasvex and max(vecsizes) > 0 and not separate_opsize
 
-        if "FORCE64" in desc.flags:
+        if "F64" in desc.flags:
             opsizes = {64}
             prepend_opsize = False
 
@@ -571,12 +618,12 @@ def encode_table(entries):
             opc_s = hex(opc_i) + opc_flags + prefix[1]
             if opsize == 16: opc_s += "|OPC_66"
             if vecsize == 256: opc_s += "|OPC_VEXL"
-            if opsize == 64 and "DEF64" not in desc.flags and "FORCE64" not in desc.flags: opc_s += "|OPC_REXW"
+            if opsize == 64 and "D64" not in desc.flags and "F64" not in desc.flags: opc_s += "|OPC_REXW"
 
             # Construct mnemonic name
             mnem_name = {"MOVABS": "MOV", "XCHG_NOP": "XCHG"}.get(desc.mnemonic, desc.mnemonic)
             name = "FE_" + prefix[0] + mnem_name
-            if prepend_opsize and not ("DEF64" in desc.flags and opsize == 64):
+            if prepend_opsize and not ("D64" in desc.flags and opsize == 64):
                 name += f"_{opsize}"[name[-1] not in "0123456789":]
             if prepend_vecsize:
                 name += f"_{vecsize}"[name[-1] not in "0123456789":]
