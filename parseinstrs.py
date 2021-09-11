@@ -415,22 +415,33 @@ class Trie:
         return tuple(data), [offsets[v] for _, v in self.trie[0]]
 
 def parse_mnemonics(mnemonics):
-    mktree = lambda: defaultdict(mktree)
-    tree = mktree()
-    for m in mnemonics:
-        cur = tree
-        for c in m[::-1]:
-            cur = cur[c]
-    def tree_walk(tree, cur="\0"):
-        if not tree:
-            yield cur
+    # This faces the "shortest superstring" problem, which is NP-hard.
+    # Preprocessing: remove any strings which are already completely covered
+    mnems = []
+    for m in sorted(mnemonics, key=len, reverse=True):
+        for m2 in mnems:
+            if m in m2:
+                break
         else:
-            for el, subtree in tree.items():
-                for path in tree_walk(subtree, el + cur):
-                    yield path
-    merged_str = "".join(sorted(tree_walk(tree)))
-    cstr = '"' + merged_str[:-1].replace("\0", '\\0') + '"'
-    tab = [(merged_str.index(m + "\0"), len(m)) for m in mnemonics]
+            mnems.append(m)
+
+    # Greedy heuristic generally yields acceptable results, though it depends on
+    # the order of the menmonics. More compact results are possible, but the
+    # expectable gains of an optimal result (probably with O(n!)) are small.
+    merged_str = ""
+    def maxoverlap(m1, m2):
+        # return next((i for i in range(min(len(m1), len(m2))-1, 0, -1) if m1[:i] == m2[-i:]), 0)
+        for i in range(min(len(m1), len(m2))-1, 0, -1):
+            if m1[:i] == m2[-i:]:
+                return i
+        return 0
+    while mnems:
+        mnem = max(mnems, key=lambda k: maxoverlap(k, merged_str))
+        merged_str += mnem[maxoverlap(mnem, merged_str):]
+        mnems.remove(mnem)
+    indices = [str(merged_str.index(m)) for m in mnemonics]
+    cstr = '"' + merged_str + '"'
+    tab = [(merged_str.index(m), len(m)) for m in mnemonics]
     return cstr, ",".join(map(lambda e: f"{e[0]}", tab)), ",".join(map(lambda e: f"{e[1]}", tab))
 
 DECODE_TABLE_TEMPLATE = """// Auto-generated file -- do not modify!
