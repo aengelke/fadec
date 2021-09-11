@@ -414,53 +414,31 @@ class Trie:
         print("%d bytes" % (2*len(data)), stats)
         return tuple(data), [offsets[v] for _, v in self.trie[0]]
 
-def parse_mnemonics(mnemonics):
+def superstring(strs):
     # This faces the "shortest superstring" problem, which is NP-hard.
     # Preprocessing: remove any strings which are already completely covered
-    mnems = []
-    for m in sorted(mnemonics, key=len, reverse=True):
-        for m2 in mnems:
-            if m in m2:
+    realstrs = []
+    for s in sorted(strs, key=len, reverse=True):
+        for s2 in realstrs:
+            if s in s2:
                 break
         else:
-            mnems.append(m)
+            realstrs.append(s)
 
     # Greedy heuristic generally yields acceptable results, though it depends on
     # the order of the menmonics. More compact results are possible, but the
     # expectable gains of an optimal result (probably with O(n!)) are small.
-    merged_str = ""
-    def maxoverlap(m1, m2):
-        # return next((i for i in range(min(len(m1), len(m2))-1, 0, -1) if m1[:i] == m2[-i:]), 0)
-        for i in range(min(len(m1), len(m2))-1, 0, -1):
-            if m1[:i] == m2[-i:]:
+    merged = ""
+    def maxoverlap(s1, s2):
+        for i in range(min(len(s1), len(s2))-1, 0, -1):
+            if s1[:i] == s2[-i:]:
                 return i
         return 0
-    while mnems:
-        mnem = max(mnems, key=lambda k: maxoverlap(k, merged_str))
-        merged_str += mnem[maxoverlap(mnem, merged_str):]
-        mnems.remove(mnem)
-    indices = [str(merged_str.index(m)) for m in mnemonics]
-    cstr = '"' + merged_str + '"'
-    tab = [(merged_str.index(m), len(m)) for m in mnemonics]
-    return cstr, ",".join(map(lambda e: f"{e[0]}", tab)), ",".join(map(lambda e: f"{e[1]}", tab))
-
-DECODE_TABLE_TEMPLATE = """// Auto-generated file -- do not modify!
-#if defined(FD_DECODE_TABLE_DATA)
-{hex_table}
-#elif defined(FD_DECODE_TABLE_DESCS)
-{descs}
-#elif defined(FD_DECODE_TABLE_STRTAB1)
-{mnemonics[0]}
-#elif defined(FD_DECODE_TABLE_STRTAB2)
-{mnemonics[1]}
-#elif defined(FD_DECODE_TABLE_STRTAB3)
-{mnemonics[2]}
-#elif defined(FD_DECODE_TABLE_DEFINES)
-{defines}
-#else
-#error "unspecified decode table"
-#endif
-"""
+    while realstrs:
+        s = max(realstrs, key=lambda k: maxoverlap(k, merged))
+        merged += s[maxoverlap(s, merged):]
+        realstrs.remove(s)
+    return merged
 
 def decode_table(entries, modes):
     mnems = sorted({desc.mnemonic for _, _, desc in entries})
@@ -493,15 +471,27 @@ def decode_table(entries, modes):
                         .replace("C_SEP", "CWD CDQ CQO")
                         .replace("C_EX", "CBW CWDECDQE")
                         .lower() for m in mnems]
+    mnemonics_str = superstring(mnemonics_intel)
 
-    defines = ["FD_TABLE_OFFSET_%d %d"%k for k in zip(modes, root_offsets)]
+    defines = ["FD_TABLE_OFFSET_%d %d\n"%k for k in zip(modes, root_offsets)]
 
-    return "".join(decode_mnems_lines), DECODE_TABLE_TEMPLATE.format(
-        hex_table="".join(f"{e:#06x}," for e in table_data),
-        descs="\n".join("{{{0},{1},{2},{3}}},".format(*desc) for desc in descs),
-        mnemonics=parse_mnemonics(mnemonics_intel),
-        defines="\n".join("#define " + line for line in defines),
-    )
+    return "".join(decode_mnems_lines), f"""// Auto-generated file -- do not modify!
+#if defined(FD_DECODE_TABLE_DATA)
+{"".join(f"{e:#06x}," for e in table_data)}
+#elif defined(FD_DECODE_TABLE_DESCS)
+{"".join("{{{0},{1},{2},{3}}},".format(*desc) for desc in descs)}
+#elif defined(FD_DECODE_TABLE_STRTAB1)
+"{mnemonics_str}"
+#elif defined(FD_DECODE_TABLE_STRTAB2)
+{",".join(str(mnemonics_str.index(mnem)) for mnem in mnemonics_intel)}
+#elif defined(FD_DECODE_TABLE_STRTAB3)
+{",".join(str(len(mnem)) for mnem in mnemonics_intel)}
+#elif defined(FD_DECODE_TABLE_DEFINES)
+{"".join("#define " + line for line in defines)}
+#else
+#error "unspecified decode table"
+#endif
+"""
 
 def encode_table(entries):
     mnemonics = defaultdict(list)
