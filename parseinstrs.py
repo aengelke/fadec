@@ -370,7 +370,7 @@ class Trie:
                   EntryKind.TABLE_PREFIX, EntryKind.TABLE16,
                   EntryKind.TABLE8E, EntryKind.TABLE_VEX)
     TABLE_LENGTH = {
-        EntryKind.TABLE_ROOT: 8,
+        EntryKind.TABLE_ROOT: 12,
         EntryKind.TABLE256: 256,
         EntryKind.TABLE_PREFIX: 4,
         EntryKind.TABLE16: 16,

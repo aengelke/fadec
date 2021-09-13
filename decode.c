@@ -62,6 +62,7 @@ enum
     PREFIX_REXW = 0x08,
     PREFIX_REX = 0x40,
     PREFIX_VEXL = 0x10,
+    PREFIX_REXRR = 0x80,
 };
 
 struct InstrDesc
@@ -123,6 +124,7 @@ fd_decode(const uint8_t* buffer, size_t len_sz, int mode_int, uintptr_t address,
     uint8_t addr_size = mode == DECODE_64 ? 3 : 2;
     unsigned prefix_rex = 0;
     int rex_off = -1;
+    unsigned prefix_evex = 0;
     instr->segment = FD_REG_NONE;
 
     if (mode == DECODE_32) {
@@ -197,29 +199,45 @@ prefix_end:
             opcode_escape = 1;
         off += opcode_escape >= 2 ? 2 : 1;
     }
-    else if (UNLIKELY((buffer[off] & 0xfe) == 0xc4)) // VEX c4/c5
+    else if (UNLIKELY((buffer[off] & 0xfe) == 0xc4 || buffer[off] == 0x62))
     {
+        unsigned vex_prefix = buffer[off];
+        // VEX (C4/C5) or EVEX (62)
         if (UNLIKELY(off + 1 >= len))
             return FD_ERR_PARTIAL;
         if (mode == DECODE_32 && (buffer[off + 1] & 0xc0) != 0xc0)
             goto skipvex;
 
-        // VEX + 66/F3/F2/REX will #UD.
+        // VEX/EVEX + 66/F3/F2/REX will #UD.
         // Note: REX is also here only respected if it immediately precedes the
-        // opcode, in this case the VEX "prefix".
+        // opcode, in this case the VEX/EVEX "prefix".
         if (prefix_66 || prefix_rep || prefix_rex)
             return FD_ERR_UD;
 
         uint8_t byte = buffer[off + 1];
         prefix_rex |= byte & 0x80 ? 0 : PREFIX_REXR;
-        if (buffer[off] == 0xc4) // 3-byte VEX
+        if (vex_prefix == 0xc5) // 2-byte VEX
+        {
+            opcode_escape = 1 | 4; // 4 is table index with VEX, 0f escape
+        }
+        else // 3-byte VEX or EVEX
         {
             prefix_rex |= byte & 0x40 ? 0 : PREFIX_REXX;
             // SDM Vol 2A 2-15 (Dec. 2016): Ignored in 32-bit mode
             prefix_rex |= mode != DECODE_64 || (byte & 0x20) ? 0 : PREFIX_REXB;
-            if (byte & 0x1c) // Bits 4:2 of opcode_escape must be clear.
-                return FD_ERR_UD;
-            opcode_escape = (byte & 0x03) | 4; // 4 is table index with VEX
+            if (vex_prefix == 0x62) // EVEX
+            {
+                if (byte & 0x0c) // Bits 3:2 of opcode_escape must be clear.
+                    return FD_ERR_UD;
+                opcode_escape = (byte & 0x03) | 8; // 8 is table index with EVEX
+                prefix_rex |= mode != DECODE_64 || (byte & 0x10) ? 0 : PREFIX_REXRR;
+            }
+            else // 3-byte VEX
+            {
+                if (byte & 0x1c) // Bits 4:2 of opcode_escape must be clear.
+                    return FD_ERR_UD;
+                opcode_escape = (byte & 0x03) | 4; // 4 is table index with VEX
+            }
 
             // Load third byte of VEX prefix
             if (UNLIKELY(off + 2 >= len))
@@ -227,15 +245,29 @@ prefix_end:
             byte = buffer[off + 2];
             prefix_rex |= byte & 0x80 ? PREFIX_REXW : 0;
         }
-        else // 2-byte VEX
-            opcode_escape = 1 | 4; // 4 is table index with VEX, 0f escape
 
-        prefix_rex |= byte & 0x04 ? PREFIX_VEXL : 0;
         prefix_rep = (byte & 2) ? (byte & 3) : 0;
         prefix_66 = (byte & 3) == 1;
         vex_operand = ((byte & 0x78) >> 3) ^ 0xf;
 
-        off += buffer[off] == 0xc4 ? 3 : 2;
+        if (vex_prefix == 0x62) // EVEX
+        {
+            if (!(byte & 0x04)) // Bit 10 must be 1.
+                return FD_ERR_UD;
+            if (UNLIKELY(off + 3 >= len))
+                return FD_ERR_PARTIAL;
+            byte = buffer[off + 3];
+            prefix_evex = byte | 0x08; // Ensure that prefix_evex is non-zero.
+            if (mode == DECODE_64) // V' ignored in 32-bit mode
+                vex_operand |= byte & 0x08 ? 0 : 0x10; // V'
+            off += 4;
+        }
+        else // VEX
+        {
+            prefix_rex |= byte & 0x04 ? PREFIX_VEXL : 0;
+            off += vex_prefix == 0xc4 ? 3 : 2;
+        }
+
     skipvex:;
     }
 
@@ -346,6 +378,8 @@ prefix_end:
         op_modreg->misc = (0350761 >> (3 * reg_ty)) & 0x7;
         if (LIKELY(!(reg_ty & 4)))
             reg_idx += prefix_rex & PREFIX_REXR ? 8 : 0;
+        // TODO-EVEX/64-bit: UD if PREFIX_REXR and misc == FD_RT_MASK
+        // TODO-EVEX/64-bit: UD if PREFIX_EVEXR2 and misc != FD_RT_VEC, otw. +16
         op_modreg->type = FD_OT_REG;
         op_modreg->size = operand_sizes[(desc->operand_sizes >> 2) & 3];
         op_modreg->reg = reg_idx;
@@ -365,6 +399,7 @@ prefix_end:
             op_modrm->misc = (07450061 >> (3 * reg_ty)) & 0x7;
             if (LIKELY(!(reg_ty & 4)))
                 reg_idx += prefix_rex & PREFIX_REXB ? 8 : 0;
+            // TODO-EVEX/64-bit: Add PREFIX_REXX (+16) if FD_RT_VEC, ignore otw.
             op_modrm->type = FD_OT_REG;
             op_modrm->reg = reg_idx;
         }
@@ -383,6 +418,7 @@ prefix_end:
                 unsigned idx = (sib & 0x38) >> 3;
                 idx += prefix_rex & PREFIX_REXX ? 8 : 0;
                 base = sib & 0x07;
+                // TODO-EVEX/64-bit: respect EVEX.V' as extra bit
                 if (!vsib && idx == 4)
                     idx = FD_REG_NONE;
                 op_modrm->misc = scale | idx;
@@ -409,6 +445,7 @@ prefix_end:
             {
                 if (UNLIKELY(off + 1 > len))
                     return FD_ERR_PARTIAL;
+                // TODO-EVEX: scale by tupletype.
                 instr->disp = (int8_t) LOAD_LE_1(&buffer[off]);
                 off += 1;
             }
@@ -435,6 +472,9 @@ skip_modrm:
         operand->size = operand_sizes[(desc->operand_sizes >> 4) & 3];
         if (mode == DECODE_32)
             vex_operand &= 0x7;
+        // TODO-EVEX/64-bit: UD if FD_RT_MASK and vex_operand&8 != 0
+        // TODO-EVEX/64-bit: UD if not FD_RT_VEC and vex_operand&16 != 0
+        // Note: 32-bit will never UD here.
         operand->reg = vex_operand | DESC_ZEROREG_VAL(desc);
 
         unsigned reg_ty = DESC_REGTY_VEXREG(desc); // GPL VEC MSK FPU
@@ -442,6 +482,7 @@ skip_modrm:
     }
     else if (vex_operand != 0)
     {
+        // TODO: bit 3 ignored in 32-bit mode? unverified
         return FD_ERR_UD;
     }
 
