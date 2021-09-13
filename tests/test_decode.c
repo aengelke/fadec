@@ -196,6 +196,8 @@ main(int argc, char** argv)
     // [rip+disp32]
     TEST64("\x01\x05\x01\x00\x00\x00", "add dword ptr [rip+0x1], eax");
     TEST64("\x41\x01\x05\x01\x00\x00\x00", "add dword ptr [rip+0x1], eax");
+    TEST64("\x67\x01\x05\x01\x00\x00\x00", "add dword ptr [eip+0x1], eax");
+    TEST64("\x67\x41\x01\x05\x01\x00\x00\x00", "add dword ptr [eip+0x1], eax");
     // [reg+disp32]
     TEST32("\x01\x80\x01\x00\x00\x00", "add dword ptr [eax+0x1], eax");
     TEST64("\x01\x80\x01\x00\x00\x00", "add dword ptr [rax+0x1], eax");
@@ -252,6 +254,7 @@ main(int argc, char** argv)
 
     TEST("\x69\xC7\x08\x01\x00\x00", "imul eax, edi, 0x108");
     TEST("\x6B\xC7\x08", "imul eax, edi, 0x8");
+    TEST("\x6B\xC7\xff", "imul eax, edi, 0xffffffff");
 
     TEST("\x0f\x38\xf0\xd1", "UD"); // MOVBE doesn't allow register moves
     TEST32("\x0f\x38\xf0\x11", "movbe edx, dword ptr [ecx]");
@@ -268,6 +271,23 @@ main(int argc, char** argv)
     TEST32("\x8d\x00", "lea eax, [eax]");
     TEST64("\x8d\x00", "lea eax, [rax]");
     TEST("\x8d\xc0", "UD");
+
+    TEST("\x00\xc0", "add al, al");
+    TEST("\x00\xc1", "add cl, al");
+    TEST("\x00\xd0", "add al, dl");
+    TEST("\x00\xff", "add bh, bh");
+    TEST("\x01\xc0", "add eax, eax");
+    TEST("\x01\xc1", "add ecx, eax");
+    TEST("\x01\xd0", "add eax, edx");
+    TEST("\x01\xff", "add edi, edi");
+    TEST("\x02\xc0", "add al, al");
+    TEST("\x02\xc1", "add al, cl");
+    TEST("\x02\xd0", "add dl, al");
+    TEST("\x02\xff", "add bh, bh");
+    TEST("\x03\xc0", "add eax, eax");
+    TEST("\x03\xc1", "add eax, ecx");
+    TEST("\x03\xd0", "add edx, eax");
+    TEST("\x03\xff", "add edi, edi");
 
     TEST32("\x40", "inc eax");
     TEST32("\x43", "inc ebx");
@@ -367,6 +387,8 @@ main(int argc, char** argv)
     TEST("\x0f\xae\xf9", "sfence");
     TEST("\x0f\xae\xff", "sfence");
 
+    TEST("\x0f\x6e\xc0", "movd mm0, eax");
+    TEST64("\x48\x0f\x6e\xc0", "movq mm0, rax");
     TEST("\x0f\x70\xc0\x85", "pshufw mm0, mm0, 0x85");
 
     TEST("\xf3\x0f\x2a\xc1", "cvtsi2ss xmm0, ecx");
@@ -607,6 +629,10 @@ main(int argc, char** argv)
     TEST("\x0f\x0f\xc0\xa0", "3dnow mm0, mm0, 0xa0"); // PFCMPGT
     TEST("\x0f\x0f\xc0\xb6", "3dnow mm0, mm0, 0xb6"); // PFRCPIT2
     TEST("\x0f\x0f\xc0\xbf", "3dnow mm0, mm0, 0xbf"); // PAVGUSB
+
+    TEST("\x0f\x01\xfc", "clzero eax");
+    TEST("\x66\x0f\x01\xfc", "clzero ax");
+    TEST64("\x48\x0f\x01\xfc", "clzero rax");
 
     // VIA PadLock
     TEST("\x0f\xa7\xc0", "xstore");
