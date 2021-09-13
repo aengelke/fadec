@@ -265,7 +265,7 @@ class InstrDesc(NamedTuple):
         if "U66" not in self.flags and (ign66 or "I66" in self.flags):
             extraflags["ign66"] = 1
 
-        if self.imm_size(1 if "SZ8" in self.flags else 8) == 1:
+        if self.imm_size(4) == 1:
             extraflags["imm_control"] = flags.imm_control | 1
 
         enc = flags._replace(**extraflags)._encode()
