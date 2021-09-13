@@ -460,10 +460,13 @@ class Trie:
                 if elem is not None:
                     value = elem[1] << 2 if elem[0].is_instr else offsets[elem[1]]
                     data[i] = (value << 1) | (elem[0].value & 7)
-
-        stats = {k: len(v) for k, v in self.kindmap.items()}
-        print("%d bytes" % (2*len(data)), stats)
         return tuple(data), [offsets[v] for _, v in self.trie[0]]
+
+    @property
+    def stats(self):
+        return {k.name: sum(self.trie[e] is not None for e in v)
+                for k, v in self.kindmap.items()}
+
 
 def superstring(strs):
     # This faces the "shortest superstring" problem, which is NP-hard.
@@ -523,6 +526,10 @@ def decode_table(entries, modes):
                         .replace("C_EX", "CBW CWDECDQE")
                         .lower() for m in mnems]
     mnemonics_str = superstring(mnemonics_intel)
+
+    print(f"Stats: Descs -- {len(descs)} ({8*len(descs)} bytes);",
+          f"Trie -- {2*len(table_data)} bytes, {trie.stats};"
+          f"Mnems -- {len(mnemonics_str)} + {3*len(mnemonics_intel)} bytes")
 
     defines = ["FD_TABLE_OFFSET_%d %d\n"%k for k in zip(modes, root_offsets)]
 
