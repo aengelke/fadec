@@ -427,12 +427,16 @@ class Trie:
                 entry = self.trie[num]
                 for i, elem in enumerate(entry):
                     if elem and not elem[0].is_instr and elem[1] in synonyms:
-                        entry[i] = elem[0], synonyms[elem[1]]
+                        entry[i] = synonyms[elem[1]]
 
-                # And deduplicate all entries of this kind
                 unique_entry = tuple(entry)
-                if unique_entry in entries:
-                    synonyms[num] = entries[unique_entry]
+                if len(set(unique_entry)) == 1:
+                    # Omit kind if all entries point to the same child
+                    synonyms[num] = entry[0]
+                    self.trie[num] = None
+                elif unique_entry in entries:
+                    # Deduplicate entries of this kind
+                    synonyms[num] = kind, entries[unique_entry]
                     self.trie[num] = None
                 else:
                     entries[unique_entry] = num
