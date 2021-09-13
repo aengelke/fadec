@@ -485,6 +485,7 @@ skip_modrm:
         if (mode == DECODE_32)
             reg &= 0x7f;
         operand->reg = reg >> 4;
+        instr->imm = reg & 0x0f;
     }
     else if (imm_control != 0)
     {
