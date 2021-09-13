@@ -571,6 +571,8 @@ def encode_table(entries):
                 opc_flags += "|OPC_" + opcode.prefix
             if "U66" not in desc.flags and opcode.prefix != "NFx":
                 opsizes -= {16}
+        if "I66" in desc.flags:
+            opsizes -= {16}
         if opcode.vexl == "IG":
             vecsizes = {0}
         elif opcode.vexl:
