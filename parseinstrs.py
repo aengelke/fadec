@@ -271,7 +271,7 @@ class InstrDesc(NamedTuple):
         enc = flags._replace(**extraflags)._encode()
         enc = tuple((enc >> i) & 0xffff for i in range(0, 48, 16))
         # First 2 bytes are the mnemonic, last 6 bytes are the encoding.
-        return ("FDI_"+self.mnemonic,) + enc
+        return f"{{FDI_{self.mnemonic}, {enc[0]}, {enc[1]}, {enc[2]}}}"
 
 class EntryKind(Enum):
     NONE = 0
@@ -537,7 +537,7 @@ def decode_table(entries, modes):
 #if defined(FD_DECODE_TABLE_DATA)
 {"".join(f"{e:#06x}," for e in table_data)}
 #elif defined(FD_DECODE_TABLE_DESCS)
-{"".join("{{{0},{1},{2},{3}}},".format(*desc) for desc in descs)}
+{",".join(descs)}
 #elif defined(FD_DECODE_TABLE_STRTAB1)
 "{mnemonics_str}"
 #elif defined(FD_DECODE_TABLE_STRTAB2)
