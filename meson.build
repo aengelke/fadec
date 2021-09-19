@@ -10,6 +10,10 @@ if py_version_res.returncode() != 0 or not py_version.version_compare('>=3.6')
   error('Python 3.6 required, got @0@'.format(py_version))
 endif
 
+cc = meson.get_compiler('c')
+if cc.has_argument('-fstrict-aliasing')
+  add_project_arguments('-fstrict-aliasing', language: 'c')
+endif
 if get_option('warning_level').to_int() >= 3
   extra_warnings = [
     '-Wmissing-prototypes', '-Wshadow',  '-Wwrite-strings', '-Wswitch-default',
@@ -20,7 +24,6 @@ if get_option('warning_level').to_int() >= 3
     # always warns, even on architectures without alignment requirements.
     '-Wcast-align', '-Wcast-align=strict',
   ]
-  cc = meson.get_compiler('c')
   foreach warning : extra_warnings
     if cc.has_argument(warning)
       add_project_arguments(warning, language: 'c')
