@@ -118,7 +118,7 @@ fd_decode(const uint8_t* buffer, size_t len_sz, int mode_int, uintptr_t address,
     unsigned prefix_rep = 0;
     bool prefix_lock = false;
     bool prefix_66 = false;
-    bool prefix_67 = false;
+    uint8_t addr_size = mode == DECODE_64 ? 8 : 4;
     unsigned prefix_rex = 0;
     int rex_off = -1;
     instr->segment = FD_REG_NONE;
@@ -138,7 +138,7 @@ fd_decode(const uint8_t* buffer, size_t len_sz, int mode_int, uintptr_t address,
             case 0x64: instr->segment = FD_REG_FS; break;
             case 0x65: instr->segment = FD_REG_GS; break;
             case 0x66: prefix_66 = true; break;
-            case 0x67: prefix_67 = true; break;
+            case 0x67: addr_size = 2; break;
             case 0xf0: prefix_lock = true; break;
             case 0xf3: prefix_rep = 2; break;
             case 0xf2: prefix_rep = 3; break;
@@ -159,7 +159,7 @@ fd_decode(const uint8_t* buffer, size_t len_sz, int mode_int, uintptr_t address,
             case 0x64: instr->segment = FD_REG_FS; break;
             case 0x65: instr->segment = FD_REG_GS; break;
             case 0x66: prefix_66 = true; break;
-            case 0x67: prefix_67 = true; break;
+            case 0x67: addr_size = 4; break;
             case 0xf0: prefix_lock = true; break;
             case 0xf3: prefix_rep = 2; break;
             case 0xf2: prefix_rep = 3; break;
@@ -279,6 +279,7 @@ prefix_end:
     const struct InstrDesc* desc = &descs[table_idx >> 2];
 
     instr->type = desc->type;
+    instr->addrsz = addr_size;
     instr->flags = prefix_rep == 2 ? FD_FLAG_REP :
                    prefix_rep == 3 ? FD_FLAG_REPNZ : 0;
     if (mode == DECODE_64)
@@ -299,12 +300,6 @@ prefix_end:
     uint8_t vec_size = 16;
     if (prefix_rex & PREFIX_VEXL)
         vec_size = 32;
-
-    // Compute address size.
-    uint8_t addr_size = mode == DECODE_64 ? 8 : 4;
-    if (UNLIKELY(prefix_67))
-        addr_size >>= 1;
-    instr->addrsz = addr_size;
 
     __builtin_memset(instr->operands, 0, sizeof(instr->operands));
 
