@@ -213,6 +213,8 @@ main(int argc, char** argv)
     TEST("", FE_MOV64ar, 0xfedcba9876543210, FE_CX);
     TEST("", FE_MOV64ar|FE_ADDR32, 0xfedcba98, FE_CX);
 
+    TEST("\xc7\xf8\x02\x00\x00\x00", FE_XBEGIN, (intptr_t) buf + 8);
+
     // Test FPU instructions
     TEST("\xd8\x00", FE_FADDm32, FE_MEM(FE_AX, 0, 0, 0));
     TEST("\xdc\x00", FE_FADDm64, FE_MEM(FE_AX, 0, 0, 0));

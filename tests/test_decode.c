@@ -139,6 +139,14 @@ main(int argc, char** argv)
     TEST32("\x0f\x20\xd0", "mov eax, cr2"); // cr2
     TEST64("\x0f\x20\xd0", "mov rax, cr2"); // cr2
     TEST64("\x48\x0f\x20\xd0", "mov rax, cr2"); // cr2 + REX.W
+    TEST32("\x0f\x20\xd8", "mov eax, cr3"); // cr3
+    TEST64("\x0f\x20\xd8", "mov rax, cr3"); // cr3
+    TEST32("\x0f\x20\xe0", "mov eax, cr4"); // cr4
+    TEST64("\x0f\x20\xe0", "mov rax, cr4"); // cr4
+    TEST32("\x0f\x20\xe8", "UD"); // cr5
+    TEST64("\x0f\x20\xe8", "UD"); // cr5
+    TEST64("\x44\x0f\x20\x00", "mov rax, cr8"); // cr8
+    TEST64("\x45\x0f\x20\x00", "mov r8, cr8"); // cr8
     TEST64("\x44\x0f\x20\x08", "UD"); // cr9
     TEST64("\x44\x0f\x21\x00", "UD"); // dr8
     TEST32("\xf0\x0f\x20\x00", "UD"); // LOCK
@@ -224,6 +232,9 @@ main(int argc, char** argv)
     TEST32("\xf3\x0f\x01\x00", "sgdt [eax]");
     TEST64("\xf3\x0f\x01\x00", "sgdt [rax]");
     TEST("\x04\x01", "add al, 0x1");
+    TEST("\x66\x50", "push ax");
+    TEST32("\x50", "push eax");
+    TEST64("\x50", "push rax");
     TEST("\x66\x68\xff\xad", "pushw 0xadff");
     TEST32("\x68\xff\xad\x90\xbc", "push 0xbc90adff");
     TEST64("\x68\xff\xad\x90\xbc", "push 0xffffffffbc90adff");
@@ -410,6 +421,8 @@ main(int argc, char** argv)
     TEST64("\x0f\xb2\x00", "lss eax, fword ptr [rax]");
     TEST64("\x48\x0f\xb2\x00", "lss rax, tbyte ptr [rax]");
     TEST("\xc5\xf2\x2a\xc0", "vcvtsi2ss xmm0, xmm1, eax");
+    TEST32("\xc4\xe1\xf2\x2a\xc0", "vcvtsi2ss xmm0, xmm1, eax"); // VEX.W ignored
+    TEST64("\xc4\xe1\xf2\x2a\xc0", "vcvtsi2ss xmm0, xmm1, rax");
     TEST("\xf3\xc5\xf2\x2a\xc0", "UD"); // VEX+REP
     TEST("\xf2\xc5\xf2\x2a\xc0", "UD"); // VEX+REPNZ
     TEST("\xf2\xf3\xc5\xf2\x2a\xc0", "UD"); // VEX+REP+REPNZ
@@ -538,8 +551,16 @@ main(int argc, char** argv)
     TEST32("\x0f\xae\x00", "fxsave [eax]");
     TEST64("\x0f\xae\x00", "fxsave [rax]");
     TEST64("\x48\x0f\xae\x00", "fxsave64 [rax]");
+    TEST32("\xff\xe0", "jmp eax");
+    TEST64("\xff\xe0", "jmp rax");
     TEST32("\x66\xff\xe0", "jmp ax");
     TEST64("\x66\xff\xe0", "jmp rax");
+    TEST64("\x48\xff\xe0", "jmp rax");
+    TEST32("\xff\xd0", "call eax");
+    TEST64("\xff\xd0", "call rax");
+    TEST32("\x66\xff\xd0", "call ax");
+    TEST64("\x66\xff\xd0", "call rax");
+    TEST64("\x48\xff\xd0", "call rax");
     TEST32("\x66\x70\x00", "jow 0x3");
     TEST64("\x66\x70\x00", "jo 0x3");
     TEST32("\xe3\xfe", "jecxz 0x0");
@@ -641,6 +662,9 @@ main(int argc, char** argv)
     TEST("\x0f\xa7\xe8 ", "UD");
     TEST("\xf2\x0f\xa7\xe8", "UD");
     TEST("\xf3\x0f\xa7\xe8", "rep xcryptofb");
+
+    // Maximum instruction length is 15 bytes.
+    TEST("\x66\x66\x66\x66\x66\x66\x66\x66\x66\x66\x66\x66\x66\x66\x66\x90", "PARTIAL");
 
     puts(failed ? "Some tests FAILED" : "All tests PASSED");
     return failed ? EXIT_FAILURE : EXIT_SUCCESS;
