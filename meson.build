@@ -61,7 +61,8 @@ fadec = declare_dependency(link_with: libfadec,
                            include_directories: include_directories('.'),
                            sources: instr_data)
 
-subdir('tests')
+test('decode', executable('decode-test', 'decode-test.c', dependencies: fadec))
+test('encode', executable('encode-test', 'encode-test.c', dependencies: fadec))
 
 install_headers('fadec.h', 'fadec-enc.h')
 
