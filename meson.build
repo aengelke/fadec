@@ -60,6 +60,9 @@ libfadec = static_library('fadec', 'decode.c', 'encode.c', 'format.c', instr_dat
 fadec = declare_dependency(link_with: libfadec,
                            include_directories: include_directories('.'),
                            sources: instr_data)
+if meson.version().version_compare('>=0.54.0')
+  meson.override_dependency('fadec', fadec)
+endif
 
 subdir('tests')
 
