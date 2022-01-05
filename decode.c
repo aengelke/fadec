@@ -43,7 +43,7 @@ table_walk(unsigned cur_idx, unsigned entry_idx, unsigned* out_kind) {
     return (entry & ~ENTRY_MASK) >> 1;
 }
 
-#define LOAD_LE_1(buf) ((size_t) *(uint8_t*) (buf))
+#define LOAD_LE_1(buf) ((uint64_t) *(uint8_t*) (buf))
 #define LOAD_LE_2(buf) (LOAD_LE_1(buf) | LOAD_LE_1((uint8_t*) (buf) + 1)<<8)
 #define LOAD_LE_3(buf) (LOAD_LE_2(buf) | LOAD_LE_1((uint8_t*) (buf) + 2)<<16)
 #define LOAD_LE_4(buf) (LOAD_LE_2(buf) | LOAD_LE_2((uint8_t*) (buf) + 2)<<16)
