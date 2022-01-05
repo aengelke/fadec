@@ -31,7 +31,7 @@ typedef enum DecodeMode DecodeMode;
 #define ENTRY_TABLE_ROOT 8
 #define ENTRY_MASK 7
 
-static inline unsigned
+static unsigned
 table_walk(unsigned cur_idx, unsigned entry_idx, unsigned* out_kind) {
     static __attribute__((aligned(16))) const uint16_t _decode_table[] = {
 #define FD_DECODE_TABLE_DATA
