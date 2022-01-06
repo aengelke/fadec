@@ -127,6 +127,7 @@ fd_strpcatreg(char* restrict dst, unsigned rt, unsigned ri, unsigned size) {
 
 const char*
 fdi_name(FdInstrType ty) {
+    (void) ty;
     return "(invalid)";
 }
 
