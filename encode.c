@@ -31,9 +31,9 @@ enum {
 };
 
 #define OPC_SEG_IDX 31
-#define OPC_SEG_MSK (0x7l << OPC_SEG_IDX)
+#define OPC_SEG_MSK ((uint64_t) 0x7l << OPC_SEG_IDX)
 #define OPC_VEXOP_IDX 34
-#define OPC_VEXOP_MSK (0xfl << OPC_VEXOP_IDX)
+#define OPC_VEXOP_MSK ((uint64_t) 0xfl << OPC_VEXOP_IDX)
 
 static bool op_mem(FeOp op) { return op < 0; }
 static bool op_reg(FeOp op) { return op >= 0; }
