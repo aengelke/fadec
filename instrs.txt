@@ -224,7 +224,7 @@ ca                     I    Iw  -   -   -   RETF+w
 cb                     NP   -   -   -   -   RETF+w
 cc                     NP   -   -   -   -   INT3                EFL=--M-----
 cd                     I    Ib  -   -   -   INT                 EFL=--M-----
-ce                     NP   -   -   -   -   INTO        I64     EFL=-tM-----
+ce                     NP   -   -   -   -   INTO        I64     EFL=t-M-----
 cf                     NP   -   -   -   -   IRET+w              EFL=mmmmmmmm
 d0/0                   M1   Eb  Ib  -   -   ROL             SZ8 EFL=m------m
 d0/1                   M1   Eb  Ib  -   -   ROR             SZ8 EFL=m------m
