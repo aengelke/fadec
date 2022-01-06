@@ -176,9 +176,14 @@ class InstrDesc(NamedTuple):
     @classmethod
     def parse(cls, desc):
         desc = desc.split()
-        if desc[5][-2:] == "+w":
-            desc[5] = desc[5][:-2]
+        mnem_comp = desc[5].split("+", 1)
+        desc[5] = mnem_comp[0]
+        if len(mnem_comp) > 1 and "w" in mnem_comp[1]:
             desc.append("INSTR_WIDTH")
+        if len(mnem_comp) > 1 and "a" in mnem_comp[1]:
+            desc.append("U67")
+        if len(mnem_comp) > 1 and "s" in mnem_comp[1]:
+            desc.append("USEG")
         operands = tuple(OpKind.parse(op) for op in desc[1:5] if op != "-")
         return cls(desc[5], desc[0], operands, frozenset(desc[6:]))
 
