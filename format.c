@@ -59,7 +59,7 @@ fd_strpcatnum(char dst[static 18], uint64_t val) {
     __m128i ma = _mm_add_epi8(mn, mgtm);
     __m128i msw = _mm_shufflehi_epi16(_mm_shufflelo_epi16(ma, 0x1b), 0x1b);
     __m128i ms = _mm_shuffle_epi32(msw, 0x4e);
-    _mm_storeu_si128((__m128i*) (dst + 2), ms);
+    _mm_storeu_si128((__m128i_u*) (dst + 2), ms);
 #else
     unsigned idx = numbytes + 2;
     do {
