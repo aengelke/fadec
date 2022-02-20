@@ -224,7 +224,7 @@ class InstrDesc(NamedTuple):
                 tys.append(self.OPKIND_REGTYS_ENC[op.kind])
         return sum(ty << (4*i) for i, ty in enumerate(tys))
 
-    def encode(self, ign66, modrm):
+    def encode(self, mnem, ign66, modrm):
         flags = ENCODINGS[self.encoding]
         extraflags = {}
 
@@ -276,7 +276,7 @@ class InstrDesc(NamedTuple):
         enc = flags._replace(**extraflags)._encode()
         enc = tuple((enc >> i) & 0xffff for i in range(0, 48, 16))
         # First 2 bytes are the mnemonic, last 6 bytes are the encoding.
-        return f"{{FDI_{self.mnemonic}, {enc[0]}, {enc[1]}, {enc[2]}}}"
+        return f"{{FDI_{mnem}, {enc[0]}, {enc[1]}, {enc[2]}}}"
 
 class EntryKind(Enum):
     NONE = 0
@@ -500,15 +500,24 @@ def superstring(strs):
     return merged
 
 def decode_table(entries, modes):
-    mnems = sorted({desc.mnemonic for _, _, desc in entries})
-    decode_mnems_lines = [f"FD_MNEMONIC({m},{i})\n" for i, m in enumerate(mnems)]
-
     trie = Trie(root_count=len(modes))
-    descs, desc_map = [], {}
+    mnems, descs, desc_map = set(), [], {}
     for weak, opcode, desc in entries:
         ign66 = opcode.prefix in ("NP", "66", "F2", "F3")
         modrm = opcode.modreg or opcode.opcext
-        descenc = desc.encode(ign66, modrm)
+        mnem = {
+            "PUSH_SEG": "PUSH", "POP_SEG": "POP",
+            "MOV_CR2G": "MOV_CR", "MOV_G2CR": "MOV_CR",
+            "MOV_DR2G": "MOV_DR", "MOV_G2DR": "MOV_DR",
+            "MMX_MOVD_M2G": "MMX_MOVD", "MMX_MOVD_G2M": "MMX_MOVD",
+            "MMX_MOVQ_M2G": "MMX_MOVQ", "MMX_MOVQ_G2M": "MMX_MOVQ",
+            "SSE_MOVD_X2G": "SSE_MOVD", "SSE_MOVD_G2X": "SSE_MOVD",
+            "SSE_MOVQ_X2G": "SSE_MOVQ", "SSE_MOVQ_G2X": "SSE_MOVQ",
+            "VMOVD_X2G": "VMOVD", "VMOVD_G2X": "VMOVD",
+            "VMOVQ_X2G": "VMOVQ", "VMOVQ_G2X": "VMOVQ",
+        }.get(desc.mnemonic, desc.mnemonic)
+        mnems.add(mnem)
+        descenc = desc.encode(mnem, ign66, modrm)
         desc_idx = desc_map.get(descenc)
         if desc_idx is None:
             desc_idx = desc_map[descenc] = len(descs)
@@ -519,6 +528,9 @@ def decode_table(entries, modes):
 
     trie.deduplicate()
     table_data, root_offsets = trie.compile()
+
+    mnems = sorted(mnems)
+    decode_mnems_lines = [f"FD_MNEMONIC({m},{i})\n" for i, m in enumerate(mnems)]
 
     mnemonics_intel = [m.replace("SSE_", "").replace("MMX_", "")
                         .replace("MOVABS", "MOV").replace("RESERVED_", "")

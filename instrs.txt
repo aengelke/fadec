@@ -11,15 +11,15 @@
 03                     RM   Gv  Ev  -   -   ADD                 EFL=m--mmmmm
 04                     IA   Rb  Ib  -   -   ADD             SZ8 EFL=m--mmmmm
 05                     IA   Rv  Iz  -   -   ADD                 EFL=m--mmmmm
-06                     S    Sv  -   -   -   PUSH        I64
-07                     S    Sv  -   -   -   POP         I64
+06                     S    Sv  -   -   -   PUSH_SEG    I64
+07                     S    Sv  -   -   -   POP_SEG     I64
 08                     MR   Eb  Gb  -   -   OR         LOCK SZ8 EFL=0--mmum0
 09                     MR   Ev  Gv  -   -   OR         LOCK     EFL=0--mmum0
 0a                     RM   Gb  Eb  -   -   OR              SZ8 EFL=0--mmum0
 0b                     RM   Gv  Ev  -   -   OR                  EFL=0--mmum0
 0c                     IA   Rb  Ib  -   -   OR              SZ8 EFL=0--mmum0
 0d                     IA   Rv  Iz  -   -   OR                  EFL=0--mmum0
-0e                     S    Sv  -   -   -   PUSH        I64
+0e                     S    Sv  -   -   -   PUSH_SEG    I64
 #0f    escape opcode
 10                     MR   Eb  Gb  -   -   ADC        LOCK SZ8 EFL=m--mmmmM
 11                     MR   Ev  Gv  -   -   ADC        LOCK     EFL=m--mmmmM
@@ -27,16 +27,16 @@
 13                     RM   Gv  Ev  -   -   ADC                 EFL=m--mmmmM
 14                     IA   Rb  Ib  -   -   ADC             SZ8 EFL=m--mmmmM
 15                     IA   Rv  Iz  -   -   ADC                 EFL=m--mmmmM
-16                     S    Sv  -   -   -   PUSH        I64
-17                     S    Sv  -   -   -   POP         I64
+16                     S    Sv  -   -   -   PUSH_SEG    I64
+17                     S    Sv  -   -   -   POP_SEG     I64
 18                     MR   Eb  Gb  -   -   SBB        LOCK SZ8 EFL=m--mmmmM
 19                     MR   Ev  Gv  -   -   SBB        LOCK     EFL=m--mmmmM
 1a                     RM   Gb  Eb  -   -   SBB             SZ8 EFL=m--mmmmM
 1b                     RM   Gv  Ev  -   -   SBB                 EFL=m--mmmmM
 1c                     IA   Rb  Ib  -   -   SBB             SZ8 EFL=m--mmmmM
 1d                     IA   Rv  Iz  -   -   SBB                 EFL=m--mmmmM
-1e                     S    Sv  -   -   -   PUSH        I64
-1f                     S    Sv  -   -   -   POP         I64
+1e                     S    Sv  -   -   -   PUSH_SEG    I64
+1f                     S    Sv  -   -   -   POP_SEG     I64
 20                     MR   Eb  Gb  -   -   AND        LOCK SZ8 EFL=0--mmum0
 21                     MR   Ev  Gv  -   -   AND        LOCK     EFL=0--mmum0
 22                     RM   Gb  Eb  -   -   AND             SZ8 EFL=0--mmum0
@@ -377,10 +377,10 @@ NP.0f01d7              NP   -   -   -   -   ENCLU               F=SGX
 *0f1e                  MR   Ev  Gv  -   -   RESERVED_NOP
 *0f1f                  MR   Ev  Gv  -   -   RESERVED_NOP
 0f1f/0                 M    Ev  -   -   -   NOP
-0f20                   MR   Ry  Cy  -   -   MOV_CR      I66 D64 CPL0 EFL=u--uuuuu
-0f21                   MR   Ry  Dy  -   -   MOV_DR      I66 D64 CPL0 EFL=u--uuuuu
-0f22                   RM   Cy  Ry  -   -   MOV_CR      I66 D64 CPL0 EFL=u--uuuuu
-0f23                   RM   Dy  Ry  -   -   MOV_DR      I66 D64 CPL0 EFL=u--uuuuu
+0f20                   MR   Ry  Cy  -   -   MOV_CR2G    I66 D64 CPL0 EFL=u--uuuuu
+0f21                   MR   Ry  Dy  -   -   MOV_DR2G    I66 D64 CPL0 EFL=u--uuuuu
+0f22                   RM   Cy  Ry  -   -   MOV_G2CR    I66 D64 CPL0 EFL=u--uuuuu
+0f23                   RM   Dy  Ry  -   -   MOV_G2DR    I66 D64 CPL0 EFL=u--uuuuu
 0f30                   NP   -   -   -   -   WRMSR               F=586 CPL0
 0f31                   NP   -   -   -   -   RDTSC               F=586
 0f32                   NP   -   -   -   -   RDMSR               F=586 CPL0
@@ -437,14 +437,14 @@ NP.0f37                NP   -   -   -   -   GETSEC              F=SMX EFL=MMMMMM
 0f9d                   M    Eb  -   -   -   SETGE           SZ8 EFL=t--t----
 0f9e                   M    Eb  -   -   -   SETLE           SZ8 EFL=t--tt---
 0f9f                   M    Eb  -   -   -   SETG            SZ8 EFL=t--tt---
-0fa0                   S    Sv  -   -   -   PUSH            D64
-0fa1                   S    Sv  -   -   -   POP             D64
+0fa0                   S    Sv  -   -   -   PUSH_SEG        D64
+0fa1                   S    Sv  -   -   -   POP_SEG         D64
 0fa2                   NP   -   -   -   -   CPUID               F=586
 0fa3                   MR   Ev  Gv  -   -   BT                  EFL=u--u-uum
 0fa4                   MRI  Ev  Gv  Ib  -   SHLD                EFL=u--mmumm
 0fa5                   MRC  Ev  Gv  Rb  -   SHLD                EFL=u--mmumm
-0fa8                   S    Sv  -   -   -   PUSH            D64
-0fa9                   S    Sv  -   -   -   POP             D64
+0fa8                   S    Sv  -   -   -   PUSH_SEG        D64
+0fa9                   S    Sv  -   -   -   POP_SEG         D64
 0faa                   NP   -   -   -   -   RSM                 F=586
 0fab                   MR   Ev  Gv  -   -   BTS        LOCK     EFL=u--u-uum
 0fac                   MRI  Ev  Gv  Ib  -   SHRD                EFL=u--mmumm
@@ -502,8 +502,8 @@ NP.0f68                RM   Pq  Qd  -   -   MMX_PUNPCKHBW       F=MMX
 NP.0f69                RM   Pq  Qd  -   -   MMX_PUNPCKHWD       F=MMX
 NP.0f6a                RM   Pq  Qd  -   -   MMX_PUNPCKHDQ       F=MMX
 NP.0f6b                RM   Pq  Qd  -   -   MMX_PACKSSDW        F=MMX
-NP.W0.0f6e             RM   Pq  Ey  -   -   MMX_MOVD            F=MMX ENC_NOSZ
-NP.W1.0f6e             RM   Pq  Ey  -   -   MMX_MOVQ            F=MMX ENC_NOSZ
+NP.W0.0f6e             RM   Pq  Ey  -   -   MMX_MOVD_G2M        F=MMX ENC_NOSZ
+NP.W1.0f6e             RM   Pq  Ey  -   -   MMX_MOVQ_G2M        F=MMX ENC_NOSZ
 NP.0f6f                RM   Pq  Qq  -   -   MMX_MOVQ            F=MMX
 NP.0f70                RMI  Qq  Pq  Ib  -   MMX_PSHUFW          F=SSE
 NP.0f71/2r             MI   Nq  Ib  -   -   MMX_PSRLW           F=MMX
@@ -518,8 +518,8 @@ NP.0f74                RM   Pq  Qq  -   -   MMX_PCMPEQB         F=MMX
 NP.0f75                RM   Pq  Qq  -   -   MMX_PCMPEQW         F=MMX
 NP.0f76                RM   Pq  Qq  -   -   MMX_PCMPEQD         F=MMX
 NP.0f77                NP   -   -   -   -   MMX_EMMS            F=MMX
-NP.W0.0f7e             MR   Ey  Py  -   -   MMX_MOVD            F=MMX ENC_NOSZ
-NP.W1.0f7e             MR   Ey  Py  -   -   MMX_MOVQ            F=MMX ENC_NOSZ
+NP.W0.0f7e             MR   Ey  Py  -   -   MMX_MOVD_M2G        F=MMX ENC_NOSZ
+NP.W1.0f7e             MR   Ey  Py  -   -   MMX_MOVQ_M2G        F=MMX ENC_NOSZ
 NP.0f7f                MR   Qq  Pq  -   -   MMX_MOVQ            F=MMX
 # TODO: Ey operand is actually Ry/Mw
 NP.0fc4                RMI  Pq  Ey  Ib  -   MMX_PINSRW          F=SSE ENC_NOSZ
@@ -694,8 +694,8 @@ F2.0f5f                RM   Vsd Wsd -   -   SSE_MAXSD           F=SSE2
 66.0f6b                RM   Vx  Wx  -   -   SSE_PACKSSDW        F=SSE2
 66.0f6c                RM   Vx  Wx  -   -   SSE_PUNPCKLQDQ      F=SSE2
 66.0f6d                RM   Vx  Wx  -   -   SSE_PUNPCKHQDQ      F=SSE2
-66.W0.0f6e             RM   Vx  Ey  -   -   SSE_MOVD            F=SSE2 ENC_NOSZ
-66.W1.0f6e             RM   Vx  Ey  -   -   SSE_MOVQ            F=SSE2 ENC_NOSZ
+66.W0.0f6e             RM   Vx  Ey  -   -   SSE_MOVD_G2X        F=SSE2 ENC_NOSZ
+66.W1.0f6e             RM   Vx  Ey  -   -   SSE_MOVQ_G2X        F=SSE2 ENC_NOSZ
 66.0f6f                RM   Vx  Wx  -   -   SSE_MOVDQA          F=SSE2
 F3.0f6f                RM   Vx  Wx  -   -   SSE_MOVDQU          F=SSE2
 66.0f70                RMI  Vx  Wx  Ib  -   SSE_PSHUFD          F=SSE2
@@ -723,8 +723,8 @@ F2.0f79/r              RM   Vx  Wx  -   -   SSE_INSERTQ         F=SSE4A ONLYAMD
 F2.0f7c                RM   Vx  Wx  -   -   SSE_HADDPS          F=SSE3
 66.0f7d                RM   Vx  Wx  -   -   SSE_HSUBPD          F=SSE3
 F2.0f7d                RM   Vx  Wx  -   -   SSE_HSUBPS          F=SSE3
-66.W0.0f7e             MR   Ey  Vy  -   -   SSE_MOVD            F=SSE2 ENC_NOSZ
-66.W1.0f7e             MR   Ey  Vy  -   -   SSE_MOVQ            F=SSE2 ENC_NOSZ
+66.W0.0f7e             MR   Ey  Vy  -   -   SSE_MOVD_X2G        F=SSE2 ENC_NOSZ
+66.W1.0f7e             MR   Ey  Vy  -   -   SSE_MOVQ_X2G        F=SSE2 ENC_NOSZ
 F3.0f7e                RM   Vx  Wq  -   -   SSE_MOVQ            F=SSE2
 66.0f7f                MR   Wx  Vx  -   -   SSE_MOVDQA          F=SSE2
 F3.0f7f                MR   Wx  Vx  -   -   SSE_MOVDQU          F=SSE2
@@ -997,9 +997,9 @@ VEX.66.0f6a            RVM  Vx  Hx  Wx  -   VPUNPCKHDQ          F=AVX
 VEX.66.0f6b            RVM  Vx  Hx  Wx  -   VPACKSSDW           F=AVX
 VEX.66.0f6c            RVM  Vx  Hx  Wx  -   VPUNPCKLQDQ         F=AVX
 VEX.66.0f6d            RVM  Vx  Hx  Wx  -   VPUNPCKHQDQ         F=AVX
-VEX.66.W0.L0.0f6e      RM   Vy  Ey  -   -   VMOVD               F=AVX ENC_NOSZ
-VEX.66.W1.L0.0f6e      RM   Vy  Ey  -   -   VMOVD       I64     F=AVX ENC_NOSZ
-VEX.66.W1.L0.0f6e      RM   Vy  Ey  -   -   VMOVQ       O64     F=AVX ENC_NOSZ
+VEX.66.W0.L0.0f6e      RM   Vy  Ey  -   -   VMOVD_G2X           F=AVX ENC_NOSZ
+VEX.66.W1.L0.0f6e      RM   Vy  Ey  -   -   VMOVD_G2X   I64     F=AVX ENC_NOSZ
+VEX.66.W1.L0.0f6e      RM   Vy  Ey  -   -   VMOVQ_G2X   O64     F=AVX ENC_NOSZ
 VEX.66.0f6f            RM   Vx  Wx  -   -   VMOVDQA             F=AVX
 VEX.F3.0f6f            RM   Vx  Wx  -   -   VMOVDQU             F=AVX
 VEX.66.0f70            RMI  Vx  Wx  Ib  -   VPSHUFD             F=AVX
@@ -1024,9 +1024,9 @@ VEX.66.0f7c            RVM  Vx  Hx  Wx  -   VHADDPD             F=AVX
 VEX.F2.0f7c            RVM  Vx  Hx  Wx  -   VHADDPS             F=AVX
 VEX.66.0f7d            RVM  Vx  Hx  Wx  -   VHSUBPD             F=AVX
 VEX.F2.0f7d            RVM  Vx  Hx  Wx  -   VHSUBPS             F=AVX
-VEX.66.W0.L0.0f7e      MR   Ey  Vy  -   -   VMOVD               F=AVX ENC_NOSZ
-VEX.66.W1.L0.0f7e      MR   Ey  Vy  -   -   VMOVQ       I64     F=AVX ENC_NOSZ
-VEX.66.W1.L0.0f7e      MR   Ey  Vy  -   -   VMOVQ       O64     F=AVX ENC_NOSZ
+VEX.66.W0.L0.0f7e      MR   Ey  Vy  -   -   VMOVD_X2G           F=AVX ENC_NOSZ
+VEX.66.W1.L0.0f7e      MR   Ey  Vy  -   -   VMOVQ_X2G   I64     F=AVX ENC_NOSZ
+VEX.66.W1.L0.0f7e      MR   Ey  Vy  -   -   VMOVQ_X2G   O64     F=AVX ENC_NOSZ
 VEX.F3.L0.0f7e         RM   Vq  Wq  -   -   VMOVQ               F=AVX ENC_NOSZ
 VEX.66.0f7f            MR   Wx  Vx  -   -   VMOVDQA             F=AVX
 VEX.F3.0f7f            MR   Wx  Vx  -   -   VMOVDQU             F=AVX
