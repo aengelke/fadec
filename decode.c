@@ -11,7 +11,7 @@
 
 // Defines FD_TABLE_OFFSET_32 and FD_TABLE_OFFSET_64, if available
 #define FD_DECODE_TABLE_DEFINES
-#include <fadec-table.inc>
+#include <fadec-decode-private.inc>
 #undef FD_DECODE_TABLE_DEFINES
 
 enum DecodeMode {
@@ -35,7 +35,7 @@ static unsigned
 table_walk(unsigned cur_idx, unsigned entry_idx, unsigned* out_kind) {
     static __attribute__((aligned(16))) const uint16_t _decode_table[] = {
 #define FD_DECODE_TABLE_DATA
-#include <fadec-table.inc>
+#include <fadec-decode-private.inc>
 #undef FD_DECODE_TABLE_DATA
     };
     unsigned entry = _decode_table[cur_idx + entry_idx];
@@ -273,7 +273,7 @@ prefix_end:
 
     static __attribute__((aligned(16))) const struct InstrDesc descs[] = {
 #define FD_DECODE_TABLE_DESCS
-#include <fadec-table.inc>
+#include <fadec-decode-private.inc>
 #undef FD_DECODE_TABLE_DESCS
     };
     const struct InstrDesc* desc = &descs[table_idx >> 2];

@@ -30,7 +30,7 @@ typedef enum {
 
 typedef enum {
 #define FD_MNEMONIC(name,value) FDI_ ## name = value,
-#include <fadec-mnems.inc>
+#include <fadec-decode-public.inc>
 #undef FD_MNEMONIC
 } FdInstrType;
 

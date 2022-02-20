@@ -499,7 +499,9 @@ def superstring(strs):
         realstrs.remove(s)
     return merged
 
-def decode_table(entries, modes):
+def decode_table(entries, args):
+    modes = args.modes
+
     trie = Trie(root_count=len(modes))
     mnems, descs, desc_map = set(), [], {}
     for weak, opcode, desc in entries:
@@ -568,7 +570,7 @@ def decode_table(entries, modes):
 #endif
 """
 
-def encode_table(entries):
+def encode_table(entries, args):
     mnemonics = defaultdict(list)
     mnemonics["FE_NOP"].append(("NP", 0, 0, "0x90"))
     for weak, opcode, desc in entries:
@@ -686,15 +688,19 @@ def encode_table(entries):
     return mnem_tab, descs
 
 if __name__ == "__main__":
+    generators = {
+        "decode": decode_table,
+        "encode": encode_table,
+    }
+
     parser = argparse.ArgumentParser()
     parser.add_argument("--32", dest="modes", action="append_const", const=32)
     parser.add_argument("--64", dest="modes", action="append_const", const=64)
     parser.add_argument("--with-undoc", action="store_true")
+    parser.add_argument("mode", choices=generators.keys())
     parser.add_argument("table", type=argparse.FileType('r'))
-    parser.add_argument("decode_mnems", type=argparse.FileType('w'))
-    parser.add_argument("decode_table", type=argparse.FileType('w'))
-    parser.add_argument("encode_mnems", type=argparse.FileType('w'))
-    parser.add_argument("encode_table", type=argparse.FileType('w'))
+    parser.add_argument("out_public", type=argparse.FileType('w'))
+    parser.add_argument("out_private", type=argparse.FileType('w'))
     args = parser.parse_args()
 
     entries = []
@@ -706,10 +712,6 @@ if __name__ == "__main__":
         if "UNDOC" not in desc.flags or args.with_undoc:
             entries.append((weak, opcode, desc))
 
-    fd_mnem_list, fd_table = decode_table(entries, args.modes)
-    args.decode_mnems.write(fd_mnem_list)
-    args.decode_table.write(fd_table)
-
-    fe_mnem_list, fe_code = encode_table(entries)
-    args.encode_mnems.write(fe_mnem_list)
-    args.encode_table.write(fe_code)
+    res_public, res_private = generators[args.mode](entries, args)
+    args.out_public.write(res_public)
+    args.out_private.write(res_private)

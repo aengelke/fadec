@@ -311,7 +311,7 @@ struct EncodeDesc {
 };
 
 static const struct EncodeDesc descs[] = {
-#include <fadec-enc-cases.inc>
+#include <fadec-encode-private.inc>
 };
 
 int

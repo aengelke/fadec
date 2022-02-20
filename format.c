@@ -135,19 +135,19 @@ static char*
 fd_mnemonic(char buf[restrict static 48], const FdInstr* instr) {
 #define FD_DECODE_TABLE_STRTAB1
     static const char* mnemonic_str =
-#include <fadec-table.inc>
+#include <fadec-decode-private.inc>
         "\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0"; // 15 NULL Bytes to prevent overflow
 #undef FD_DECODE_TABLE_STRTAB1
 
 #define FD_DECODE_TABLE_STRTAB2
     static const uint16_t mnemonic_offs[] = {
-#include <fadec-table.inc>
+#include <fadec-decode-private.inc>
     };
 #undef FD_DECODE_TABLE_STRTAB2
 
 #define FD_DECODE_TABLE_STRTAB3
     static const uint8_t mnemonic_lens[] = {
-#include <fadec-table.inc>
+#include <fadec-decode-private.inc>
     };
 #undef FD_DECODE_TABLE_STRTAB3
 

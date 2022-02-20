@@ -31,6 +31,21 @@ if get_option('warning_level').to_int() >= 3
   endforeach
 endif
 
+sources = []
+headers = []
+components = []
+
+if get_option('with_decode')
+  components += 'decode'
+  headers += files('fadec.h')
+  sources += files('decode.c', 'format.c')
+endif
+if get_option('with_encode')
+  components += 'encode'
+  headers += files('fadec-enc.h')
+  sources += files('encode.c')
+endif
+
 generate_args = []
 if get_option('archmode') != 'only64'
   generate_args += ['--32']
@@ -42,32 +57,33 @@ if get_option('with_undoc')
   generate_args += ['--with-undoc']
 endif
 
-instr_data = custom_target('tables',
-                           command: [python3, '@INPUT0@', '@INPUT1@', '@OUTPUT@'] + generate_args,
-                           input: files('parseinstrs.py', 'instrs.txt'),
-                           output: [
-                             'fadec-mnems.inc', 'fadec-table.inc',
-                             'fadec-enc-mnems.inc', 'fadec-enc-cases.inc',
-                           ],
-                           install: true,
-                           install_dir: [
-                             get_option('includedir'), false,
-                             get_option('includedir'), false,
-                           ])
+tables = []
+foreach component : components
+  tables += custom_target('@0@_table'.format(component),
+                          command: [python3, '@INPUT0@', component,
+                                    '@INPUT1@', '@OUTPUT@'] + generate_args,
+                          input: files('parseinstrs.py', 'instrs.txt'),
+                          output: ['fadec-@0@-public.inc'.format(component),
+                                   'fadec-@0@-private.inc'.format(component)],
+                          install: true,
+                          install_dir: [get_option('includedir'), false])
+endforeach
 
-libfadec = static_library('fadec', 'decode.c', 'encode.c', 'format.c', instr_data,
-                          install: true)
+libfadec = static_library('fadec', sources, tables, install: true)
 fadec = declare_dependency(link_with: libfadec,
                            include_directories: include_directories('.'),
-                           sources: instr_data)
+                           sources: tables)
+install_headers(headers)
+
+foreach component : components
+  test(component, executable('@0@-test'.format(component),
+                             '@0@-test.c'.format(component),
+                             dependencies: fadec))
+endforeach
+
 if meson.version().version_compare('>=0.54.0')
   meson.override_dependency('fadec', fadec)
 endif
-
-test('decode', executable('decode-test', 'decode-test.c', dependencies: fadec))
-test('encode', executable('encode-test', 'encode-test.c', dependencies: fadec))
-
-install_headers('fadec.h', 'fadec-enc.h')
 
 pkg = import('pkgconfig')
 pkg.generate(libraries: libfadec,

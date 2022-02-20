@@ -46,7 +46,7 @@ typedef int64_t FeOp;
 
 enum {
 #define FE_MNEMONIC(name,value) name = value,
-#include <fadec-enc-mnems.inc>
+#include <fadec-encode-public.inc>
 #undef FE_MNEMONIC
     FE_MNEM_MAX
 };
