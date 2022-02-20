@@ -2,3 +2,5 @@ option('archmode', type: 'combo', choices: ['both', 'only32', 'only64'])
 option('with_undoc', type: 'boolean', value: false)
 option('with_decode', type: 'boolean', value: true)
 option('with_encode', type: 'boolean', value: true)
+# encode2 is off-by-default to reduce size and compile-time
+option('with_encode2', type: 'boolean', value: false)

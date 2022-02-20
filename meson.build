@@ -1,4 +1,4 @@
-project('fadec', ['c'], default_options: ['warning_level=3', 'c_std=c99'],
+project('fadec', ['c'], default_options: ['warning_level=3', 'c_std=c11'],
         meson_version: '>=0.40')
 
 python3 = find_program('python3')
@@ -44,6 +44,11 @@ if get_option('with_encode')
   components += 'encode'
   headers += files('fadec-enc.h')
   sources += files('encode.c')
+endif
+if get_option('with_encode2')
+  components += 'encode2'
+  headers += files('fadec-enc2.h')
+  sources += files('encode2.c')
 endif
 
 generate_args = []

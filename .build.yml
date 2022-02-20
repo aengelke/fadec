@@ -5,8 +5,12 @@ packages:
 - meson
 tasks:
 - build: |
-    mkdir fadec-build
-    meson fadec-build fadec
-    ninja -C fadec-build
-- check: |
-    ninja -C fadec-build test
+    mkdir fadec-build1
+    meson fadec-build1 fadec
+    ninja -C fadec-build1
+    ninja -C fadec-build1 test
+    # Complete test with encode2 API.
+    mkdir fadec-build2
+    meson fadec-build2 fadec -Dwith_encode2=true
+    ninja -C fadec-build2
+    ninja -C fadec-build2 test
