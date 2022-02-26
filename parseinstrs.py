@@ -570,124 +570,8 @@ def decode_table(entries, args):
 #endif
 """
 
-def encode_table(entries, args):
-    mnemonics = defaultdict(list)
-    mnemonics["FE_NOP"].append(("NP", 0, 0, "0x90"))
-    for weak, opcode, desc in entries:
-        if "I64" in desc.flags or desc.mnemonic[:9] == "RESERVED_":
-            continue
-
-        opsizes = {8} if "SZ8" in desc.flags else {16, 32, 64}
-        hasvex, vecsizes = False, {128}
-
-        opc_i = opcode.opc
-        if opcode.opcext:
-            opc_i |= opcode.opcext << 8
-        if opcode.modreg and opcode.modreg[0] is not None:
-            opc_i |= opcode.modreg[0] << 8
-        opc_flags = ""
-        opc_flags += ["","|OPC_0F","|OPC_0F38","|OPC_0F3A"][opcode.escape]
-        if "VSIB" in desc.flags:
-            opc_flags += "|OPC_VSIB"
-        if opcode.vex:
-            hasvex, vecsizes = True, {128, 256}
-            opc_flags += "|OPC_VEX"
-        if opcode.prefix:
-            if opcode.prefix in ("66", "F2", "F3"):
-                opc_flags += "|OPC_" + opcode.prefix
-            if "U66" not in desc.flags and opcode.prefix != "NFx":
-                opsizes -= {16}
-        if "I66" in desc.flags:
-            opsizes -= {16}
-        if opcode.vexl == "IG":
-            vecsizes = {0}
-        elif opcode.vexl:
-            vecsizes -= {128 if opcode.vexl == "1" else 256}
-            if opcode.vexl == "1": opc_flags += "|OPC_VEXL"
-        if opcode.rexw == "IG":
-            opsizes = {0}
-        elif opcode.rexw:
-            opsizes -= {32 if opcode.rexw == "1" else 64}
-            if opcode.rexw == "1": opc_flags += "|OPC_REXW"
-
-        if "D64" in desc.flags:
-            opsizes -= {32}
-        if "SZ8" not in desc.flags and "INSTR_WIDTH" not in desc.flags and all(op.size != OpKind.SZ_OP for op in desc.operands):
-            opsizes = {0}
-        if "VSIB" not in desc.flags and all(op.size != OpKind.SZ_VEC for op in desc.operands):
-            vecsizes = {0} # for VEX-encoded general-purpose instructions.
-        if "ENC_NOSZ" in desc.flags:
-            opsizes, vecsizes = {0}, {0}
-
-        # Where to put the operand size in the mnemonic
-        separate_opsize = "ENC_SEPSZ" in desc.flags
-        prepend_opsize = max(opsizes) > 0 and not separate_opsize
-        prepend_vecsize = hasvex and max(vecsizes) > 0 and not separate_opsize
-
-        if "F64" in desc.flags:
-            opsizes = {64}
-            prepend_opsize = False
-
-        modrm_type = opcode.modreg[1] if opcode.modreg else "rm"
-        optypes_base = desc.optype_str()
-        optypes = [optypes_base.replace("M", t) for t in modrm_type]
-
-        prefixes = [("", "")]
-        if "LOCK" in desc.flags:
-            prefixes.append(("LOCK_", "|OPC_LOCK"))
-        if "ENC_REP" in desc.flags:
-            prefixes.append(("REP_", "|OPC_F3"))
-        if "ENC_REPCC" in desc.flags:
-            prefixes.append(("REPNZ_", "|OPC_F2"))
-            prefixes.append(("REPZ_", "|OPC_F3"))
-
-        for opsize, vecsize, prefix, ots in product(opsizes, vecsizes, prefixes, optypes):
-            if prefix[1] == "|OPC_LOCK" and ots[0] != "m":
-                continue
-
-            imm_size = desc.imm_size(opsize//8)
-            tys_i = desc.encode_regtys(ots, opsize//8)
-            opc_s = hex(opc_i) + opc_flags + prefix[1]
-            if opsize == 16: opc_s += "|OPC_66"
-            if vecsize == 256: opc_s += "|OPC_VEXL"
-            if opsize == 64 and "D64" not in desc.flags and "F64" not in desc.flags: opc_s += "|OPC_REXW"
-
-            # Construct mnemonic name
-            mnem_name = {"MOVABS": "MOV", "XCHG_NOP": "XCHG"}.get(desc.mnemonic, desc.mnemonic)
-            name = "FE_" + prefix[0] + mnem_name
-            if prepend_opsize and not ("D64" in desc.flags and opsize == 64):
-                name += f"_{opsize}"[name[-1] not in "0123456789":]
-            if prepend_vecsize:
-                name += f"_{vecsize}"[name[-1] not in "0123456789":]
-            for ot, op in zip(ots, desc.operands):
-                name += ot.replace("o", "")
-                if separate_opsize:
-                    name += f"{op.abssize(opsize//8, vecsize//8)*8}"
-            mnemonics[name].append((desc.encoding, imm_size, tys_i, opc_s))
-
-    descs = ""
-    alt_index = 0
-    for mnem, variants in mnemonics.items():
-        dedup = []
-        for variant in variants:
-            # TODO: when adapting to 32-bit mode, handle S encodings.
-            if not any(x[:3] == variant[:3] for x in dedup):
-                dedup.append(variant)
-
-        enc_prio = ["O", "OA", "OI", "IA", "M", "MI", "MR", "RM"]
-        dedup.sort(key=lambda e: (e[1], e[0] in enc_prio and enc_prio.index(e[0])))
-
-        indices = [mnem] + [f"FE_MNEM_MAX+{alt_index+i}" for i in range(len(dedup) - 1)]
-        alt_list = indices[1:] + ["0"]
-        alt_index += len(alt_list) - 1
-        for idx, alt, (enc, immsz, tys_i, opc_s) in zip(indices, alt_list, dedup):
-            descs += f"[{idx}] = {{ .enc = ENC_{enc}, .immsz = {immsz}, .tys = {tys_i:#x}, .opc = {opc_s}, .alt = {alt} }},\n"
-
-    mnem_list = sorted(mnemonics.keys())
-    mnem_tab = "".join(f"FE_MNEMONIC({m},{i})\n" for i, m in enumerate(mnem_list))
-    return mnem_tab, descs
-
-def encode2_table(entries, args):
+def encode_mnems(entries):
+    # mapping from (mnem, opsize, ots) -> (opcode, desc)
     mnemonics = defaultdict(list)
     for weak, opcode, desc in entries:
         if "I64" in desc.flags or desc.mnemonic[:9] == "RESERVED_":
@@ -767,7 +651,6 @@ def encode2_table(entries, args):
                     name += f"{op.abssize(opsize//8, vecsize//8)*8}"
             mnemonics[name, opsize, ots].append((spec_opcode, desc))
 
-    enc_decls, enc_code = "", ""
     for (mnem, opsize, ots), variants in mnemonics.items():
         dedup = OrderedDict()
         for i, (opcode, desc) in enumerate(variants):
@@ -777,10 +660,56 @@ def encode2_table(entries, args):
             key = desc.imm_size(opsize//8), enc_prio, unique
             if key not in dedup:
                 dedup[key] = opcode, desc
-            if desc.encoding == "S":
-                print(mnem, key, desc, dedup)
-        variants = [dedup[k] for k in sorted(dedup.keys())]
-        max_imm_size = max(k[0] for k in dedup.keys())
+        mnemonics[mnem, opsize, ots] = [dedup[k] for k in sorted(dedup.keys())]
+
+    return dict(mnemonics)
+
+def encode_table(entries, args):
+    mnemonics = encode_mnems(entries)
+    mnemonics["NOP", 0, ""] = [(Opcode.parse("90"), InstrDesc.parse("NP - - - - NOP"))]
+    descs = ""
+    alt_index = 0
+    for (mnem, opsize, ots), variants in mnemonics.items():
+        indices = [f"FE_{mnem}"] + [f"FE_MNEM_MAX+{alt_index+i}" for i in range(len(variants) - 1)]
+        alt_list = indices[1:] + ["0"]
+        alt_index += len(alt_list) - 1
+        for idx, alt, (opcode, desc) in zip(indices, alt_list, variants):
+            opc_i = opcode.opc
+            if opcode.opcext:
+                opc_i |= opcode.opcext << 8
+            if opcode.modreg and opcode.modreg[0] is not None:
+                opc_i |= opcode.modreg[0] << 8
+            opc_s = f"{opc_i}"
+            opc_s += ["","|OPC_0F","|OPC_0F38","|OPC_0F3A"][opcode.escape]
+            if opcode.prefix in ("66", "F2", "F3", "LOCK"):
+                opc_s += "|OPC_" + opcode.prefix
+            if opsize == 16 and opcode.prefix != "66":
+                opc_s += "|OPC_66"
+            opc_s += "|OPC_VSIB" if "VSIB" in desc.flags else ""
+            opc_s += "|OPC_VEX" if opcode.vex else ""
+            opc_s += "|OPC_VEXL" if opcode.vexl == "1" else ""
+            opc_s += "|OPC_REXW" if opcode.rexw == "1" else ""
+
+            desc = {
+                "enc": f"ENC_{desc.encoding}",
+                "immsz": desc.imm_size(opsize//8),
+                "tys": desc.encode_regtys(ots, opsize//8),
+                "opc": opc_s,
+                "alt": alt,
+            }
+            desc_str = ", ".join(f".{k} = {v}" for k, v in desc.items())
+            descs += f"[{idx}] = {{ {desc_str} }},\n"
+
+    mnem_list = sorted(f"FE_{mnem}" for mnem, _, _ in mnemonics.keys())
+    mnem_tab = "".join(f"FE_MNEMONIC({m},{i})\n" for i, m in enumerate(mnem_list))
+    return mnem_tab, descs
+
+def encode2_table(entries, args):
+    mnemonics = encode_mnems(entries)
+
+    enc_decls, enc_code = "", ""
+    for (mnem, opsize, ots), variants in mnemonics.items():
+        max_imm_size = max(desc.imm_size(opsize//8) for _, desc in variants)
 
         supports_high_regs = []
         if variants[0][1].mnemonic in ("MOVSX", "MOVZX") or opsize == 8:
