@@ -49,6 +49,7 @@ typedef enum {
     FD_OT_IMM = 2,
     FD_OT_MEM = 3,
     FD_OT_OFF = 4,
+    FD_OT_MEMBCST = 5,
 } FdOpType;
 
 typedef enum {
@@ -78,6 +79,22 @@ typedef enum {
     FD_RT_MEM = 15,
 } FdRegType;
 
+/** Do not depend on the actual enum values. **/
+typedef enum {
+    /** Round to nearest (even) **/
+    FD_RC_RN = 1,
+    /** Round down **/
+    FD_RC_RD = 3,
+    /** Round up **/
+    FD_RC_RU = 5,
+    /** Round to zero (truncate) **/
+    FD_RC_RZ = 7,
+    /** Rounding mode as specified in MXCSR **/
+    FD_RC_MXCSR = 0,
+    /** Rounding mode irrelevant, but SAE **/
+    FD_RC_SAE = 6,
+} FdRoundControl;
+
 /** Internal use only. **/
 typedef struct {
     uint8_t type;
@@ -94,7 +111,7 @@ typedef struct {
     uint8_t addrsz;
     uint8_t operandsz;
     uint8_t size;
-    uint8_t _pad0;
+    uint8_t evex;
 
     FdOp operands[4];
 
@@ -230,24 +247,34 @@ const char* fdi_name(FdInstrType ty);
  * if the memory operand has no base register. This is the only case where the
  * 64-bit register RIP can be returned, in which case the operand also has no
  * scaled index register.
- * Only valid if  FD_OP_TYPE == FD_OT_MEM  **/
+ * Only valid if  FD_OP_TYPE == FD_OT_MEM/MEMBCST  **/
 #define FD_OP_BASE(instr,idx) ((FdReg) (instr)->operands[idx].reg)
 /** Gets the index of the index register from a memory operand, or FD_REG_NONE,
  * if the memory operand has no scaled index register.
- * Only valid if  FD_OP_TYPE == FD_OT_MEM  **/
+ * Only valid if  FD_OP_TYPE == FD_OT_MEM/MEMBCST  **/
 #define FD_OP_INDEX(instr,idx) ((FdReg) (instr)->operands[idx].misc & 0x3f)
 /** Gets the scale of the index register from a memory operand when existent.
  * This does /not/ return the scale in an absolute value but returns the amount
  * of bits the index register is shifted to the left (i.e. the value in in the
  * range 0-3). The actual scale can be computed easily using  1<<FD_OP_SCALE.
- * Only valid if  FD_OP_TYPE == FD_OT_MEM  and  FD_OP_INDEX != FD_REG_NONE **/
+ * Only valid if  FD_OP_TYPE == FD_OT_MEM/MEMBCST  and  FD_OP_INDEX != NONE **/
 #define FD_OP_SCALE(instr,idx) ((instr)->operands[idx].misc >> 6)
 /** Gets the sign-extended displacement of a memory operand.
- * Only valid if  FD_OP_TYPE == FD_OT_MEM  **/
+ * Only valid if  FD_OP_TYPE == FD_OT_MEM/MEMBCST  **/
 #define FD_OP_DISP(instr,idx) ((int64_t) (instr)->disp)
+/** Get whether the memory broadcast is 64-bit (otherwise: 32-bit).
+ * Only valid if  FD_OP_TYPE == FD_OT_MEMBCST **/
+#define FD_OP_BCST64(instr,idx) (!!((instr)->evex & 0x08))
 /** Gets the (sign-extended) encoded constant for an immediate operand.
  * Only valid if  FD_OP_TYPE == FD_OT_IMM  or  FD_OP_TYPE == FD_OT_OFF  **/
 #define FD_OP_IMM(instr,idx) ((instr)->imm)
+
+/** Get the opmask register for EVEX-encoded instructions; 0 for no mask. **/
+#define FD_MASKREG(instr) ((instr)->evex & 0x07)
+/** Get whether zero masking shall be used. Only valid if  FD_MASKREG != 0. **/
+#define FD_MASKZERO(instr) ((instr)->evex & 0x80)
+/** Get rounding mode for EVEX-encoded instructions. See FdRoundControl. **/
+#define FD_ROUNDCONTROL(instr) ((FdRoundControl) (((instr)->evex & 0x70) >> 4))
 
 #ifdef __cplusplus
 }

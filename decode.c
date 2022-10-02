@@ -81,6 +81,8 @@ struct InstrDesc
 #define DESC_VEXREG_IDX(desc) ((((desc)->operand_indices >> 4) & 3) ^ 3)
 #define DESC_IMM_CONTROL(desc) (((desc)->operand_indices >> 12) & 0x7)
 #define DESC_IMM_IDX(desc) ((((desc)->operand_indices >> 6) & 3) ^ 3)
+#define DESC_EVEX_BCST(desc) (((desc)->operand_indices >> 8) & 1)
+#define DESC_EVEX_MASK(desc) (((desc)->operand_indices >> 9) & 1)
 #define DESC_ZEROREG_VAL(desc) (((desc)->operand_indices >> 10) & 1)
 #define DESC_LOCK(desc) (((desc)->operand_indices >> 11) & 1)
 #define DESC_VSIB(desc) (((desc)->operand_indices >> 15) & 1)
@@ -90,6 +92,8 @@ struct InstrDesc
 #define DESC_INSTR_WIDTH(desc) (((desc)->operand_sizes >> 15) & 1)
 #define DESC_MODRM(desc) (((desc)->reg_types >> 14) & 1)
 #define DESC_IGN66(desc) (((desc)->reg_types >> 15) & 1)
+#define DESC_EVEX_SAE(desc) (((desc)->reg_types >> 8) & 1)
+#define DESC_EVEX_ER(desc) (((desc)->reg_types >> 9) & 1)
 #define DESC_REGTY_MODRM(desc) (((desc)->reg_types >> 0) & 7)
 #define DESC_REGTY_MODREG(desc) (((desc)->reg_types >> 3) & 7)
 #define DESC_REGTY_VEXREG(desc) (((desc)->reg_types >> 6) & 3)
@@ -257,9 +261,12 @@ prefix_end:
             if (UNLIKELY(off + 3 >= len))
                 return FD_ERR_PARTIAL;
             byte = buffer[off + 3];
+            // prefix_evex is z:L'L/RC:b:V':aaa
             prefix_evex = byte | 0x08; // Ensure that prefix_evex is non-zero.
-            if (mode == DECODE_64) // V' ignored in 32-bit mode
+            if (mode == DECODE_64) // V' causes UD in 32-bit mode
                 vex_operand |= byte & 0x08 ? 0 : 0x10; // V'
+            else if (!(byte & 0x08))
+                return FD_ERR_UD;
             off += 4;
         }
         else // VEX
@@ -299,6 +306,9 @@ prefix_end:
         uint8_t index = 0;
         index |= prefix_rex & PREFIX_REXW ? (1 << 0) : 0;
         index |= prefix_rex & PREFIX_VEXL ? (1 << 1) : 0;
+        // When EVEX.L'L is the rounding mode, the instruction must not have
+        // L'L constraints.
+        index |= (prefix_evex >> 4) & 6;
         table_idx = table_walk(table_idx, index, &kind);
     }
 
@@ -327,6 +337,39 @@ prefix_end:
         return FD_ERR_PARTIAL;
     unsigned op_byte = buffer[off - 1] | (!DESC_MODRM(desc) ? 0xc0 : 0);
 
+    unsigned vexl = !!(prefix_rex & PREFIX_VEXL);
+    if (UNLIKELY(prefix_evex)) {
+        // VSIB inst (gather/scatter) without mask register or w/EVEX.z is UD
+        if (DESC_VSIB(desc) && (!(prefix_evex & 0x07) || (prefix_evex & 0x80)))
+            return FD_ERR_UD;
+        // Inst doesn't support masking, so EVEX.z or EVEX.aaa is UD
+        if (!DESC_EVEX_MASK(desc) && (prefix_evex & 0x87))
+            return FD_ERR_UD;
+
+        vexl = (prefix_evex >> 5) & 3;
+        // Cases for SAE/RC (reg operands only):
+        //  - ER supported -> all ok
+        //  - SAE supported -> assume L'L is RC, but ignored (undocumented)
+        //  - Neither supported -> b == 0
+        if ((prefix_evex & 0x10) && (op_byte & 0xc0) == 0xc0) { // EVEX.b+reg
+            if (!DESC_EVEX_SAE(desc))
+                return FD_ERR_UD;
+            vexl = 2;
+            if (DESC_EVEX_ER(desc))
+                instr->evex = prefix_evex;
+            else
+                instr->evex = (prefix_evex & 0x87) | 0x60; // set RC, clear B
+        } else {
+            if (UNLIKELY(vexl == 3)) // EVEX.L'L == 11b is UD
+                return FD_ERR_UD;
+            // Update V' to REX.W, s.t. broadcast size is exposed
+            unsigned rexw = prefix_rex & PREFIX_REXW ? 0x08 : 0x00;
+            instr->evex = (prefix_evex & 0x87) | rexw;
+        }
+    } else {
+        instr->evex = 0;
+    }
+
     unsigned op_size;
     unsigned op_size_alt = 0;
     if (!(DESC_OPSIZE(desc) & 4)) {
@@ -340,7 +383,7 @@ prefix_end:
         else
             op_size = UNLIKELY(prefix_66 && !DESC_IGN66(desc)) ? 2 : 3;
     } else {
-        op_size = 5 + !!(prefix_rex & PREFIX_VEXL);
+        op_size = 5 + vexl;
         op_size_alt = op_size - (DESC_OPSIZE(desc) & 3);
     }
 
@@ -378,8 +421,14 @@ prefix_end:
         op_modreg->misc = (0350761 >> (3 * reg_ty)) & 0x7;
         if (LIKELY(!(reg_ty & 4)))
             reg_idx += prefix_rex & PREFIX_REXR ? 8 : 0;
-        // TODO-EVEX/64-bit: UD if PREFIX_REXR and misc == FD_RT_MASK
-        // TODO-EVEX/64-bit: UD if PREFIX_EVEXR2 and misc != FD_RT_VEC, otw. +16
+        if (reg_ty == 2 && reg_idx >= 8) // REXR can't be set in 32-bit mode
+            return FD_ERR_UD;
+        if (reg_ty == 2 && (prefix_evex & 0x80)) // EVEX.z with mask as dest
+            return FD_ERR_UD;
+        if (reg_ty == 1) // PREFIX_REXRR ignored above in 32-bit mode
+            reg_idx += prefix_rex & PREFIX_REXRR ? 16 : 0;
+        else if (prefix_rex & PREFIX_REXRR)
+            return FD_ERR_UD;
         op_modreg->type = FD_OT_REG;
         op_modreg->size = operand_sizes[(desc->operand_sizes >> 2) & 3];
         op_modreg->reg = reg_idx;
@@ -399,7 +448,8 @@ prefix_end:
             op_modrm->misc = (07450061 >> (3 * reg_ty)) & 0x7;
             if (LIKELY(!(reg_ty & 4)))
                 reg_idx += prefix_rex & PREFIX_REXB ? 8 : 0;
-            // TODO-EVEX/64-bit: Add PREFIX_REXX (+16) if FD_RT_VEC, ignore otw.
+            if (prefix_evex && reg_ty == 1) // vector registers only
+                reg_idx += prefix_rex & PREFIX_REXX ? 16 : 0;
             op_modrm->type = FD_OT_REG;
             op_modrm->reg = reg_idx;
         }
@@ -418,9 +468,12 @@ prefix_end:
                 unsigned idx = (sib & 0x38) >> 3;
                 idx += prefix_rex & PREFIX_REXX ? 8 : 0;
                 base = sib & 0x07;
-                // TODO-EVEX/64-bit: respect EVEX.V' as extra bit
                 if (!vsib && idx == 4)
                     idx = FD_REG_NONE;
+                if (vsib) {
+                    idx |= vex_operand & 0x10;
+                    vex_operand &= 0xf;
+                }
                 op_modrm->misc = scale | idx;
             }
             else
@@ -431,7 +484,20 @@ prefix_end:
                 op_modrm->misc = FD_REG_NONE;
             }
 
-            op_modrm->type = FD_OT_MEM;
+            // EVEX.z for memory destination operand is UD.
+            if (DESC_MODRM_IDX(desc) == 0 && (prefix_evex & 0x80))
+                return FD_ERR_UD;
+
+            // EVEX.b for memory-operand without broadcast support is UD.
+            unsigned scale = op_modrm->size - 1;
+            if (UNLIKELY(prefix_evex & 0x10)) {
+                if (UNLIKELY(!DESC_EVEX_BCST(desc)))
+                    return FD_ERR_UD;
+                scale = prefix_rex & PREFIX_REXW ? 3 : 2;
+                op_modrm->type = FD_OT_MEMBCST;
+            } else {
+                op_modrm->type = FD_OT_MEM;
+            }
 
             // RIP-relative addressing only if SIB-byte is absent
             if (mod == 0 && rm == 5 && mode == DECODE_64)
@@ -445,8 +511,9 @@ prefix_end:
             {
                 if (UNLIKELY(off + 1 > len))
                     return FD_ERR_PARTIAL;
-                // TODO-EVEX: scale by tupletype.
                 instr->disp = (int8_t) LOAD_LE_1(&buffer[off]);
+                if (prefix_evex)
+                    instr->disp <<= scale;
                 off += 1;
             }
             else if (mod == 0x80 || (mod == 0 && base == 5))
@@ -462,7 +529,6 @@ prefix_end:
             }
         }
     }
-skip_modrm:
 
     if (UNLIKELY(DESC_HAS_VEXREG(desc)))
     {
@@ -472,12 +538,15 @@ skip_modrm:
         operand->size = operand_sizes[(desc->operand_sizes >> 4) & 3];
         if (mode == DECODE_32)
             vex_operand &= 0x7;
-        // TODO-EVEX/64-bit: UD if FD_RT_MASK and vex_operand&8 != 0
-        // TODO-EVEX/64-bit: UD if not FD_RT_VEC and vex_operand&16 != 0
-        // Note: 32-bit will never UD here.
+        // Note: 32-bit will never UD here. EVEX.V' is caught above already.
+        // Note: UD if > 16 for non-VEC. No EVEX-encoded instruction uses
+        // EVEX.vvvv to refer to non-vector registers. Verified in parseinstrs.
         operand->reg = vex_operand | DESC_ZEROREG_VAL(desc);
 
         unsigned reg_ty = DESC_REGTY_VEXREG(desc); // GPL VEC MSK FPU
+        // In 64-bit mode: UD if FD_RT_MASK and vex_operand&8 != 0
+        if (reg_ty == 2 && vex_operand >= 8)
+            return FD_ERR_UD;
         operand->misc = (04761 >> (3 * reg_ty)) & 0x7;
     }
     else if (vex_operand != 0)
@@ -615,6 +684,7 @@ skip_modrm:
             return FD_ERR_UD;
     }
 
+skip_modrm:
     if (UNLIKELY(prefix_lock)) {
         if (!DESC_LOCK(desc) || instr->operands[0].type != FD_OT_MEM)
             return FD_ERR_UD;

@@ -248,6 +248,20 @@ fd_mnemonic(char buf[DECLARE_RESTRICTED_ARRAY_SIZE(48)], const FdInstr* instr) {
         if (FD_OPSIZELG(instr) == 3)
             sizesuffix[0] = '6', sizesuffix[1] = '4', sizesuffixlen = 2;
         break;
+    case FDI_EVX_MOV_G2X:
+    case FDI_EVX_MOV_X2G:
+    case FDI_EVX_PEXTR:
+        sizesuffix[0] = "bwdq"[FD_OP_SIZELG(instr, 0)];
+        sizesuffixlen = 1;
+        break;
+    case FDI_EVX_PBROADCAST:
+        sizesuffix[0] = "bwdq"[FD_OP_SIZELG(instr, 1)];
+        sizesuffixlen = 1;
+        break;
+    case FDI_EVX_PINSR:
+        sizesuffix[0] = "bwdq"[FD_OP_SIZELG(instr, 2)];
+        sizesuffixlen = 1;
+        break;
     case FDI_RET:
     case FDI_ENTER:
     case FDI_LEAVE:
@@ -329,7 +343,7 @@ fd_format_impl(char buf[DECLARE_RESTRICTED_ARRAY_SIZE(128)], const FdInstr* inst
             unsigned type = FD_OP_REG_TYPE(instr, i);
             unsigned idx = FD_OP_REG(instr, i);
             buf = fd_strpcatreg(buf, type, idx, size);
-        } else if (op_type == FD_OT_MEM) {
+        } else if (op_type == FD_OT_MEM || op_type == FD_OT_MEMBCST) {
             unsigned idx_rt = FD_RT_GPL;
             unsigned idx_sz = FD_ADDRSIZELG(instr);
             switch (FD_TYPE(instr)) {
@@ -352,23 +366,51 @@ fd_format_impl(char buf[DECLARE_RESTRICTED_ARRAY_SIZE(128)], const FdInstr* inst
                 break;
             case FDI_VPGATHERQD:
             case FDI_VGATHERQPS:
+            case FDI_EVX_PGATHERQD:
+            case FDI_EVX_GATHERQPS:
                 idx_rt = FD_RT_VEC;
                 idx_sz = FD_OP_SIZELG(instr, 0) + 1;
                 break;
+            case FDI_EVX_PSCATTERQD:
+            case FDI_EVX_SCATTERQPS:
+                idx_rt = FD_RT_VEC;
+                idx_sz = FD_OP_SIZELG(instr, 1) + 1;
+                break;
             case FDI_VPGATHERDQ:
             case FDI_VGATHERDPD:
+            case FDI_EVX_PGATHERDQ:
+            case FDI_EVX_GATHERDPD:
                 idx_rt = FD_RT_VEC;
                 idx_sz = FD_OP_SIZELG(instr, 0) - 1;
+                break;
+            case FDI_EVX_PSCATTERDQ:
+            case FDI_EVX_SCATTERDPD:
+                idx_rt = FD_RT_VEC;
+                idx_sz = FD_OP_SIZELG(instr, 1) - 1;
                 break;
             case FDI_VPGATHERDD:
             case FDI_VPGATHERQQ:
             case FDI_VGATHERDPS:
             case FDI_VGATHERQPD:
+            case FDI_EVX_PGATHERDD:
+            case FDI_EVX_PGATHERQQ:
+            case FDI_EVX_GATHERDPS:
+            case FDI_EVX_GATHERQPD:
                 idx_rt = FD_RT_VEC;
                 idx_sz = FD_OP_SIZELG(instr, 0);
                 break;
+            case FDI_EVX_PSCATTERDD:
+            case FDI_EVX_PSCATTERQQ:
+            case FDI_EVX_SCATTERDPS:
+            case FDI_EVX_SCATTERQPD:
+                idx_rt = FD_RT_VEC;
+                idx_sz = FD_OP_SIZELG(instr, 1);
+                break;
             default: break;
             }
+
+            if (op_type == FD_OT_MEMBCST)
+                size = FD_OP_BCST64(instr, i) ? 3 : 2;
 
             const char* ptrsizes =
                 "\00               "
@@ -417,6 +459,14 @@ fd_format_impl(char buf[DECLARE_RESTRICTED_ARRAY_SIZE(128)], const FdInstr* inst
             if (disp || (!has_base && !has_idx))
                 buf = fd_strpcatnum(buf, disp);
             *buf++ = ']';
+
+            if (UNLIKELY(op_type == FD_OT_MEMBCST)) {
+                // {1toX}, X = FD_OP_SIZE(instr, i) / size (=> 2/4/8/16)
+                unsigned bcstszidx = FD_OP_SIZE(instr, i) >> (FD_OP_BCST64(instr, i) + 1);
+                const char* bcstsizes = "\6{1to2} \6{1to4} \6{1to8} \0       \7{1to16}         ";
+                const char* bcstsize = bcstsizes + bcstszidx;
+                buf = fd_strpcat(buf, (struct FdStr) { bcstsize+1, *bcstsize });
+            }
         } else if (op_type == FD_OT_IMM || op_type == FD_OT_OFF) {
             size_t immediate = FD_OP_IMM(instr, i);
             // Some instructions have actually two immediate operands which are
@@ -453,6 +503,24 @@ fd_format_impl(char buf[DECLARE_RESTRICTED_ARRAY_SIZE(128)], const FdInstr* inst
             else if (size == 2)
                 immediate &= 0xffffffff;
             buf = fd_strpcatnum(buf, immediate);
+        }
+
+        if (i == 0 && FD_MASKREG(instr)) {
+            *buf++ = '{';
+            buf = fd_strpcatreg(buf, FD_RT_MASK, FD_MASKREG(instr), 0);
+            *buf++ = '}';
+            if (FD_MASKZERO(instr))
+                buf = fd_strpcat(buf, fd_stre("{z}"));
+        }
+    }
+    if (UNLIKELY(FD_ROUNDCONTROL(instr) != FD_RC_MXCSR)) {
+        switch (FD_ROUNDCONTROL(instr)) {
+        case FD_RC_RN: buf = fd_strpcat(buf, fd_stre(", {rn-sae}")); break;
+        case FD_RC_RD: buf = fd_strpcat(buf, fd_stre(", {rd-sae}")); break;
+        case FD_RC_RU: buf = fd_strpcat(buf, fd_stre(", {ru-sae}")); break;
+        case FD_RC_RZ: buf = fd_strpcat(buf, fd_stre(", {rz-sae}")); break;
+        case FD_RC_SAE: buf = fd_strpcat(buf, fd_stre(", {sae}")); break;
+        default: break; // should not happen
         }
     }
     *buf++ = '\0';
