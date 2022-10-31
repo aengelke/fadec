@@ -382,7 +382,7 @@ fd_format_impl(char buf[restrict static 128], const FdInstr* instr, uint64_t add
             if (disp && (has_base || has_idx)) {
                 *buf++ = (int64_t) disp < 0 ? '-' : '+';
                 if ((int64_t) disp < 0)
-                    disp = -disp;
+                    disp = -(int64_t) disp;
             }
             if (FD_ADDRSIZE(instr) == 2)
                 disp &= 0xffff;
