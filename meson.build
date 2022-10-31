@@ -51,6 +51,22 @@ if get_option('with_encode2')
   sources += files('encode2.c')
 endif
 
+if cc.get_argument_syntax() == 'msvc'
+  # Disable some warnings to align warnings with GCC and Clang:
+  add_project_arguments('-D_CRT_SECURE_NO_WARNINGS',
+                        '/wd4018', # - Signed/unsigned comparison
+                        '/wd4146', # - Unary minus operator applied to unsigned
+                                   #   type, result still unsigned
+                        '/wd4244', # - Possible loss of data in conversion
+                                   #   from integer type to smaller integer type
+                        '/wd4245', # - Signed/unsigned assignment
+                        '/wd4267', # - Possible loss of data in conversion
+                                   #   from size_t to smaller type
+                        '/wd4310', # - Possible loss of data in conversion
+                                   #   of constant value to smaller type
+                        language: 'c')
+endif
+
 generate_args = []
 if get_option('archmode') != 'only64'
   generate_args += ['--32']

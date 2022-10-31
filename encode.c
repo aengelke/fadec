@@ -6,8 +6,13 @@
 #include <fadec-enc.h>
 
 
+#ifdef __GNUC__
 #define LIKELY(x) __builtin_expect((x), 1)
 #define UNLIKELY(x) __builtin_expect((x), 0)
+#else
+#define LIKELY(x) (x)
+#define UNLIKELY(x) (x)
+#endif
 
 enum {
     // 16:17 = escape

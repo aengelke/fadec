@@ -6,8 +6,13 @@
 #include <fadec.h>
 
 
+#ifdef __GNUC__
 #define LIKELY(x) __builtin_expect((x), 1)
 #define UNLIKELY(x) __builtin_expect((x), 0)
+#else
+#define LIKELY(x) (x)
+#define UNLIKELY(x) (x)
+#endif
 
 // Defines FD_TABLE_OFFSET_32 and FD_TABLE_OFFSET_64, if available
 #define FD_DECODE_TABLE_DEFINES
@@ -33,7 +38,7 @@ typedef enum DecodeMode DecodeMode;
 
 static unsigned
 table_walk(unsigned cur_idx, unsigned entry_idx, unsigned* out_kind) {
-    static __attribute__((aligned(16))) const uint16_t _decode_table[] = {
+    static _Alignas(16) const uint16_t _decode_table[] = {
 #define FD_DECODE_TABLE_DATA
 #include <fadec-decode-private.inc>
 #undef FD_DECODE_TABLE_DATA
@@ -65,7 +70,7 @@ struct InstrDesc
     uint16_t operand_indices;
     uint16_t operand_sizes;
     uint16_t reg_types;
-} __attribute__((packed));
+};
 
 #define DESC_HAS_MODRM(desc) (((desc)->operand_indices & (3 << 0)) != 0)
 #define DESC_MODRM_IDX(desc) ((((desc)->operand_indices >> 0) & 3) ^ 3)
@@ -271,7 +276,7 @@ prefix_end:
     if (UNLIKELY(kind != ENTRY_INSTR))
         return kind == 0 ? FD_ERR_UD : FD_ERR_PARTIAL;
 
-    static __attribute__((aligned(16))) const struct InstrDesc descs[] = {
+    static _Alignas(16) const struct InstrDesc descs[] = {
 #define FD_DECODE_TABLE_DESCS
 #include <fadec-decode-private.inc>
 #undef FD_DECODE_TABLE_DESCS
@@ -301,7 +306,8 @@ prefix_end:
     if (prefix_rex & PREFIX_VEXL)
         vec_size = 32;
 
-    __builtin_memset(instr->operands, 0, sizeof(instr->operands));
+    for (unsigned i = 0; i < sizeof(instr->operands) / sizeof(FdOp); i++)
+        instr->operands[i] = (FdOp) {0};
 
     if (DESC_MODRM(desc) && UNLIKELY(off++ >= len))
         return FD_ERR_PARTIAL;

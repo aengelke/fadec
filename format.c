@@ -2,12 +2,24 @@
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
+#ifdef _MSC_VER
+#include <intrin.h>
+#endif
 
 #include <fadec.h>
 
 
+#ifdef __GNUC__
 #define LIKELY(x) __builtin_expect((x), 1)
 #define UNLIKELY(x) __builtin_expect((x), 0)
+#define DECLARE_ARRAY_SIZE(n) static n
+#define DECLARE_RESTRICTED_ARRAY_SIZE(n) restrict static n
+#else
+#define LIKELY(x) (x)
+#define UNLIKELY(x) (x)
+#define DECLARE_ARRAY_SIZE(n) n
+#define DECLARE_RESTRICTED_ARRAY_SIZE(n) n
+#endif
 
 struct FdStr {
     const char* s;
@@ -27,7 +39,11 @@ fd_strplcpy(char* restrict dst, const char* src, size_t size) {
 
 static char*
 fd_strpcat(char* restrict dst, struct FdStr src) {
+#ifdef __GNUC__
     unsigned lim = __builtin_constant_p(src.sz) && src.sz <= 8 ? 8 : 16;
+#else
+    unsigned lim = 16;
+#endif
     for (unsigned i = 0; i < lim; i++)
         dst[i] = src.s[i];
     // __builtin_memcpy(dst, src.s, 16);
@@ -36,7 +52,24 @@ fd_strpcat(char* restrict dst, struct FdStr src) {
 
 static unsigned
 fd_clz64(uint64_t v) {
+#if defined(__GNUC__)
     return __builtin_clzl(v);
+#elif defined(_MSC_VER)
+    unsigned long index;
+
+#if INTPTR_MAX == INT64_MAX
+    _BitScanReverse64(&index, v);
+#else
+    if (_BitScanReverse(&index, v >> 32))
+        return 31 - index;
+
+    _BitScanReverse(&index, v & 0xffffffff);
+#endif
+
+    return 63 - index;
+#else
+#error Unsupported compiler.
+#endif
 }
 
 #if defined(__SSE2__)
@@ -44,7 +77,7 @@ fd_clz64(uint64_t v) {
 #endif
 
 static char*
-fd_strpcatnum(char dst[static 18], uint64_t val) {
+fd_strpcatnum(char dst[DECLARE_ARRAY_SIZE(18)], uint64_t val) {
     unsigned lz = fd_clz64(val|1);
     unsigned numbytes = 16 - (lz / 4);
 #if defined(__SSE2__)
@@ -132,7 +165,7 @@ fdi_name(FdInstrType ty) {
 }
 
 static char*
-fd_mnemonic(char buf[restrict static 48], const FdInstr* instr) {
+fd_mnemonic(char buf[DECLARE_RESTRICTED_ARRAY_SIZE(48)], const FdInstr* instr) {
 #define FD_DECODE_TABLE_STRTAB1
     static const char* mnemonic_str =
 #include <fadec-decode-private.inc>
@@ -281,7 +314,7 @@ fd_mnemonic(char buf[restrict static 48], const FdInstr* instr) {
 }
 
 static char*
-fd_format_impl(char buf[restrict static 128], const FdInstr* instr, uint64_t addr) {
+fd_format_impl(char buf[DECLARE_RESTRICTED_ARRAY_SIZE(128)], const FdInstr* instr, uint64_t addr) {
     buf = fd_mnemonic(buf, instr);
 
     for (int i = 0; i < 4; i++)
