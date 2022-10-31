@@ -4,3 +4,4 @@ option('with_decode', type: 'boolean', value: true)
 option('with_encode', type: 'boolean', value: true)
 # encode2 is off-by-default to reduce size and compile-time
 option('with_encode2', type: 'boolean', value: false)
+option('tests', type: 'boolean', value: true)

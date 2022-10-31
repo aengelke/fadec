@@ -80,11 +80,13 @@ fadec = declare_dependency(link_with: libfadec,
                            sources: tables)
 install_headers(headers)
 
-foreach component : components
-  test(component, executable('@0@-test'.format(component),
-                             '@0@-test.c'.format(component),
-                             dependencies: fadec))
-endforeach
+if get_option('tests')
+  foreach component : components
+    test(component, executable('@0@-test'.format(component),
+                               '@0@-test.c'.format(component),
+                               dependencies: fadec))
+  endforeach
+endif
 
 if meson.version().version_compare('>=0.54.0')
   meson.override_dependency('fadec', fadec)
