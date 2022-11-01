@@ -4,9 +4,9 @@ project('fadec', ['c'], default_options: ['warning_level=3', 'c_std=c11'],
 python3 = find_program('python3')
 
 # Check Python version
-py_version_res = run_command(python3, ['--version'])
+py_version_res = run_command(python3, ['--version'], check: true)
 py_version = py_version_res.stdout().split(' ')[1]
-if py_version_res.returncode() != 0 or not py_version.version_compare('>=3.6')
+if not py_version.version_compare('>=3.6')
   error('Python 3.6 required, got @0@'.format(py_version))
 endif
 
