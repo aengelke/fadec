@@ -358,9 +358,9 @@ prefix_end:
     {
         FdOp* op_modrm = &instr->operands[DESC_MODRM_IDX(desc)];
 
-        unsigned mod = (op_byte & 0xc0) >> 6;
+        unsigned mod = op_byte & 0xc0;
         unsigned rm = op_byte & 0x07;
-        if (mod == 3)
+        if (mod == 0xc0)
         {
             uint8_t reg_idx = rm;
             unsigned reg_ty = DESC_REGTY_MODRM(desc); // GPL VEC - - MMX FPU MSK
@@ -381,13 +381,13 @@ prefix_end:
                 if (UNLIKELY(off >= len))
                     return FD_ERR_PARTIAL;
                 uint8_t sib = buffer[off++];
-                unsigned scale = (sib & 0xc0) >> 6;
+                unsigned scale = sib & 0xc0;
                 unsigned idx = (sib & 0x38) >> 3;
                 idx += prefix_rex & PREFIX_REXX ? 8 : 0;
                 base = sib & 0x07;
                 if (!vsib && idx == 4)
                     idx = FD_REG_NONE;
-                op_modrm->misc = (scale << 6) | idx;
+                op_modrm->misc = scale | idx;
             }
             else
             {
@@ -407,14 +407,14 @@ prefix_end:
             else
                 op_modrm->reg = base + (prefix_rex & PREFIX_REXB ? 8 : 0);
 
-            if (mod == 1)
+            if (mod == 0x40)
             {
                 if (UNLIKELY(off + 1 > len))
                     return FD_ERR_PARTIAL;
                 instr->disp = (int8_t) LOAD_LE_1(&buffer[off]);
                 off += 1;
             }
-            else if (mod == 2 || (mod == 0 && base == 5))
+            else if (mod == 0x80 || (mod == 0 && base == 5))
             {
                 if (UNLIKELY(off + 4 > len))
                     return FD_ERR_PARTIAL;
