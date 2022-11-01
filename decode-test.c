@@ -338,6 +338,8 @@ main(int argc, char** argv)
 
     TEST("\x66\x0f\xbe\xc2", "movsx ax, dl");
     TEST("\x0f\xbe\xc2", "movsx eax, dl");
+    TEST("\x0f\xbe\xc4", "movsx eax, ah");
+    TEST64("\x40\x0f\xbe\xc4", "movsx eax, spl");
     TEST("\x0f\xbf\xc2", "movsx eax, dx");
     TEST64("\x48\x0f\xbf\xc2", "movsx rax, dx");
     TEST64("\x48\x63\xc2", "movsx rax, edx");
