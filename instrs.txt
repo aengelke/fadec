@@ -880,10 +880,15 @@ NP.0f38f9/m            MR   My  Gy  -   -   MOVDIRI             F=MOVDIRI
 66.0f38df              RM   Vdq Wdq -   -   AESDECLAST          F=AESNI
 66.0f3adf              RMI  Vdq Wdq Ib  -   AESKEYGENASSIST     F=AESNI
 VEX.66.L0.0f38db       RM   Vdq Wdq -   -   VAESIMC             F=AESNI,AVX
-VEX.66.L0.0f38dc       RVM  Vdq Hdq Wdq -   VAESENC             F=AESNI,AVX
-VEX.66.L0.0f38dd       RVM  Vdq Hdq Wdq -   VAESENCLAST         F=AESNI,AVX
-VEX.66.L0.0f38de       RVM  Vdq Hdq Wdq -   VAESDEC             F=AESNI,AVX
-VEX.66.L0.0f38df       RVM  Vdq Hdq Wdq -   VAESDECLAST         F=AESNI,AVX
+# 256-bit encodings require VAES.
+VEX.66.L0.0f38dc       RVM  Vx  Hx  Wx  -   VAESENC             F=AESNI,AVX
+VEX.66.L1.0f38dc       RVM  Vx  Hx  Wx  -   VAESENC             F=AESNI,VAES,AVX
+VEX.66.L0.0f38dd       RVM  Vx  Hx  Wx  -   VAESENCLAST         F=AESNI,AVX
+VEX.66.L1.0f38dd       RVM  Vx  Hx  Wx  -   VAESENCLAST         F=AESNI,VAES,AVX
+VEX.66.L0.0f38de       RVM  Vx  Hx  Wx  -   VAESDEC             F=AESNI,AVX
+VEX.66.L1.0f38de       RVM  Vx  Hx  Wx  -   VAESDEC             F=AESNI,VAES,AVX
+VEX.66.L0.0f38df       RVM  Vx  Hx  Wx  -   VAESDECLAST         F=AESNI,AVX
+VEX.66.L1.0f38df       RVM  Vx  Hx  Wx  -   VAESDECLAST         F=AESNI,VAES,AVX
 VEX.66.L0.0f3adf       RMI  Vdq Wdq Ib  -   VAESKEYGENASSIST    F=AESNI,AVX
 #
 # AVX

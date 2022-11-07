@@ -255,6 +255,17 @@ TEST("\xc4\xe2\xf1\x91\x04\xe7", VPGATHERQQ128rmr, 0, FE_XMM0, FE_MEMV(FE_DI, 8,
 TEST("\xc4\xe2\xf5\x91\x04\xff", VPGATHERQQ256rmr, 0, FE_XMM0, FE_MEMV(FE_DI, 8, FE_XMM7, 0), FE_XMM1);
 TEST("\xc4\xe2\xf5\x91\x04\xe7", VPGATHERQQ256rmr, 0, FE_XMM0, FE_MEMV(FE_DI, 8, FE_XMM4, 0), FE_XMM1);
 
+TEST("\xc4\xe2\x79\xdb\xc1", VAESIMCrr, 0, FE_XMM0, FE_XMM1);
+TEST("\xc4\xe3\x79\xdf\xc1\xae", VAESKEYGENASSISTrri, 0, FE_XMM0, FE_XMM1, (int8_t) 0xae);
+TEST("\xc4\xe2\x71\xdc\xc2", VAESENC128rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2);
+TEST("\xc4\xe2\x75\xdc\xc2", VAESENC256rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2);
+TEST("\xc4\xe2\x71\xdd\xc2", VAESENCLAST128rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2);
+TEST("\xc4\xe2\x75\xdd\xc2", VAESENCLAST256rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2);
+TEST("\xc4\xe2\x71\xde\xc2", VAESDEC128rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2);
+TEST("\xc4\xe2\x75\xde\xc2", VAESDEC256rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2);
+TEST("\xc4\xe2\x71\xdf\xc2", VAESDECLAST128rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2);
+TEST("\xc4\xe2\x75\xdf\xc2", VAESDECLAST256rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2);
+
 // Test ModRM encoding
 TEST("\x01\x00", ADD32mr, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0), FE_AX);
 TEST("\x01\x04\x24", ADD32mr, 0, FE_MEM(FE_SP, 0, FE_NOREG, 0), FE_AX);

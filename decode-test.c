@@ -498,6 +498,19 @@ main(int argc, char** argv)
     TEST32("\xc4\xe3\x75\x4b\xc2\x80", "vblendvpd ymm0, ymm1, ymm2, ymm0"); // Bit 7 is ignored
     TEST64("\xc4\xe3\x75\x4b\xc2\x80", "vblendvpd ymm0, ymm1, ymm2, ymm8");
 
+    TEST("\xc4\xe2\x79\xdb\xc1", "vaesimc xmm0, xmm1");
+    TEST("\xc4\xe2\x7d\xdb\xc1", "UD"); // VEX.L != 0
+    TEST("\xc4\xe3\x79\xdf\xc1\xae", "vaeskeygenassist xmm0, xmm1, 0xae");
+    TEST("\xc4\xe3\x7d\xdf\xc1\xae", "UD"); // VEX.L != 0
+    TEST("\xc4\xe2\x71\xdc\xc2", "vaesenc xmm0, xmm1, xmm2");
+    TEST("\xc4\xe2\x75\xdc\xc2", "vaesenc ymm0, ymm1, ymm2");
+    TEST("\xc4\xe2\x71\xdd\xc2", "vaesenclast xmm0, xmm1, xmm2");
+    TEST("\xc4\xe2\x75\xdd\xc2", "vaesenclast ymm0, ymm1, ymm2");
+    TEST("\xc4\xe2\x71\xde\xc2", "vaesdec xmm0, xmm1, xmm2");
+    TEST("\xc4\xe2\x75\xde\xc2", "vaesdec ymm0, ymm1, ymm2");
+    TEST("\xc4\xe2\x71\xdf\xc2", "vaesdeclast xmm0, xmm1, xmm2");
+    TEST("\xc4\xe2\x75\xdf\xc2", "vaesdeclast ymm0, ymm1, ymm2");
+
     TEST("\xc4\xe2\x71\x92\xc0", "UD"); // Must have memory operand
     TEST("\xc4\xe2\x71\x92\x00", "UD"); // Must have SIB byte
     TEST("\xc4\xe2\x71\x92\x05\x00\x00\x00\x00", "UD"); // Must have SIB byte
