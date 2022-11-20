@@ -78,11 +78,9 @@ struct InstrDesc
 #define DESC_MODREG_IDX(desc) ((((desc)->operand_indices >> 2) & 3) ^ 3)
 #define DESC_HAS_VEXREG(desc) (((desc)->operand_indices & (3 << 4)) != 0)
 #define DESC_VEXREG_IDX(desc) ((((desc)->operand_indices >> 4) & 3) ^ 3)
-#define DESC_HAS_IMPLICIT(desc) (((desc)->operand_indices & (3 << 6)) != 0)
-#define DESC_IMPLICIT_IDX(desc) ((((desc)->operand_indices >> 6) & 3) ^ 3)
 #define DESC_IMM_CONTROL(desc) (((desc)->operand_indices >> 12) & 0x7)
-#define DESC_IMM_IDX(desc) ((((desc)->operand_indices >> 8) & 3) ^ 3)
-#define DESC_IMPLICIT_VAL(desc) (((desc)->operand_indices >> 10) & 1)
+#define DESC_IMM_IDX(desc) ((((desc)->operand_indices >> 6) & 3) ^ 3)
+#define DESC_ZEROREG_VAL(desc) (((desc)->operand_indices >> 10) & 1)
 #define DESC_LOCK(desc) (((desc)->operand_indices >> 11) & 1)
 #define DESC_VSIB(desc) (((desc)->operand_indices >> 15) & 1)
 #define DESC_OPSIZE(desc) (((desc)->operand_sizes >> 8) & 3)
@@ -94,7 +92,6 @@ struct InstrDesc
 #define DESC_REGTY_MODRM(desc) (((desc)->reg_types >> 0) & 7)
 #define DESC_REGTY_MODREG(desc) (((desc)->reg_types >> 3) & 7)
 #define DESC_REGTY_VEXREG(desc) (((desc)->reg_types >> 6) & 3)
-#define DESC_REGTY_ZEROREG(desc) (((desc)->reg_types >> 8) & 3)
 
 int
 fd_decode(const uint8_t* buffer, size_t len_sz, int mode_int, uintptr_t address,
@@ -333,15 +330,6 @@ prefix_end:
         goto skip_modrm;
     }
 
-    if (UNLIKELY(DESC_HAS_IMPLICIT(desc)))
-    {
-        FdOp* operand = &instr->operands[DESC_IMPLICIT_IDX(desc)];
-        operand->type = FD_OT_REG;
-        operand->reg = DESC_IMPLICIT_VAL(desc);
-        unsigned reg_ty = DESC_REGTY_ZEROREG(desc); // GPL VEC FPU
-        operand->misc = (0461 >> (3 * reg_ty)) & 0x7;
-    }
-
     if (DESC_HAS_MODREG(desc))
     {
         FdOp* op_modreg = &instr->operands[DESC_MODREG_IDX(desc)];
@@ -431,14 +419,15 @@ skip_modrm:
 
     if (UNLIKELY(DESC_HAS_VEXREG(desc)))
     {
+        // Without VEX prefix, this encodes an implicit register
         FdOp* operand = &instr->operands[DESC_VEXREG_IDX(desc)];
         operand->type = FD_OT_REG;
         if (mode == DECODE_32)
             vex_operand &= 0x7;
-        operand->reg = vex_operand;
+        operand->reg = vex_operand | DESC_ZEROREG_VAL(desc);
 
-        unsigned reg_ty = DESC_REGTY_VEXREG(desc); // GPL VEC MSK
-        operand->misc = (0761 >> (3 * reg_ty)) & 0x7;
+        unsigned reg_ty = DESC_REGTY_VEXREG(desc); // GPL VEC MSK FPU
+        operand->misc = (04761 >> (3 * reg_ty)) & 0x7;
     }
     else if (vex_operand != 0)
     {

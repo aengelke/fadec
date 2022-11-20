@@ -11,9 +11,9 @@ from typing import NamedTuple, FrozenSet, List, Tuple, Union, Optional, ByteStri
 INSTR_FLAGS_FIELDS, INSTR_FLAGS_SIZES = zip(*[
     ("modrm_idx", 2),
     ("modreg_idx", 2),
-    ("vexreg_idx", 2),
-    ("zeroreg_idx", 2),
+    ("vexreg_idx", 2), # note: vexreg w/o vex prefix is zeroreg_val
     ("imm_idx", 2),
+    ("unused1", 2),
     ("zeroreg_val", 1),
     ("lock", 1),
     ("imm_control", 3),
@@ -29,8 +29,7 @@ INSTR_FLAGS_FIELDS, INSTR_FLAGS_SIZES = zip(*[
     ("modrm_ty", 3),
     ("modreg_ty", 3),
     ("vexreg_ty", 2),
-    ("zeroreg_ty", 2),
-    ("unused", 4),
+    ("unused", 6),
     ("modrm", 1),
     ("ign66", 1),
 ][::-1])
@@ -49,25 +48,25 @@ ENCODINGS = {
     "M": InstrFlags(modrm=1, modrm_idx=0^3),
     "M1": InstrFlags(modrm=1, modrm_idx=0^3, imm_idx=1^3, imm_control=1),
     "MI": InstrFlags(modrm=1, modrm_idx=0^3, imm_idx=1^3, imm_control=4),
-    "MC": InstrFlags(modrm=1, modrm_idx=0^3, zeroreg_idx=1^3, zeroreg_val=1),
+    "MC": InstrFlags(modrm=1, modrm_idx=0^3, vexreg_idx=1^3, zeroreg_val=1),
     "MR": InstrFlags(modrm=1, modrm_idx=0^3, modreg_idx=1^3),
     "RM": InstrFlags(modrm=1, modrm_idx=1^3, modreg_idx=0^3),
-    "RMA": InstrFlags(modrm=1, modrm_idx=1^3, modreg_idx=0^3, zeroreg_idx=2^3),
+    "RMA": InstrFlags(modrm=1, modrm_idx=1^3, modreg_idx=0^3, vexreg_idx=2^3),
     "MRI": InstrFlags(modrm=1, modrm_idx=0^3, modreg_idx=1^3, imm_idx=2^3, imm_control=4),
     "RMI": InstrFlags(modrm=1, modrm_idx=1^3, modreg_idx=0^3, imm_idx=2^3, imm_control=4),
-    "MRC": InstrFlags(modrm=1, modrm_idx=0^3, modreg_idx=1^3, zeroreg_idx=2^3, zeroreg_val=1),
-    "AM": InstrFlags(modrm=1, modrm_idx=1^3, zeroreg_idx=0^3),
-    "MA": InstrFlags(modrm=1, modrm_idx=0^3, zeroreg_idx=1^3),
+    "MRC": InstrFlags(modrm=1, modrm_idx=0^3, modreg_idx=1^3, vexreg_idx=2^3, zeroreg_val=1),
+    "AM": InstrFlags(modrm=1, modrm_idx=1^3, vexreg_idx=0^3),
+    "MA": InstrFlags(modrm=1, modrm_idx=0^3, vexreg_idx=1^3),
     "I": InstrFlags(imm_idx=0^3, imm_control=4),
-    "IA": InstrFlags(zeroreg_idx=0^3, imm_idx=1^3, imm_control=4),
+    "IA": InstrFlags(vexreg_idx=0^3, imm_idx=1^3, imm_control=4),
     "O": InstrFlags(modrm_idx=0^3),
     "OI": InstrFlags(modrm_idx=0^3, imm_idx=1^3, imm_control=4),
-    "OA": InstrFlags(modrm_idx=0^3, zeroreg_idx=1^3),
+    "OA": InstrFlags(modrm_idx=0^3, vexreg_idx=1^3),
     "S": InstrFlags(modreg_idx=0^3), # segment register in bits 3,4,5
-    "A": InstrFlags(zeroreg_idx=0^3),
+    "A": InstrFlags(vexreg_idx=0^3),
     "D": InstrFlags(imm_idx=0^3, imm_control=6),
-    "FD": InstrFlags(zeroreg_idx=0^3, imm_idx=1^3, imm_control=2),
-    "TD": InstrFlags(zeroreg_idx=1^3, imm_idx=0^3, imm_control=2),
+    "FD": InstrFlags(vexreg_idx=0^3, imm_idx=1^3, imm_control=2),
+    "TD": InstrFlags(vexreg_idx=1^3, imm_idx=0^3, imm_control=2),
 
     "RVM": InstrFlags(modrm=1, modrm_idx=2^3, modreg_idx=0^3, vexreg_idx=1^3),
     "RVMI": InstrFlags(modrm=1, modrm_idx=2^3, modreg_idx=0^3, vexreg_idx=1^3, imm_idx=3^3, imm_control=4),
@@ -77,7 +76,7 @@ ENCODINGS = {
     "VMI": InstrFlags(modrm=1, modrm_idx=1^3, vexreg_idx=0^3, imm_idx=2^3, imm_control=4),
     "MVR": InstrFlags(modrm=1, modrm_idx=0^3, modreg_idx=2^3, vexreg_idx=1^3),
 }
-ENCODING_OPTYS = ["modrm", "modreg", "vexreg", "zeroreg", "imm"]
+ENCODING_OPTYS = ["modrm", "modreg", "vexreg", "imm"]
 ENCODING_OPORDER = { enc: sorted(ENCODING_OPTYS, key=lambda ty: getattr(ENCODINGS[enc], ty+"_idx")^3) for enc in ENCODINGS}
 
 OPKIND_CANONICALIZE = {
@@ -164,8 +163,7 @@ class InstrDesc(NamedTuple):
     OPKIND_REGTYS_MODRM = { "GP": 0, "XMM": 1, "MMX": 4, "FPU": 5, "MASK": 6,  }
     OPKIND_REGTYS_MODREG = { "GP": 0, "XMM": 1, "MASK": 2, "MMX": 4, "SEG": 5,
                              "CR": 0, "DR": 0 } # CR/DR handled in code.
-    OPKIND_REGTYS_VEXREG = { "GP": 0, "XMM": 1, "MASK": 2 }
-    OPKIND_REGTYS_ZEROREG = { "GP": 0, "XMM": 1, "FPU": 2 }
+    OPKIND_REGTYS_VEXREG = { "GP": 0, "XMM": 1, "MASK": 2, "FPU": 3 } # also zeroreg
     OPKIND_REGTYS_ENC = {"SEG": 3, "FPU": 4, "MMX": 5, "XMM": 6, "BND": 8,
                          "CR": 9, "DR": 10}
     OPKIND_SIZES = {
@@ -203,7 +201,6 @@ class InstrDesc(NamedTuple):
         if flags.modrm_idx:   optypes[flags.modrm_idx^3] = "rM"[flags.modrm]
         if flags.modreg_idx:  optypes[flags.modreg_idx^3] = "r"
         if flags.vexreg_idx:  optypes[flags.vexreg_idx^3] = "r"
-        if flags.zeroreg_idx: optypes[flags.zeroreg_idx^3] = "r"
         if flags.imm_control: optypes[flags.imm_idx^3] = " iariioo"[flags.imm_control]
         return "".join(optypes)
 
@@ -252,8 +249,6 @@ class InstrDesc(NamedTuple):
                 extraflags["modreg_ty"] = self.OPKIND_REGTYS_MODREG[opkind.kind]
             elif opname == "vexreg":
                 extraflags["vexreg_ty"] = self.OPKIND_REGTYS_VEXREG[opkind.kind]
-            elif opname == "zeroreg":
-                extraflags["zeroreg_ty"] = self.OPKIND_REGTYS_ZEROREG[opkind.kind]
             else:
                 if opkind.kind not in ("IMM", "MEM", "XMM"):
                     raise Exception("invalid regty for op 3, must be VEC")
@@ -769,8 +764,8 @@ def encode2_table(entries, args):
                 # XCHG eax, eax must not be encoded as 90 -- that'd be NOP.
                 code += f"  if (op_reg_idx(op0)==0&&op_reg_idx(op1)==0) goto next{i};\n"
                 neednext = True
-            if flags.zeroreg_idx:
-                code += f"  if (op_reg_idx(op{flags.zeroreg_idx^3})!={flags.zeroreg_val}) goto next{i};\n"
+            if flags.vexreg_idx and not opcode.vex: # vexreg w/o vex is zeroreg
+                code += f"  if (op_reg_idx(op{flags.vexreg_idx^3})!={flags.zeroreg_val}) goto next{i};\n"
                 neednext = True
             if flags.imm_control:
                 if flags.imm_control != 3:
