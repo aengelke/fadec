@@ -178,9 +178,14 @@ const char* fdi_name(FdInstrType ty);
 #define FD_SEGMENT(instr) ((FdReg) (instr)->segment)
 /** Gets the address size attribute of the instruction in bytes. **/
 #define FD_ADDRSIZE(instr) (1 << (instr)->addrsz)
+/** Get the logarithmic address size; FD_ADDRSIZE == 1 << FD_ADDRSIZELG **/
+#define FD_ADDRSIZELG(instr) ((instr)->addrsz)
 /** Gets the operation width in bytes of the instruction if this is not encoded
  * in the operands, for example for the string instruction (e.g. MOVS). **/
 #define FD_OPSIZE(instr) (1 << (instr)->operandsz)
+/** Get the logarithmic operand size; FD_OPSIZE == 1 << FD_OPSIZELG iff
+ * FD_OPSIZE is valid. **/
+#define FD_OPSIZELG(instr) ((instr)->operandsz)
 /** Indicates whether the instruction was encoded with a REP prefix. Needed for:
  * (1) Handling the instructions MOVS, STOS, LODS, INS and OUTS properly.
  * (2) Handling the instructions SCAS and CMPS, for which this means REPZ. **/
@@ -202,6 +207,11 @@ const char* fdi_name(FdInstrType ty);
  *     a smaller part than specified here). The real operand size is always
  *     fully recoverable in combination with the instruction type. **/
 #define FD_OP_SIZE(instr,idx) (1 << (instr)->operands[idx].size >> 1)
+/** Get the logarithmic size of an operand; see FD_OP_SIZE for special cases.
+ * The following equality holds:  FD_OP_SIZE == 1 << (FD_OP_SIZELG + 1) >> 1
+ * Note that typically  FD_OP_SIZE == 1 << FD_OP_SIZELG  unless a zero-sized
+ * memory operand, FPU register, or mask register is involved.  **/
+#define FD_OP_SIZELG(instr,idx) ((instr)->operands[idx].size - 1)
 /** Gets the accessed register index of a register operand. Note that /only/ the
  * index is returned, no further interpretation of the index (which depends on
  * the instruction type) is done. The register type can be fetched using
