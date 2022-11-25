@@ -244,6 +244,17 @@ main(int argc, char** argv)
     TEST32("\x60", "pushad");
     TEST32("\x66\x60", "pushaw");
     TEST("\xb0\xf0", "mov al, 0xf0");
+    TEST("\xb1\xda", "mov cl, 0xda");
+    TEST("\xb2\xff", "mov dl, 0xff");
+    TEST("\xb3\x8d", "mov bl, 0x8d");
+    TEST("\xb4\x5e", "mov ah, 0x5e");
+    TEST64("\x40\xb4\x00", "mov spl, 0x0");
+    TEST("\xb5\x74", "mov ch, 0x74");
+    TEST64("\x40\xb5\xd0", "mov bpl, 0xd0");
+    TEST("\xb6\xe5", "mov dh, 0xe5");
+    TEST64("\x40\xb6\xf1", "mov sil, 0xf1");
+    TEST("\xb7\xe8", "mov bh, 0xe8");
+    TEST64("\x40\xb7\x31", "mov dil, 0x31");
     TEST("\x66\xb8\xf0\xf0", "mov ax, 0xf0f0");
     TEST("\xb8\xf0\xf0\xab\xff", "mov eax, 0xffabf0f0");
     TEST64("\x48\xb8\xf0\xf0\xab\xff\x00\x12\x12\xcd", "mov rax, 0xcd121200ffabf0f0");
@@ -360,6 +371,18 @@ main(int argc, char** argv)
     TEST64("\xc2\x00\x00", "ret 0x0");
     TEST64("\xc2\x0d\x00", "ret 0xd");
     TEST64("\xc2\x0d\xff", "ret 0xff0d");
+    TEST("\xca\x00\x00", "retfd 0x0");
+    TEST("\xca\x0d\x00", "retfd 0xd");
+    TEST("\xca\x0d\xff", "retfd 0xff0d");
+    TEST("\xcb", "retfd");
+    TEST("\x66\xca\x00\x00", "retfw 0x0");
+    TEST("\x66\xca\x0d\x00", "retfw 0xd");
+    TEST("\x66\xca\x0d\xff", "retfw 0xff0d");
+    TEST("\x66\xcb", "retfw");
+    TEST64("\x48\xca\x00\x00", "retfq 0x0");
+    TEST64("\x48\xca\x0d\x00", "retfq 0xd");
+    TEST64("\x48\xca\x0d\xff", "retfq 0xff0d");
+    TEST64("\x48\xcb", "retfq");
 
     // NFx/66+F2/F3 combinations
     TEST("\x0f\xc7\xf0", "rdrand eax");
@@ -582,6 +605,20 @@ main(int argc, char** argv)
     TEST64("\xe3\xfe", "jrcxz 0x0");
     TEST32("\x67\xe3\xfd", "jcxz 0x0");
     TEST64("\x67\xe3\xfd", "jecxz 0x0");
+    TEST32("\xff\x20", "jmp dword ptr [eax]");
+    TEST64("\xff\x20", "jmp qword ptr [rax]");
+    TEST32("\x66\xff\x20", "jmp word ptr [eax]");
+    TEST64("\x66\xff\x20", "jmp qword ptr [rax]");
+    TEST64("\x48\xff\x20", "jmp qword ptr [rax]");
+    TEST32("\xff\x28", "jmp far fword ptr [eax]");
+    TEST64("\xff\x28", "jmp far fword ptr [rax]");
+    TEST32("\x66\xff\x28", "jmp far dword ptr [eax]");
+    TEST64("\x66\xff\x28", "jmp far dword ptr [rax]");
+    TEST64("\x48\xff\x28", "jmp far tbyte ptr [rax]");
+    TEST32("\xea\x11\x22\x33\x44\x55\x66", "jmp far 0x6655:0x44332211");
+    TEST64("\xea\x11\x22\x33\x44\x55\x66", "UD");
+    TEST32("\x66\xea\x11\x22\x33\x44", "jmp far 0x4433:0x2211");
+    TEST64("\x66\xea\x11\x22\x33\x44", "UD");
     TEST32("\x66\x9a\x23\x01\x23\x00", "call far 0x23:0x123");
     TEST32("\x9a\x67\x45\x23\x01\x23\x00", "call far 0x23:0x1234567");
     TEST32("\x9a\xff\xff\xff\xff\xff\xff", "call far 0xffff:0xffffffff");
