@@ -177,10 +177,10 @@ const char* fdi_name(FdInstrType ty);
 /** Gets the specified segment override, or FD_REG_NONE for default segment. **/
 #define FD_SEGMENT(instr) ((FdReg) (instr)->segment)
 /** Gets the address size attribute of the instruction in bytes. **/
-#define FD_ADDRSIZE(instr) ((instr)->addrsz)
+#define FD_ADDRSIZE(instr) (1 << (instr)->addrsz)
 /** Gets the operation width in bytes of the instruction if this is not encoded
  * in the operands, for example for the string instruction (e.g. MOVS). **/
-#define FD_OPSIZE(instr) ((instr)->operandsz)
+#define FD_OPSIZE(instr) (1 << (instr)->operandsz)
 /** Indicates whether the instruction was encoded with a REP prefix. Needed for:
  * (1) Handling the instructions MOVS, STOS, LODS, INS and OUTS properly.
  * (2) Handling the instructions SCAS and CMPS, for which this means REPZ. **/
@@ -201,7 +201,7 @@ const char* fdi_name(FdInstrType ty);
  *     actually needed operand size (that is, an instruction may/must only use
  *     a smaller part than specified here). The real operand size is always
  *     fully recoverable in combination with the instruction type. **/
-#define FD_OP_SIZE(instr,idx) ((instr)->operands[idx].size)
+#define FD_OP_SIZE(instr,idx) (1 << (instr)->operands[idx].size >> 1)
 /** Gets the accessed register index of a register operand. Note that /only/ the
  * index is returned, no further interpretation of the index (which depends on
  * the instruction type) is done. The register type can be fetched using

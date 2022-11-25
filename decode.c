@@ -120,7 +120,7 @@ fd_decode(const uint8_t* buffer, size_t len_sz, int mode_int, uintptr_t address,
     unsigned prefix_rep = 0;
     bool prefix_lock = false;
     bool prefix_66 = false;
-    uint8_t addr_size = mode == DECODE_64 ? 8 : 4;
+    uint8_t addr_size = mode == DECODE_64 ? 3 : 2;
     unsigned prefix_rex = 0;
     int rex_off = -1;
     instr->segment = FD_REG_NONE;
@@ -140,7 +140,7 @@ fd_decode(const uint8_t* buffer, size_t len_sz, int mode_int, uintptr_t address,
             case 0x64: instr->segment = FD_REG_FS; break;
             case 0x65: instr->segment = FD_REG_GS; break;
             case 0x66: prefix_66 = true; break;
-            case 0x67: addr_size = 2; break;
+            case 0x67: addr_size = 1; break;
             case 0xf0: prefix_lock = true; break;
             case 0xf3: prefix_rep = 2; break;
             case 0xf2: prefix_rep = 3; break;
@@ -161,7 +161,7 @@ fd_decode(const uint8_t* buffer, size_t len_sz, int mode_int, uintptr_t address,
             case 0x64: instr->segment = FD_REG_FS; break;
             case 0x65: instr->segment = FD_REG_GS; break;
             case 0x66: prefix_66 = true; break;
-            case 0x67: addr_size = 4; break;
+            case 0x67: addr_size = 2; break;
             case 0xf0: prefix_lock = true; break;
             case 0xf3: prefix_rep = 2; break;
             case 0xf2: prefix_rep = 3; break;
@@ -292,16 +292,16 @@ prefix_end:
     if (DESC_OPSIZE(desc) == 1)
         op_size = 1;
     else if (mode == DECODE_64)
-        op_size = ((prefix_rex & PREFIX_REXW) || DESC_OPSIZE(desc) == 3) ? 8 :
+        op_size = ((prefix_rex & PREFIX_REXW) || DESC_OPSIZE(desc) == 3) ? 4 :
                                 UNLIKELY(prefix_66 && !DESC_IGN66(desc)) ? 2 :
-                                                       DESC_OPSIZE(desc) ? 8 :
-                                                                           4;
+                                                       DESC_OPSIZE(desc) ? 4 :
+                                                                           3;
     else
-        op_size = UNLIKELY(prefix_66 && !DESC_IGN66(desc)) ? 2 : 4;
+        op_size = UNLIKELY(prefix_66 && !DESC_IGN66(desc)) ? 2 : 3;
 
-    uint8_t vec_size = 16;
+    uint8_t vec_size = 5;
     if (prefix_rex & PREFIX_VEXL)
-        vec_size = 32;
+        vec_size = 6;
 
     for (unsigned i = 0; i < sizeof(instr->operands) / sizeof(FdOp); i++)
         instr->operands[i] = (FdOp) {0};
@@ -450,15 +450,16 @@ skip_modrm:
         operand->reg = FD_REG_NONE;
         operand->misc = FD_REG_NONE;
 
-        if (UNLIKELY(off + addr_size > len))
+        int moffsz = 1 << addr_size;
+        if (UNLIKELY(off + moffsz > len))
             return FD_ERR_PARTIAL;
-        if (addr_size == 2)
+        if (moffsz == 2)
             instr->disp = LOAD_LE_2(&buffer[off]);
-        if (addr_size == 4)
+        if (moffsz == 4)
             instr->disp = LOAD_LE_4(&buffer[off]);
-        if (LIKELY(addr_size == 8))
+        if (LIKELY(moffsz == 8))
             instr->disp = LOAD_LE_8(&buffer[off]);
-        off += addr_size;
+        off += moffsz;
     }
     else if (UNLIKELY(imm_control == 3))
     {
@@ -495,11 +496,11 @@ skip_modrm:
                           instr->type == FDI_SSE_INSERTQ))
             imm_size = 2;
         else if (UNLIKELY(instr->type == FDI_JMPF || instr->type == FDI_CALLF))
-            imm_size = op_size + 2;
+            imm_size = (1 << op_size >> 1) + 2;
         else if (UNLIKELY(instr->type == FDI_ENTER))
             imm_size = 3;
         else if (instr->type == FDI_MOVABS)
-            imm_size = op_size;
+            imm_size = (1 << op_size >> 1);
         else
             imm_size = op_size == 2 ? 2 : 4;
 
@@ -561,7 +562,7 @@ skip_modrm:
     }
 
     uint8_t operand_sizes[4] = {
-        1 << DESC_SIZE_FIX1(desc) >> 1, 1 << DESC_SIZE_FIX2(desc), op_size, vec_size
+        DESC_SIZE_FIX1(desc), DESC_SIZE_FIX2(desc) + 1, op_size, vec_size
     };
 
     for (int i = 0; i < 4; i++)
@@ -587,7 +588,7 @@ skip_modrm:
     }
 
     instr->size = off;
-    instr->operandsz = DESC_INSTR_WIDTH(desc) ? op_size : 0;
+    instr->operandsz = DESC_INSTR_WIDTH(desc) ? op_size - 1 : 0;
 
     return off;
 }
