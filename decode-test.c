@@ -408,6 +408,10 @@ main(int argc, char** argv)
     TEST64("\xf3\x0f\x09", "wbnoinvd");
     TEST32("\x66\x0f\x38\x82\x01", "invpcid eax, xmmword ptr [ecx]");
     TEST64("\x66\x0f\x38\x82\x01", "invpcid rax, xmmword ptr [rcx]");
+    TEST32("\x66\x0f\x38\x80\x02", "invept eax, xmmword ptr [edx]");
+    TEST64("\x66\x0f\x38\x80\x02", "invept rax, xmmword ptr [rdx]");
+    TEST32("\x66\x0f\x38\x81\x02", "invvpid eax, xmmword ptr [edx]");
+    TEST64("\x66\x0f\x38\x81\x02", "invvpid rax, xmmword ptr [rdx]");
     TEST32("\x66\x0f\x38\xf8\x01", "movdir64b eax, zmmword ptr [ecx]");
     TEST64("\x66\x0f\x38\xf8\x01", "movdir64b rax, zmmword ptr [rcx]");
     // TODO: MOVDIR64B first operand has address size.

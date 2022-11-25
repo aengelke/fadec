@@ -1483,8 +1483,8 @@ F3.0fa7e0              NP   -   -   -   -   REP_XCRYPTCFB       F=PADLOCK ONLYVI
 F3.0fa7e8              NP   -   -   -   -   REP_XCRYPTOFB       F=PADLOCK ONLYVIA
 
 # VMX
-66.0f3880/m            RM   Gy  M   -   -   INVEPT          D64 F=VMX
-66.0f3881/m            RM   Gy  M   -   -   INVVPID         D64 F=VMX
+66.0f3880/m            RM   Gy  Mdq -   -   INVEPT          D64 F=VMX
+66.0f3881/m            RM   Gy  Mdq -   -   INVVPID         D64 F=VMX
 NP.0f01c1              NP   -   -   -   -   VMCALL              F=VMX
 66.0fc7/6m             M    Mq  -   -   -   VMCLEAR             F=VMX
 NP.0f01d4              NP   -   -   -   -   VMFUNC              F=VMX
