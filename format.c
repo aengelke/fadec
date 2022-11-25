@@ -29,15 +29,6 @@ struct FdStr {
 #define fd_stre(s) ((struct FdStr) { (s "\0\0\0\0\0\0\0\0\0\0"), sizeof (s)-1 })
 
 static char*
-fd_strplcpy(char* restrict dst, const char* src, size_t size) {
-    while (*src && size > 1)
-        *dst++ = *src++, size--;
-    if (size)
-        *dst = 0;
-    return dst;
-}
-
-static char*
 fd_strpcat(char* restrict dst, struct FdStr src) {
 #ifdef __GNUC__
     unsigned lim = __builtin_constant_p(src.sz) && src.sz <= 8 ? 8 : 16;
@@ -424,29 +415,27 @@ fd_format_impl(char buf[DECLARE_RESTRICTED_ARRAY_SIZE(128)], const FdInstr* inst
             size_t immediate = FD_OP_IMM(instr, i);
             // Some instructions have actually two immediate operands which are
             // decoded as a single operand. Split them here appropriately.
-            size_t splitimm = 0;
-            const char* splitsep = ", ";
             switch (FD_TYPE(instr)) {
             default:
                 goto nosplitimm;
             case FDI_SSE_EXTRQ:
             case FDI_SSE_INSERTQ:
-                splitimm = immediate & 0xff;
+                buf = fd_strpcatnum(buf, immediate & 0xff);
+                buf = fd_strpcat(buf, fd_stre(", "));
                 immediate = (immediate >> 8) & 0xff;
                 break;
             case FDI_ENTER:
-                splitimm = immediate & 0xffff;
+                buf = fd_strpcatnum(buf, immediate & 0xffff);
+                buf = fd_strpcat(buf, fd_stre(", "));
                 immediate = (immediate >> 16) & 0xff;
                 break;
             case FDI_JMPF:
             case FDI_CALLF:
-                splitsep = ":";
-                splitimm = (immediate >> (8 << size)) & 0xffff;
+                buf = fd_strpcatnum(buf, (immediate >> (8 << size)) & 0xffff);
+                *buf++ = ':';
                 // immediate is masked below.
                 break;
             }
-            buf = fd_strpcatnum(buf, splitimm);
-            buf = fd_strplcpy(buf, splitsep, 4);
 
         nosplitimm:
             if (op_type == FD_OT_OFF)
