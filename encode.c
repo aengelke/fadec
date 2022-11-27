@@ -304,7 +304,7 @@ const struct EncodingInfo encoding_infos[ENC_MAX] = {
     [ENC_RMV]     = { .modrm = 1^3, .modreg = 0^3, .vexreg = 2^3 },
     [ENC_VM]      = { .modrm = 1^3, .vexreg = 0^3 },
     [ENC_VMI]     = { .modrm = 1^3, .vexreg = 0^3, .immctl = 4, .immidx = 2 },
-    [ENC_MVR]     = { .modrm = 0^3, .modreg = 1^3, .vexreg = 1^3 },
+    [ENC_MVR]     = { .modrm = 0^3, .modreg = 2^3, .vexreg = 1^3 },
 };
 
 struct EncodeDesc {
