@@ -513,6 +513,9 @@ main(int argc, char** argv)
     TEST("\xc4\xe3\x75\x22\xc0\x00", "UD"); // VEX.L != 0
     TEST("\xc4\xe3\xf5\x22\xc0\x00", "UD"); // VEX.L != 0
 
+    TEST("\xc5\xf1\x71\xd7\x02", "vpsrlw xmm1, xmm7, 0x2");
+    TEST("\xc5\xf5\x71\xd7\x02", "vpsrlw ymm1, ymm7, 0x2");
+    TEST("\xc5\xf5\x71\x00\x02", "UD"); // Must have register operand
     TEST("\xc4\xe2\x71\x45\xc2", "vpsrlvd xmm0, xmm1, xmm2");
     TEST("\xc4\xe2\x75\x45\xc2", "vpsrlvd ymm0, ymm1, ymm2");
     TEST("\xc4\xe2\xf1\x45\xc2", "vpsrlvq xmm0, xmm1, xmm2");
