@@ -619,6 +619,39 @@ main(int argc, char** argv)
     TEST("\xc4\xe2\x71\x53\xc2", "vpdpwssds xmm0, xmm1, xmm2");
     TEST("\xc4\xe2\x75\x53\xc2", "vpdpwssds ymm0, ymm1, ymm2");
 
+    TEST("\xc4\xe2\x78\xb0\xc8", "UD"); // Must have memory operand
+    TEST32("\xc4\xe2\x78\xb0\x08", "vcvtneoph2ps xmm1, xmmword ptr [eax]");
+    TEST64("\xc4\xe2\x78\xb0\x08", "vcvtneoph2ps xmm1, xmmword ptr [rax]");
+    TEST32("\xc4\xe2\x7c\xb0\x08", "vcvtneoph2ps ymm1, ymmword ptr [eax]");
+    TEST64("\xc4\xe2\x7c\xb0\x08", "vcvtneoph2ps ymm1, ymmword ptr [rax]");
+    TEST("\xc4\xe2\x79\xb0\xc8", "UD"); // Must have memory operand
+    TEST32("\xc4\xe2\x79\xb0\x08", "vcvtneeph2ps xmm1, xmmword ptr [eax]");
+    TEST64("\xc4\xe2\x79\xb0\x08", "vcvtneeph2ps xmm1, xmmword ptr [rax]");
+    TEST32("\xc4\xe2\x7d\xb0\x08", "vcvtneeph2ps ymm1, ymmword ptr [eax]");
+    TEST64("\xc4\xe2\x7d\xb0\x08", "vcvtneeph2ps ymm1, ymmword ptr [rax]");
+    TEST("\xc4\xe2\x7a\xb0\xc8", "UD"); // Must have memory operand
+    TEST32("\xc4\xe2\x7a\xb0\x08", "vcvtneebf162ps xmm1, xmmword ptr [eax]");
+    TEST64("\xc4\xe2\x7a\xb0\x08", "vcvtneebf162ps xmm1, xmmword ptr [rax]");
+    TEST32("\xc4\xe2\x7e\xb0\x08", "vcvtneebf162ps ymm1, ymmword ptr [eax]");
+    TEST64("\xc4\xe2\x7e\xb0\x08", "vcvtneebf162ps ymm1, ymmword ptr [rax]");
+    TEST("\xc4\xe2\x7b\xb0\xc8", "UD"); // Must have memory operand
+    TEST32("\xc4\xe2\x7b\xb0\x08", "vcvtneobf162ps xmm1, xmmword ptr [eax]");
+    TEST64("\xc4\xe2\x7b\xb0\x08", "vcvtneobf162ps xmm1, xmmword ptr [rax]");
+    TEST32("\xc4\xe2\x7f\xb0\x08", "vcvtneobf162ps ymm1, ymmword ptr [eax]");
+    TEST64("\xc4\xe2\x7f\xb0\x08", "vcvtneobf162ps ymm1, ymmword ptr [rax]");
+    TEST("\xc4\xe2\x79\xb1\xc8", "UD"); // Must have memory operand
+    TEST32("\xc4\xe2\x79\xb1\x08", "vbcstnesh2ps xmm1, word ptr [eax]");
+    TEST64("\xc4\xe2\x79\xb1\x08", "vbcstnesh2ps xmm1, word ptr [rax]");
+    TEST32("\xc4\xe2\x7d\xb1\x08", "vbcstnesh2ps ymm1, word ptr [eax]");
+    TEST64("\xc4\xe2\x7d\xb1\x08", "vbcstnesh2ps ymm1, word ptr [rax]");
+    TEST("\xc4\xe2\x7a\xb1\xc8", "UD"); // Must have memory operand
+    TEST32("\xc4\xe2\x7a\xb1\x08", "vbcstnebf162ps xmm1, word ptr [eax]");
+    TEST64("\xc4\xe2\x7a\xb1\x08", "vbcstnebf162ps xmm1, word ptr [rax]");
+    TEST32("\xc4\xe2\x7e\xb1\x08", "vbcstnebf162ps ymm1, word ptr [eax]");
+    TEST64("\xc4\xe2\x7e\xb1\x08", "vbcstnebf162ps ymm1, word ptr [rax]");
+    TEST("\xc4\xe2\x7a\x72\xc1", "vcvtneps2bf16 xmm0, xmm1");
+    TEST("\xc4\xe2\x7e\x72\xc1", "vcvtneps2bf16 xmm0, ymm1");
+
     TEST("\xc4\xe2\x71\x92\xc0", "UD"); // Must have memory operand
     TEST("\xc4\xe2\x71\x92\x00", "UD"); // Must have SIB byte
     TEST("\xc4\xe2\x71\x92\x05\x00\x00\x00\x00", "UD"); // Must have SIB byte
