@@ -22,14 +22,15 @@ INSTR_FLAGS_FIELDS, INSTR_FLAGS_SIZES = zip(*[
     ("op1_size", 2),
     ("op2_size", 2),
     ("op3_size", 2),
-    ("opsize", 2),
+    ("unused2", 2),
     ("size_fix1", 3),
     ("size_fix2", 2),
     ("instr_width", 1),
     ("modrm_ty", 3),
     ("modreg_ty", 3),
     ("vexreg_ty", 2),
-    ("unused", 6),
+    ("unused", 3),
+    ("opsize", 3),
     ("modrm", 1),
     ("ign66", 1),
 ][::-1])
@@ -112,22 +113,25 @@ OPKIND_SIZES = {
     "b": 1,
     "w": 2,
     "d": 4,
-    "ss": 4, # Scalar single of XMM
+    "ss": 4, # Scalar single of XMM (d)
     "q": 8,
-    "sd": 8, # Scalar double of XMM
+    "sd": 8, # Scalar double of XMM (q)
     "t": 10, # FPU/ten-byte
     "dq": 16,
     "qq": 32,
     "oq": 64, # oct-quadword
     "": 0, # for MEMZ
-    "v": -1,
-    "y": -1, # actually, dword or qword
-    "z": -1, # actually, op-size maxed at 4 (immediates)
-    "a": -1, # actually, twice the size
-    "p": -1, # actually, far pointer = SZ_OP + 2
-    "x": -2,
-    "pd": -2, # packed double
-    "ps": -2, # packed single
+    "v": -1, # operand size (w/d/q)
+    "y": -1, # operand size (d/q)
+    "z": -1, # w/d (immediates, min(operand size, 4))
+    "a": -1, # z:z
+    "p": -1, # w:z
+    "x": -2, # vector size
+    "h": -3, # half x
+    "f": -4, # fourth x
+    "e": -5, # eighth x
+    "pd": -2, # packed double (x)
+    "ps": -2, # packed single (x)
 
     # Custom names
     "bs": -1, # sign-extended immediate
@@ -141,10 +145,16 @@ class OpKind(NamedTuple):
 
     SZ_OP = -1
     SZ_VEC = -2
+    SZ_VEC_HALF = -3
+    SZ_VEC_QUARTER = -4
+    SZ_VEC_EIGHTH = -5
 
     def abssize(self, opsz=None, vecsz=None):
         res = opsz if self.size == self.SZ_OP else \
-              vecsz if self.size == self.SZ_VEC else self.size
+              vecsz if self.size == self.SZ_VEC else \
+              vecsz >> 1 if self.size == self.SZ_VEC_HALF else \
+              vecsz >> 2 if self.size == self.SZ_VEC_QUARTER else \
+              vecsz >> 3 if self.size == self.SZ_VEC_EIGHTH else self.size
         if res is None:
             raise Exception("unspecified operand size")
         return res
@@ -169,7 +179,6 @@ class InstrDesc(NamedTuple):
                          "CR": 9, "DR": 10}
     OPKIND_SIZES = {
         0: 0, 1: 1, 2: 2, 4: 3, 8: 4, 16: 5, 32: 6, 64: 7, 10: 0,
-        OpKind.SZ_OP: -2, OpKind.SZ_VEC: -3,
     }
 
     @classmethod
@@ -222,28 +231,47 @@ class InstrDesc(NamedTuple):
                 tys.append(self.OPKIND_REGTYS_ENC[op.kind])
         return sum(ty << (4*i) for i, ty in enumerate(tys))
 
+    def dynsizes(self):
+        dynopsz = set(op.size for op in self.operands if op.size < 0)
+        if {"INSTR_WIDTH", "SZ8"} & self.flags: dynopsz.add(OpKind.SZ_OP)
+        if OpKind.SZ_OP in dynopsz and len(dynopsz) > 1:
+            raise Exception(f"conflicting dynamic operand sizes in {self}")
+        return dynopsz
+
     def encode(self, mnem, ign66, modrm):
         flags = ENCODINGS[self.encoding]
         extraflags = {}
 
-        opsz = set(self.OPKIND_SIZES[opkind.size] for opkind in self.operands)
+        dynopsz = self.dynsizes()
         # Operand size either refers to vectors or GP, but not both
-        if -2 in opsz and -3 in opsz:
-            raise Exception(f"conflicting gp vs. vec operand size in {self}")
+        if dynopsz and OpKind.SZ_OP not in dynopsz: # Vector operand size
+            if self.flags & {"SZ8", "D64", "F64", "INSTR_WIDTH", "LOCK", "U66"}:
+                raise Exception(f"incompatible flags in {self}")
+            # Allow at most the vector size together with one alternative
+            dynsizes = [OpKind.SZ_VEC] + list(dynopsz - {OpKind.SZ_VEC})
+            extraflags["opsize"] = 4 | (OpKind.SZ_VEC - dynsizes[-1])
+            if len(dynsizes) > 2:
+                raise Exception(f"conflicting vector operand sizes in {self}")
+        else: # either empty or GP operand size
+            dynsizes = [OpKind.SZ_OP]
+            if "SZ8" in self.flags: extraflags["opsize"] = 1
+            if "D64" in self.flags: extraflags["opsize"] = 2
+            if "F64" in self.flags: extraflags["opsize"] = 3
+            extraflags["instr_width"] = "INSTR_WIDTH" in self.flags
+            extraflags["lock"] = "LOCK" in self.flags
 
         # Sort fixed sizes encodable in size_fix2 as second element.
-        fixed = sorted((x for x in opsz if x >= 0), key=lambda x: 1 <= x <= 4)
+        fixed = set(self.OPKIND_SIZES[op.size] for op in self.operands if op.size >= 0)
+        fixed = sorted(fixed, key=lambda x: 1 <= x <= 4)
         if len(fixed) > 2 or (len(fixed) == 2 and not (1 <= fixed[1] <= 4)):
             raise Exception(f"invalid fixed sizes {fixed} in {self}")
-        sizes = (fixed + [1, 1])[:2] + [-2, -3] # See operand_sizes in decode.c.
+        sizes = (fixed + [1, 1])[:2] + dynsizes # See operand_sizes in decode.c.
         extraflags["size_fix1"] = sizes[0]
         extraflags["size_fix2"] = sizes[1] - 1
 
         for i, opkind in enumerate(self.operands):
-            sz = self.OPKIND_SIZES[opkind.size]
+            sz = self.OPKIND_SIZES[opkind.size] if opkind.size >= 0 else opkind.size
             extraflags["op%d_size"%i] = sizes.index(sz)
-            if i >= 3:
-                continue
             opname = ENCODING_OPORDER[self.encoding][i]
             if opname == "modrm":
                 if opkind.kind == "MEM":
@@ -258,11 +286,6 @@ class InstrDesc(NamedTuple):
                     raise Exception("invalid regty for op 3, must be VEC")
 
         # Miscellaneous Flags
-        if "SZ8" in self.flags:         extraflags["opsize"] = 1
-        if "D64" in self.flags:         extraflags["opsize"] = 2
-        if "F64" in self.flags:         extraflags["opsize"] = 3
-        if "INSTR_WIDTH" in self.flags: extraflags["instr_width"] = 1
-        if "LOCK" in self.flags:        extraflags["lock"] = 1
         if "VSIB" in self.flags:        extraflags["vsib"] = 1
         if modrm:                       extraflags["modrm"] = 1
 

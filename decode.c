@@ -83,7 +83,7 @@ struct InstrDesc
 #define DESC_ZEROREG_VAL(desc) (((desc)->operand_indices >> 10) & 1)
 #define DESC_LOCK(desc) (((desc)->operand_indices >> 11) & 1)
 #define DESC_VSIB(desc) (((desc)->operand_indices >> 15) & 1)
-#define DESC_OPSIZE(desc) (((desc)->operand_sizes >> 8) & 3)
+#define DESC_OPSIZE(desc) (((desc)->reg_types >> 11) & 7)
 #define DESC_SIZE_FIX1(desc) (((desc)->operand_sizes >> 10) & 7)
 #define DESC_SIZE_FIX2(desc) (((desc)->operand_sizes >> 13) & 3)
 #define DESC_INSTR_WIDTH(desc) (((desc)->operand_sizes >> 15) & 1)
@@ -288,27 +288,29 @@ prefix_end:
         instr->flags |= FD_FLAG_64;
     instr->address = address;
 
-    unsigned op_size;
-    if (DESC_OPSIZE(desc) == 1)
-        op_size = 1;
-    else if (mode == DECODE_64)
-        op_size = ((prefix_rex & PREFIX_REXW) || DESC_OPSIZE(desc) == 3) ? 4 :
-                                UNLIKELY(prefix_66 && !DESC_IGN66(desc)) ? 2 :
-                                                       DESC_OPSIZE(desc) ? 4 :
-                                                                           3;
-    else
-        op_size = UNLIKELY(prefix_66 && !DESC_IGN66(desc)) ? 2 : 3;
-
-    uint8_t vec_size = 5;
-    if (prefix_rex & PREFIX_VEXL)
-        vec_size = 6;
-
     for (unsigned i = 0; i < sizeof(instr->operands) / sizeof(FdOp); i++)
         instr->operands[i] = (FdOp) {0};
 
     if (DESC_MODRM(desc) && UNLIKELY(off++ >= len))
         return FD_ERR_PARTIAL;
     unsigned op_byte = buffer[off - 1] | (!DESC_MODRM(desc) ? 0xc0 : 0);
+
+    unsigned op_size;
+    unsigned op_size_alt = 0;
+    if (!(DESC_OPSIZE(desc) & 4)) {
+        if (DESC_OPSIZE(desc) == 1)
+            op_size = 1;
+        else if (mode == DECODE_64)
+            op_size = ((prefix_rex & PREFIX_REXW) || DESC_OPSIZE(desc) == 3) ? 4 :
+                                    UNLIKELY(prefix_66 && !DESC_IGN66(desc)) ? 2 :
+                                                           DESC_OPSIZE(desc) ? 4 :
+                                                                               3;
+        else
+            op_size = UNLIKELY(prefix_66 && !DESC_IGN66(desc)) ? 2 : 3;
+    } else {
+        op_size = 5 + !!(prefix_rex & PREFIX_VEXL);
+        op_size_alt = op_size - (DESC_OPSIZE(desc) & 3);
+    }
 
     if (UNLIKELY(instr->type == FDI_MOV_CR || instr->type == FDI_MOV_DR)) {
         unsigned modreg = (op_byte >> 3) & 0x7;
@@ -562,7 +564,7 @@ skip_modrm:
     }
 
     uint8_t operand_sizes[4] = {
-        DESC_SIZE_FIX1(desc), DESC_SIZE_FIX2(desc) + 1, op_size, vec_size
+        DESC_SIZE_FIX1(desc), DESC_SIZE_FIX2(desc) + 1, op_size, op_size_alt
     };
 
     for (int i = 0; i < 4; i++)
