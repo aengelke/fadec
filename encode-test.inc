@@ -213,6 +213,8 @@ TEST("\xc4\xe2\x71\x2e\x17", VMASKMOVPS128mrr, 0, FE_MEM(FE_DI, 0, FE_NOREG, 0),
 TEST("\xc4\xe2\x75\x2e\x17", VMASKMOVPS256mrr, 0, FE_MEM(FE_DI, 0, FE_NOREG, 0), FE_XMM1, FE_XMM2);
 TEST("\xc5\xf1\x71\xd7\x02", VPSRLW128rri, 0, FE_XMM1, FE_XMM7, 0x2);
 TEST("\xc5\xf5\x71\xd7\x02", VPSRLW256rri, 0, FE_XMM1, FE_XMM7, 0x2);
+TEST("\xc4\xc3\xfd\x00\xc9\x12", VPERMQ256rri, 0, FE_XMM1, FE_XMM9, 0x12);
+TEST("\xc4\xe3\xfd\x01\xcf\x12", VPERMPD256rri, 0, FE_XMM1, FE_XMM7, 0x12);
 
 // Test RVMR encoding
 TEST("\xc4\xe3\x71\x4a\xc2\x30", VBLENDVPS128rrrr, 0, FE_XMM0, FE_XMM1, FE_XMM2, FE_XMM3);

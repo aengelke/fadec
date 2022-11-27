@@ -527,6 +527,10 @@ main(int argc, char** argv)
     TEST("\xc4\xe3\x71\x4b\xc2\x70", "vblendvpd xmm0, xmm1, xmm2, xmm7");
     TEST32("\xc4\xe3\x75\x4b\xc2\x80", "vblendvpd ymm0, ymm1, ymm2, ymm0"); // Bit 7 is ignored
     TEST64("\xc4\xe3\x75\x4b\xc2\x80", "vblendvpd ymm0, ymm1, ymm2, ymm8");
+    TEST32("\xc4\xc3\xfd\x00\xc9\x12", "vpermq ymm1, ymm1, 0x12"); // VEX.B ignored
+    TEST64("\xc4\xc3\xfd\x00\xc9\x12", "vpermq ymm1, ymm9, 0x12");
+    TEST("\xc4\xc3\x7d\x00\xc9\x12", "UD"); // VEX.W = 0 is UD
+    TEST("\xc4\xe3\xfd\x01\xcf\x12", "vpermpd ymm1, ymm7, 0x12");
 
     TEST("\xc4\xe2\x79\xdb\xc1", "vaesimc xmm0, xmm1");
     TEST("\xc4\xe2\x7d\xdb\xc1", "UD"); // VEX.L != 0
