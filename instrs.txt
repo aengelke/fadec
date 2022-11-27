@@ -1595,8 +1595,14 @@ F2.0f01e8              NP   -   -   -   -   XSUSLDTRK           F=TSXLDTRK
 F2.0f01e9              NP   -   -   -   -   XRESLDTRK           F=TSXLDTRK
 
 # AVX_VNNI
+VEX.NP.W0.0f3850       RVM  Vx  Hx  Wx  -   VPDPBUUD            F=VNNI-INT8
 VEX.66.W0.0f3850       RVM  Vx  Hx  Wx  -   VPDPBUSD            F=VNNI
+VEX.F3.W0.0f3850       RVM  Vx  Hx  Wx  -   VPDPBSUD            F=VNNI-INT8
+VEX.F2.W0.0f3850       RVM  Vx  Hx  Wx  -   VPDPBSSD            F=VNNI-INT8
+VEX.NP.W0.0f3851       RVM  Vx  Hx  Wx  -   VPDPBUUDS           F=VNNI-INT8
 VEX.66.W0.0f3851       RVM  Vx  Hx  Wx  -   VPDPBUSDS           F=VNNI
+VEX.F3.W0.0f3851       RVM  Vx  Hx  Wx  -   VPDPBSUDS           F=VNNI-INT8
+VEX.F2.W0.0f3851       RVM  Vx  Hx  Wx  -   VPDPBSSDS           F=VNNI-INT8
 VEX.66.W0.0f3852       RVM  Vx  Hx  Wx  -   VPDPWSSD            F=VNNI
 VEX.66.W0.0f3853       RVM  Vx  Hx  Wx  -   VPDPWSSDS           F=VNNI
 

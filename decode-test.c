@@ -598,6 +598,27 @@ main(int argc, char** argv)
     TEST("\xc4\xe2\x71\xdf\xc2", "vaesdeclast xmm0, xmm1, xmm2");
     TEST("\xc4\xe2\x75\xdf\xc2", "vaesdeclast ymm0, ymm1, ymm2");
 
+    TEST("\xc4\xe2\x70\x50\xc2", "vpdpbuud xmm0, xmm1, xmm2");
+    TEST("\xc4\xe2\x74\x50\xc2", "vpdpbuud ymm0, ymm1, ymm2");
+    TEST("\xc4\xe2\x71\x50\xc2", "vpdpbusd xmm0, xmm1, xmm2");
+    TEST("\xc4\xe2\x75\x50\xc2", "vpdpbusd ymm0, ymm1, ymm2");
+    TEST("\xc4\xe2\x72\x50\xc2", "vpdpbsud xmm0, xmm1, xmm2");
+    TEST("\xc4\xe2\x76\x50\xc2", "vpdpbsud ymm0, ymm1, ymm2");
+    TEST("\xc4\xe2\x73\x50\xc2", "vpdpbssd xmm0, xmm1, xmm2");
+    TEST("\xc4\xe2\x77\x50\xc2", "vpdpbssd ymm0, ymm1, ymm2");
+    TEST("\xc4\xe2\x70\x51\xc2", "vpdpbuuds xmm0, xmm1, xmm2");
+    TEST("\xc4\xe2\x74\x51\xc2", "vpdpbuuds ymm0, ymm1, ymm2");
+    TEST("\xc4\xe2\x71\x51\xc2", "vpdpbusds xmm0, xmm1, xmm2");
+    TEST("\xc4\xe2\x75\x51\xc2", "vpdpbusds ymm0, ymm1, ymm2");
+    TEST("\xc4\xe2\x72\x51\xc2", "vpdpbsuds xmm0, xmm1, xmm2");
+    TEST("\xc4\xe2\x76\x51\xc2", "vpdpbsuds ymm0, ymm1, ymm2");
+    TEST("\xc4\xe2\x73\x51\xc2", "vpdpbssds xmm0, xmm1, xmm2");
+    TEST("\xc4\xe2\x77\x51\xc2", "vpdpbssds ymm0, ymm1, ymm2");
+    TEST("\xc4\xe2\x71\x52\xc2", "vpdpwssd xmm0, xmm1, xmm2");
+    TEST("\xc4\xe2\x75\x52\xc2", "vpdpwssd ymm0, ymm1, ymm2");
+    TEST("\xc4\xe2\x71\x53\xc2", "vpdpwssds xmm0, xmm1, xmm2");
+    TEST("\xc4\xe2\x75\x53\xc2", "vpdpwssds ymm0, ymm1, ymm2");
+
     TEST("\xc4\xe2\x71\x92\xc0", "UD"); // Must have memory operand
     TEST("\xc4\xe2\x71\x92\x00", "UD"); // Must have SIB byte
     TEST("\xc4\xe2\x71\x92\x05\x00\x00\x00\x00", "UD"); // Must have SIB byte
