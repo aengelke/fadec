@@ -421,6 +421,23 @@ main(int argc, char** argv)
     TEST64("\xf2\x0f\x01\xc6", "rdmsrlist");
     TEST64("\xf3\x0f\x01\xc6", "wrmsrlist");
 
+    TEST("\x0f\x38\xfc\xc1", "UD"); // Must be memory operand
+    TEST32("\x0f\x38\xfc\x01", "aadd dword ptr [ecx], eax");
+    TEST64("\x0f\x38\xfc\x01", "aadd dword ptr [rcx], eax");
+    TEST64("\x48\x0f\x38\xfc\x01", "aadd qword ptr [rcx], rax");
+    TEST("\x66\x0f\x38\xfc\xc1", "UD"); // Must be memory operand
+    TEST32("\x66\x0f\x38\xfc\x01", "aand dword ptr [ecx], eax");
+    TEST64("\x66\x0f\x38\xfc\x01", "aand dword ptr [rcx], eax");
+    TEST64("\x66\x48\x0f\x38\xfc\x01", "aand qword ptr [rcx], rax");
+    TEST("\xf3\x0f\x38\xfc\xc1", "UD"); // Must be memory operand
+    TEST32("\xf3\x0f\x38\xfc\x01", "axor dword ptr [ecx], eax");
+    TEST64("\xf3\x0f\x38\xfc\x01", "axor dword ptr [rcx], eax");
+    TEST64("\xf3\x48\x0f\x38\xfc\x01", "axor qword ptr [rcx], rax");
+    TEST("\xf2\x0f\x38\xfc\xc1", "UD"); // Must be memory operand
+    TEST32("\xf2\x0f\x38\xfc\x01", "aor dword ptr [ecx], eax");
+    TEST64("\xf2\x0f\x38\xfc\x01", "aor dword ptr [rcx], eax");
+    TEST64("\xf2\x48\x0f\x38\xfc\x01", "aor qword ptr [rcx], rax");
+
     TEST("\x0f\xae\xe8", "lfence");
     TEST("\x0f\xae\xe9", "lfence");
     TEST("\x0f\xae\xef", "lfence");

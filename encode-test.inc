@@ -181,6 +181,15 @@ TEST("\x0f\x01\xc6", WRMSRNS, 0);
 TEST("\xf2\x0f\x01\xc6", RDMSRLIST, 0);
 TEST("\xf3\x0f\x01\xc6", WRMSRLIST, 0);
 
+TEST("\x0f\x38\xfc\x01", AADD32mr, 0, FE_MEM(FE_CX, 0, FE_NOREG, 0), FE_AX);
+TEST("\x48\x0f\x38\xfc\x01", AADD64mr, 0, FE_MEM(FE_CX, 0, FE_NOREG, 0), FE_AX);
+TEST("\x66\x0f\x38\xfc\x01", AAND32mr, 0, FE_MEM(FE_CX, 0, FE_NOREG, 0), FE_AX);
+TEST("\x66\x48\x0f\x38\xfc\x01", AAND64mr, 0, FE_MEM(FE_CX, 0, FE_NOREG, 0), FE_AX);
+TEST("\xf3\x0f\x38\xfc\x01", AXOR32mr, 0, FE_MEM(FE_CX, 0, FE_NOREG, 0), FE_AX);
+TEST("\xf3\x48\x0f\x38\xfc\x01", AXOR64mr, 0, FE_MEM(FE_CX, 0, FE_NOREG, 0), FE_AX);
+TEST("\xf2\x0f\x38\xfc\x01", AOR32mr, 0, FE_MEM(FE_CX, 0, FE_NOREG, 0), FE_AX);
+TEST("\xf2\x48\x0f\x38\xfc\x01", AOR64mr, 0, FE_MEM(FE_CX, 0, FE_NOREG, 0), FE_AX);
+
 // Test FPU instructions
 TEST("\xd8\x00", FADDm32, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0));
 TEST("\xdc\x00", FADDm64, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0));

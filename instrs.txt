@@ -1620,6 +1620,12 @@ NP.0f01c6              NP   -   -   -   -   WRMSRNS             F=WRMSRNS
 F2.0f01c6              NP   -   -   -   -   RDMSRLIST   O64     F=MSRLIST
 F3.0f01c6              NP   -   -   -   -   WRMSRLIST   O64     F=MSRLIST
 
+# RAO-INT
+NP.0f38fc/m            MR   My  Gy  -   -   AADD                F=RAO-INT
+66.0f38fc/m            MR   My  Gy  -   -   AAND                F=RAO-INT
+F3.0f38fc/m            MR   My  Gy  -   -   AXOR                F=RAO-INT
+F2.0f38fc/m            MR   My  Gy  -   -   AOR                 F=RAO-INT
+
 # AESKLE/KL (Key Locker)
 F3.0f38d8/0m           M    M   -   -   -   AESENCWIDE128KL     F=AESKLE
 F3.0f38d8/1m           M    M   -   -   -   AESDECWIDE128KL     F=AESKLE
