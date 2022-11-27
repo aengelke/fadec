@@ -1613,6 +1613,10 @@ F3.0f01ee              NP   -   -   -   -   CLUI        O64     F=UINTR
 F3.0f01ef              NP   -   -   -   -   STUI        O64     F=UINTR
 F3.0fc7/6r             M    Ry  -   -   -   SENDUIPI    O64 D64 F=UINTR
 
+# MSRLIST
+F2.0f01c6              NP   -   -   -   -   RDMSRLIST   O64     F=MSRLIST
+F3.0f01c6              NP   -   -   -   -   WRMSRLIST   O64     F=MSRLIST
+
 # AESKLE/KL (Key Locker)
 F3.0f38d8/0m           M    M   -   -   -   AESENCWIDE128KL     F=AESKLE
 F3.0f38d8/1m           M    M   -   -   -   AESDECWIDE128KL     F=AESKLE
