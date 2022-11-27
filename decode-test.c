@@ -417,6 +417,7 @@ main(int argc, char** argv)
     // TODO: MOVDIR64B first operand has address size.
     // TEST32("\x67\x66\x0f\x38\xf8\x01", "movdir64b ax, zmmword ptr [cx]");
     // TEST64("\x67\x66\x0f\x38\xf8\x01", "movdir64b eax, zmmword ptr [ecx]");
+    TEST("\x0f\x01\xc6", "wrmsrns");
     TEST64("\xf2\x0f\x01\xc6", "rdmsrlist");
     TEST64("\xf3\x0f\x01\xc6", "wrmsrlist");
 

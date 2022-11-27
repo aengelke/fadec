@@ -177,6 +177,7 @@ TEST("", MOV64ar, FE_ADDR32, 0xfedcba98, FE_CX);
 
 TEST("\xc7\xf8\x02\x00\x00\x00", XBEGIN, 0, FE_PTR(8));
 
+TEST("\x0f\x01\xc6", WRMSRNS, 0);
 TEST("\xf2\x0f\x01\xc6", RDMSRLIST, 0);
 TEST("\xf3\x0f\x01\xc6", WRMSRLIST, 0);
 
