@@ -75,6 +75,7 @@ ENCODINGS = {
     "VM": InstrFlags(modrm=1, modrm_idx=1^3, vexreg_idx=0^3),
     "VMI": InstrFlags(modrm=1, modrm_idx=1^3, vexreg_idx=0^3, imm_idx=2^3, imm_control=4),
     "MVR": InstrFlags(modrm=1, modrm_idx=0^3, modreg_idx=2^3, vexreg_idx=1^3),
+    "MRV": InstrFlags(modrm=1, modrm_idx=0^3, modreg_idx=1^3, vexreg_idx=2^3),
 }
 ENCODING_OPTYS = ["modrm", "modreg", "vexreg", "imm"]
 ENCODING_OPORDER = { enc: sorted(ENCODING_OPTYS, key=lambda ty: getattr(ENCODINGS[enc], ty+"_idx")^3) for enc in ENCODINGS}

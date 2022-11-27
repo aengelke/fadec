@@ -1626,6 +1626,24 @@ NP.0f38fc/m            MR   My  Gy  -   -   AADD                F=RAO-INT
 F3.0f38fc/m            MR   My  Gy  -   -   AXOR                F=RAO-INT
 F2.0f38fc/m            MR   My  Gy  -   -   AOR                 F=RAO-INT
 
+# CMPCCXADD
+VEX.66.L0.0f38e0/m     MRV  My  Gy  By  -   CMPOXADD    O64     F=CMPCCXADD EFL=m--mmmmm
+VEX.66.L0.0f38e1/m     MRV  My  Gy  By  -   CMPNOXADD   O64     F=CMPCCXADD EFL=m--mmmmm
+VEX.66.L0.0f38e2/m     MRV  My  Gy  By  -   CMPBXADD    O64     F=CMPCCXADD EFL=m--mmmmm
+VEX.66.L0.0f38e3/m     MRV  My  Gy  By  -   CMPNBXADD   O64     F=CMPCCXADD EFL=m--mmmmm
+VEX.66.L0.0f38e4/m     MRV  My  Gy  By  -   CMPZXADD    O64     F=CMPCCXADD EFL=m--mmmmm
+VEX.66.L0.0f38e5/m     MRV  My  Gy  By  -   CMPNZXADD   O64     F=CMPCCXADD EFL=m--mmmmm
+VEX.66.L0.0f38e6/m     MRV  My  Gy  By  -   CMPBEXADD   O64     F=CMPCCXADD EFL=m--mmmmm
+VEX.66.L0.0f38e7/m     MRV  My  Gy  By  -   CMPNBEXADD  O64     F=CMPCCXADD EFL=m--mmmmm
+VEX.66.L0.0f38e8/m     MRV  My  Gy  By  -   CMPSXADD    O64     F=CMPCCXADD EFL=m--mmmmm
+VEX.66.L0.0f38e9/m     MRV  My  Gy  By  -   CMPNSXADD   O64     F=CMPCCXADD EFL=m--mmmmm
+VEX.66.L0.0f38ea/m     MRV  My  Gy  By  -   CMPPXADD    O64     F=CMPCCXADD EFL=m--mmmmm
+VEX.66.L0.0f38eb/m     MRV  My  Gy  By  -   CMPNPXADD   O64     F=CMPCCXADD EFL=m--mmmmm
+VEX.66.L0.0f38ec/m     MRV  My  Gy  By  -   CMPLXADD    O64     F=CMPCCXADD EFL=m--mmmmm
+VEX.66.L0.0f38ed/m     MRV  My  Gy  By  -   CMPNLXADD   O64     F=CMPCCXADD EFL=m--mmmmm
+VEX.66.L0.0f38ee/m     MRV  My  Gy  By  -   CMPLEXADD   O64     F=CMPCCXADD EFL=m--mmmmm
+VEX.66.L0.0f38ef/m     MRV  My  Gy  By  -   CMPNLEXADD  O64     F=CMPCCXADD EFL=m--mmmmm
+
 # AESKLE/KL (Key Locker)
 F3.0f38d8/0m           M    M   -   -   -   AESENCWIDE128KL     F=AESKLE
 F3.0f38d8/1m           M    M   -   -   -   AESDECWIDE128KL     F=AESKLE

@@ -259,7 +259,7 @@ typedef enum {
     ENC_M, ENC_M1, ENC_MI, ENC_MC, ENC_MR, ENC_RM, ENC_RMA, ENC_MRI, ENC_RMI, ENC_MRC,
     ENC_AM, ENC_MA,
     ENC_I, ENC_IA, ENC_O, ENC_OI, ENC_OA, ENC_S, ENC_A, ENC_D, ENC_FD, ENC_TD,
-    ENC_RVM, ENC_RVMI, ENC_RVMR, ENC_RMV, ENC_VM, ENC_VMI, ENC_MVR,
+    ENC_RVM, ENC_RVMI, ENC_RVMR, ENC_RMV, ENC_VM, ENC_VMI, ENC_MVR, ENC_MRV,
     ENC_MAX
 } Encoding;
 
@@ -305,6 +305,7 @@ const struct EncodingInfo encoding_infos[ENC_MAX] = {
     [ENC_VM]      = { .modrm = 1^3, .vexreg = 0^3 },
     [ENC_VMI]     = { .modrm = 1^3, .vexreg = 0^3, .immctl = 4, .immidx = 2 },
     [ENC_MVR]     = { .modrm = 0^3, .modreg = 2^3, .vexreg = 1^3 },
+    [ENC_MRV]     = { .modrm = 0^3, .modreg = 1^3, .vexreg = 2^3 },
 };
 
 struct EncodeDesc {

@@ -190,6 +190,39 @@ TEST("\xf3\x48\x0f\x38\xfc\x01", AXOR64mr, 0, FE_MEM(FE_CX, 0, FE_NOREG, 0), FE_
 TEST("\xf2\x0f\x38\xfc\x01", AOR32mr, 0, FE_MEM(FE_CX, 0, FE_NOREG, 0), FE_AX);
 TEST("\xf2\x48\x0f\x38\xfc\x01", AOR64mr, 0, FE_MEM(FE_CX, 0, FE_NOREG, 0), FE_AX);
 
+TEST("\xc4\xe2\x61\xe0\x08", CMPOXADD32mrr, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0), FE_CX, FE_BX);
+TEST("\xc4\xe2\xe1\xe0\x08", CMPOXADD64mrr, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0), FE_CX, FE_BX);
+TEST("\xc4\xe2\x61\xe1\x08", CMPNOXADD32mrr, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0), FE_CX, FE_BX);
+TEST("\xc4\xe2\xe1\xe1\x08", CMPNOXADD64mrr, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0), FE_CX, FE_BX);
+TEST("\xc4\xe2\x61\xe2\x08", CMPBXADD32mrr, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0), FE_CX, FE_BX);
+TEST("\xc4\xe2\xe1\xe2\x08", CMPBXADD64mrr, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0), FE_CX, FE_BX);
+TEST("\xc4\xe2\x61\xe3\x08", CMPNBXADD32mrr, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0), FE_CX, FE_BX);
+TEST("\xc4\xe2\xe1\xe3\x08", CMPNBXADD64mrr, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0), FE_CX, FE_BX);
+TEST("\xc4\xe2\x61\xe4\x08", CMPZXADD32mrr, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0), FE_CX, FE_BX);
+TEST("\xc4\xe2\xe1\xe4\x08", CMPZXADD64mrr, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0), FE_CX, FE_BX);
+TEST("\xc4\xe2\x61\xe5\x08", CMPNZXADD32mrr, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0), FE_CX, FE_BX);
+TEST("\xc4\xe2\xe1\xe5\x08", CMPNZXADD64mrr, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0), FE_CX, FE_BX);
+TEST("\xc4\xe2\x61\xe6\x08", CMPBEXADD32mrr, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0), FE_CX, FE_BX);
+TEST("\xc4\xe2\xe1\xe6\x08", CMPBEXADD64mrr, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0), FE_CX, FE_BX);
+TEST("\xc4\xe2\x61\xe7\x08", CMPNBEXADD32mrr, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0), FE_CX, FE_BX);
+TEST("\xc4\xe2\xe1\xe7\x08", CMPNBEXADD64mrr, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0), FE_CX, FE_BX);
+TEST("\xc4\xe2\x61\xe8\x08", CMPSXADD32mrr, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0), FE_CX, FE_BX);
+TEST("\xc4\xe2\xe1\xe8\x08", CMPSXADD64mrr, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0), FE_CX, FE_BX);
+TEST("\xc4\xe2\x61\xe9\x08", CMPNSXADD32mrr, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0), FE_CX, FE_BX);
+TEST("\xc4\xe2\xe1\xe9\x08", CMPNSXADD64mrr, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0), FE_CX, FE_BX);
+TEST("\xc4\xe2\x61\xea\x08", CMPPXADD32mrr, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0), FE_CX, FE_BX);
+TEST("\xc4\xe2\xe1\xea\x08", CMPPXADD64mrr, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0), FE_CX, FE_BX);
+TEST("\xc4\xe2\x61\xeb\x08", CMPNPXADD32mrr, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0), FE_CX, FE_BX);
+TEST("\xc4\xe2\xe1\xeb\x08", CMPNPXADD64mrr, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0), FE_CX, FE_BX);
+TEST("\xc4\xe2\x61\xec\x08", CMPLXADD32mrr, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0), FE_CX, FE_BX);
+TEST("\xc4\xe2\xe1\xec\x08", CMPLXADD64mrr, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0), FE_CX, FE_BX);
+TEST("\xc4\xe2\x61\xed\x08", CMPNLXADD32mrr, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0), FE_CX, FE_BX);
+TEST("\xc4\xe2\xe1\xed\x08", CMPNLXADD64mrr, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0), FE_CX, FE_BX);
+TEST("\xc4\xe2\x61\xee\x08", CMPLEXADD32mrr, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0), FE_CX, FE_BX);
+TEST("\xc4\xe2\xe1\xee\x08", CMPLEXADD64mrr, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0), FE_CX, FE_BX);
+TEST("\xc4\xe2\x61\xef\x08", CMPNLEXADD32mrr, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0), FE_CX, FE_BX);
+TEST("\xc4\xe2\xe1\xef\x08", CMPNLEXADD64mrr, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0), FE_CX, FE_BX);
+
 // Test FPU instructions
 TEST("\xd8\x00", FADDm32, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0));
 TEST("\xdc\x00", FADDm64, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0));
