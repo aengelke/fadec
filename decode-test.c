@@ -652,6 +652,11 @@ main(int argc, char** argv)
     TEST("\xc4\xe2\x7a\x72\xc1", "vcvtneps2bf16 xmm0, xmm1");
     TEST("\xc4\xe2\x7e\x72\xc1", "vcvtneps2bf16 xmm0, ymm1");
 
+    TEST("\xc4\xe2\xf1\xb4\xc2", "vpmadd52luq xmm0, xmm1, xmm2");
+    TEST("\xc4\xe2\xf5\xb4\xc2", "vpmadd52luq ymm0, ymm1, ymm2");
+    TEST("\xc4\xe2\xf1\xb5\xc2", "vpmadd52huq xmm0, xmm1, xmm2");
+    TEST("\xc4\xe2\xf5\xb5\xc2", "vpmadd52huq ymm0, ymm1, ymm2");
+
     TEST("\xc4\xe2\x71\x92\xc0", "UD"); // Must have memory operand
     TEST("\xc4\xe2\x71\x92\x00", "UD"); // Must have SIB byte
     TEST("\xc4\xe2\x71\x92\x05\x00\x00\x00\x00", "UD"); // Must have SIB byte

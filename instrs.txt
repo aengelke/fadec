@@ -1616,6 +1616,10 @@ VEX.F3.W0.0f38b1/m     RM   Vx  Mw  -   -   VBCSTNEBF162PS      F=AVX-NE-CONVERT
 # TODO: Vdq is actually half the vector size
 VEX.F3.W0.0f3872       RM   Vdq Wps -   -   VCVTNEPS2BF16       F=AVX-NE-CONVERT
 
+# AVX-IFMA
+VEX.66.W1.0f38b4       RVM  Vx  Hx  Wx  -   VPMADD52LUQ         F=AVX-IFMA
+VEX.66.W1.0f38b5       RVM  Vx  Hx  Wx  -   VPMADD52HUQ         F=AVX-IFMA
+
 # HRESET
 #F3.0f3af0c0           IA   Ib  Rd  -   -   HRESET              F=HRESET
 
