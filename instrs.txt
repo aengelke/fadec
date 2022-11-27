@@ -631,8 +631,8 @@ NP.0f2e                RM   Vss Wss -   -   SSE_UCOMISS         F=SSE EFL=0--0m0
 66.0f2e                RM   Vsd Wsd -   -   SSE_UCOMISD         F=SSE2 EFL=0--0m0mm
 NP.0f2f                RM   Vss Wss -   -   SSE_COMISS          F=SSE EFL=0--0m0mm
 66.0f2f                RM   Vsd Wsd -   -   SSE_COMISD          F=SSE2 EFL=0--0m0mm
-NP.0f50/r              RM   Gy  Ups -   -   SSE_MOVMSKPS    D64 F=SSE
-66.0f50/r              RM   Gy  Upd -   -   SSE_MOVMSKPD    D64 F=SSE2
+NP.0f50/r              RM   Gy  Udq -   -   SSE_MOVMSKPS    D64 F=SSE
+66.0f50/r              RM   Gy  Udq -   -   SSE_MOVMSKPD    D64 F=SSE2
 NP.0f51                RM   Vps Wps -   -   SSE_SQRTPS          F=SSE
 66.0f51                RM   Vpd Wpd -   -   SSE_SQRTPD          F=SSE2
 F3.0f51                RM   Vss Wss -   -   SSE_SQRTSS          F=SSE
@@ -694,8 +694,8 @@ F2.0f5f                RM   Vsd Wsd -   -   SSE_MAXSD           F=SSE2
 66.0f6b                RM   Vx  Wx  -   -   SSE_PACKSSDW        F=SSE2
 66.0f6c                RM   Vx  Wx  -   -   SSE_PUNPCKLQDQ      F=SSE2
 66.0f6d                RM   Vx  Wx  -   -   SSE_PUNPCKHQDQ      F=SSE2
-66.W0.0f6e             RM   Vx  Ey  -   -   SSE_MOVD_G2X        F=SSE2 ENC_NOSZ
-66.W1.0f6e             RM   Vx  Ey  -   -   SSE_MOVQ_G2X        F=SSE2 ENC_NOSZ
+66.W0.0f6e             RM   Vx  Ed  -   -   SSE_MOVD_G2X        F=SSE2 ENC_NOSZ
+66.W1.0f6e             RM   Vx  Eq  -   -   SSE_MOVQ_G2X        F=SSE2 ENC_NOSZ
 66.0f6f                RM   Vx  Wx  -   -   SSE_MOVDQA          F=SSE2
 F3.0f6f                RM   Vx  Wx  -   -   SSE_MOVDQU          F=SSE2
 66.0f70                RMI  Vx  Wx  Ib  -   SSE_PSHUFD          F=SSE2
@@ -752,7 +752,7 @@ F2.0fd0                RM   Vpd Wpd -   -   SSE_ADDSUBPS        F=SSE3
 66.0fd5                RM   Vx  Wx  -   -   SSE_PMULLW          F=SSE2
 # This is tricky, MOVQ to mem writes 64 bits, MOVQ to reg writes 128 bits
 66.0fd6                MR   Wq  Vq  -   -   SSE_MOVQ            F=SSE2
-66.0fd7/r              RM   Gy  Ux  -   -   SSE_PMOVMSKB    D64 F=SSE2
+66.0fd7/r              RM   Gy  Udq -   -   SSE_PMOVMSKB    D64 F=SSE2
 66.0fd8                RM   Vx  Wx  -   -   SSE_PSUBUSB         F=SSE2
 66.0fd9                RM   Vx  Wx  -   -   SSE_PSUBUSW         F=SSE2
 66.0fda                RM   Vx  Wx  -   -   SSE_PMINUB          F=SSE2
@@ -854,16 +854,16 @@ NP.0f38f9/m            MR   My  Gy  -   -   MOVDIRI             F=MOVDIRI
 66.0f3a0e              RMI  Vx  Wx  Ib  -   SSE_PBLENDW         F=SSE41
 66.0f3a0f              RMI  Vx  Wx  Ib  -   SSE_PALIGNR         F=SSSE3
 66.0f3a14/m            MRI  Mb  Vx  Ib  -   SSE_PEXTRB          F=SSE41
-66.0f3a14/r            MRI  Ry  Vx  Ib  -   SSE_PEXTRB          F=SSE41 ENC_NOSZ
+66.0f3a14/r            MRI  Rd  Vx  Ib  -   SSE_PEXTRB          F=SSE41 ENC_NOSZ
 66.0f3a15/m            MRI  Mw  Vx  Ib  -   SSE_PEXTRW          F=SSE41
-66.0f3a15/r            MRI  Ry  Vx  Ib  -   SSE_PEXTRW          F=SSE41 ENC_NOSZ
-66.W0.0f3a16           MRI  Ey  Vx  Ib  -   SSE_PEXTRD          F=SSE41 ENC_NOSZ
-66.W1.0f3a16           MRI  Ey  Vx  Ib  -   SSE_PEXTRQ          F=SSE41 ENC_NOSZ
+66.0f3a15/r            MRI  Rd  Vx  Ib  -   SSE_PEXTRW          F=SSE41 ENC_NOSZ
+66.W0.0f3a16           MRI  Ed  Vx  Ib  -   SSE_PEXTRD          F=SSE41 ENC_NOSZ
+66.W1.0f3a16           MRI  Eq  Vx  Ib  -   SSE_PEXTRQ          F=SSE41 ENC_NOSZ
 66.0f3a17              MRI  Ed  Vx  Ib  -   SSE_EXTRACTPS       F=SSE41
 66.0f3a20              RMI  Vx  Eb  Ib  -   SSE_PINSRB          F=SSE41
 66.0f3a21              RMI  Vps Wss Ib  -   SSE_INSERTPS        F=SSE41
-66.W0.0f3a22           RMI  Vx  Ey  Ib  -   SSE_PINSRD          F=SSE41 ENC_NOSZ
-66.W1.0f3a22           RMI  Vx  Ey  Ib  -   SSE_PINSRQ          F=SSE41 ENC_NOSZ
+66.W0.0f3a22           RMI  Vx  Ed  Ib  -   SSE_PINSRD          F=SSE41 ENC_NOSZ
+66.W1.0f3a22           RMI  Vx  Eq  Ib  -   SSE_PINSRQ          F=SSE41 ENC_NOSZ
 66.0f3a40              RMI  Vps Wps Ib  -   SSE_DPPS            F=SSE41
 66.0f3a41              RMI  Vpd Wpd Ib  -   SSE_DPPD            F=SSE41
 66.0f3a42              RMI  Vx  Wx  Ib  -   SSE_MPSADBW         F=SSE41
@@ -938,8 +938,8 @@ VEX.NP.LIG.0f2e        RM   Vss Wss -   -   VUCOMISS            F=AVX EFL=0--0m0
 VEX.66.LIG.0f2e        RM   Vsd Wsd -   -   VUCOMISD            F=AVX EFL=0--0m0mm
 VEX.NP.LIG.0f2f        RM   Vss Wss -   -   VCOMISS             F=AVX EFL=0--0m0mm
 VEX.66.LIG.0f2f        RM   Vsd Wsd -   -   VCOMISD             F=AVX EFL=0--0m0mm
-VEX.NP.0f50/r          RM   Gy  Ups -   -   VMOVMSKPS       D64 F=AVX
-VEX.66.0f50/r          RM   Gy  Upd -   -   VMOVMSKPD       D64 F=AVX
+VEX.NP.0f50/r          RM   Gd  Ups -   -   VMOVMSKPS           F=AVX
+VEX.66.0f50/r          RM   Gd  Upd -   -   VMOVMSKPD           F=AVX
 VEX.NP.0f51            RM   Vps Wps -   -   VSQRTPS             F=AVX
 VEX.66.0f51            RM   Vpd Wpd -   -   VSQRTPD             F=AVX
 VEX.F3.LIG.0f51        RVM  Vdq Hdq Wss -   VSQRTSS             F=AVX
@@ -1043,7 +1043,7 @@ VEX.66.0fc2            RVMI Vx  Hx  Wx  Ib  VCMPPD              F=AVX
 VEX.F3.LIG.0fc2        RVMI Vx  Hx  Wss Ib  VCMPSS              F=AVX
 VEX.F2.LIG.0fc2        RVMI Vx  Hx  Wsd Ib  VCMPSD              F=AVX
 VEX.66.WIG.L0.0fc4     RVMI Vx  Hx  Ew  Ib  VPINSRW             F=AVX ENC_NOSZ
-VEX.66.WIG.L0.0fc5/r   RMI  Gy  Ux  Ib  -   VPEXTRW         D64 F=AVX ENC_NOSZ
+VEX.66.WIG.L0.0fc5/r   RMI  Gd  Ux  Ib  -   VPEXTRW             F=AVX ENC_NOSZ
 VEX.NP.0fc6            RVMI Vx  Hx  Wx  Ib  VSHUFPS             F=AVX
 VEX.66.0fc6            RVMI Vx  Hx  Wx  Ib  VSHUFPD             F=AVX
 VEX.NP.0fd0            RVM  Vx  Hx  Wx  -   VADDSUBPS           F=AVX
@@ -1054,7 +1054,7 @@ VEX.66.0fd3            RVM  Vx  Hx  Wx  -   VPSRLQ              F=AVX
 VEX.66.0fd4            RVM  Vx  Hx  Wx  -   VPADDQ              F=AVX
 VEX.66.0fd5            RVM  Vx  Hx  Wx  -   VPMULLW             F=AVX
 VEX.66.L0.0fd6         MR   Wq  Vq  -   -   VMOVQ               F=AVX
-VEX.66.0fd7/r          RM   Gy  Ux  -   -   VPMOVMSKB       D64 F=AVX
+VEX.66.0fd7/r          RM   Gd  Ux  -   -   VPMOVMSKB           F=AVX
 VEX.66.0fd8            RVM  Vx  Hx  Wx  -   VPSUBUSB            F=AVX
 VEX.66.0fd9            RVM  Vx  Hx  Wx  -   VPSUBUSW            F=AVX
 VEX.66.0fda            RVM  Vx  Hx  Wx  -   VPMINUB             F=AVX
@@ -1259,9 +1259,9 @@ VEX.66.WIG.L0.0f3a14/m MRI  Mb  Vx  Ib  -   VPEXTRB             F=AVX ENC_NOSZ
 VEX.66.WIG.L0.0f3a14/r MRI  Rd  Vx  Ib  -   VPEXTRB             F=AVX ENC_NOSZ
 VEX.66.WIG.L0.0f3a15/m MRI  Mw  Vx  Ib  -   VPEXTRW             F=AVX ENC_NOSZ
 VEX.66.WIG.L0.0f3a15/r MRI  Rd  Vx  Ib  -   VPEXTRW             F=AVX ENC_NOSZ
-VEX.66.W0.L0.0f3a16    MRI  Ey  Vx  Ib  -   VPEXTRD             F=AVX ENC_NOSZ
-VEX.66.W1.L0.0f3a16    MRI  Ey  Vx  Ib  -   VPEXTRD     I64     F=AVX ENC_NOSZ
-VEX.66.W1.L0.0f3a16    MRI  Ey  Vx  Ib  -   VPEXTRQ     O64     F=AVX ENC_NOSZ
+VEX.66.W0.L0.0f3a16    MRI  Ed  Vx  Ib  -   VPEXTRD             F=AVX ENC_NOSZ
+VEX.66.W1.L0.0f3a16    MRI  Ed  Vx  Ib  -   VPEXTRD     I64     F=AVX ENC_NOSZ
+VEX.66.W1.L0.0f3a16    MRI  Eq  Vx  Ib  -   VPEXTRQ     O64     F=AVX ENC_NOSZ
 VEX.66.L0.0f3a17       MRI  Ed  Vx  Ib  -   VEXTRACTPS          F=AVX ENC_NOSZ
 VEX.66.W0.L1.0f3a18    RVMI Vx  Hx  Wdq Ib  VINSERTF128         F=AVX ENC_NOSZ
 VEX.66.W0.L1.0f3a19    MRI  Wdq Vx  Ib  -   VEXTRACTF128        F=AVX ENC_NOSZ

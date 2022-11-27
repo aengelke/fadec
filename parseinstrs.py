@@ -227,6 +227,9 @@ class InstrDesc(NamedTuple):
         extraflags = {}
 
         opsz = set(self.OPKIND_SIZES[opkind.size] for opkind in self.operands)
+        # Operand size either refers to vectors or GP, but not both
+        if -2 in opsz and -3 in opsz:
+            raise Exception(f"conflicting gp vs. vec operand size in {self}")
 
         # Sort fixed sizes encodable in size_fix2 as second element.
         fixed = sorted((x for x in opsz if x >= 0), key=lambda x: 1 <= x <= 4)
