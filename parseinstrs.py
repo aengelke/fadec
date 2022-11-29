@@ -599,41 +599,32 @@ def encode_mnems(entries):
         if "I64" in desc.flags or desc.mnemonic[:9] == "RESERVED_":
             continue
 
-        opsizes = {8} if "SZ8" in desc.flags else {16, 32, 64}
-        hasvex, vecsizes = False, {128}
-
-        if opcode.vex:
-            hasvex, vecsizes = True, {128, 256}
-        if opcode.prefix in ("66", "F2", "F3") and "U66" not in desc.flags:
-            opsizes -= {16}
-        if opcode.vexl == "IG":
-            vecsizes = {0}
-        elif opcode.vexl:
-            vecsizes -= {128 if opcode.vexl == "1" else 256}
-        if opcode.rexw == "IG":
-            opsizes = {0}
-        elif opcode.rexw:
-            opsizes -= {32 if opcode.rexw == "1" else 64}
-
-        if "I66" in desc.flags:
-            opsizes -= {16}
-        if "D64" in desc.flags:
-            opsizes -= {32}
-        if "SZ8" not in desc.flags and "INSTR_WIDTH" not in desc.flags and all(op.size != OpKind.SZ_OP for op in desc.operands):
-            opsizes = {0}
-        if "VSIB" not in desc.flags and all(op.size != OpKind.SZ_VEC for op in desc.operands):
-            vecsizes = {0} # for VEX-encoded general-purpose instructions.
-        if "ENC_NOSZ" in desc.flags:
-            opsizes, vecsizes = {0}, {0}
-
+        opsizes, vecsizes = {0}, {0}
+        prepend_opsize, prepend_vecsize = False, False
         # Where to put the operand size in the mnemonic
         separate_opsize = "ENC_SEPSZ" in desc.flags
-        prepend_opsize = max(opsizes) > 0 and not separate_opsize
-        prepend_vecsize = hasvex and max(vecsizes) > 0 and not separate_opsize
 
-        if "F64" in desc.flags:
-            opsizes = {64}
-            prepend_opsize = False
+        if "ENC_NOSZ" in desc.flags or not desc.dynsizes():
+            pass
+        elif OpKind.SZ_OP in desc.dynsizes():
+            if opcode.rexw:
+                raise Exception(f"unexpected REXW specifier {desc}")
+            opsizes = {8} if "SZ8" in desc.flags else {16, 32, 64}
+            if opcode.prefix in ("66", "F2", "F3") and "U66" not in desc.flags:
+                opsizes -= {16}
+            if "I66" in desc.flags:
+                opsizes -= {16}
+            if "D64" in desc.flags:
+                opsizes -= {32}
+            prepend_opsize = not separate_opsize
+            if "F64" in desc.flags:
+                opsizes = {64}
+                prepend_opsize = False
+        elif opcode.vex and opcode.vexl != "IG": # vectors; don't care for SSE
+            vecsizes = {128, 256}
+            if opcode.vexl:
+                vecsizes -= {128 if opcode.vexl == "1" else 256}
+            prepend_vecsize = not separate_opsize
 
         modrm_type = opcode.modreg[1] if opcode.modreg else "rm"
         optypes_base = desc.optype_str()
