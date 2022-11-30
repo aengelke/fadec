@@ -221,8 +221,6 @@ main(int argc, char** argv)
     TEST("\x66\x0f\xbc\xc0", "bsf ax, ax");
     TEST("\xf2\x0f\xbc\xc0", "bsf eax, eax");
     TEST("\x66\xf2\x0f\xbc\xc0", "bsf ax, ax");
-    TEST("\xf3\x0f\xbc\xc0", "tzcnt eax, eax");
-    TEST("\x66\xf3\x0f\xbc\xc0", "tzcnt ax, ax");
     TEST32("\x0f\x01\x00", "sgdt [eax]");
     TEST64("\x0f\x01\x00", "sgdt [rax]");
     TEST32("\x66\x0f\x01\x00", "sgdt [eax]");
@@ -383,6 +381,59 @@ main(int argc, char** argv)
     TEST64("\x48\xca\x0d\x00", "retfq 0xd");
     TEST64("\x48\xca\x0d\xff", "retfq 0xff0d");
     TEST64("\x48\xcb", "retfq");
+
+    // BMI1
+    TEST("\xf3\x0f\xbc\xc0", "tzcnt eax, eax");
+    TEST("\x66\xf3\x0f\xbc\xc0", "tzcnt ax, ax");
+    TEST64("\xf3\x48\x0f\xbc\xc0", "tzcnt rax, rax");
+    TEST("\xf3\x0f\xbd\xc0", "lzcnt eax, eax");
+    TEST("\x66\xf3\x0f\xbd\xc0", "lzcnt ax, ax");
+    TEST64("\xf3\x48\x0f\xbd\xc0", "lzcnt rax, rax");
+    TEST32("\xc4\xc2\x18\xf2\xc7", "andn eax, esp, edi");
+    TEST64("\xc4\xc2\x18\xf2\xc7", "andn eax, r12d, r15d");
+    TEST32("\xc4\xc2\x98\xf2\xc7", "andn eax, esp, edi");
+    TEST64("\xc4\xc2\x98\xf2\xc7", "andn rax, r12, r15");
+    TEST64("\xc4\x42\x18\xf2\xc7", "andn r8d, r12d, r15d");
+    TEST64("\xc4\x42\x98\xf2\xc7", "andn r8, r12, r15");
+    TEST("\xc4\xe2\x78\xf3\xca", "blsr eax, edx");
+    TEST32("\xc4\xe2\x78\xf3\x08", "blsr eax, dword ptr [eax]");
+    TEST64("\xc4\xe2\x78\xf3\x08", "blsr eax, dword ptr [rax]");
+    TEST32("\xc4\xe2\xf8\xf3\xca", "blsr eax, edx");
+    TEST64("\xc4\xe2\xf8\xf3\xca", "blsr rax, rdx");
+    TEST32("\xc4\xe2\xf8\xf3\x08", "blsr eax, dword ptr [eax]");
+    TEST64("\xc4\xe2\xf8\xf3\x08", "blsr rax, qword ptr [rax]");
+    TEST32("\xc4\xc2\x38\xf3\xc9", "blsr eax, ecx");
+    TEST64("\xc4\xc2\x38\xf3\xc9", "blsr r8d, r9d");
+    TEST32("\xc4\xc2\xb8\xf3\xc9", "blsr eax, ecx");
+    TEST64("\xc4\xc2\xb8\xf3\xc9", "blsr r8, r9");
+    TEST32("\xc4\xe2\x38\xf3\xc9", "blsr eax, ecx");
+    TEST64("\xc4\xe2\x38\xf3\xc9", "blsr r8d, ecx");
+    TEST32("\xc4\xe2\xb8\xf3\xc9", "blsr eax, ecx");
+    TEST64("\xc4\xe2\xb8\xf3\xc9", "blsr r8, rcx");
+    TEST32("\xc4\xc2\x78\xf3\xc9", "blsr eax, ecx");
+    TEST64("\xc4\xc2\x78\xf3\xc9", "blsr eax, r9d");
+    TEST32("\xc4\xc2\xf8\xf3\xc9", "blsr eax, ecx");
+    TEST64("\xc4\xc2\xf8\xf3\xc9", "blsr rax, r9");
+    TEST("\xc4\xe2\x78\xf3\xd2", "blsmsk eax, edx");
+    TEST32("\xc4\xe2\x78\xf3\x10", "blsmsk eax, dword ptr [eax]");
+    TEST64("\xc4\xe2\x78\xf3\x10", "blsmsk eax, dword ptr [rax]");
+    TEST32("\xc4\xe2\xf8\xf3\xd2", "blsmsk eax, edx");
+    TEST64("\xc4\xe2\xf8\xf3\xd2", "blsmsk rax, rdx");
+    TEST32("\xc4\xe2\xf8\xf3\x10", "blsmsk eax, dword ptr [eax]");
+    TEST64("\xc4\xe2\xf8\xf3\x10", "blsmsk rax, qword ptr [rax]");
+    TEST("\xc4\xe2\x78\xf3\xda", "blsi eax, edx");
+    TEST32("\xc4\xe2\x78\xf3\x18", "blsi eax, dword ptr [eax]");
+    TEST64("\xc4\xe2\x78\xf3\x18", "blsi eax, dword ptr [rax]");
+    TEST32("\xc4\xe2\xf8\xf3\xda", "blsi eax, edx");
+    TEST64("\xc4\xe2\xf8\xf3\xda", "blsi rax, rdx");
+    TEST32("\xc4\xe2\xf8\xf3\x18", "blsi eax, dword ptr [eax]");
+    TEST64("\xc4\xe2\xf8\xf3\x18", "blsi rax, qword ptr [rax]");
+    TEST32("\xc4\xc2\x18\xf7\xc7", "bextr eax, edi, esp");
+    TEST64("\xc4\xc2\x18\xf7\xc7", "bextr eax, r15d, r12d");
+    TEST32("\xc4\xc2\x98\xf7\xc7", "bextr eax, edi, esp");
+    TEST64("\xc4\xc2\x98\xf7\xc7", "bextr rax, r15, r12");
+    TEST64("\xc4\x42\x18\xf7\xc7", "bextr r8d, r15d, r12d");
+    TEST64("\xc4\x42\x98\xf7\xc7", "bextr r8, r15, r12");
 
     // NFx/66+F2/F3 combinations
     TEST("\x0f\xc7\xf0", "rdrand eax");
