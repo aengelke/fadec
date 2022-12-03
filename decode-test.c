@@ -633,6 +633,55 @@ main(int argc, char** argv)
     TEST("\xc5\xf9\xf7\x00", "UD"); // must have memory operand
     TEST("\xc5\xfd\xf7\xc1", "UD"); // VEX.L != 0
 
+    TEST("\xc5\xf1\xe1\xc2", "vpsraw xmm0, xmm1, xmm2");
+    TEST32("\xc5\xf1\xe1\x00", "vpsraw xmm0, xmm1, xmmword ptr [eax]");
+    TEST64("\xc5\xf1\xe1\x00", "vpsraw xmm0, xmm1, xmmword ptr [rax]");
+    TEST("\xc5\xf5\xe1\xc2", "vpsraw ymm0, ymm1, xmm2");
+    TEST32("\xc5\xf5\xe1\x00", "vpsraw ymm0, ymm1, xmmword ptr [eax]");
+    TEST64("\xc5\xf5\xe1\x00", "vpsraw ymm0, ymm1, xmmword ptr [rax]");
+    TEST("\xc5\xf1\xe2\xc2", "vpsrad xmm0, xmm1, xmm2");
+    TEST32("\xc5\xf1\xe2\x00", "vpsrad xmm0, xmm1, xmmword ptr [eax]");
+    TEST64("\xc5\xf1\xe2\x00", "vpsrad xmm0, xmm1, xmmword ptr [rax]");
+    TEST("\xc5\xf5\xe2\xc2", "vpsrad ymm0, ymm1, xmm2");
+    TEST32("\xc5\xf5\xe2\x00", "vpsrad ymm0, ymm1, xmmword ptr [eax]");
+    TEST64("\xc5\xf5\xe2\x00", "vpsrad ymm0, ymm1, xmmword ptr [rax]");
+    TEST("\xc5\xf1\xd1\xc2", "vpsrlw xmm0, xmm1, xmm2");
+    TEST32("\xc5\xf1\xd1\x00", "vpsrlw xmm0, xmm1, xmmword ptr [eax]");
+    TEST64("\xc5\xf1\xd1\x00", "vpsrlw xmm0, xmm1, xmmword ptr [rax]");
+    TEST("\xc5\xf5\xd1\xc2", "vpsrlw ymm0, ymm1, xmm2");
+    TEST32("\xc5\xf5\xd1\x00", "vpsrlw ymm0, ymm1, xmmword ptr [eax]");
+    TEST64("\xc5\xf5\xd1\x00", "vpsrlw ymm0, ymm1, xmmword ptr [rax]");
+    TEST("\xc5\xf1\xd2\xc2", "vpsrld xmm0, xmm1, xmm2");
+    TEST32("\xc5\xf1\xd2\x00", "vpsrld xmm0, xmm1, xmmword ptr [eax]");
+    TEST64("\xc5\xf1\xd2\x00", "vpsrld xmm0, xmm1, xmmword ptr [rax]");
+    TEST("\xc5\xf5\xd2\xc2", "vpsrld ymm0, ymm1, xmm2");
+    TEST32("\xc5\xf5\xd2\x00", "vpsrld ymm0, ymm1, xmmword ptr [eax]");
+    TEST64("\xc5\xf5\xd2\x00", "vpsrld ymm0, ymm1, xmmword ptr [rax]");
+    TEST("\xc5\xf1\xd3\xc2", "vpsrlq xmm0, xmm1, xmm2");
+    TEST32("\xc5\xf1\xd3\x00", "vpsrlq xmm0, xmm1, xmmword ptr [eax]");
+    TEST64("\xc5\xf1\xd3\x00", "vpsrlq xmm0, xmm1, xmmword ptr [rax]");
+    TEST("\xc5\xf5\xd3\xc2", "vpsrlq ymm0, ymm1, xmm2");
+    TEST32("\xc5\xf5\xd3\x00", "vpsrlq ymm0, ymm1, xmmword ptr [eax]");
+    TEST64("\xc5\xf5\xd3\x00", "vpsrlq ymm0, ymm1, xmmword ptr [rax]");
+    TEST("\xc5\xf1\xf1\xc2", "vpsllw xmm0, xmm1, xmm2");
+    TEST32("\xc5\xf1\xf1\x00", "vpsllw xmm0, xmm1, xmmword ptr [eax]");
+    TEST64("\xc5\xf1\xf1\x00", "vpsllw xmm0, xmm1, xmmword ptr [rax]");
+    TEST("\xc5\xf5\xf1\xc2", "vpsllw ymm0, ymm1, xmm2");
+    TEST32("\xc5\xf5\xf1\x00", "vpsllw ymm0, ymm1, xmmword ptr [eax]");
+    TEST64("\xc5\xf5\xf1\x00", "vpsllw ymm0, ymm1, xmmword ptr [rax]");
+    TEST("\xc5\xf1\xf2\xc2", "vpslld xmm0, xmm1, xmm2");
+    TEST32("\xc5\xf1\xf2\x00", "vpslld xmm0, xmm1, xmmword ptr [eax]");
+    TEST64("\xc5\xf1\xf2\x00", "vpslld xmm0, xmm1, xmmword ptr [rax]");
+    TEST("\xc5\xf5\xf2\xc2", "vpslld ymm0, ymm1, xmm2");
+    TEST32("\xc5\xf5\xf2\x00", "vpslld ymm0, ymm1, xmmword ptr [eax]");
+    TEST64("\xc5\xf5\xf2\x00", "vpslld ymm0, ymm1, xmmword ptr [rax]");
+    TEST("\xc5\xf1\xf3\xc2", "vpsllq xmm0, xmm1, xmm2");
+    TEST32("\xc5\xf1\xf3\x00", "vpsllq xmm0, xmm1, xmmword ptr [eax]");
+    TEST64("\xc5\xf1\xf3\x00", "vpsllq xmm0, xmm1, xmmword ptr [rax]");
+    TEST("\xc5\xf5\xf3\xc2", "vpsllq ymm0, ymm1, xmm2");
+    TEST32("\xc5\xf5\xf3\x00", "vpsllq ymm0, ymm1, xmmword ptr [eax]");
+    TEST64("\xc5\xf5\xf3\x00", "vpsllq ymm0, ymm1, xmmword ptr [rax]");
+
     TEST("\xc4\xe3\x79\x14\xc0\x00", "vpextrb eax, xmm0, 0x0");
     TEST("\xc4\xe3\xf9\x14\xc0\x00", "vpextrb eax, xmm0, 0x0");
     TEST("\xc4\xe3\x79\x15\xc0\x00", "vpextrw eax, xmm0, 0x0");
