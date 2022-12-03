@@ -18,10 +18,10 @@ INSTR_FLAGS_FIELDS, INSTR_FLAGS_SIZES = zip(*[
     ("lock", 1),
     ("imm_control", 3),
     ("vsib", 1),
-    ("op0_size", 2),
-    ("op1_size", 2),
-    ("op2_size", 2),
-    ("op3_size", 2),
+    ("modrm_size", 2),
+    ("modreg_size", 2),
+    ("vexreg_size", 2),
+    ("imm_size", 2),
     ("unused2", 2),
     ("size_fix1", 3),
     ("size_fix2", 2),
@@ -29,6 +29,7 @@ INSTR_FLAGS_FIELDS, INSTR_FLAGS_SIZES = zip(*[
     ("modrm_ty", 3),
     ("modreg_ty", 3),
     ("vexreg_ty", 2),
+    ("imm_ty", 0),
     ("unused", 3),
     ("opsize", 3),
     ("modrm", 1),
@@ -171,10 +172,18 @@ class InstrDesc(NamedTuple):
     operands: Tuple[str, ...]
     flags: FrozenSet[str]
 
-    OPKIND_REGTYS_MODRM = { "GP": 0, "XMM": 1, "MMX": 4, "FPU": 5, "MASK": 6,  }
-    OPKIND_REGTYS_MODREG = { "GP": 0, "XMM": 1, "MASK": 2, "MMX": 4, "SEG": 5,
-                             "CR": 0, "DR": 0 } # CR/DR handled in code.
-    OPKIND_REGTYS_VEXREG = { "GP": 0, "XMM": 1, "MASK": 2, "FPU": 3 } # also zeroreg
+    OPKIND_REGTYS = {
+        ("modrm", "GP"): 0,   ("modreg", "GP"): 0,   ("vexreg", "GP"): 0,
+        ("modrm", "XMM"): 1,  ("modreg", "XMM"): 1,  ("vexreg", "XMM"): 1,
+        ("modrm", "MMX"): 4,  ("modreg", "MMX"): 4,
+        ("modrm", "FPU"): 5,                         ("vexreg", "FPU"): 3,
+        ("modrm", "MASK"): 6, ("modreg", "MASK"): 2, ("vexreg", "MASK"): 2,
+                              ("modreg", "SEG"): 5,
+                              ("modreg", "DR"): 0, # handled in code
+                              ("modreg", "CR"): 0, # handled in code
+        ("modrm", "MEM"): 0,
+        ("imm", "MEM"): 0, ("imm", "IMM"): 0, ("imm", "XMM"): 0,
+    }
     OPKIND_REGTYS_ENC = {"SEG": 3, "FPU": 4, "MMX": 5, "XMM": 6, "BND": 8,
                          "CR": 9, "DR": 10}
     OPKIND_SIZES = {
@@ -271,19 +280,9 @@ class InstrDesc(NamedTuple):
 
         for i, opkind in enumerate(self.operands):
             sz = self.OPKIND_SIZES[opkind.size] if opkind.size >= 0 else opkind.size
-            extraflags["op%d_size"%i] = sizes.index(sz)
             opname = ENCODING_OPORDER[self.encoding][i]
-            if opname == "modrm":
-                if opkind.kind == "MEM":
-                    continue
-                extraflags["modrm_ty"] = self.OPKIND_REGTYS_MODRM[opkind.kind]
-            elif opname == "modreg":
-                extraflags["modreg_ty"] = self.OPKIND_REGTYS_MODREG[opkind.kind]
-            elif opname == "vexreg":
-                extraflags["vexreg_ty"] = self.OPKIND_REGTYS_VEXREG[opkind.kind]
-            else:
-                if opkind.kind not in ("IMM", "MEM", "XMM"):
-                    raise Exception("invalid regty for op 3, must be VEC")
+            extraflags[f"{opname}_size"] = sizes.index(sz)
+            extraflags[f"{opname}_ty"] = self.OPKIND_REGTYS[opname, opkind.kind]
 
         # Miscellaneous Flags
         if "VSIB" in self.flags:        extraflags["vsib"] = 1

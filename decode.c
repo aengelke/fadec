@@ -312,12 +312,17 @@ prefix_end:
         op_size_alt = op_size - (DESC_OPSIZE(desc) & 3);
     }
 
+    uint8_t operand_sizes[4] = {
+        DESC_SIZE_FIX1(desc), DESC_SIZE_FIX2(desc) + 1, op_size, op_size_alt
+    };
+
     if (UNLIKELY(instr->type == FDI_MOV_CR || instr->type == FDI_MOV_DR)) {
         unsigned modreg = (op_byte >> 3) & 0x7;
         unsigned modrm = op_byte & 0x7;
 
         FdOp* op_modreg = &instr->operands[DESC_MODREG_IDX(desc)];
         op_modreg->type = FD_OT_REG;
+        op_modreg->size = op_size;
         op_modreg->reg = modreg | (prefix_rex & PREFIX_REXR ? 8 : 0);
         op_modreg->misc = instr->type == FDI_MOV_CR ? FD_RT_CR : FD_RT_DR;
         if (instr->type == FDI_MOV_CR && (~0x011d >> op_modreg->reg) & 1)
@@ -327,6 +332,7 @@ prefix_end:
 
         FdOp* op_modrm = &instr->operands[DESC_MODRM_IDX(desc)];
         op_modrm->type = FD_OT_REG;
+        op_modrm->size = op_size;
         op_modrm->reg = modrm | (prefix_rex & PREFIX_REXB ? 8 : 0);
         op_modrm->misc = FD_RT_GPL;
         goto skip_modrm;
@@ -341,12 +347,14 @@ prefix_end:
         if (LIKELY(!(reg_ty & 4)))
             reg_idx += prefix_rex & PREFIX_REXR ? 8 : 0;
         op_modreg->type = FD_OT_REG;
+        op_modreg->size = operand_sizes[(desc->operand_sizes >> 2) & 3];
         op_modreg->reg = reg_idx;
     }
 
     if (DESC_HAS_MODRM(desc))
     {
         FdOp* op_modrm = &instr->operands[DESC_MODRM_IDX(desc)];
+        op_modrm->size = operand_sizes[(desc->operand_sizes >> 0) & 3];
 
         unsigned mod = op_byte & 0xc0;
         unsigned rm = op_byte & 0x07;
@@ -424,6 +432,7 @@ skip_modrm:
         // Without VEX prefix, this encodes an implicit register
         FdOp* operand = &instr->operands[DESC_VEXREG_IDX(desc)];
         operand->type = FD_OT_REG;
+        operand->size = operand_sizes[(desc->operand_sizes >> 4) & 3];
         if (mode == DECODE_32)
             vex_operand &= 0x7;
         operand->reg = vex_operand | DESC_ZEROREG_VAL(desc);
@@ -442,6 +451,7 @@ skip_modrm:
         // 1 = immediate constant 1, used for shifts
         FdOp* operand = &instr->operands[DESC_IMM_IDX(desc)];
         operand->type = FD_OT_IMM;
+        operand->size = 1;
         instr->imm = 1;
     }
     else if (UNLIKELY(imm_control == 2))
@@ -449,6 +459,7 @@ skip_modrm:
         // 2 = memory, address-sized, used for mov with moffs operand
         FdOp* operand = &instr->operands[DESC_IMM_IDX(desc)];
         operand->type = FD_OT_MEM;
+        operand->size = op_size;
         operand->reg = FD_REG_NONE;
         operand->misc = FD_REG_NONE;
 
@@ -468,6 +479,7 @@ skip_modrm:
         // 3 = register in imm8[7:4], used for RVMR encoding with VBLENDVP[SD]
         FdOp* operand = &instr->operands[DESC_IMM_IDX(desc)];
         operand->type = FD_OT_REG;
+        operand->size = op_size;
         operand->misc = FD_RT_VEC;
 
         if (UNLIKELY(off + 1 > len))
@@ -484,6 +496,7 @@ skip_modrm:
     {
         FdOp* operand = &instr->operands[DESC_IMM_IDX(desc)];
         operand->type = FD_OT_IMM;
+        operand->size = operand_sizes[(desc->operand_sizes >> 6) & 3];
 
         // 4/5 = immediate, operand-sized/8 bit
         // 6/7 = offset, operand-sized/8 bit (used for jumps/calls)
@@ -561,19 +574,6 @@ skip_modrm:
         if (!DESC_LOCK(desc) || instr->operands[0].type != FD_OT_MEM)
             return FD_ERR_UD;
         instr->flags |= FD_FLAG_LOCK;
-    }
-
-    uint8_t operand_sizes[4] = {
-        DESC_SIZE_FIX1(desc), DESC_SIZE_FIX2(desc) + 1, op_size, op_size_alt
-    };
-
-    for (int i = 0; i < 4; i++)
-    {
-        FdOp* operand = &instr->operands[i];
-        if (operand->type == FD_OT_NONE)
-            break;
-
-        operand->size = operand_sizes[(desc->operand_sizes >> 2 * i) & 3];
     }
 
     if (UNLIKELY(op_size == 1 || instr->type == FDI_MOVSX || instr->type == FDI_MOVZX)) {
