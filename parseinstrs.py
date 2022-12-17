@@ -337,7 +337,7 @@ class EntryKind(Enum):
 
 opcode_regex = re.compile(
      r"^(?:(?P<prefixes>(?P<vex>E?VEX\.)?(?P<legacy>NP|66|F2|F3|NFx)\." +
-                     r"(?:W(?P<rexw>[01]|IG)\.)?(?:L(?P<vexl>0|1|12|2|IG)\.)?))?" +
+                     r"(?:W(?P<rexw>[01])\.)?(?:L(?P<vexl>0|1|12|2|IG)\.)?))?" +
      r"(?P<escape>0f38|0f3a|0f|)" +
      r"(?P<opcode>[0-9a-f]{2})" +
      r"(?:/(?P<modreg>[0-7]|[rm]|[0-7][rm])|(?P<opcext>[c-f][0-9a-f]))?(?P<extended>\+)?$")
@@ -351,7 +351,7 @@ class Opcode(NamedTuple):
     opcext: Union[None, int] # 0xc0-0xff, or 0
     vex: int # 0 = legacy, 1 = VEX, 2 = EVEX
     vexl: Union[str, None] # 0, 1, 12, 2, IG, None = used, both
-    rexw: Union[str, None] # 0, 1, IG, None = used, both
+    rexw: Union[str, None] # 0, 1, None = both (or ignored)
 
     @classmethod
     def parse(cls, opcode_string):
@@ -486,8 +486,8 @@ class Trie:
             mod = {"m": [0], "r": [1<<3], "rm": [0, 1<<3]}[opc.modreg[1]]
             reg = [opc.modreg[0]] if opc.modreg[0] is not None else list(range(8))
             t16 = [x + y for x in mod for y in reg]
-        if (opc.rexw or "IG") != "IG" or (opc.vexl or "IG") != "IG":
-            rexw = {"0": [0], "1": [1<<0], "IG": [0, 1<<0]}[opc.rexw or "IG"]
+        if opc.rexw is not None or (opc.vexl or "IG") != "IG":
+            rexw = {"0": [0], "1": [1<<0], None: [0, 1<<0]}[opc.rexw]
             if opc.vex < 2:
                 vexl = {"0": [0], "1": [1<<1], "IG": [0, 1<<1]}[opc.vexl or "IG"]
             else:
@@ -698,7 +698,7 @@ def encode_mnems(entries):
         if "ENC_NOSZ" in desc.flags or not desc.dynsizes():
             pass
         elif OpKind.SZ_OP in desc.dynsizes():
-            if opcode.rexw:
+            if opcode.rexw is not None:
                 raise Exception(f"unexpected REXW specifier {desc}")
             opsizes = {8} if "SZ8" in desc.flags else {16, 32, 64}
             if opcode.prefix in ("NP", "66", "F2", "F3") and "U66" not in desc.flags:
