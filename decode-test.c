@@ -685,6 +685,12 @@ main(int argc, char** argv)
     TEST("\xc5\xf5\xf3\xc2", "vpsllq ymm0, ymm1, xmm2");
     TEST32("\xc5\xf5\xf3\x00", "vpsllq ymm0, ymm1, xmmword ptr [eax]");
     TEST64("\xc5\xf5\xf3\x00", "vpsllq ymm0, ymm1, xmmword ptr [rax]");
+    TEST("\xc4\xe2\x71\x47\xc2", "vpsllvd xmm0, xmm1, xmm2");
+    TEST("\xc4\xe2\xf1\x47\xc2", "vpsllvq xmm0, xmm1, xmm2");
+    TEST("\xc4\xe2\x71\x45\xc2", "vpsrlvd xmm0, xmm1, xmm2");
+    TEST("\xc4\xe2\xf1\x45\xc2", "vpsrlvq xmm0, xmm1, xmm2");
+    TEST("\xc4\xe2\x71\x46\xc2", "vpsravd xmm0, xmm1, xmm2");
+    TEST("\xc4\xe2\xf1\x46\xc2", "UD"); // VEX-encoded VPSRAVQ doesn't exist
 
     TEST("\xc4\xe3\x79\x14\xc0\x00", "vpextrb eax, xmm0, 0x0");
     TEST("\xc4\xe3\xf9\x14\xc0\x00", "vpextrb eax, xmm0, 0x0");

@@ -1155,7 +1155,6 @@ VEX.66.L0.0f3841       RM   Vx  Wx  -   -   VPHMINPOSUW         F=AVX
 VEX.66.W0.0f3845       RVM  Vx  Hx  Wx  -   VPSRLVD             F=AVX2
 VEX.66.W1.0f3845       RVM  Vx  Hx  Wx  -   VPSRLVQ             F=AVX2
 VEX.66.W0.0f3846       RVM  Vx  Hx  Wx  -   VPSRAVD             F=AVX2
-VEX.66.W1.0f3846       RVM  Vx  Hx  Wx  -   VPSRAVQ             F=AVX2
 VEX.66.W0.0f3847       RVM  Vx  Hx  Wx  -   VPSLLVD             F=AVX2
 VEX.66.W1.0f3847       RVM  Vx  Hx  Wx  -   VPSLLVQ             F=AVX2
 VEX.66.W0.0f3858       RM   Vx  Wd  -   -   VPBROADCASTD        F=AVX2
