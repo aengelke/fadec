@@ -339,7 +339,7 @@ class EntryKind(Enum):
 opcode_regex = re.compile(
      r"^(?:(?P<prefixes>(?P<vex>E?VEX\.)?(?P<legacy>NP|66|F2|F3|NFx)\." +
                      r"(?:W(?P<rexw>[01])\.)?(?:L(?P<vexl>0|1|12|2|IG)\.)?))?" +
-     r"(?P<escape>0f38|0f3a|0f|)" +
+     r"(?P<escape>0f38|0f3a|0f|M[56]\.|)" +
      r"(?P<opcode>[0-9a-f]{2})" +
      r"(?:/(?P<modreg>[0-7]|[rm]|[0-7][rm])|(?P<opcext>[c-f][0-9a-f]))?(?P<extended>\+)?$")
 
@@ -370,7 +370,7 @@ class Opcode(NamedTuple):
 
         return cls(
             prefix=match.group("legacy"),
-            escape=["", "0f", "0f38", "0f3a"].index(match.group("escape")),
+            escape=["", "0f", "0f38", "0f3a", "M4.", "M5.", "M6."].index(match.group("escape")),
             opc=int(match.group("opcode"), 16),
             extended=match.group("extended") is not None,
             modreg=modreg,
@@ -407,10 +407,13 @@ def verifyOpcodeDesc(opcode, desc):
             raise Exception(f"missing memory operand {opcode}, {desc}")
         # From Intel SDM
         bcst, evexw, vszs = {
+            "TUPLE_FULL_16":      (2,    "0",  (  16,   32,   64)),
             "TUPLE_FULL_32":      (4,    "0",  (  16,   32,   64)),
             "TUPLE_FULL_64":      (8,    "1",  (  16,   32,   64)),
+            "TUPLE_HALF_16":      (2,    "0",  (   8,   16,   32)),
             "TUPLE_HALF_32":      (4,    "0",  (   8,   16,   32)),
             "TUPLE_HALF_64":      (8,    "1",  (   8,   16,   32)),
+            "TUPLE_QUARTER_16":   (2,    "0",  (   4,    8,   16)),
             "TUPLE_FULL_MEM":     (None, None, (  16,   32,   64)),
             "TUPLE_HALF_MEM":     (None, None, (   8,   16,   32)),
             "TUPLE_QUARTER_MEM":  (None, None, (   4,    8,   16)),
@@ -449,7 +452,7 @@ class Trie:
                   EntryKind.TABLE_PREFIX, EntryKind.TABLE16,
                   EntryKind.TABLE8E, EntryKind.TABLE_VEX)
     TABLE_LENGTH = {
-        EntryKind.TABLE_ROOT: 12,
+        EntryKind.TABLE_ROOT: 16,
         EntryKind.TABLE256: 256,
         EntryKind.TABLE_PREFIX: 4,
         EntryKind.TABLE16: 16,

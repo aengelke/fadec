@@ -2739,6 +2739,26 @@ main(int argc, char** argv)
     TEST32("\x62\xf2\xfd\x49\x93\x44\xe7\x01", "vgatherqpd zmm0{k1}, qword ptr [edi+8*zmm4+0x8]");
     TEST64("\x62\xf2\xfd\x49\x93\x44\xe7\x01", "vgatherqpd zmm0{k1}, qword ptr [rdi+8*zmm4+0x8]");
 
+    // AVX512-FP16
+    TEST("\x62\xf5\x74\x08\x5c\xc2", "vsubph xmm0, xmm1, xmm2");
+    TEST("\x62\xf5\x74\x28\x5c\xc2", "vsubph ymm0, ymm1, ymm2");
+    TEST("\x62\xf5\x74\x48\x5c\xc2", "vsubph zmm0, zmm1, zmm2");
+    TEST32("\x62\xf5\x74\x08\x5c\x42\x01", "vsubph xmm0, xmm1, xmmword ptr [edx+0x10]");
+    TEST64("\x62\xf5\x74\x08\x5c\x42\x01", "vsubph xmm0, xmm1, xmmword ptr [rdx+0x10]");
+    TEST32("\x62\xf5\x74\x28\x5c\x42\x01", "vsubph ymm0, ymm1, ymmword ptr [edx+0x20]");
+    TEST64("\x62\xf5\x74\x28\x5c\x42\x01", "vsubph ymm0, ymm1, ymmword ptr [rdx+0x20]");
+    TEST32("\x62\xf5\x74\x48\x5c\x42\x01", "vsubph zmm0, zmm1, zmmword ptr [edx+0x40]");
+    TEST64("\x62\xf5\x74\x48\x5c\x42\x01", "vsubph zmm0, zmm1, zmmword ptr [rdx+0x40]");
+    TEST32("\x62\xf5\x74\x18\x5c\x42\x01", "vsubph xmm0, xmm1, word ptr [edx+0x2]{1to8}");
+    TEST64("\x62\xf5\x74\x18\x5c\x42\x01", "vsubph xmm0, xmm1, word ptr [rdx+0x2]{1to8}");
+    TEST32("\x62\xf5\x74\x38\x5c\x42\x01", "vsubph ymm0, ymm1, word ptr [edx+0x2]{1to16}");
+    TEST64("\x62\xf5\x74\x38\x5c\x42\x01", "vsubph ymm0, ymm1, word ptr [rdx+0x2]{1to16}");
+    TEST32("\x62\xf5\x74\x58\x5c\x42\x01", "vsubph zmm0, zmm1, word ptr [edx+0x2]{1to32}");
+    TEST64("\x62\xf5\x74\x58\x5c\x42\x01", "vsubph zmm0, zmm1, word ptr [rdx+0x2]{1to32}");
+    TEST64("\x62\x93\x36\x34\xc2\xeb\x89", "vcmpsh k5{k4}, xmm25, xmm27, 0x89, {sae}");
+    TEST("\x62\xf5\x66\x4c\x11\xd5", "vmovsh xmm5{k4}, xmm3, xmm2");
+    TEST64("\x62\x25\x66\x4c\x11\xd5", "vmovsh xmm21{k4}, xmm3, xmm26");
+
     puts(failed ? "Some tests FAILED" : "All tests PASSED");
     return failed ? EXIT_FAILURE : EXIT_SUCCESS;
 }

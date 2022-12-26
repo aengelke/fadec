@@ -232,9 +232,9 @@ prefix_end:
             prefix_rex |= mode != DECODE_64 || (byte & 0x20) ? 0 : PREFIX_REXB;
             if (vex_prefix == 0x62) // EVEX
             {
-                if (byte & 0x0c) // Bits 3:2 of opcode_escape must be clear.
+                if (byte & 0x08) // Bit 3 of opcode_escape must be clear.
                     return FD_ERR_UD;
-                opcode_escape = (byte & 0x03) | 8; // 8 is table index with EVEX
+                opcode_escape = (byte & 0x07) | 8; // 8 is table index with EVEX
                 prefix_rex |= mode != DECODE_64 || (byte & 0x10) ? 0 : PREFIX_REXRR;
             }
             else // 3-byte VEX
