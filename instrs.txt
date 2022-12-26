@@ -1457,7 +1457,7 @@ F3.0f1efa              NP   -   -   -   -   ENDBR64             F=CET
 F3.0f1efb              NP   -   -   -   -   ENDBR32             F=CET
 66.0f38f5/m            MR   My  Gy  -   -   WRUSS               F=CET
 NP.0f38f6/m            MR   My  Gy  -   -   WRSS                F=CET
-F3.0fae/6m             M    My  -   -   -   CLRSSBSY            F=CET CPL0
+F3.0fae/6m             M    Mq  -   -   -   CLRSSBSY            F=CET CPL0
 F3.0fae/5r             M    Ry  -   -   -   INCSSP              F=CET
 #
 # CLDEMOTE
