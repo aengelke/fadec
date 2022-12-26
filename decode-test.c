@@ -454,6 +454,10 @@ main(int argc, char** argv)
     TEST64("\x0f\xc7\x30", "vmptrld qword ptr [rax]");
     TEST64("\x66\x0f\xc7\x30", "vmclear qword ptr [rax]");
     TEST64("\xf3\x0f\xc7\x30", "vmxon qword ptr [rax]");
+    TEST32("\x0f\x78\xc1", "vmread ecx, eax");
+    TEST64("\x0f\x78\xc1", "vmread rcx, rax");
+    TEST32("\x0f\x79\xc1", "vmwrite eax, ecx");
+    TEST64("\x0f\x79\xc1", "vmwrite rax, rcx");
 
     TEST64("\x0f\x09", "wbinvd");
     TEST64("\xf3\x0f\x09", "wbnoinvd");
