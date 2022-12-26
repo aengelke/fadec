@@ -33,7 +33,7 @@ INSTR_FLAGS_FIELDS, INSTR_FLAGS_SIZES = zip(*[
     ("vexreg_ty", 2),
     ("imm_ty", 0),
     ("evex_rc", 2),
-    ("unused", 1),
+    ("evex_bcst16", 1),
     ("opsize", 3),
     ("modrm", 1),
     ("ign66", 1),
@@ -308,6 +308,7 @@ class InstrDesc(NamedTuple):
         # Miscellaneous Flags
         if "VSIB" in self.flags:        extraflags["vsib"] = 1
         if "BCST" in self.flags:        extraflags["evex_bcst"] = 1
+        if "BCST16" in self.flags:      extraflags["evex_bcst16"] = 1
         if "MASK" in self.flags:        extraflags["evex_mask"] = 1
         if "SAE" in self.flags:         extraflags["evex_rc"] = 1
         if "ER" in self.flags:          extraflags["evex_rc"] = 3
@@ -406,32 +407,36 @@ def verifyOpcodeDesc(opcode, desc):
             raise Exception(f"missing memory operand {opcode}, {desc}")
         # From Intel SDM
         bcst, evexw, vszs = {
-            "TUPLE_FULL_32":      (True,  "0",  (  16,   32,   64)),
-            "TUPLE_FULL_64":      (True,  "1",  (  16,   32,   64)),
-            "TUPLE_HALF_32":      (True,  "0",  (   8,   16,   32)),
-            "TUPLE_HALF_64":      (True,  "1",  (   8,   16,   32)),
-            "TUPLE_FULL_MEM":     (False, None, (  16,   32,   64)),
-            "TUPLE_HALF_MEM":     (False, None, (   8,   16,   32)),
-            "TUPLE_QUARTER_MEM":  (False, None, (   4,    8,   16)),
-            "TUPLE_EIGHTH_MEM":   (False, None, (   2,    4,    8)),
-            "TUPLE1_SCALAR_8":    (False, None, (   1,    1,    1)),
-            "TUPLE1_SCALAR_16":   (False, None, (   2,    2,    2)),
-            "TUPLE1_SCALAR_32":   (False, "0",  (   4,    4,    4)),
-            "TUPLE1_SCALAR_64":   (False, "1",  (   8,    8,    8)),
-            "TUPLE1_SCALAR_OPSZ": (False, None, (   0,    0,    0)),
-            "TUPLE1_FIXED_32":    (False, None, (   4,    4,    4)),
-            "TUPLE1_FIXED_64":    (False, None, (   8,    8,    8)),
-            "TUPLE2_32":          (False, "0",  (   8,    8,    8)),
-            "TUPLE2_64":          (False, "1",  (None,   16,   16)),
-            "TUPLE4_32":          (False, "0",  (None,   16,   16)),
-            "TUPLE4_64":          (False, "1",  (None, None,   32)),
-            "TUPLE8_32":          (False, "0",  (None, None,   32)),
-            "TUPLE_MEM128":       (False, None, (  16,   16,   16)),
+            "TUPLE_FULL_32":      (4,    "0",  (  16,   32,   64)),
+            "TUPLE_FULL_64":      (8,    "1",  (  16,   32,   64)),
+            "TUPLE_HALF_32":      (4,    "0",  (   8,   16,   32)),
+            "TUPLE_HALF_64":      (8,    "1",  (   8,   16,   32)),
+            "TUPLE_FULL_MEM":     (None, None, (  16,   32,   64)),
+            "TUPLE_HALF_MEM":     (None, None, (   8,   16,   32)),
+            "TUPLE_QUARTER_MEM":  (None, None, (   4,    8,   16)),
+            "TUPLE_EIGHTH_MEM":   (None, None, (   2,    4,    8)),
+            "TUPLE1_SCALAR_8":    (None, None, (   1,    1,    1)),
+            "TUPLE1_SCALAR_16":   (None, None, (   2,    2,    2)),
+            "TUPLE1_SCALAR_32":   (None, "0",  (   4,    4,    4)),
+            "TUPLE1_SCALAR_64":   (None, "1",  (   8,    8,    8)),
+            "TUPLE1_SCALAR_OPSZ": (None, None, (   0,    0,    0)),
+            "TUPLE1_FIXED_32":    (None, None, (   4,    4,    4)),
+            "TUPLE1_FIXED_64":    (None, None, (   8,    8,    8)),
+            "TUPLE2_32":          (None, "0",  (   8,    8,    8)),
+            "TUPLE2_64":          (None, "1",  (None,   16,   16)),
+            "TUPLE4_32":          (None, "0",  (None,   16,   16)),
+            "TUPLE4_64":          (None, "1",  (None, None,   32)),
+            "TUPLE8_32":          (None, "0",  (None, None,   32)),
+            "TUPLE_MEM128":       (None, None, (  16,   16,   16)),
             # TODO: Fix MOVDDUP tuple size :(
-            "TUPLE_MOVDDUP":      (False, None, (  16,   32,   64)),
+            "TUPLE_MOVDDUP":      (None, None, (  16,   32,   64)),
         }[tts[0]]
-        if "BCST" in desc.flags and not bcst:
-            raise Exception(f"broadcast on incompatible type {opcode}, {desc}")
+        if "BCST" in desc.flags:
+            if bcst is None:
+                raise Exception(f"broadcast on incompatible type {opcode}, {desc}")
+            if ("BCST16" in desc.flags) != (bcst == 2):
+                raise Exception(f"bcst16 mismatch, should be {bcst} {opcode}, {desc}")
+        # EVEX.W is used to distinguish 4/8-byte broadcast size
         if evexw and opcode.rexw != evexw:
             raise Exception(f"incompatible EVEX.W {opcode}, {desc}")
         for l, tupsz in enumerate(vszs):

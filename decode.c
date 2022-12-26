@@ -94,6 +94,7 @@ struct InstrDesc
 #define DESC_IGN66(desc) (((desc)->reg_types >> 15) & 1)
 #define DESC_EVEX_SAE(desc) (((desc)->reg_types >> 8) & 1)
 #define DESC_EVEX_ER(desc) (((desc)->reg_types >> 9) & 1)
+#define DESC_EVEX_BCST16(desc) (((desc)->reg_types >> 10) & 1)
 #define DESC_REGTY_MODRM(desc) (((desc)->reg_types >> 0) & 7)
 #define DESC_REGTY_MODREG(desc) (((desc)->reg_types >> 3) & 7)
 #define DESC_REGTY_VEXREG(desc) (((desc)->reg_types >> 6) & 3)
@@ -495,7 +496,10 @@ prefix_end:
             if (UNLIKELY(prefix_evex & 0x10)) {
                 if (UNLIKELY(!DESC_EVEX_BCST(desc)))
                     return FD_ERR_UD;
-                scale = prefix_rex & PREFIX_REXW ? 3 : 2;
+                if (UNLIKELY(DESC_EVEX_BCST16(desc)))
+                    scale = 1;
+                else
+                    scale = prefix_rex & PREFIX_REXW ? 3 : 2;
                 instr->segment |= scale << 6; // Store broadcast size
                 op_modrm->type = FD_OT_MEMBCST;
             } else {
