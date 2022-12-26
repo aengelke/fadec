@@ -345,6 +345,10 @@ prefix_end:
         // Inst doesn't support masking, so EVEX.z or EVEX.aaa is UD
         if (!DESC_EVEX_MASK(desc) && (prefix_evex & 0x87))
             return FD_ERR_UD;
+        // EVEX.z without EVEX.aaa is UD. The Intel SDM is rather unprecise
+        // about this, but real hardware doesn't accept this.
+        if ((prefix_evex & 0x87) == 0x80)
+            return FD_ERR_UD;
 
         vexl = (prefix_evex >> 5) & 3;
         // Cases for SAE/RC (reg operands only):

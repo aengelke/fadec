@@ -1501,40 +1501,40 @@ main(int argc, char** argv)
     TEST("\x62\xf1\x74\x08\x58\xc2", "vaddps xmm0, xmm1, xmm2");
     TEST("\x62\xf1\x74\x09\x58\xc2", "vaddps xmm0{k1}, xmm1, xmm2");
     TEST("\x62\xf1\x74\x89\x58\xc2", "vaddps xmm0{k1}{z}, xmm1, xmm2");
-    TEST("\x62\xf1\x74\x88\x58\xc2", "vaddps xmm0, xmm1, xmm2"); // EVEX.z = 1
+    TEST("\x62\xf1\x74\x88\x58\xc2", "UD"); // EVEX.z = 1
     TEST("\x62\xf1\x74\x28\x58\xc2", "vaddps ymm0, ymm1, ymm2");
     TEST("\x62\xf1\x74\x29\x58\xc2", "vaddps ymm0{k1}, ymm1, ymm2");
     TEST("\x62\xf1\x74\xa9\x58\xc2", "vaddps ymm0{k1}{z}, ymm1, ymm2");
-    TEST("\x62\xf1\x74\xa8\x58\xc2", "vaddps ymm0, ymm1, ymm2"); // EVEX.z = 1
+    TEST("\x62\xf1\x74\xa8\x58\xc2", "UD"); // EVEX.z = 1
     TEST("\x62\xf1\x74\x48\x58\xc2", "vaddps zmm0, zmm1, zmm2");
     TEST("\x62\xf1\x74\x49\x58\xc2", "vaddps zmm0{k1}, zmm1, zmm2");
     TEST("\x62\xf1\x74\xc9\x58\xc2", "vaddps zmm0{k1}{z}, zmm1, zmm2");
-    TEST("\x62\xf1\x74\xc8\x58\xc2", "vaddps zmm0, zmm1, zmm2"); // EVEX.z = 1
+    TEST("\x62\xf1\x74\xc8\x58\xc2", "UD"); // EVEX.z = 1
     TEST("\x62\xf1\x74\x68\x58\xc2", "UD"); // EVEX.L'Lb = 110
     TEST64("\x62\xf1\x74\x08\x58\x00", "vaddps xmm0, xmm1, xmmword ptr [rax]");
     TEST64("\x62\xf1\x74\x0a\x58\x00", "vaddps xmm0{k2}, xmm1, xmmword ptr [rax]");
     TEST64("\x62\xf1\x74\x8a\x58\x00", "vaddps xmm0{k2}{z}, xmm1, xmmword ptr [rax]");
-    TEST64("\x62\xf1\x74\x88\x58\x00", "vaddps xmm0, xmm1, xmmword ptr [rax]"); // EVEX.z = 1
+    TEST64("\x62\xf1\x74\x88\x58\x00", "UD"); // EVEX.z = 1
     TEST64("\x62\xf1\x74\x18\x58\x00", "vaddps xmm0, xmm1, dword ptr [rax]{1to4}");
     TEST64("\x62\xf1\x74\x1a\x58\x00", "vaddps xmm0{k2}, xmm1, dword ptr [rax]{1to4}");
     TEST64("\x62\xf1\x74\x9a\x58\x00", "vaddps xmm0{k2}{z}, xmm1, dword ptr [rax]{1to4}");
-    TEST64("\x62\xf1\x74\x98\x58\x00", "vaddps xmm0, xmm1, dword ptr [rax]{1to4}"); // EVEX.z = 1
+    TEST64("\x62\xf1\x74\x98\x58\x00", "UD"); // EVEX.z = 1
     TEST64("\x62\xf1\x74\x28\x58\x00", "vaddps ymm0, ymm1, ymmword ptr [rax]");
     TEST64("\x62\xf1\x74\x2a\x58\x00", "vaddps ymm0{k2}, ymm1, ymmword ptr [rax]");
     TEST64("\x62\xf1\x74\xaa\x58\x00", "vaddps ymm0{k2}{z}, ymm1, ymmword ptr [rax]");
-    TEST64("\x62\xf1\x74\xa8\x58\x00", "vaddps ymm0, ymm1, ymmword ptr [rax]"); // EVEX.z = 1
+    TEST64("\x62\xf1\x74\xa8\x58\x00", "UD"); // EVEX.z = 1
     TEST64("\x62\xf1\x74\x38\x58\x00", "vaddps ymm0, ymm1, dword ptr [rax]{1to8}");
     TEST64("\x62\xf1\x74\x3a\x58\x00", "vaddps ymm0{k2}, ymm1, dword ptr [rax]{1to8}");
     TEST64("\x62\xf1\x74\xba\x58\x00", "vaddps ymm0{k2}{z}, ymm1, dword ptr [rax]{1to8}");
-    TEST64("\x62\xf1\x74\xb8\x58\x00", "vaddps ymm0, ymm1, dword ptr [rax]{1to8}"); // EVEX.z = 1
+    TEST64("\x62\xf1\x74\xb8\x58\x00", "UD"); // EVEX.z = 1
     TEST64("\x62\xf1\x74\x48\x58\x00", "vaddps zmm0, zmm1, zmmword ptr [rax]");
     TEST64("\x62\xf1\x74\x4a\x58\x00", "vaddps zmm0{k2}, zmm1, zmmword ptr [rax]");
     TEST64("\x62\xf1\x74\xca\x58\x00", "vaddps zmm0{k2}{z}, zmm1, zmmword ptr [rax]");
-    TEST64("\x62\xf1\x74\xc8\x58\x00", "vaddps zmm0, zmm1, zmmword ptr [rax]"); // EVEX.z = 1
+    TEST64("\x62\xf1\x74\xc8\x58\x00", "UD"); // EVEX.z = 1
     TEST64("\x62\xf1\x74\x58\x58\x00", "vaddps zmm0, zmm1, dword ptr [rax]{1to16}");
     TEST64("\x62\xf1\x74\x5a\x58\x00", "vaddps zmm0{k2}, zmm1, dword ptr [rax]{1to16}");
     TEST64("\x62\xf1\x74\xda\x58\x00", "vaddps zmm0{k2}{z}, zmm1, dword ptr [rax]{1to16}");
-    TEST64("\x62\xf1\x74\xd8\x58\x00", "vaddps zmm0, zmm1, dword ptr [rax]{1to16}"); // EVEX.z = 1
+    TEST64("\x62\xf1\x74\xd8\x58\x00", "UD"); // EVEX.z = 1
     TEST64("\x62\xf1\x74\x68\x58\x00", "UD"); // EVEX.L'L = 11
     TEST64("\x62\xf1\x74\x6a\x58\x00", "UD"); // EVEX.L'L = 11
     TEST64("\x62\xf1\x74\xea\x58\x00", "UD"); // EVEX.L'L = 11
@@ -1546,27 +1546,27 @@ main(int argc, char** argv)
     TEST64("\x62\xf1\x74\x08\x58\x40\x01", "vaddps xmm0, xmm1, xmmword ptr [rax+0x10]");
     TEST64("\x62\xf1\x74\x0a\x58\x40\x01", "vaddps xmm0{k2}, xmm1, xmmword ptr [rax+0x10]");
     TEST64("\x62\xf1\x74\x8a\x58\x40\x01", "vaddps xmm0{k2}{z}, xmm1, xmmword ptr [rax+0x10]");
-    TEST64("\x62\xf1\x74\x88\x58\x40\x01", "vaddps xmm0, xmm1, xmmword ptr [rax+0x10]"); // EVEX.z = 1
+    TEST64("\x62\xf1\x74\x88\x58\x40\x01", "UD"); // EVEX.z = 1
     TEST64("\x62\xf1\x74\x18\x58\x40\x01", "vaddps xmm0, xmm1, dword ptr [rax+0x4]{1to4}");
     TEST64("\x62\xf1\x74\x1a\x58\x40\x01", "vaddps xmm0{k2}, xmm1, dword ptr [rax+0x4]{1to4}");
     TEST64("\x62\xf1\x74\x9a\x58\x40\x01", "vaddps xmm0{k2}{z}, xmm1, dword ptr [rax+0x4]{1to4}");
-    TEST64("\x62\xf1\x74\x98\x58\x40\x01", "vaddps xmm0, xmm1, dword ptr [rax+0x4]{1to4}"); // EVEX.z = 1
+    TEST64("\x62\xf1\x74\x98\x58\x40\x01", "UD"); // EVEX.z = 1
     TEST64("\x62\xf1\x74\x28\x58\x40\x01", "vaddps ymm0, ymm1, ymmword ptr [rax+0x20]");
     TEST64("\x62\xf1\x74\x2a\x58\x40\x01", "vaddps ymm0{k2}, ymm1, ymmword ptr [rax+0x20]");
     TEST64("\x62\xf1\x74\xaa\x58\x40\x01", "vaddps ymm0{k2}{z}, ymm1, ymmword ptr [rax+0x20]");
-    TEST64("\x62\xf1\x74\xa8\x58\x40\x01", "vaddps ymm0, ymm1, ymmword ptr [rax+0x20]"); // EVEX.z = 1
+    TEST64("\x62\xf1\x74\xa8\x58\x40\x01", "UD"); // EVEX.z = 1
     TEST64("\x62\xf1\x74\x38\x58\x40\x01", "vaddps ymm0, ymm1, dword ptr [rax+0x4]{1to8}");
     TEST64("\x62\xf1\x74\x3a\x58\x40\x01", "vaddps ymm0{k2}, ymm1, dword ptr [rax+0x4]{1to8}");
     TEST64("\x62\xf1\x74\xba\x58\x40\x01", "vaddps ymm0{k2}{z}, ymm1, dword ptr [rax+0x4]{1to8}");
-    TEST64("\x62\xf1\x74\xb8\x58\x40\x01", "vaddps ymm0, ymm1, dword ptr [rax+0x4]{1to8}"); // EVEX.z = 1
+    TEST64("\x62\xf1\x74\xb8\x58\x40\x01", "UD"); // EVEX.z = 1
     TEST64("\x62\xf1\x74\x48\x58\x40\x01", "vaddps zmm0, zmm1, zmmword ptr [rax+0x40]");
     TEST64("\x62\xf1\x74\x4a\x58\x40\x01", "vaddps zmm0{k2}, zmm1, zmmword ptr [rax+0x40]");
     TEST64("\x62\xf1\x74\xca\x58\x40\x01", "vaddps zmm0{k2}{z}, zmm1, zmmword ptr [rax+0x40]");
-    TEST64("\x62\xf1\x74\xc8\x58\x40\x01", "vaddps zmm0, zmm1, zmmword ptr [rax+0x40]"); // EVEX.z = 1
+    TEST64("\x62\xf1\x74\xc8\x58\x40\x01", "UD"); // EVEX.z = 1
     TEST64("\x62\xf1\x74\x58\x58\x40\x01", "vaddps zmm0, zmm1, dword ptr [rax+0x4]{1to16}");
     TEST64("\x62\xf1\x74\x5a\x58\x40\x01", "vaddps zmm0{k2}, zmm1, dword ptr [rax+0x4]{1to16}");
     TEST64("\x62\xf1\x74\xda\x58\x40\x01", "vaddps zmm0{k2}{z}, zmm1, dword ptr [rax+0x4]{1to16}");
-    TEST64("\x62\xf1\x74\xd8\x58\x40\x01", "vaddps zmm0, zmm1, dword ptr [rax+0x4]{1to16}"); // EVEX.z = 1
+    TEST64("\x62\xf1\x74\xd8\x58\x40\x01", "UD"); // EVEX.z = 1
     TEST64("\x62\xf1\x74\x68\x58\x40\x01", "UD"); // EVEX.L'L = 11
     TEST64("\x62\xf1\x74\x6a\x58\x40\x01", "UD"); // EVEX.L'L = 11
     TEST64("\x62\xf1\x74\xea\x58\x40\x01", "UD"); // EVEX.L'L = 11
@@ -1578,27 +1578,27 @@ main(int argc, char** argv)
     TEST64("\x62\xf1\x74\x08\x58\x40\xff", "vaddps xmm0, xmm1, xmmword ptr [rax-0x10]");
     TEST64("\x62\xf1\x74\x0a\x58\x40\xff", "vaddps xmm0{k2}, xmm1, xmmword ptr [rax-0x10]");
     TEST64("\x62\xf1\x74\x8a\x58\x40\xff", "vaddps xmm0{k2}{z}, xmm1, xmmword ptr [rax-0x10]");
-    TEST64("\x62\xf1\x74\x88\x58\x40\xff", "vaddps xmm0, xmm1, xmmword ptr [rax-0x10]"); // EVEX.z = 1
+    TEST64("\x62\xf1\x74\x88\x58\x40\xff", "UD"); // EVEX.z = 1
     TEST64("\x62\xf1\x74\x18\x58\x40\xff", "vaddps xmm0, xmm1, dword ptr [rax-0x4]{1to4}");
     TEST64("\x62\xf1\x74\x1a\x58\x40\xff", "vaddps xmm0{k2}, xmm1, dword ptr [rax-0x4]{1to4}");
     TEST64("\x62\xf1\x74\x9a\x58\x40\xff", "vaddps xmm0{k2}{z}, xmm1, dword ptr [rax-0x4]{1to4}");
-    TEST64("\x62\xf1\x74\x98\x58\x40\xff", "vaddps xmm0, xmm1, dword ptr [rax-0x4]{1to4}"); // EVEX.z = 1
+    TEST64("\x62\xf1\x74\x98\x58\x40\xff", "UD"); // EVEX.z = 1
     TEST64("\x62\xf1\x74\x28\x58\x40\xff", "vaddps ymm0, ymm1, ymmword ptr [rax-0x20]");
     TEST64("\x62\xf1\x74\x2a\x58\x40\xff", "vaddps ymm0{k2}, ymm1, ymmword ptr [rax-0x20]");
     TEST64("\x62\xf1\x74\xaa\x58\x40\xff", "vaddps ymm0{k2}{z}, ymm1, ymmword ptr [rax-0x20]");
-    TEST64("\x62\xf1\x74\xa8\x58\x40\xff", "vaddps ymm0, ymm1, ymmword ptr [rax-0x20]"); // EVEX.z = 1
+    TEST64("\x62\xf1\x74\xa8\x58\x40\xff", "UD"); // EVEX.z = 1
     TEST64("\x62\xf1\x74\x38\x58\x40\xff", "vaddps ymm0, ymm1, dword ptr [rax-0x4]{1to8}");
     TEST64("\x62\xf1\x74\x3a\x58\x40\xff", "vaddps ymm0{k2}, ymm1, dword ptr [rax-0x4]{1to8}");
     TEST64("\x62\xf1\x74\xba\x58\x40\xff", "vaddps ymm0{k2}{z}, ymm1, dword ptr [rax-0x4]{1to8}");
-    TEST64("\x62\xf1\x74\xb8\x58\x40\xff", "vaddps ymm0, ymm1, dword ptr [rax-0x4]{1to8}"); // EVEX.z = 1
+    TEST64("\x62\xf1\x74\xb8\x58\x40\xff", "UD"); // EVEX.z = 1
     TEST64("\x62\xf1\x74\x48\x58\x40\xff", "vaddps zmm0, zmm1, zmmword ptr [rax-0x40]");
     TEST64("\x62\xf1\x74\x4a\x58\x40\xff", "vaddps zmm0{k2}, zmm1, zmmword ptr [rax-0x40]");
     TEST64("\x62\xf1\x74\xca\x58\x40\xff", "vaddps zmm0{k2}{z}, zmm1, zmmword ptr [rax-0x40]");
-    TEST64("\x62\xf1\x74\xc8\x58\x40\xff", "vaddps zmm0, zmm1, zmmword ptr [rax-0x40]"); // EVEX.z = 1
+    TEST64("\x62\xf1\x74\xc8\x58\x40\xff", "UD"); // EVEX.z = 1
     TEST64("\x62\xf1\x74\x58\x58\x40\xff", "vaddps zmm0, zmm1, dword ptr [rax-0x4]{1to16}");
     TEST64("\x62\xf1\x74\x5a\x58\x40\xff", "vaddps zmm0{k2}, zmm1, dword ptr [rax-0x4]{1to16}");
     TEST64("\x62\xf1\x74\xda\x58\x40\xff", "vaddps zmm0{k2}{z}, zmm1, dword ptr [rax-0x4]{1to16}");
-    TEST64("\x62\xf1\x74\xd8\x58\x40\xff", "vaddps zmm0, zmm1, dword ptr [rax-0x4]{1to16}"); // EVEX.z = 1
+    TEST64("\x62\xf1\x74\xd8\x58\x40\xff", "UD"); // EVEX.z = 1
     TEST64("\x62\xf1\x74\x68\x58\x40\xff", "UD"); // EVEX.L'L = 11
     TEST64("\x62\xf1\x74\x6a\x58\x40\xff", "UD"); // EVEX.L'L = 11
     TEST64("\x62\xf1\x74\xea\x58\x40\xff", "UD"); // EVEX.L'L = 11
@@ -1610,27 +1610,27 @@ main(int argc, char** argv)
     TEST64("\x62\xf1\x74\x08\x58\x80\x01\x00\x00\x00", "vaddps xmm0, xmm1, xmmword ptr [rax+0x1]");
     TEST64("\x62\xf1\x74\x0a\x58\x80\x01\x00\x00\x00", "vaddps xmm0{k2}, xmm1, xmmword ptr [rax+0x1]");
     TEST64("\x62\xf1\x74\x8a\x58\x80\x01\x00\x00\x00", "vaddps xmm0{k2}{z}, xmm1, xmmword ptr [rax+0x1]");
-    TEST64("\x62\xf1\x74\x88\x58\x80\x01\x00\x00\x00", "vaddps xmm0, xmm1, xmmword ptr [rax+0x1]"); // EVEX.z = 1
+    TEST64("\x62\xf1\x74\x88\x58\x80\x01\x00\x00\x00", "UD"); // EVEX.z = 1
     TEST64("\x62\xf1\x74\x18\x58\x80\x01\x00\x00\x00", "vaddps xmm0, xmm1, dword ptr [rax+0x1]{1to4}");
     TEST64("\x62\xf1\x74\x1a\x58\x80\x01\x00\x00\x00", "vaddps xmm0{k2}, xmm1, dword ptr [rax+0x1]{1to4}");
     TEST64("\x62\xf1\x74\x9a\x58\x80\x01\x00\x00\x00", "vaddps xmm0{k2}{z}, xmm1, dword ptr [rax+0x1]{1to4}");
-    TEST64("\x62\xf1\x74\x98\x58\x80\x01\x00\x00\x00", "vaddps xmm0, xmm1, dword ptr [rax+0x1]{1to4}"); // EVEX.z = 1
+    TEST64("\x62\xf1\x74\x98\x58\x80\x01\x00\x00\x00", "UD"); // EVEX.z = 1
     TEST64("\x62\xf1\x74\x28\x58\x80\x01\x00\x00\x00", "vaddps ymm0, ymm1, ymmword ptr [rax+0x1]");
     TEST64("\x62\xf1\x74\x2a\x58\x80\x01\x00\x00\x00", "vaddps ymm0{k2}, ymm1, ymmword ptr [rax+0x1]");
     TEST64("\x62\xf1\x74\xaa\x58\x80\x01\x00\x00\x00", "vaddps ymm0{k2}{z}, ymm1, ymmword ptr [rax+0x1]");
-    TEST64("\x62\xf1\x74\xa8\x58\x80\x01\x00\x00\x00", "vaddps ymm0, ymm1, ymmword ptr [rax+0x1]"); // EVEX.z = 1
+    TEST64("\x62\xf1\x74\xa8\x58\x80\x01\x00\x00\x00", "UD"); // EVEX.z = 1
     TEST64("\x62\xf1\x74\x38\x58\x80\x01\x00\x00\x00", "vaddps ymm0, ymm1, dword ptr [rax+0x1]{1to8}");
     TEST64("\x62\xf1\x74\x3a\x58\x80\x01\x00\x00\x00", "vaddps ymm0{k2}, ymm1, dword ptr [rax+0x1]{1to8}");
     TEST64("\x62\xf1\x74\xba\x58\x80\x01\x00\x00\x00", "vaddps ymm0{k2}{z}, ymm1, dword ptr [rax+0x1]{1to8}");
-    TEST64("\x62\xf1\x74\xb8\x58\x80\x01\x00\x00\x00", "vaddps ymm0, ymm1, dword ptr [rax+0x1]{1to8}"); // EVEX.z = 1
+    TEST64("\x62\xf1\x74\xb8\x58\x80\x01\x00\x00\x00", "UD"); // EVEX.z = 1
     TEST64("\x62\xf1\x74\x48\x58\x80\x01\x00\x00\x00", "vaddps zmm0, zmm1, zmmword ptr [rax+0x1]");
     TEST64("\x62\xf1\x74\x4a\x58\x80\x01\x00\x00\x00", "vaddps zmm0{k2}, zmm1, zmmword ptr [rax+0x1]");
     TEST64("\x62\xf1\x74\xca\x58\x80\x01\x00\x00\x00", "vaddps zmm0{k2}{z}, zmm1, zmmword ptr [rax+0x1]");
-    TEST64("\x62\xf1\x74\xc8\x58\x80\x01\x00\x00\x00", "vaddps zmm0, zmm1, zmmword ptr [rax+0x1]"); // EVEX.z = 1
+    TEST64("\x62\xf1\x74\xc8\x58\x80\x01\x00\x00\x00", "UD"); // EVEX.z = 1
     TEST64("\x62\xf1\x74\x58\x58\x80\x01\x00\x00\x00", "vaddps zmm0, zmm1, dword ptr [rax+0x1]{1to16}");
     TEST64("\x62\xf1\x74\x5a\x58\x80\x01\x00\x00\x00", "vaddps zmm0{k2}, zmm1, dword ptr [rax+0x1]{1to16}");
     TEST64("\x62\xf1\x74\xda\x58\x80\x01\x00\x00\x00", "vaddps zmm0{k2}{z}, zmm1, dword ptr [rax+0x1]{1to16}");
-    TEST64("\x62\xf1\x74\xd8\x58\x80\x01\x00\x00\x00", "vaddps zmm0, zmm1, dword ptr [rax+0x1]{1to16}"); // EVEX.z = 1
+    TEST64("\x62\xf1\x74\xd8\x58\x80\x01\x00\x00\x00", "UD"); // EVEX.z = 1
     TEST64("\x62\xf1\x74\x68\x58\x80\x01\x00\x00\x00", "UD"); // EVEX.L'L = 11
     TEST64("\x62\xf1\x74\x6a\x58\x80\x01\x00\x00\x00", "UD"); // EVEX.L'L = 11
     TEST64("\x62\xf1\x74\xea\x58\x80\x01\x00\x00\x00", "UD"); // EVEX.L'L = 11
@@ -1942,7 +1942,7 @@ main(int argc, char** argv)
     TEST64("\x62\xf2\x7d\x89\x63\x40\x01", "UD"); // EVEX.z = 1
     TEST("\x62\xf2\x7d\x08\x63\xc1", "vpcompressb xmm1, xmm0");
     TEST("\x62\xf2\x7d\x09\x63\xc1", "vpcompressb xmm1{k1}, xmm0");
-    TEST("\x62\xf2\x7d\x88\x63\xc1", "vpcompressb xmm1, xmm0"); // EVEX.z ignored?
+    TEST("\x62\xf2\x7d\x88\x63\xc1", "UD"); // EVEX.z = 1
     TEST("\x62\xf2\x7d\x89\x63\xc1", "vpcompressb xmm1{k1}{z}, xmm0");
     TEST("\x62\xf1\x75\x08\x74\xc2", "vpcmpeqb k0, xmm1, xmm2");
     TEST("\x62\xf1\x75\x09\x74\xc2", "vpcmpeqb k0{k1}, xmm1, xmm2");
