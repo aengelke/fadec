@@ -636,6 +636,13 @@ main(int argc, char** argv)
     TEST("\xc5\xf9\xf7\xc1", "vmaskmovdqu xmm0, xmm1");
     TEST("\xc5\xf9\xf7\x00", "UD"); // must have memory operand
     TEST("\xc5\xfd\xf7\xc1", "UD"); // VEX.L != 0
+    TEST64("\xc5\x07\xd0\x02", "vaddsubps ymm8, ymm15, ymmword ptr [rdx]");
+    TEST("\xc4\xc3\x6d\x09\xd9\x85", "UD"); // VEX.vvvv != 0
+    TEST32("\xc4\xc3\x7d\x09\xd9\x85", "vroundpd ymm3, ymm1, 0x85");
+    TEST64("\xc4\xc3\x7d\x09\xd9\x85", "vroundpd ymm3, ymm9, 0x85");
+    TEST("\xc5\xff\xf0\xd1", "UD"); // must have memory operand
+    TEST32("\xc5\xff\xf0\x11", "vlddqu ymm2, ymmword ptr [ecx]");
+    TEST64("\xc5\xff\xf0\x11", "vlddqu ymm2, ymmword ptr [rcx]");
 
     TEST("\xc5\xf1\xe1\xc2", "vpsraw xmm0, xmm1, xmm2");
     TEST32("\xc5\xf1\xe1\x00", "vpsraw xmm0, xmm1, xmmword ptr [eax]");
