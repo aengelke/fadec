@@ -192,7 +192,7 @@ const char* fdi_name(FdInstrType ty);
 /** Gets the size of the instruction in bytes. **/
 #define FD_SIZE(instr) ((instr)->size)
 /** Gets the specified segment override, or FD_REG_NONE for default segment. **/
-#define FD_SEGMENT(instr) ((FdReg) (instr)->segment)
+#define FD_SEGMENT(instr) ((FdReg) (instr)->segment & 0x3f)
 /** Gets the address size attribute of the instruction in bytes. **/
 #define FD_ADDRSIZE(instr) (1 << (instr)->addrsz)
 /** Get the logarithmic address size; FD_ADDRSIZE == 1 << FD_ADDRSIZELG **/
@@ -262,9 +262,12 @@ const char* fdi_name(FdInstrType ty);
 /** Gets the sign-extended displacement of a memory operand.
  * Only valid if  FD_OP_TYPE == FD_OT_MEM/MEMBCST  **/
 #define FD_OP_DISP(instr,idx) ((int64_t) (instr)->disp)
-/** Get whether the memory broadcast is 64-bit (otherwise: 32-bit).
+/** Get memory broadcast size in bytes.
  * Only valid if  FD_OP_TYPE == FD_OT_MEMBCST **/
-#define FD_OP_BCST64(instr,idx) (!!((instr)->evex & 0x08))
+#define FD_OP_BCSTSZ(instr,idx) (1 << FD_OP_BCSTSZLG(instr,idx))
+/** Get logarithmic memory broadcast size (1 = 2-byte; 2=4-byte; 3=8-byte).
+ * Only valid if  FD_OP_TYPE == FD_OT_MEMBCST **/
+#define FD_OP_BCSTSZLG(instr,idx) ((instr)->segment >> 6)
 /** Gets the (sign-extended) encoded constant for an immediate operand.
  * Only valid if  FD_OP_TYPE == FD_OT_IMM  or  FD_OP_TYPE == FD_OT_OFF  **/
 #define FD_OP_IMM(instr,idx) ((instr)->imm)

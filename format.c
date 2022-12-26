@@ -410,7 +410,7 @@ fd_format_impl(char buf[DECLARE_RESTRICTED_ARRAY_SIZE(128)], const FdInstr* inst
             }
 
             if (op_type == FD_OT_MEMBCST)
-                size = FD_OP_BCST64(instr, i) ? 3 : 2;
+                size = FD_OP_BCSTSZLG(instr, i);
 
             const char* ptrsizes =
                 "\00               "
@@ -461,10 +461,10 @@ fd_format_impl(char buf[DECLARE_RESTRICTED_ARRAY_SIZE(128)], const FdInstr* inst
             *buf++ = ']';
 
             if (UNLIKELY(op_type == FD_OT_MEMBCST)) {
-                // {1toX}, X = FD_OP_SIZE(instr, i) / size (=> 2/4/8/16)
-                unsigned bcstszidx = FD_OP_SIZE(instr, i) >> (FD_OP_BCST64(instr, i) + 1);
-                const char* bcstsizes = "\6{1to2} \6{1to4} \6{1to8} \0       \7{1to16}         ";
-                const char* bcstsize = bcstsizes + bcstszidx;
+                // {1toX}, X = FD_OP_SIZE(instr, i) / BCSTSZ (=> 2/4/8/16/32)
+                unsigned bcstszidx = FD_OP_SIZELG(instr, i) - FD_OP_BCSTSZLG(instr, i) - 1;
+                const char* bcstsizes = "\6{1to2} \6{1to4} \6{1to8} \7{1to16}\7{1to32}         ";
+                const char* bcstsize = bcstsizes + bcstszidx * 8;
                 buf = fd_strpcat(buf, (struct FdStr) { bcstsize+1, *bcstsize });
             }
         } else if (op_type == FD_OT_IMM || op_type == FD_OT_OFF) {

@@ -366,9 +366,7 @@ prefix_end:
         } else {
             if (UNLIKELY(vexl == 3)) // EVEX.L'L == 11b is UD
                 return FD_ERR_UD;
-            // Update V' to REX.W, s.t. broadcast size is exposed
-            unsigned rexw = prefix_rex & PREFIX_REXW ? 0x08 : 0x00;
-            instr->evex = (prefix_evex & 0x87) | rexw;
+            instr->evex = prefix_evex & 0x87; // clear RC, clear B
         }
     } else {
         instr->evex = 0;
@@ -498,6 +496,7 @@ prefix_end:
                 if (UNLIKELY(!DESC_EVEX_BCST(desc)))
                     return FD_ERR_UD;
                 scale = prefix_rex & PREFIX_REXW ? 3 : 2;
+                instr->segment |= scale << 6; // Store broadcast size
                 op_modrm->type = FD_OT_MEMBCST;
             } else {
                 op_modrm->type = FD_OT_MEM;
