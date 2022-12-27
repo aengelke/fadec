@@ -494,47 +494,51 @@ skip_modrm:
     }
     else if (imm_control != 0)
     {
-        FdOp* operand = &instr->operands[DESC_IMM_IDX(desc)];
-        operand->type = FD_OT_IMM;
-        operand->size = operand_sizes[(desc->operand_sizes >> 6) & 3];
-
         // 4/5 = immediate, operand-sized/8 bit
         // 6/7 = offset, operand-sized/8 bit (used for jumps/calls)
         int imm_byte = imm_control & 1;
         int imm_offset = imm_control & 2;
 
-        uint8_t imm_size;
-        if (imm_byte)
-            imm_size = 1;
-        else if (UNLIKELY(instr->type == FDI_RET || instr->type == FDI_RETF ||
-                          instr->type == FDI_SSE_EXTRQ ||
-                          instr->type == FDI_SSE_INSERTQ))
-            imm_size = 2;
-        else if (UNLIKELY(instr->type == FDI_JMPF || instr->type == FDI_CALLF))
-            imm_size = (1 << op_size >> 1) + 2;
-        else if (UNLIKELY(instr->type == FDI_ENTER))
-            imm_size = 3;
-        else if (instr->type == FDI_MOVABS)
-            imm_size = (1 << op_size >> 1);
-        else
-            imm_size = op_size == 2 ? 2 : 4;
+        FdOp* operand = &instr->operands[DESC_IMM_IDX(desc)];
+        operand->type = FD_OT_IMM;
 
-        if (UNLIKELY(off + imm_size > len))
-            return FD_ERR_PARTIAL;
+        if (imm_byte) {
+            if (UNLIKELY(off + 1 > len))
+                return FD_ERR_PARTIAL;
+            instr->imm = (int8_t) LOAD_LE_1(&buffer[off++]);
+            operand->size = desc->operand_sizes & 0x40 ? 1 : op_size;
+        } else {
+            operand->size = operand_sizes[(desc->operand_sizes >> 6) & 3];
 
-        if (imm_size == 1)
-            instr->imm = (int8_t) LOAD_LE_1(&buffer[off]);
-        else if (imm_size == 2)
-            instr->imm = (int16_t) LOAD_LE_2(&buffer[off]);
-        else if (imm_size == 3)
-            instr->imm = LOAD_LE_3(&buffer[off]);
-        else if (imm_size == 4)
-            instr->imm = (int32_t) LOAD_LE_4(&buffer[off]);
-        else if (imm_size == 6)
-            instr->imm = LOAD_LE_4(&buffer[off]) | LOAD_LE_2(&buffer[off+4]) << 32;
-        else if (imm_size == 8)
-            instr->imm = (int64_t) LOAD_LE_8(&buffer[off]);
-        off += imm_size;
+            uint8_t imm_size;
+            if (UNLIKELY(instr->type == FDI_RET || instr->type == FDI_RETF ||
+                         instr->type == FDI_SSE_EXTRQ ||
+                         instr->type == FDI_SSE_INSERTQ))
+                imm_size = 2;
+            else if (UNLIKELY(instr->type == FDI_JMPF || instr->type == FDI_CALLF))
+                imm_size = (1 << op_size >> 1) + 2;
+            else if (UNLIKELY(instr->type == FDI_ENTER))
+                imm_size = 3;
+            else if (instr->type == FDI_MOVABS)
+                imm_size = (1 << op_size >> 1);
+            else
+                imm_size = op_size == 2 ? 2 : 4;
+
+            if (UNLIKELY(off + imm_size > len))
+                return FD_ERR_PARTIAL;
+
+            if (imm_size == 2)
+                instr->imm = (int16_t) LOAD_LE_2(&buffer[off]);
+            else if (imm_size == 3)
+                instr->imm = LOAD_LE_3(&buffer[off]);
+            else if (imm_size == 4)
+                instr->imm = (int32_t) LOAD_LE_4(&buffer[off]);
+            else if (imm_size == 6)
+                instr->imm = LOAD_LE_4(&buffer[off]) | LOAD_LE_2(&buffer[off+4]) << 32;
+            else if (imm_size == 8)
+                instr->imm = (int64_t) LOAD_LE_8(&buffer[off]);
+            off += imm_size;
+        }
 
         if (imm_offset)
         {

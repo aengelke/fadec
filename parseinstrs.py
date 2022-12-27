@@ -269,8 +269,13 @@ class InstrDesc(NamedTuple):
             extraflags["instr_width"] = "INSTR_WIDTH" in self.flags
             extraflags["lock"] = "LOCK" in self.flags
 
+        imm_byte = self.imm_size(4) == 1
+        extraflags["imm_control"] = flags.imm_control | imm_byte
+
         # Sort fixed sizes encodable in size_fix2 as second element.
-        fixed = set(self.OPKIND_SIZES[op.size] for op in self.operands if op.size >= 0)
+        # But: byte-sized immediates are handled specially and don't cost space.
+        fixed = set(self.OPKIND_SIZES[op.size] for op in self.operands if
+                    op.size >= 0 and not (imm_byte and op.kind == "IMM"))
         fixed = sorted(fixed, key=lambda x: 1 <= x <= 4)
         if len(fixed) > 2 or (len(fixed) == 2 and not (1 <= fixed[1] <= 4)):
             raise Exception(f"invalid fixed sizes {fixed} in {self}")
@@ -280,9 +285,14 @@ class InstrDesc(NamedTuple):
 
         for i, opkind in enumerate(self.operands):
             sz = self.OPKIND_SIZES[opkind.size] if opkind.size >= 0 else opkind.size
-            opname = ENCODING_OPORDER[self.encoding][i]
-            extraflags[f"{opname}_size"] = sizes.index(sz)
-            extraflags[f"{opname}_ty"] = self.OPKIND_REGTYS[opname, opkind.kind]
+            if opkind.kind == "IMM":
+                if imm_byte and sz not in (dynsizes[0], 1):
+                    raise Exception(f"imm_byte with opsize {sz} in {self}")
+                extraflags[f"imm_size"] = sz == 1 if imm_byte else sizes.index(sz)
+            else:
+                opname = ENCODING_OPORDER[self.encoding][i]
+                extraflags[f"{opname}_size"] = sizes.index(sz)
+                extraflags[f"{opname}_ty"] = self.OPKIND_REGTYS[opname, opkind.kind]
 
         # Miscellaneous Flags
         if "VSIB" in self.flags:        extraflags["vsib"] = 1
@@ -290,9 +300,6 @@ class InstrDesc(NamedTuple):
 
         if "U66" not in self.flags and (ign66 or "I66" in self.flags):
             extraflags["ign66"] = 1
-
-        if self.imm_size(4) == 1:
-            extraflags["imm_control"] = flags.imm_control | 1
 
         enc = flags._replace(**extraflags)._encode()
         enc = tuple((enc >> i) & 0xffff for i in range(0, 48, 16))
