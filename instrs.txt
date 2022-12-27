@@ -521,8 +521,7 @@ NP.0f77                NP   -   -   -   -   MMX_EMMS            F=MMX
 NP.W0.0f7e             MR   Ey  Py  -   -   MMX_MOVD_M2G        F=MMX ENC_NOSZ
 NP.W1.0f7e             MR   Ey  Py  -   -   MMX_MOVQ_M2G        F=MMX ENC_NOSZ
 NP.0f7f                MR   Qq  Pq  -   -   MMX_MOVQ            F=MMX
-# TODO: Ey operand is actually Ew
-NP.0fc4                RMI  Pq  Ey  Ib  -   MMX_PINSRW          F=SSE ENC_NOSZ
+NP.0fc4                RMI  Pq  Ew  Ib  -   MMX_PINSRW          F=SSE ENC_NOSZ
 NP.0fc5/r              RMI  Gy  Nq  Ib  -   MMX_PEXTRW      D64 F=SSE
 NP.0fd1                RM   Pq  Qq  -   -   MMX_PSRLW           F=MMX
 NP.0fd2                RM   Pq  Qq  -   -   MMX_PSRLD           F=MMX
@@ -1038,9 +1037,8 @@ VEX.NP.L0.0fae/2m      M    Md  -   -   -   VLDMXCSR            F=AVX
 VEX.NP.L0.0fae/3m      M    Md  -   -   -   VSTMXCSR            F=AVX
 VEX.NP.0fc2            RVMI Vx  Hx  Wx  Ib  VCMPPS              F=AVX
 VEX.66.0fc2            RVMI Vx  Hx  Wx  Ib  VCMPPD              F=AVX
-# TODO: Vx/Hx is actually Vdq/Hdq
-VEX.F3.LIG.0fc2        RVMI Vx  Hx  Wss Ib  VCMPSS              F=AVX
-VEX.F2.LIG.0fc2        RVMI Vx  Hx  Wsd Ib  VCMPSD              F=AVX
+VEX.F3.LIG.0fc2        RVMI Vdq Hdq Wss Ib  VCMPSS              F=AVX
+VEX.F2.LIG.0fc2        RVMI Vdq Hdq Wsd Ib  VCMPSD              F=AVX
 VEX.66.WIG.L0.0fc4     RVMI Vx  Hx  Ew  Ib  VPINSRW             F=AVX ENC_NOSZ
 VEX.66.WIG.L0.0fc5/r   RMI  Gd  Ux  Ib  -   VPEXTRW             F=AVX ENC_NOSZ
 VEX.NP.0fc6            RVMI Vx  Hx  Wx  Ib  VSHUFPS             F=AVX
@@ -1242,9 +1240,8 @@ VEX.66.W0.0f3a05       RMI  Vx  Wx  Ib  -   VPERMILPD           F=AVX
 VEX.66.W0.L1.0f3a06    RVMI Vx  Hx  Wx  Ib  VPERM2F128          F=AVX
 VEX.66.0f3a08          RMI  Vps Wps Ib  -   VROUNDPS            F=AVX
 VEX.66.0f3a09          RMI  Vpd Wpd Ib  -   VROUNDPD            F=AVX
-# TODO: Vx/Hx is actually Vdq/Hdq
-VEX.66.LIG.0f3a0a      RVMI Vx  Hx  Wss Ib  VROUNDSS            F=AVX
-VEX.66.LIG.0f3a0b      RVMI Vx  Hx  Wsd Ib  VROUNDSD            F=AVX
+VEX.66.LIG.0f3a0a      RVMI Vdq Hdq Wss Ib  VROUNDSS            F=AVX
+VEX.66.LIG.0f3a0b      RVMI Vdq Hdq Wsd Ib  VROUNDSD            F=AVX
 VEX.66.0f3a0c          RVMI Vx  Hx  Wx  Ib  VBLENDPS            F=AVX
 VEX.66.0f3a0d          RVMI Vx  Hx  Wx  Ib  VBLENDPD            F=AVX
 VEX.66.0f3a0e          RVMI Vx  Hx  Wx  Ib  VPBLENDW            F=AVX
