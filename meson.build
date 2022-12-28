@@ -77,6 +77,9 @@ endif
 if get_option('with_undoc')
   generate_args += ['--with-undoc']
 endif
+if not meson.is_subproject()
+  generate_args += ['--stats']
+endif
 
 tables = []
 foreach component : components

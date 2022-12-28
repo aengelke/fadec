@@ -576,9 +576,10 @@ def decode_table(entries, args):
                         .lower() for m in mnems]
     mnemonics_str = superstring(mnemonics_intel)
 
-    print(f"Stats: Descs -- {len(descs)} ({8*len(descs)} bytes);",
-          f"Trie -- {2*len(table_data)} bytes, {trie.stats};"
-          f"Mnems -- {len(mnemonics_str)} + {3*len(mnemonics_intel)} bytes")
+    if args.stats:
+        print(f"Decode stats: Descs -- {len(descs)} ({8*len(descs)} bytes); ",
+              f"Trie -- {2*len(table_data)} bytes, {trie.stats}; "
+              f"Mnems -- {len(mnemonics_str)} + {3*len(mnemonics_intel)} bytes")
 
     defines = ["FD_TABLE_OFFSET_%d %d\n"%k for k in zip(modes, root_offsets)]
 
@@ -930,6 +931,7 @@ if __name__ == "__main__":
     parser.add_argument("--32", dest="modes", action="append_const", const=32)
     parser.add_argument("--64", dest="modes", action="append_const", const=64)
     parser.add_argument("--with-undoc", action="store_true")
+    parser.add_argument("--stats", action="store_true")
     parser.add_argument("mode", choices=generators.keys())
     parser.add_argument("table", type=argparse.FileType('r'))
     parser.add_argument("out_public", type=argparse.FileType('w'))
