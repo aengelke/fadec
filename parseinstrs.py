@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 
 import argparse
+import bisect
 from collections import OrderedDict, defaultdict, namedtuple, Counter
 from enum import Enum
 from itertools import product
@@ -515,16 +516,17 @@ def superstring(strs):
     # Greedy heuristic generally yields acceptable results, though it depends on
     # the order of the menmonics. More compact results are possible, but the
     # expectable gains of an optimal result (probably with O(n!)) are small.
+    # First sort strings and later do a binary search for each possible prefix.
+    realstrs.sort()
     merged = ""
-    def maxoverlap(s1, s2):
-        for i in range(min(len(s1), len(s2))-1, 0, -1):
-            if s1[:i] == s2[-i:]:
-                return i
-        return 0
     while realstrs:
-        s = max(realstrs, key=lambda k: maxoverlap(k, merged))
-        merged += s[maxoverlap(s, merged):]
-        realstrs.remove(s)
+        for i in range(min(16, len(merged)), 0, -1):
+            idx = bisect.bisect_left(realstrs, merged[-i:])
+            if idx < len(realstrs) and realstrs[idx][:i] == merged[-i:]:
+                merged += realstrs.pop(idx)[i:]
+                break
+        else:
+            merged += realstrs.pop()
     return merged
 
 def decode_table(entries, args):
@@ -570,7 +572,7 @@ def decode_table(entries, args):
                         .replace("REP_", "REP ").replace("CMPXCHGD", "CMPXCHG")
                         .replace("JCXZ", "JCXZ JECXZJRCXZ")
                         .replace("C_SEP", "CWD CDQ CQO")
-                        .replace("C_EX", "CBW CWDECDQE")
+                        .replace("C_EX", "CBW CWDECDQE").replace("XCHG_NOP", "")
                         .lower() for m in mnems]
     mnemonics_str = superstring(mnemonics_intel)
 
