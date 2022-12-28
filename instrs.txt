@@ -1535,6 +1535,7 @@ F3.0fae/4              M    Ey  -   -   -   PTWRITE             F=PTWRITE
 66.0f3acf              RMI  Vx  Wx  Ib  -   GF2P8AFFINEINVQB    F=GFNI
 
 # ENQCMD
+# TODO: Gy operands are address-sized
 F2.0f38f8/m            RM   Gy  Moq -   -   ENQCMD              F=ENQCMD
 F3.0f38f8/m            RM   Gy  Moq -   -   ENQCMDS             F=ENQCMD
 
@@ -1623,11 +1624,11 @@ F3.0f01ef              NP   -   -   -   -   STUI        O64     F=UINTR
 F3.0fc7/6r             M    Ry  -   -   -   SENDUIPI    O64 D64 F=UINTR
 
 # WRMSRNS
-NP.0f01c6              NP   -   -   -   -   WRMSRNS             F=WRMSRNS
+NP.0f01c6              NP   -   -   -   -   WRMSRNS             F=WRMSRNS CPL0
 
 # MSRLIST
-F2.0f01c6              NP   -   -   -   -   RDMSRLIST   O64     F=MSRLIST
-F3.0f01c6              NP   -   -   -   -   WRMSRLIST   O64     F=MSRLIST
+F2.0f01c6              NP   -   -   -   -   RDMSRLIST   O64     F=MSRLIST CPL0
+F3.0f01c6              NP   -   -   -   -   WRMSRLIST   O64     F=MSRLIST CPL0
 
 # RAO-INT
 NP.0f38fc/m            MR   My  Gy  -   -   AADD                F=RAO-INT
