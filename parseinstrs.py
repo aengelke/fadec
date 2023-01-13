@@ -660,6 +660,8 @@ def encode_mnems(entries):
                 spec_opcode = spec_opcode._replace(rexw="1")
             if vecsize == 256:
                 spec_opcode = spec_opcode._replace(vexl="1")
+            if spec_opcode.vexl == "IG":
+                spec_opcode = spec_opcode._replace(vexl="0")
 
             # Construct mnemonic name
             mnem_name = {"MOVABS": "MOV", "XCHG_NOP": "XCHG"}.get(desc.mnemonic, desc.mnemonic)
@@ -690,42 +692,52 @@ def encode_mnems(entries):
 def encode_table(entries, args):
     mnemonics = encode_mnems(entries)
     mnemonics["NOP", 0, ""] = [(Opcode.parse("90"), InstrDesc.parse("NP - - - - NOP"))]
-    descs = ""
-    alt_index = 0
+    mnem_map = {}
+    alt_table = [0] # first entry is unused
     for (mnem, opsize, ots), variants in mnemonics.items():
-        indices = [f"FE_{mnem}"] + [f"FE_MNEM_MAX+{alt_index+i}" for i in range(len(variants) - 1)]
-        alt_list = indices[1:] + ["0"]
-        alt_index += len(alt_list) - 1
-        for idx, alt, (opcode, desc) in zip(indices, alt_list, variants):
+        supports_high_regs = []
+        if variants[0][1].mnemonic in ("MOVSX", "MOVZX") or opsize == 8:
+            # Should be the same for all variants
+            desc = variants[0][1]
+            for i, (ot, op) in enumerate(zip(ots, desc.operands)):
+                if ot == "r" and op.kind == "GP" and op.abssize(opsize//8) == 1:
+                    supports_high_regs.append(i)
+
+        alt_indices = [i + len(alt_table) for i in range(len(variants) - 1)] + [0]
+        enc_opcs = []
+        for alt, (opcode, desc) in zip(alt_indices, variants):
             opc_i = opcode.opc
             if opcode.opcext:
                 opc_i |= opcode.opcext << 8
             if opcode.modreg and opcode.modreg[0] is not None:
                 opc_i |= opcode.modreg[0] << 8
-            opc_s = f"{opc_i}"
-            opc_s += ["","|OPC_0F","|OPC_0F38","|OPC_0F3A"][opcode.escape]
-            if opcode.prefix in ("66", "F2", "F3", "LOCK"):
-                opc_s += "|OPC_" + opcode.prefix
-            if opsize == 16 and opcode.prefix != "66":
-                opc_s += "|OPC_66"
-            opc_s += "|OPC_VSIB" if "VSIB" in desc.flags else ""
-            opc_s += "|OPC_VEX" if opcode.vex else ""
-            opc_s += "|OPC_VEXL" if opcode.vexl == "1" else ""
-            opc_s += "|OPC_REXW" if opcode.rexw == "1" else ""
+            opc_i |= opcode.escape * 0x10000
+            opc_i |= 0x80000 if opcode.prefix == "66" or opsize == 16 else 0
+            opc_i |= 0x100000 if opcode.prefix == "F2" else 0
+            opc_i |= 0x200000 if opcode.prefix == "F3" else 0
+            opc_i |= 0x400000 if opcode.rexw == "1" else 0
+            if opcode.prefix == "LOCK":
+                opc_i |= 0x800000
+            elif opcode.vex:
+                opc_i |= 0x1000000 + 0x800000 * int(opcode.vexl or 0)
+            opc_i |= 0x8000000 if "VSIB" in desc.flags else 0
+            if alt >= 0x100:
+                raise Exception("encode alternate bits exhausted")
+            opc_i |= sum(1 << i for i in supports_high_regs) << 45
+            opc_i |= desc.imm_size(opsize//8) << 47
+            opc_i |= ["INVALID",
+                "NP", "M", "M1", "MI", "MC", "MR", "RM", "RMA", "MRI", "RMI", "MRC",
+                "AM", "MA", "I", "IA", "O", "OI", "OA", "S", "A", "D", "FD", "TD",
+                "RVM", "RVMI", "RVMR", "RMV", "VM", "VMI", "MVR", "MRV",
+            ].index(desc.encoding) << 51
+            opc_i |= alt << 56
+            enc_opcs.append(opc_i)
+        mnem_map[f"FE_{mnem}"] = enc_opcs[0]
+        alt_table += enc_opcs[1:]
 
-            desc = {
-                "enc": f"ENC_{desc.encoding}",
-                "immsz": desc.imm_size(opsize//8),
-                "tys": desc.encode_regtys(ots, opsize//8),
-                "opc": opc_s,
-                "alt": alt,
-            }
-            desc_str = ", ".join(f".{k} = {v}" for k, v in desc.items())
-            descs += f"[{idx}] = {{ {desc_str} }},\n"
-
-    mnem_list = sorted(f"FE_{mnem}" for mnem, _, _ in mnemonics.keys())
-    mnem_tab = "".join(f"FE_MNEMONIC({m},{i})\n" for i, m in enumerate(mnem_list))
-    return mnem_tab, descs
+    mnem_tab = "".join(f"#define {m} {v:#x}\n" for m, v in mnem_map.items())
+    alt_tab = "".join(f"[{i}] = {v:#x},\n" for i, v in enumerate(alt_table))
+    return mnem_tab, alt_tab
 
 def encode2_table(entries, args):
     mnemonics = encode_mnems(entries)

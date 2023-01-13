@@ -14,39 +14,38 @@
 #define UNLIKELY(x) (x)
 #endif
 
-enum {
-    // 16:17 = escape
-    OPC_0F = 1 << 16,
-    OPC_0F38 = 2 << 16,
-    OPC_0F3A = 3 << 16,
-    OPC_ESCAPE_MSK = 3 << 16,
-    OPC_VSIB = 1 << 18,
-    OPC_66 = 1 << 19,
-    OPC_F2 = 1 << 20,
-    OPC_F3 = 1 << 21,
-    OPC_REXW = 1 << 22,
-    OPC_LOCK = 1 << 23,
-    OPC_VEX = 1 << 24,
-    OPC_VEXL = 1 << 25,
-    OPC_REXR = 1 << 28,
-    OPC_REXX = 1 << 27,
-    OPC_REXB = 1 << 26,
-    OPC_REX = 1 << 29,
-    OPC_67 = 1 << 30,
-};
+#define OPC_66 0x80000
+#define OPC_F2 0x100000
+#define OPC_F3 0x200000
+#define OPC_REXW 0x400000
+#define OPC_LOCK 0x800000
+#define OPC_VEXL0 0x1000000
+#define OPC_VEXL1 0x1800000
+#define OPC_EVEXL0 0x2000000
+#define OPC_EVEXL1 0x2800000
+#define OPC_EVEXL2 0x3000000
+#define OPC_EVEXL3 0x3800000
+#define OPC_EVEXB 0x4000000
+#define OPC_VSIB 0x8000000
+#define OPC_67 FE_ADDR32
+#define OPC_SEG_MSK 0xe0000000
+#define OPC_JMPL FE_JMPL
+#define OPC_MASK_MSK 0x1e00000000
+#define OPC_USER_MSK (OPC_67|OPC_SEG_MSK|OPC_MASK_MSK)
+#define OPC_GPH_OP0 0x200000000000
+#define OPC_GPH_OP1 0x400000000000
 
-#define OPC_SEG_IDX 31
-#define OPC_SEG_MSK ((uint64_t) 0x7l << OPC_SEG_IDX)
-#define OPC_VEXOP_IDX 34
-#define OPC_VEXOP_MSK ((uint64_t) 0xfl << OPC_VEXOP_IDX)
+#define EPFX_REX_MSK 0x0f
+#define EPFX_REX 0x08
+#define EPFX_REXR 0x04
+#define EPFX_REXX 0x02
+#define EPFX_REXB 0x01
+#define EPFX_VVVV_IDX 4
 
 static bool op_mem(FeOp op) { return op < 0; }
 static bool op_reg(FeOp op) { return op >= 0; }
 static bool op_reg_gpl(FeOp op) { return (op & ~0xf) == 0x100; }
 static bool op_reg_gph(FeOp op) { return (op & ~0x3) == 0x204; }
-static bool op_reg_seg(FeOp op) { return (op & ~0x7) == 0x300 && (op & 7) < 6; }
-static bool op_reg_fpu(FeOp op) { return (op & ~0x7) == 0x400; }
-static bool op_reg_mmx(FeOp op) { return (op & ~0x7) == 0x500; }
 static bool op_reg_xmm(FeOp op) { return (op & ~0xf) == 0x600; }
 static int64_t op_mem_offset(FeOp op) { return (int32_t) op; }
 static unsigned op_mem_base(FeOp op) { return (op >> 32) & 0xfff; }
@@ -65,11 +64,13 @@ static bool op_imm_n(FeOp imm, unsigned immsz) {
 
 static
 unsigned
-opc_size(uint64_t opc)
+opc_size(uint64_t opc, uint64_t epfx)
 {
     unsigned res = 1;
-    if (opc & OPC_VEX) {
-        if ((opc & (OPC_REXW|OPC_REXX|OPC_REXB|OPC_ESCAPE_MSK)) != OPC_0F)
+    if (opc & OPC_EVEXL0) {
+        res += 4;
+    } else if (opc & OPC_VEXL0) {
+        if (opc & (OPC_REXW|0x20000) || epfx & (EPFX_REXX|EPFX_REXB))
             res += 3;
         else
             res += 2;
@@ -78,63 +79,64 @@ opc_size(uint64_t opc)
         if (opc & OPC_66) res++;
         if (opc & OPC_F2) res++;
         if (opc & OPC_F3) res++;
-        if (opc & (OPC_REX|OPC_REXW|OPC_REXR|OPC_REXX|OPC_REXB)) res++;
-        if (opc & OPC_ESCAPE_MSK) res++;
-        if ((opc & OPC_ESCAPE_MSK) == OPC_0F38 || (opc & OPC_ESCAPE_MSK) == OPC_0F3A) res++;
+        if (opc & OPC_REXW || epfx & EPFX_REX_MSK) res++;
+        if (opc & 0x30000) res++;
+        if (opc & 0x20000) res++;
     }
     if (opc & OPC_SEG_MSK) res++;
     if (opc & OPC_67) res++;
-    if ((opc & 0xc000) == 0xc000) res++;
+    if (opc & 0x8000) res++;
     return res;
 }
 
 static
 int
-enc_opc(uint8_t** restrict buf, uint64_t opc)
+enc_opc(uint8_t** restrict buf, uint64_t opc, uint64_t epfx)
 {
     if (opc & OPC_SEG_MSK)
-        *(*buf)++ = (0x65643e362e2600 >> (8 * ((opc >> OPC_SEG_IDX) & 7))) & 0xff;
+        *(*buf)++ = (0x65643e362e2600 >> (8 * ((opc >> 29) & 7))) & 0xff;
     if (opc & OPC_67) *(*buf)++ = 0x67;
-    if (opc & OPC_VEX) {
-        bool vex3 = (opc & (OPC_REXW|OPC_REXX|OPC_REXB|OPC_ESCAPE_MSK)) != OPC_0F;
+    if (opc & OPC_EVEXL0) {
+        return -1;
+    } else if (opc & OPC_VEXL0) {
+        bool vex3 = opc & (OPC_REXW|0x20000) || epfx & (EPFX_REXX|EPFX_REXB);
         unsigned pp = 0;
         if (opc & OPC_66) pp = 1;
         if (opc & OPC_F3) pp = 2;
         if (opc & OPC_F2) pp = 3;
         *(*buf)++ = 0xc4 | !vex3;
-        unsigned b2 = pp | (opc & OPC_VEXL ? 0x4 : 0);
+        unsigned b2 = pp | (opc & 0x800000 ? 0x4 : 0);
         if (vex3) {
-            unsigned b1 = (opc & OPC_ESCAPE_MSK) >> 16;
-            if (!(opc & OPC_REXR)) b1 |= 0x80;
-            if (!(opc & OPC_REXX)) b1 |= 0x40;
-            if (!(opc & OPC_REXB)) b1 |= 0x20;
+            unsigned b1 = opc >> 16 & 3;
+            if (!(epfx & EPFX_REXR)) b1 |= 0x80;
+            if (!(epfx & EPFX_REXX)) b1 |= 0x40;
+            if (!(epfx & EPFX_REXB)) b1 |= 0x20;
             *(*buf)++ = b1;
             if (opc & OPC_REXW) b2 |= 0x80;
         } else {
-            if (!(opc & OPC_REXR)) b2 |= 0x80;
+            if (!(epfx & EPFX_REXR)) b2 |= 0x80;
         }
-        b2 |= (~((opc & OPC_VEXOP_MSK) >> OPC_VEXOP_IDX) & 0xf) << 3;
+        b2 |= (~(epfx >> EPFX_VVVV_IDX) & 0xf) << 3;
         *(*buf)++ = b2;
     } else {
         if (opc & OPC_LOCK) *(*buf)++ = 0xF0;
         if (opc & OPC_66) *(*buf)++ = 0x66;
         if (opc & OPC_F2) *(*buf)++ = 0xF2;
         if (opc & OPC_F3) *(*buf)++ = 0xF3;
-        if (opc & (OPC_REX|OPC_REXW|OPC_REXR|OPC_REXX|OPC_REXB))
-        {
+        if (opc & OPC_REXW || epfx & (EPFX_REX_MSK)) {
             unsigned rex = 0x40;
             if (opc & OPC_REXW) rex |= 8;
-            if (opc & OPC_REXR) rex |= 4;
-            if (opc & OPC_REXX) rex |= 2;
-            if (opc & OPC_REXB) rex |= 1;
+            if (epfx & EPFX_REXR) rex |= 4;
+            if (epfx & EPFX_REXX) rex |= 2;
+            if (epfx & EPFX_REXB) rex |= 1;
             *(*buf)++ = rex;
         }
-        if (opc & OPC_ESCAPE_MSK) *(*buf)++ = 0x0F;
-        if ((opc & OPC_ESCAPE_MSK) == OPC_0F38) *(*buf)++ = 0x38;
-        if ((opc & OPC_ESCAPE_MSK) == OPC_0F3A) *(*buf)++ = 0x3A;
+        if (opc & 0x30000) *(*buf)++ = 0x0F;
+        if ((opc & 0x30000) == 0x20000) *(*buf)++ = 0x38;
+        if ((opc & 0x30000) == 0x30000) *(*buf)++ = 0x3A;
     }
     *(*buf)++ = opc & 0xff;
-    if ((opc & 0xc000) == 0xc000) *(*buf)++ = (opc >> 8) & 0xff;
+    if (opc & 0x8000) *(*buf)++ = (opc >> 8) & 0xff;
     return 0;
 }
 
@@ -150,32 +152,32 @@ enc_imm(uint8_t** restrict buf, uint64_t imm, unsigned immsz)
 
 static
 int
-enc_o(uint8_t** restrict buf, uint64_t opc, uint64_t op0)
+enc_o(uint8_t** restrict buf, uint64_t opc, uint64_t epfx, uint64_t op0)
 {
-    if (op_reg_idx(op0) & 0x8) opc |= OPC_REXB;
+    if (op_reg_idx(op0) & 0x8) epfx |= EPFX_REXB;
 
-    bool has_rex = !!(opc & (OPC_REX|OPC_REXW|OPC_REXR|OPC_REXX|OPC_REXB));
+    bool has_rex = opc & OPC_REXW || epfx & EPFX_REX_MSK;
     if (has_rex && op_reg_gph(op0)) return -1;
 
-    if (enc_opc(buf, opc)) return -1;
+    if (enc_opc(buf, opc, epfx)) return -1;
     *(*buf - 1) = (*(*buf - 1) & 0xf8) | (op_reg_idx(op0) & 0x7);
     return 0;
 }
 
 static
 int
-enc_mr(uint8_t** restrict buf, uint64_t opc, uint64_t op0, uint64_t op1,
-       unsigned immsz)
+enc_mr(uint8_t** restrict buf, uint64_t opc, uint64_t epfx, uint64_t op0,
+       uint64_t op1, unsigned immsz)
 {
     // If !op_reg(op1), it is a constant value for ModRM.reg
-    if (op_reg(op0) && (op_reg_idx(op0) & 0x8)) opc |= OPC_REXB;
-    if (op_mem(op0) && (op_mem_base(op0) & 0x8)) opc |= OPC_REXB;
-    if (op_mem(op0) && (op_mem_idx(op0) & 0x8)) opc |= OPC_REXX;
-    if (op_reg(op1) && op_reg_idx(op1) & 0x8) opc |= OPC_REXR;
+    if (op_reg(op0) && (op_reg_idx(op0) & 0x8)) epfx |= EPFX_REXB;
+    if (op_mem(op0) && (op_mem_base(op0) & 0x8)) epfx |= EPFX_REXB;
+    if (op_mem(op0) && (op_mem_idx(op0) & 0x8)) epfx |= EPFX_REXX;
+    if (op_reg(op1) && op_reg_idx(op1) & 0x8) epfx |= EPFX_REXR;
 
-    bool has_rex = !!(opc & (OPC_REX|OPC_REXW|OPC_REXR|OPC_REXX|OPC_REXB));
+    bool has_rex = opc & OPC_REXW || epfx & EPFX_REX_MSK;
     if (has_rex && (op_reg_gph(op0) || op_reg_gph(op1))) return -1;
-    unsigned opcsz = opc_size(opc);
+    unsigned opcsz = opc_size(opc, epfx);
 
     int mod = 0, reg = op1 & 7, rm;
     int scale = 0, idx = 4, base = 0;
@@ -246,7 +248,7 @@ enc_mr(uint8_t** restrict buf, uint64_t opc, uint64_t op0, uint64_t op1,
     unsigned dispsz = mod == 1 ? 1 : (mod == 2 || mod0off) ? 4 : 0;
     if (opcsz + 1 + (mod != 3 && rm == 4) + dispsz + immsz > 15) return -1;
 
-    if (enc_opc(buf, opc)) return -1;
+    if (enc_opc(buf, opc, epfx)) return -1;
     *(*buf)++ = (mod << 6) | (reg << 3) | rm;
     if (mod != 3 && rm == 4)
         *(*buf)++ = (scale << 6) | (idx << 3) | base;
@@ -308,104 +310,86 @@ const struct EncodingInfo encoding_infos[ENC_MAX] = {
     [ENC_MRV]     = { .modrm = 0^3, .modreg = 1^3, .vexreg = 2^3 },
 };
 
-struct EncodeDesc {
-    uint64_t opc : 26;
-    uint64_t enc : 5;
-    uint64_t immsz : 4;
-    uint64_t alt : 13;
-    uint64_t tys : 16;
-};
-
-static const struct EncodeDesc descs[] = {
+static const uint64_t alt_tab[] = {
 #include <fadec-encode-private.inc>
 };
 
 int
-fe_enc64_impl(uint8_t** restrict buf, uint64_t mnem, FeOp op0, FeOp op1,
+fe_enc64_impl(uint8_t** restrict buf, uint64_t opc, FeOp op0, FeOp op1,
               FeOp op2, FeOp op3)
 {
     uint8_t* buf_start = *buf;
     uint64_t ops[4] = {op0, op1, op2, op3};
 
-    uint64_t desc_idx = mnem & FE_MNEM_MASK;
-    if (UNLIKELY(desc_idx >= FE_MNEM_MAX)) goto fail;
+    uint64_t epfx = 0;
+    // Doesn't change between variants
+    if ((opc & OPC_GPH_OP0) && op_reg_gpl(op0) && op0 >= FE_SP)
+        epfx |= EPFX_REX;
+    else if (!(opc & OPC_GPH_OP0) && op_reg_gph(op0))
+        goto fail;
+    if ((opc & OPC_GPH_OP1) && op_reg_gpl(op1) && op1 >= FE_SP)
+        epfx |= EPFX_REX;
+    else if (!(opc & OPC_GPH_OP1) && op_reg_gph(op1))
+        goto fail;
 
-    do
-    {
-        const struct EncodeDesc* desc = &descs[desc_idx];
-        const struct EncodingInfo* ei = &encoding_infos[desc->enc];
-        uint64_t opc = desc->opc;
-        int64_t imm = 0xcc;
-        unsigned immsz = desc->immsz;
+try_encode:;
+    unsigned enc = (opc >> 51) & 0x1f;
+    const struct EncodingInfo* ei = &encoding_infos[enc];
 
-        if (UNLIKELY(desc->enc == ENC_INVALID)) goto fail;
+    int64_t imm = 0xcc;
+    unsigned immsz = (opc >> 47) & 0xf;
 
-        if (ei->zregidx)
-            if (op_reg_idx(ops[ei->zregidx^3]) != ei->zregval) goto next;
+    if (UNLIKELY(ei->zregidx && op_reg_idx(ops[ei->zregidx^3]) != ei->zregval))
+        goto next;
 
-        for (int i = 0; i < 4; i++) {
-            unsigned ty = (desc->tys >> (4 * i)) & 0xf;
-            FeOp op = ops[i];
-            if (ty == 0x0) continue;
-            if (ty == 0xf && !op_mem(op)) goto next;
-            if (ty == 0x1 && !op_reg_gpl(op)) goto next;
-            if (ty == 0x2 && !op_reg_gpl(op) && !op_reg_gph(op)) goto next;
-            if (ty == 0x2 && op_reg_gpl(op) && op >= FE_SP) opc |= OPC_REX;
-            if (ty == 0x3 && !op_reg_seg(op)) goto next;
-            if (ty == 0x4 && !op_reg_fpu(op)) goto next;
-            if (ty == 0x5 && !op_reg_mmx(op)) goto next;
-            if (ty == 0x6 && !op_reg_xmm(op)) goto next;
-            if (UNLIKELY(ty >= 7 && ty < 0xf)) goto next; // TODO: support BND, CR, DR
+    if (UNLIKELY(enc == ENC_S)) {
+        if ((op_reg_idx(op0) << 3 & 0x20) != (opc & 0x20)) goto next;
+        opc |= op_reg_idx(op0) << 3;
+    }
+
+    if (ei->immctl > 0) {
+        imm = ops[ei->immidx];
+        if (ei->immctl == 2) {
+            immsz = UNLIKELY(opc & OPC_67) ? 4 : 8;
+            if (immsz == 4) imm = (int32_t) imm; // address are zero-extended
         }
-
-        if (UNLIKELY(mnem & FE_ADDR32))
-            opc |= OPC_67;
-        if (UNLIKELY(mnem & FE_SEG_MASK))
-            opc |= (mnem & FE_SEG_MASK) << (OPC_SEG_IDX - 16);
-        if (UNLIKELY(desc->enc == ENC_S)) {
-            if ((op_reg_idx(op0) << 3 & 0x20) != (opc & 0x20)) goto next;
-            opc |= op_reg_idx(op0) << 3;
+        if (ei->immctl == 3) {
+            if (!op_reg_xmm(imm)) goto fail;
+            imm = op_reg_idx(imm) << 4;
         }
-
-        if (ei->immctl > 0) {
-            imm = ops[ei->immidx];
-            if (ei->immctl == 2) {
-                immsz = UNLIKELY(mnem & FE_ADDR32) ? 4 : 8;
-                if (immsz == 4) imm = (int32_t) imm; // address are zero-extended
-            }
-            if (ei->immctl == 3)
-                imm = op_reg_idx(imm) << 4;
-            if (ei->immctl == 6) {
-                if (UNLIKELY(mnem & FE_JMPL) && desc->alt) goto next;
-                imm -= (int64_t) *buf + opc_size(opc) + immsz;
-            }
-            if (UNLIKELY(ei->immctl == 1) && imm != 1) goto next;
-            if (ei->immctl >= 2 && !op_imm_n(imm, immsz)) goto next;
+        if (ei->immctl == 6) {
+            if (UNLIKELY(opc & FE_JMPL) && opc >> 56) goto next;
+            imm -= (int64_t) *buf + opc_size(opc, epfx) + immsz;
         }
+        if (UNLIKELY(ei->immctl == 1) && imm != 1) goto next;
+        if (ei->immctl >= 2 && !op_imm_n(imm, immsz)) goto next;
+    }
 
-        // NOP has no operands, so this must be the 32-bit OA XCHG
-        if ((desc->opc & ~7) == 0x90 && ops[0] == FE_AX) goto next;
+    // NOP has no operands, so this must be the 32-bit OA XCHG
+    if ((opc & 0xfffffff) == 0x90 && ops[0] == FE_AX) goto next;
 
+    if (ei->modrm) {
+        FeOp modreg = ei->modreg ? ops[ei->modreg^3] : (opc & 0xff00) >> 8;
         if (ei->vexreg)
-            opc |= ((uint64_t) op_reg_idx(ops[ei->vexreg^3])) << OPC_VEXOP_IDX;
+            epfx |= ((uint64_t) op_reg_idx(ops[ei->vexreg^3])) << EPFX_VVVV_IDX;
+        if (enc_mr(buf, opc, epfx, ops[ei->modrm^3], modreg, immsz)) goto fail;
+    } else if (ei->modreg) {
+        if (enc_o(buf, opc, epfx, ops[ei->modreg^3])) goto fail;
+    } else {
+        if (enc_opc(buf, opc, epfx)) goto fail;
+    }
 
-        if (ei->modrm) {
-            FeOp modreg = ei->modreg ? ops[ei->modreg^3] : (opc & 0xff00) >> 8;
-            if (enc_mr(buf, opc, ops[ei->modrm^3], modreg, immsz)) goto fail;
-        } else if (ei->modreg) {
-            if (enc_o(buf, opc, ops[ei->modreg^3])) goto fail;
-        } else {
-            if (enc_opc(buf, opc)) goto fail;
-        }
+    if (ei->immctl >= 2)
+        if (enc_imm(buf, imm, immsz)) goto fail;
 
-        if (ei->immctl >= 2)
-            if (enc_imm(buf, imm, immsz)) goto fail;
+    return 0;
 
-        return 0;
-
-    next:
-        desc_idx = desc->alt;
-    } while (desc_idx != 0);
+next:;
+    uint64_t alt = opc >> 56;
+    if (alt) { // try alternative encoding, if available
+        opc = alt_tab[alt] | (opc & OPC_USER_MSK);
+        goto try_encode;
+    }
 
 fail:
     // Don't advance buffer on error; though we shouldn't write anything.

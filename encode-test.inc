@@ -499,7 +499,6 @@ TEST("\xc4\xe2\xf1\xbf\x06", VFNMSUB231SDrrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_SI,
 
 // VSIB encodings
 #ifndef ENC_TEST_TYPESAFE
-TEST("", VGATHERDPS128rmr, 0, FE_XMM0, FE_XMM0, FE_XMM1); // must have memory operand
 TEST("", VGATHERDPS128rmr, 0, FE_XMM0, FE_MEM(FE_DI, 8, FE_NOREG, 0), FE_XMM1); // must have SIB
 TEST("", VGATHERDPS128rmr, 0, FE_XMM0, FE_MEM(FE_IP, 0, FE_NOREG, 0), FE_XMM1); // must have SIB
 #endif
