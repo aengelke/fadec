@@ -620,7 +620,7 @@ def encode_mnems(entries):
             if opcode.rexw:
                 raise Exception(f"unexpected REXW specifier {desc}")
             opsizes = {8} if "SZ8" in desc.flags else {16, 32, 64}
-            if opcode.prefix in ("66", "F2", "F3") and "U66" not in desc.flags:
+            if opcode.prefix in ("NP", "66", "F2", "F3") and "U66" not in desc.flags:
                 opsizes -= {16}
             if "I66" in desc.flags:
                 opsizes -= {16}
