@@ -326,7 +326,7 @@ opcode_regex = re.compile(
                      r"(?:W(?P<rexw>[01]|IG)\.)?(?:L(?P<vexl>[01]|IG)\.)?))?" +
      r"(?P<escape>0f38|0f3a|0f|)" +
      r"(?P<opcode>[0-9a-f]{2})" +
-     r"(?:(?P<extended>\+)|/(?P<modreg>[0-7]|[rm]|[0-7][rm])|(?P<opcext>[c-f][0-9a-f]))?$")
+     r"(?:/(?P<modreg>[0-7]|[rm]|[0-7][rm])|(?P<opcext>[c-f][0-9a-f]))?(?P<extended>\+)?$")
 
 class Opcode(NamedTuple):
     prefix: Union[None, str] # None/NP/66/F2/F3/NFx
@@ -397,7 +397,7 @@ class Trie:
 
     def _transform_opcode(self, opc):
         troot = [opc.escape | opc.vex << 2]
-        t256 = [opc.opc + i for i in range(8 if opc.extended else 1)]
+        t256 = [opc.opc + i for i in range(8 if opc.extended and not opc.opcext else 1)]
         tprefix, t16, t8e, tvex = None, None, None, None
         if opc.prefix == "NFx":
             tprefix = [0, 1]
@@ -405,7 +405,8 @@ class Trie:
             tprefix = [["NP", "66", "F3", "F2"].index(opc.prefix)]
         if opc.opcext:
             t16 = [((opc.opcext - 0xc0) >> 3) | 8]
-            t8e = [opc.opcext & 7]
+            if not opc.extended:
+                t8e = [opc.opcext & 7]
         elif opc.modreg:
             # TODO: optimize for /r and /m specifiers to reduce size
             mod = {"m": [0], "r": [1<<3], "rm": [0, 1<<3]}[opc.modreg[1]]

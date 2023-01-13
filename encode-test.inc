@@ -130,6 +130,9 @@ TEST("", SSE_PEXTRBrri, 0, FE_CH, FE_XMM0, 2);
 #endif
 TEST("\x66\x0f\xf7\xc1", SSE_MASKMOVDQUrr, 0, FE_XMM0, FE_XMM1);
 TEST("\x67\x66\x0f\xf7\xc1", SSE_MASKMOVDQUrr, FE_ADDR32, FE_XMM0, FE_XMM1);
+TEST("\x0f\xae\xe8", LFENCE, 0);
+TEST("\x0f\xae\xf0", MFENCE, 0);
+TEST("\x0f\xae\xf8", SFENCE, 0);
 
 // Test FD/TD encodings
 TEST("\xa0\x00\x00\x00\x00\x00\x00\x00\x00", MOV8ra, 0, FE_AX, 0);
