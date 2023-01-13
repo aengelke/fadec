@@ -53,8 +53,8 @@ typedef enum {
 } FdOpType;
 
 typedef enum {
-    /** Register type is encoded in mnemonic **/
-    FD_RT_IMP = 0,
+    /** Vector (SSE/AVX) register XMMn/YMMn/ZMMn **/
+    FD_RT_VEC = 0,
     /** Low general purpose register **/
     FD_RT_GPL = 1,
     /** High-byte general purpose register **/
@@ -65,8 +65,6 @@ typedef enum {
     FD_RT_FPU = 4,
     /** MMX register MMn **/
     FD_RT_MMX = 5,
-    /** Vector (SSE/AVX) register XMMn/YMMn/ZMMn **/
-    FD_RT_VEC = 6,
     /** Vector mask (AVX-512) register Kn **/
     FD_RT_MASK = 7,
     /** Bound register BNDn **/

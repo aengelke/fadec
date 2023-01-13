@@ -181,12 +181,12 @@ class InstrDesc(NamedTuple):
     flags: FrozenSet[str]
 
     OPKIND_REGTYS = {
-        ("modrm", "GP"): 0,   ("modreg", "GP"): 0,   ("vexreg", "GP"): 0,
-        ("modrm", "XMM"): 1,  ("modreg", "XMM"): 1,  ("vexreg", "XMM"): 1,
-        ("modrm", "MMX"): 4,  ("modreg", "MMX"): 4,
-        ("modrm", "FPU"): 5,                         ("vexreg", "FPU"): 3,
-        ("modrm", "MASK"): 6, ("modreg", "MASK"): 2, ("vexreg", "MASK"): 2,
-                              ("modreg", "SEG"): 5,
+        ("modrm", "GP"): 1,   ("modreg", "GP"): 1,   ("vexreg", "GP"): 1,
+        ("modrm", "XMM"): 0,  ("modreg", "XMM"): 0,  ("vexreg", "XMM"): 0,
+        ("modrm", "MMX"): 5,  ("modreg", "MMX"): 5,
+        ("modrm", "FPU"): 4,                         ("vexreg", "FPU"): 3,
+        ("modrm", "MASK"): 7, ("modreg", "MASK"): 7, ("vexreg", "MASK"): 2,
+                              ("modreg", "SEG"): 3,
                               ("modreg", "DR"): 0, # handled in code
                               ("modreg", "CR"): 0, # handled in code
         ("modrm", "MEM"): 0,
