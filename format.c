@@ -44,7 +44,13 @@ fd_strpcat(char* restrict dst, struct FdStr src) {
 static unsigned
 fd_clz64(uint64_t v) {
 #if defined(__GNUC__)
+#if INTPTR_MAX == INT64_MAX
     return __builtin_clzl(v);
+#else
+    if (v <= 0xffffffff)
+        return 32 + __builtin_clzl(v);
+    return __builtin_clzl(v >> 32);
+#endif
 #elif defined(_MSC_VER)
     unsigned long index;
 
