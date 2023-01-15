@@ -64,6 +64,10 @@ TEST("\x83\xc0\x7f", ADD32ri, 0, FE_AX, 0x7f);
 TEST("\x05\x80\x00\x00\x00", ADD32ri, 0, FE_AX, 0x80);
 TEST("\x05\x00\x01\x00\x00", ADD32ri, 0, FE_AX, 0x100);
 TEST("\x66\x05\x00\x01", ADD16ri, 0, FE_AX, 0x100);
+#ifndef ENC_TEST_TYPESAFE
+TEST("", ADD16ri, 0, FE_AX, 0x12345);
+TEST("\x66\x05\xff\xee", ADD16ri, 0, FE_AX, 0xffffffffffffeeff);
+#endif
 TEST("\xb8\x05\x00\x01\x00", MOV32ri, 0, FE_AX, 0x10005);
 TEST("\xb8\xff\xff\xff\x7f", MOV32ri, 0, FE_AX, 0x7fffffff);
 TEST("\x48\xb8\x05\x00\x01\x00\xff\x00\x00\x00", MOV64ri, 0, FE_AX, 0xff00010005);
@@ -75,6 +79,7 @@ TEST("\xb0\xff", MOV8ri, 0, FE_AX, (int8_t) 0xff);
 TEST("\xb4\xff", MOV8ri, 0, FE_AH, -1);
 TEST("\xb7\x64", MOV8ri, 0, FE_BH, 0x64);
 TEST("\x40\xb6\x64", MOV8ri, 0, FE_SI, 0x64);
+TEST("\x41\xb6\x64", MOV8ri, 0, FE_R14, 0x64);
 TEST("\x66\x0f\xbe\xc2", MOVSXr16r8, 0, FE_AX, FE_DX);
 TEST("\x0f\xbe\xc2", MOVSXr32r8, 0, FE_AX, FE_DX);
 TEST("\x48\x0f\xbe\xc2", MOVSXr64r8, 0, FE_AX, FE_DX);
@@ -88,6 +93,7 @@ TEST("\x66\x63\xc2", MOVSXr16r32, 0, FE_AX, FE_DX);
 TEST("\x63\xc2", MOVSXr32r32, 0, FE_AX, FE_DX);
 TEST("\x48\x63\xc2", MOVSXr64r32, 0, FE_AX, FE_DX);
 TEST("\xc8\x33\x22\x11", ENTERi, 0, 0x112233);
+TEST("", ENTERi, 0, 0x1112233);
 TEST("\x0f\x05", SYSCALL, 0);
 TEST("\x0f\x90\xc4", SETO8r, 0, FE_AH);
 TEST("\x40\x0f\x90\xc4", SETO8r, 0, FE_SP);
@@ -123,10 +129,26 @@ TEST("\xab", STOS32, 0);
 TEST("\xf3\xab", REP_STOS32, 0);
 TEST("\x48\xab", STOS64, 0);
 TEST("\xf3\x48\xab", REP_STOS64, 0);
+TEST("\x0f\x38\xf0\x11", MOVBE32rm, 0, FE_DX, FE_MEM(FE_CX, 0, FE_NOREG, 0));
+TEST("\x66\x0f\x38\xf0\x11", MOVBE16rm, 0, FE_DX, FE_MEM(FE_CX, 0, FE_NOREG, 0));
+TEST("\x48\x0f\x38\xf0\x11", MOVBE64rm, 0, FE_DX, FE_MEM(FE_CX, 0, FE_NOREG, 0));
+TEST("\xf2\x0f\x38\xf0\xc1", CRC32_8rr, 0, FE_AX, FE_CX);
+TEST("\xf2\x0f\x38\xf0\xc5", CRC32_8rr, 0, FE_AX, FE_CH);
+TEST("\xf2\x0f\x38\xf1\xc1", CRC32_32rr, 0, FE_AX, FE_CX);
 TEST("\x66\xf2\x0f\x38\xf1\xc1", CRC32_16rr, 0, FE_AX, FE_CX);
+TEST("\x66\xf2\x41\x0f\x38\xf1\xc2", CRC32_16rr, 0, FE_AX, FE_R10);
+TEST("\x0f\xc7\xf7", RDRAND32r, 0, FE_DI);
+TEST("\x66\x0f\xc7\xf7", RDRAND16r, 0, FE_DI);
+TEST("\x48\x0f\xc7\xf7", RDRAND64r, 0, FE_DI);
+TEST("\x0f\xc7\xff", RDSEED32r, 0, FE_DI);
+TEST("\x66\x0f\xc7\xff", RDSEED16r, 0, FE_DI);
+TEST("\x48\x0f\xc7\xff", RDSEED64r, 0, FE_DI);
+TEST("\xf3\x0f\xc7\xff", RDPIDr, 0, FE_DI);
 TEST("\x66\x0f\x3a\x14\xc1\x02", SSE_PEXTRBrri, 0, FE_CX, FE_XMM0, 2);
+TEST("\x66\x0f\x3a\x20\xc1\x02", SSE_PINSRBrri, 0, FE_XMM0, FE_CX, 2);
 #ifndef ENC_TEST_TYPESAFE
 TEST("", SSE_PEXTRBrri, 0, FE_CH, FE_XMM0, 2);
+TEST("", SSE_PINSRBrri, 0, FE_XMM0, FE_CH, 2);
 #endif
 TEST("\x66\x0f\xf7\xc1", SSE_MASKMOVDQUrr, 0, FE_XMM0, FE_XMM1);
 TEST("\x67\x66\x0f\xf7\xc1", SSE_MASKMOVDQUrr, FE_ADDR32, FE_XMM0, FE_XMM1);
@@ -297,6 +319,33 @@ TEST("\xc5\xf5\x71\xd7\x02", VPSRLW256rri, 0, FE_XMM1, FE_XMM7, 0x2);
 TEST("\xc4\xc3\xfd\x00\xc9\x12", VPERMQ256rri, 0, FE_XMM1, FE_XMM9, 0x12);
 TEST("\xc4\xe3\xfd\x01\xcf\x12", VPERMPD256rri, 0, FE_XMM1, FE_XMM7, 0x12);
 TEST("\xc5\xf9\xc5\xc0\x00", VPEXTRWrri, 0, FE_AX, FE_XMM0, 0x0);
+
+// Test VEX.RXBv
+TEST("\xc5\xf4\x58\xc2", VADDPS256rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2);
+TEST("\xc5\x74\x58\xc2", VADDPS256rrr, 0, FE_XMM8, FE_XMM1, FE_XMM2);
+TEST("\xc5\xb4\x58\xc2", VADDPS256rrr, 0, FE_XMM0, FE_XMM9, FE_XMM2);
+TEST("\xc5\x34\x58\xc2", VADDPS256rrr, 0, FE_XMM8, FE_XMM9, FE_XMM2);
+TEST("\xc4\xc1\x74\x58\xc2", VADDPS256rrr, 0, FE_XMM0, FE_XMM1, FE_XMM10);
+TEST("\xc4\x41\x74\x58\xc2", VADDPS256rrr, 0, FE_XMM8, FE_XMM1, FE_XMM10);
+TEST("\xc4\xc1\x34\x58\xc2", VADDPS256rrr, 0, FE_XMM0, FE_XMM9, FE_XMM10);
+TEST("\xc4\x41\x34\x58\xc2", VADDPS256rrr, 0, FE_XMM8, FE_XMM9, FE_XMM10);
+
+TEST("\xc5\xf4\x58\x04\x1a", VADDPS256rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 1, FE_BX, 0));
+TEST("\xc5\x74\x58\x04\x1a", VADDPS256rrm, 0, FE_XMM8, FE_XMM1, FE_MEM(FE_DX, 1, FE_BX, 0));
+TEST("\xc4\xa1\x74\x58\x04\x1a", VADDPS256rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 1, FE_R11, 0));
+TEST("\xc4\x21\x74\x58\x04\x1a", VADDPS256rrm, 0, FE_XMM8, FE_XMM1, FE_MEM(FE_DX, 1, FE_R11, 0));
+TEST("\xc5\xb4\x58\x04\x1a", VADDPS256rrm, 0, FE_XMM0, FE_XMM9, FE_MEM(FE_DX, 1, FE_BX, 0));
+TEST("\xc5\x34\x58\x04\x1a", VADDPS256rrm, 0, FE_XMM8, FE_XMM9, FE_MEM(FE_DX, 1, FE_BX, 0));
+TEST("\xc4\xa1\x34\x58\x04\x1a", VADDPS256rrm, 0, FE_XMM0, FE_XMM9, FE_MEM(FE_DX, 1, FE_R11, 0));
+TEST("\xc4\x21\x34\x58\x04\x1a", VADDPS256rrm, 0, FE_XMM8, FE_XMM9, FE_MEM(FE_DX, 1, FE_R11, 0));
+TEST("\xc4\xc1\x74\x58\x04\x1a", VADDPS256rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_R10, 1, FE_BX, 0));
+TEST("\xc4\x41\x74\x58\x04\x1a", VADDPS256rrm, 0, FE_XMM8, FE_XMM1, FE_MEM(FE_R10, 1, FE_BX, 0));
+TEST("\xc4\x81\x74\x58\x04\x1a", VADDPS256rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_R10, 1, FE_R11, 0));
+TEST("\xc4\x01\x74\x58\x04\x1a", VADDPS256rrm, 0, FE_XMM8, FE_XMM1, FE_MEM(FE_R10, 1, FE_R11, 0));
+TEST("\xc4\xc1\x34\x58\x04\x1a", VADDPS256rrm, 0, FE_XMM0, FE_XMM9, FE_MEM(FE_R10, 1, FE_BX, 0));
+TEST("\xc4\x41\x34\x58\x04\x1a", VADDPS256rrm, 0, FE_XMM8, FE_XMM9, FE_MEM(FE_R10, 1, FE_BX, 0));
+TEST("\xc4\x81\x34\x58\x04\x1a", VADDPS256rrm, 0, FE_XMM0, FE_XMM9, FE_MEM(FE_R10, 1, FE_R11, 0));
+TEST("\xc4\x01\x34\x58\x04\x1a", VADDPS256rrm, 0, FE_XMM8, FE_XMM9, FE_MEM(FE_R10, 1, FE_R11, 0));
 
 // Test RVMR encoding
 TEST("\xc4\xe3\x71\x4a\xc2\x30", VBLENDVPS128rrrr, 0, FE_XMM0, FE_XMM1, FE_XMM2, FE_XMM3);
@@ -501,6 +550,7 @@ TEST("\xc4\xe2\xf1\xbf\x06", VFNMSUB231SDrrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_SI,
 #ifndef ENC_TEST_TYPESAFE
 TEST("", VGATHERDPS128rmr, 0, FE_XMM0, FE_MEM(FE_DI, 8, FE_NOREG, 0), FE_XMM1); // must have SIB
 TEST("", VGATHERDPS128rmr, 0, FE_XMM0, FE_MEM(FE_IP, 0, FE_NOREG, 0), FE_XMM1); // must have SIB
+TEST("", VGATHERDPS128rmr, 0, FE_XMM0, FE_MEM(FE_DI, 0, FE_AX, 0), FE_XMM1); // must have XMM index
 #endif
 TEST("\xc4\xe2\x71\x92\x04\xff", VGATHERDPS128rmr, 0, FE_XMM0, FE_MEMV(FE_DI, 8, FE_XMM7, 0), FE_XMM1);
 TEST("\xc4\xe2\x71\x92\x04\xe7", VGATHERDPS128rmr, 0, FE_XMM0, FE_MEMV(FE_DI, 8, FE_XMM4, 0), FE_XMM1);
@@ -587,6 +637,81 @@ TEST("\xc4\xe2\xf5\xb4\xc2", VPMADD52LUQ256rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2);
 TEST("\xc4\xe2\xf1\xb5\xc2", VPMADD52HUQ128rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2);
 TEST("\xc4\xe2\xf5\xb5\xc2", VPMADD52HUQ256rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2);
 
+// Test REX prefix
+TEST("\x00\x01", ADD8mr, 0, FE_MEM(FE_CX, 0, FE_NOREG, 0), FE_AX);
+TEST("\x00\x21", ADD8mr, 0, FE_MEM(FE_CX, 0, FE_NOREG, 0), FE_AH);
+TEST("\x40\x00\x21", ADD8mr, 0, FE_MEM(FE_CX, 0, FE_NOREG, 0), FE_SP);
+TEST("\x41\x00\x01", ADD8mr, 0, FE_MEM(FE_R9, 0, FE_NOREG, 0), FE_AX);
+TEST("", ADD8mr, 0, FE_MEM(FE_R9, 0, FE_NOREG, 0), FE_AH);
+TEST("\x41\x00\x21", ADD8mr, 0, FE_MEM(FE_R9, 0, FE_NOREG, 0), FE_SP);
+TEST("\x44\x00\x01", ADD8mr, 0, FE_MEM(FE_CX, 0, FE_NOREG, 0), FE_R8);
+TEST("\x45\x00\x01", ADD8mr, 0, FE_MEM(FE_R9, 0, FE_NOREG, 0), FE_R8);
+TEST("", ADD8mr, 0, FE_MEM(FE_R9, 0, FE_NOREG, 0), FE_AH);
+TEST("\x00\x04\x11", ADD8mr, 0, FE_MEM(FE_CX, 1, FE_DX, 0), FE_AX);
+TEST("\x00\x24\x11", ADD8mr, 0, FE_MEM(FE_CX, 1, FE_DX, 0), FE_AH);
+TEST("\x40\x00\x24\x11", ADD8mr, 0, FE_MEM(FE_CX, 1, FE_DX, 0), FE_SP);
+TEST("\x41\x00\x04\x11", ADD8mr, 0, FE_MEM(FE_R9, 1, FE_DX, 0), FE_AX);
+TEST("\x41\x00\x24\x11", ADD8mr, 0, FE_MEM(FE_R9, 1, FE_DX, 0), FE_SP);
+TEST("", ADD8mr, 0, FE_MEM(FE_R9, 1, FE_DX, 0), FE_AH);
+TEST("\x42\x00\x04\x11", ADD8mr, 0, FE_MEM(FE_CX, 1, FE_R10, 0), FE_AX);
+TEST("\x42\x00\x24\x11", ADD8mr, 0, FE_MEM(FE_CX, 1, FE_R10, 0), FE_SP);
+TEST("", ADD8mr, 0, FE_MEM(FE_CX, 1, FE_R10, 0), FE_AH);
+TEST("\x43\x00\x04\x11", ADD8mr, 0, FE_MEM(FE_R9, 1, FE_R10, 0), FE_AX);
+TEST("\x43\x00\x24\x11", ADD8mr, 0, FE_MEM(FE_R9, 1, FE_R10, 0), FE_SP);
+TEST("", ADD8mr, 0, FE_MEM(FE_R9, 1, FE_R10, 0), FE_AH);
+TEST("\x44\x00\x04\x11", ADD8mr, 0, FE_MEM(FE_CX, 1, FE_DX, 0), FE_R8);
+TEST("\x45\x00\x04\x11", ADD8mr, 0, FE_MEM(FE_R9, 1, FE_DX, 0), FE_R8);
+TEST("\x46\x00\x04\x11", ADD8mr, 0, FE_MEM(FE_CX, 1, FE_R10, 0), FE_R8);
+TEST("\x47\x00\x04\x11", ADD8mr, 0, FE_MEM(FE_R9, 1, FE_R10, 0), FE_R8);
+TEST("\x00\xc1", ADD8rr, 0, FE_CX, FE_AX);
+TEST("\x00\xc5", ADD8rr, 0, FE_CH, FE_AX);
+TEST("\x40\x00\xc5", ADD8rr, 0, FE_BP, FE_AX);
+TEST("\x41\x00\xc1", ADD8rr, 0, FE_R9, FE_AX);
+TEST("\x00\xe1", ADD8rr, 0, FE_CX, FE_AH);
+TEST("\x00\xe5", ADD8rr, 0, FE_CH, FE_AH);
+TEST("", ADD8rr, 0, FE_BP, FE_AH);
+TEST("", ADD8rr, 0, FE_R9, FE_AH);
+TEST("\x40\x00\xe1", ADD8rr, 0, FE_CX, FE_SP);
+TEST("", ADD8rr, 0, FE_CH, FE_SP);
+TEST("\x40\x00\xe5", ADD8rr, 0, FE_BP, FE_SP);
+TEST("\x41\x00\xe1", ADD8rr, 0, FE_R9, FE_SP);
+TEST("\x44\x00\xc1", ADD8rr, 0, FE_CX, FE_R8);
+TEST("", ADD8rr, 0, FE_CH, FE_R8);
+TEST("\x44\x00\xc5", ADD8rr, 0, FE_BP, FE_R8);
+TEST("\x45\x00\xc1", ADD8rr, 0, FE_R9, FE_R8);
+TEST("\x01\x01", ADD32mr, 0, FE_MEM(FE_CX, 0, FE_NOREG, 0), FE_AX);
+TEST("\x41\x01\x01", ADD32mr, 0, FE_MEM(FE_R9, 0, FE_NOREG, 0), FE_AX);
+TEST("\x44\x01\x01", ADD32mr, 0, FE_MEM(FE_CX, 0, FE_NOREG, 0), FE_R8);
+TEST("\x45\x01\x01", ADD32mr, 0, FE_MEM(FE_R9, 0, FE_NOREG, 0), FE_R8);
+TEST("\x01\x04\x11", ADD32mr, 0, FE_MEM(FE_CX, 1, FE_DX, 0), FE_AX);
+TEST("\x41\x01\x04\x11", ADD32mr, 0, FE_MEM(FE_R9, 1, FE_DX, 0), FE_AX);
+TEST("\x42\x01\x04\x11", ADD32mr, 0, FE_MEM(FE_CX, 1, FE_R10, 0), FE_AX);
+TEST("\x43\x01\x04\x11", ADD32mr, 0, FE_MEM(FE_R9, 1, FE_R10, 0), FE_AX);
+TEST("\x44\x01\x04\x11", ADD32mr, 0, FE_MEM(FE_CX, 1, FE_DX, 0), FE_R8);
+TEST("\x45\x01\x04\x11", ADD32mr, 0, FE_MEM(FE_R9, 1, FE_DX, 0), FE_R8);
+TEST("\x46\x01\x04\x11", ADD32mr, 0, FE_MEM(FE_CX, 1, FE_R10, 0), FE_R8);
+TEST("\x47\x01\x04\x11", ADD32mr, 0, FE_MEM(FE_R9, 1, FE_R10, 0), FE_R8);
+TEST("\x48\x01\x01", ADD64mr, 0, FE_MEM(FE_CX, 0, FE_NOREG, 0), FE_AX);
+TEST("\x49\x01\x01", ADD64mr, 0, FE_MEM(FE_R9, 0, FE_NOREG, 0), FE_AX);
+TEST("\x4c\x01\x01", ADD64mr, 0, FE_MEM(FE_CX, 0, FE_NOREG, 0), FE_R8);
+TEST("\x4d\x01\x01", ADD64mr, 0, FE_MEM(FE_R9, 0, FE_NOREG, 0), FE_R8);
+TEST("\x48\x01\x04\x11", ADD64mr, 0, FE_MEM(FE_CX, 1, FE_DX, 0), FE_AX);
+TEST("\x49\x01\x04\x11", ADD64mr, 0, FE_MEM(FE_R9, 1, FE_DX, 0), FE_AX);
+TEST("\x4a\x01\x04\x11", ADD64mr, 0, FE_MEM(FE_CX, 1, FE_R10, 0), FE_AX);
+TEST("\x4b\x01\x04\x11", ADD64mr, 0, FE_MEM(FE_R9, 1, FE_R10, 0), FE_AX);
+TEST("\x4c\x01\x04\x11", ADD64mr, 0, FE_MEM(FE_CX, 1, FE_DX, 0), FE_R8);
+TEST("\x4d\x01\x04\x11", ADD64mr, 0, FE_MEM(FE_R9, 1, FE_DX, 0), FE_R8);
+TEST("\x4e\x01\x04\x11", ADD64mr, 0, FE_MEM(FE_CX, 1, FE_R10, 0), FE_R8);
+TEST("\x4f\x01\x04\x11", ADD64mr, 0, FE_MEM(FE_R9, 1, FE_R10, 0), FE_R8);
+TEST("\x01\xc1", ADD32rr, 0, FE_CX, FE_AX);
+TEST("\x41\x01\xc1", ADD32rr, 0, FE_R9, FE_AX);
+TEST("\x44\x01\xc1", ADD32rr, 0, FE_CX, FE_R8);
+TEST("\x45\x01\xc1", ADD32rr, 0, FE_R9, FE_R8);
+TEST("\x48\x01\xc1", ADD64rr, 0, FE_CX, FE_AX);
+TEST("\x49\x01\xc1", ADD64rr, 0, FE_R9, FE_AX);
+TEST("\x4c\x01\xc1", ADD64rr, 0, FE_CX, FE_R8);
+TEST("\x4d\x01\xc1", ADD64rr, 0, FE_R9, FE_R8);
+
 // Test ModRM encoding
 TEST("\x01\x00", ADD32mr, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0), FE_AX);
 TEST("\x01\x04\x24", ADD32mr, 0, FE_MEM(FE_SP, 0, FE_NOREG, 0), FE_AX);
@@ -615,4 +740,8 @@ TEST("\x66\x69\x05\xf7\xff\xff\xff\x80\x00", IMUL16rmi, 0, FE_AX, FE_MEM(FE_IP, 
 // Test LOCK prefix
 TEST("\xf0\x87\x08", LOCK_XCHG32mr, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0), FE_CX);
 TEST("\xf0\x0f\xc1\x01", LOCK_XADD32mr, 0, FE_MEM(FE_CX, 0, FE_NOREG, 0), FE_AX);
+
+// Test long instructions
 TEST("\x64\x67\xf0\x41\x81\x84\x00\x00\xff\xff\xff\x78\x56\x34\x12", LOCK_ADD32mi, FE_ADDR32|FE_SEG(FE_FS), FE_MEM(FE_R8, 1, FE_AX, -0x100), 0x12345678);
+TEST("\x64\xf0\x66\x41\x81\x84\x00\x00\xff\xff\xff\x34\x12", LOCK_ADD16mi, FE_SEG(FE_FS), FE_MEM(FE_R8, 1, FE_AX, -0x100), 0x1234);
+TEST("\x64\x67\xf0\x41\x0f\xba\xac\x00\x00\xff\xff\xff\x78", LOCK_BTS32mi, FE_ADDR32|FE_SEG(FE_FS), FE_MEM(FE_R8, 1, FE_AX, -0x100), 0x78);

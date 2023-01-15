@@ -67,9 +67,9 @@ unsigned
 opc_size(uint64_t opc, uint64_t epfx)
 {
     unsigned res = 1;
-    if (opc & OPC_EVEXL0) {
+    if (UNLIKELY(opc & OPC_EVEXL0)) {
         res += 4;
-    } else if (opc & OPC_VEXL0) {
+    } else if (UNLIKELY(opc & OPC_VEXL0)) {
         if (opc & (OPC_REXW|0x20000) || epfx & (EPFX_REXX|EPFX_REXB))
             res += 3;
         else
@@ -77,8 +77,7 @@ opc_size(uint64_t opc, uint64_t epfx)
     } else {
         if (opc & OPC_LOCK) res++;
         if (opc & OPC_66) res++;
-        if (opc & OPC_F2) res++;
-        if (opc & OPC_F3) res++;
+        if (opc & (OPC_F2|OPC_F3)) res++;
         if (opc & OPC_REXW || epfx & EPFX_REX_MSK) res++;
         if (opc & 0x30000) res++;
         if (opc & 0x20000) res++;

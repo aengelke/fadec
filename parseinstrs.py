@@ -883,12 +883,12 @@ def encode2_table(entries, args):
                     vexop = f"op_reg_idx(op{flags.vexreg_idx^3})"
                 code += f"  buf[idx++] = {ppl}|rex|(({vexop}^15)<<3);\n"
             else:
+                if opcode.prefix == "LOCK":
+                    code += f"  buf[idx++] = 0xF0;\n"
                 if opsize == 16 or opcode.prefix == "66":
                     code += "  buf[idx++] = 0x66;\n"
                 if opcode.prefix in ("F2", "F3"):
                     code += f"  buf[idx++] = 0x{opcode.prefix};\n"
-                if opcode.prefix == "LOCK":
-                    code += f"  buf[idx++] = 0xF0;\n"
                 code += f"  if (rex) buf[idx++] = rex;\n"
                 if opcode.escape:
                     code += f"  buf[idx++] = 0x0F;\n"
