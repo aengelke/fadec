@@ -58,8 +58,16 @@ main(int argc, char** argv)
 
     TEST("\x90", "nop");
     TEST("\xac", "lodsb");
+    TEST32("\x26\xac", "es lodsb");
+    TEST64("\x26\xac", "lodsb");
     TEST32("\x2e\xac", "cs lodsb");
     TEST64("\x2e\xac", "lodsb");
+    TEST32("\x36\xac", "ss lodsb");
+    TEST64("\x36\xac", "lodsb");
+    TEST32("\x3e\xac", "ds lodsb");
+    TEST64("\x3e\xac", "lodsb");
+    TEST("\x64\xac", "fs lodsb");
+    TEST("\x65\xac", "gs lodsb");
     TEST32("\x2e\x2e\xac", "cs lodsb");
     TEST64("\x2e\x2e\xac", "lodsb");
     TEST32("\x2e\x26\xac", "es lodsb");
@@ -70,6 +78,20 @@ main(int argc, char** argv)
     TEST64("\x26\x65\xac", "gs lodsb");
     TEST32("\x65\x26\xac", "es lodsb");
     TEST64("\x65\x26\xac", "gs lodsb");
+    TEST32("\x01\x00", "add dword ptr [eax], eax");
+    TEST64("\x01\x00", "add dword ptr [rax], eax");
+    TEST32("\x26\x01\x00", "add dword ptr es:[eax], eax");
+    TEST64("\x26\x01\x00", "add dword ptr [rax], eax");
+    TEST32("\x2e\x01\x00", "add dword ptr cs:[eax], eax");
+    TEST64("\x2e\x01\x00", "add dword ptr [rax], eax");
+    TEST32("\x36\x01\x00", "add dword ptr ss:[eax], eax");
+    TEST64("\x36\x01\x00", "add dword ptr [rax], eax");
+    TEST32("\x3e\x01\x00", "add dword ptr ds:[eax], eax");
+    TEST64("\x3e\x01\x00", "add dword ptr [rax], eax");
+    TEST32("\x64\x01\x00", "add dword ptr fs:[eax], eax");
+    TEST64("\x64\x01\x00", "add dword ptr fs:[rax], eax");
+    TEST32("\x65\x01\x00", "add dword ptr gs:[eax], eax");
+    TEST64("\x65\x01\x00", "add dword ptr gs:[rax], eax");
     TEST("\x0f\x10\xc1", "movups xmm0, xmm1");
     TEST("\x66\x0f\x10\xc1", "movupd xmm0, xmm1");
     TEST("\xf2\x66\x0f\x10\xc1", "movsd xmm0, xmm1");
@@ -116,12 +138,17 @@ main(int argc, char** argv)
     TEST64("\x66\xf2\xc7\x07\x34\x12", "mov word ptr [rdi], 0x1234"); // no xacquire
     TEST32("\x66\xf3\xc7\x07\x34\x12", "xrelease mov word ptr [edi], 0x1234");
     TEST64("\x66\xf3\xc7\x07\x34\x12", "xrelease mov word ptr [rdi], 0x1234");
+    TEST64("\xf0\xff\xc0", "UD"); // lock with register operand is UD
+    TEST64("\xf0\xd0\x00", "UD"); // lock with rol is UD
     TEST("\x66", "PARTIAL");
     TEST("\xf0", "PARTIAL");
     TEST("\x0f", "PARTIAL");
     TEST("\x0f\x38", "PARTIAL");
     TEST("\x0f\x3a", "PARTIAL");
     TEST("\x80", "PARTIAL");
+    TEST("\x80\x04", "PARTIAL");
+    TEST("\x80\x40", "PARTIAL");
+    TEST("\x80\x80\x00\x00\x00", "PARTIAL");
     TEST32("\x0F\x01\x22", "smsw word ptr [edx]");
     TEST64("\x0F\x01\x22", "smsw word ptr [rdx]");
     TEST64("\x48\x0F\x01\x22", "smsw word ptr [rdx]");
@@ -216,6 +243,9 @@ main(int argc, char** argv)
     TEST64("\x01\x84\x25\x01\x00\x00\x00", "add dword ptr [rbp+0x1], eax");
     // [reg+s*reg+disp32]
     TEST64("\x42\x01\x84\x25\x01\x00\x00\x00", "add dword ptr [rbp+1*r12+0x1], eax");
+    // [s*reg]
+    TEST32("\x01\x04\x8d\x00\x00\x00\x00", "add dword ptr [4*ecx], eax");
+    TEST64("\x01\x04\x8d\x00\x00\x00\x00", "add dword ptr [4*rcx], eax");
 
     TEST("\x0f\xbc\xc0", "bsf eax, eax");
     TEST("\x66\x0f\xbc\xc0", "bsf ax, ax");
@@ -257,6 +287,40 @@ main(int argc, char** argv)
     TEST("\xb8\xf0\xf0\xab\xff", "mov eax, 0xffabf0f0");
     TEST64("\x48\xb8\xf0\xf0\xab\xff\x00\x12\x12\xcd", "mov rax, 0xcd121200ffabf0f0");
     TEST64("\xcd\x80", "int 0x80");
+
+    // Test FD/TD encoding
+    TEST32("\xa0\x44\x33\x22\x11", "mov al, byte ptr [0x11223344]");
+    TEST64("\xa0\x88\x77\x66\x55\x44\x33\x22\x11", "mov al, byte ptr [0x1122334455667788]");
+    TEST32("\x67\xa0\x22\x11", "mov al, byte ptr [0x1122]");
+    TEST64("\x67\xa0\x44\x33\x22\x11", "mov al, byte ptr [0x11223344]");
+    TEST32("\xa1\x44\x33\x22\x11", "mov eax, dword ptr [0x11223344]");
+    TEST64("\xa1\x88\x77\x66\x55\x44\x33\x22\x11", "mov eax, dword ptr [0x1122334455667788]");
+    TEST32("\x67\xa1\x22\x11", "mov eax, dword ptr [0x1122]");
+    TEST64("\x67\xa1\x44\x33\x22\x11", "mov eax, dword ptr [0x11223344]");
+    TEST32("\x66\xa1\x44\x33\x22\x11", "mov ax, word ptr [0x11223344]");
+    TEST64("\x66\xa1\x88\x77\x66\x55\x44\x33\x22\x11", "mov ax, word ptr [0x1122334455667788]");
+    TEST32("\x66\x67\xa1\x22\x11", "mov ax, word ptr [0x1122]");
+    TEST64("\x66\x67\xa1\x44\x33\x22\x11", "mov ax, word ptr [0x11223344]");
+    TEST64("\x48\xa1\x88\x77\x66\x55\x44\x33\x22\x11", "mov rax, qword ptr [0x1122334455667788]");
+    TEST64("\x67\x48\xa1\x44\x33\x22\x11", "mov rax, qword ptr [0x11223344]");
+    TEST32("\xa2\x44\x33\x22\x11", "mov byte ptr [0x11223344], al");
+    TEST64("\xa2\x88\x77\x66\x55\x44\x33\x22\x11", "mov byte ptr [0x1122334455667788], al");
+    TEST32("\x67\xa2\x22\x11", "mov byte ptr [0x1122], al");
+    TEST64("\x67\xa2\x44\x33\x22\x11", "mov byte ptr [0x11223344], al");
+    TEST32("\xa3\x44\x33\x22\x11", "mov dword ptr [0x11223344], eax");
+    TEST64("\xa3\x88\x77\x66\x55\x44\x33\x22\x11", "mov dword ptr [0x1122334455667788], eax");
+    TEST32("\x67\xa3\x22\x11", "mov dword ptr [0x1122], eax");
+    TEST64("\x67\xa3\x44\x33\x22\x11", "mov dword ptr [0x11223344], eax");
+    TEST32("\x66\xa3\x44\x33\x22\x11", "mov word ptr [0x11223344], ax");
+    TEST64("\x66\xa3\x88\x77\x66\x55\x44\x33\x22\x11", "mov word ptr [0x1122334455667788], ax");
+    TEST32("\x66\x67\xa3\x22\x11", "mov word ptr [0x1122], ax");
+    TEST64("\x66\x67\xa3\x44\x33\x22\x11", "mov word ptr [0x11223344], ax");
+    TEST64("\x48\xa3\x88\x77\x66\x55\x44\x33\x22\x11", "mov qword ptr [0x1122334455667788], rax");
+    TEST64("\x67\x48\xa3\x44\x33\x22\x11", "mov qword ptr [0x11223344], rax");
+    TEST32("\xa0\x44\x33\x22", "PARTIAL");
+    TEST64("\xa0\x88\x77\x66\x55\x44\x33\x22", "PARTIAL");
+    TEST32("\x67\xa0\x22", "PARTIAL");
+    TEST64("\x67\xa0\x44\x33\x22", "PARTIAL");
 
     TEST("\x66\xc8\x00\x00\x00", "enterw 0x0, 0x0");
     TEST("\x66\xc8\x00\x0f\x00", "enterw 0xf00, 0x0");
@@ -344,6 +408,18 @@ main(int argc, char** argv)
     TEST("\x66\xa5", "movsw");
     TEST("\xf3\xa5", "rep movsd");
     TEST("\xf3\x66\xa5", "rep movsw");
+    TEST("\xf3\xae", "rep scasb");
+    TEST("\xf2\xae", "repnz scasb");
+    TEST("\xf3\x66\xae", "rep scasb");
+    TEST("\xf2\x66\xae", "repnz scasb");
+    TEST("\xf3\xaf", "rep scasd");
+    TEST("\xf2\xaf", "repnz scasd");
+    TEST("\xf3\x66\xaf", "rep scasw");
+    TEST("\xf2\x66\xaf", "repnz scasw");
+    TEST64("\xf3\x48\xaf", "rep scasq");
+    TEST64("\xf2\x48\xaf", "repnz scasq");
+    TEST64("\xf3\x66\x48\xaf", "rep scasq");
+    TEST64("\xf2\x66\x48\xaf", "repnz scasq");
 
     TEST("\x66\x0f\xbe\xc2", "movsx ax, dl");
     TEST("\x0f\xbe\xc2", "movsx eax, dl");
@@ -588,6 +664,44 @@ main(int argc, char** argv)
     TEST32("\x66\x0f\x38\x35\x00", "pmovzxdq xmm0, qword ptr [eax]");
     TEST64("\x66\x0f\x38\x35\x00", "pmovzxdq xmm0, qword ptr [rax]");
 
+    TEST("\xc4", "PARTIAL");
+    TEST("\xc5", "PARTIAL");
+    TEST32("\xc4\xc0", "PARTIAL");
+    TEST64("\xc4\x00", "PARTIAL");
+    TEST32("\xc5\xc0", "PARTIAL");
+    TEST64("\xc5\x00", "PARTIAL");
+    TEST("\xc4\xe0\x78\x10\xc0", "UD"); // VEX map 0
+    TEST("\xc4\xe1\x78\x10\xc0", "vmovups xmm0, xmm0"); // VEX map 1
+    TEST("\xc4\xe2\x78\x10\xc0", "UD"); // VEX map 2
+    TEST("\xc4\xe3\x78\x10\xc0\x00", "UD"); // VEX map 3
+    TEST("\xc4\xe4\x78\x10\xc0", "UD"); // VEX map 4
+    TEST("\xc4\xe5\x78\x10\xc0", "UD"); // VEX map 5
+    TEST("\xc4\xe6\x78\x10\xc0", "UD"); // VEX map 6
+    TEST("\xc4\xe7\x78\x10\xc0", "UD"); // VEX map 7
+    TEST("\xc4\xe8\x78\x10\xc0", "UD"); // VEX map 8
+    TEST("\xc4\xe9\x78\x10\xc0", "UD"); // VEX map 9
+    TEST("\xc4\xea\x78\x10\xc0", "UD"); // VEX map 10
+    TEST("\xc4\xeb\x78\x10\xc0", "UD"); // VEX map 11
+    TEST("\xc4\xec\x78\x10\xc0", "UD"); // VEX map 12
+    TEST("\xc4\xed\x78\x10\xc0", "UD"); // VEX map 13
+    TEST("\xc4\xee\x78\x10\xc0", "UD"); // VEX map 14
+    TEST("\xc4\xef\x78\x10\xc0", "UD"); // VEX map 15
+    TEST("\xc4\xf0\x78\x10\xc0", "UD"); // VEX map 16
+    TEST("\xc4\xf1\x78\x10\xc0", "UD"); // VEX map 17
+    TEST("\xc4\xf2\x78\x10\xc0", "UD"); // VEX map 18
+    TEST("\xc4\xf3\x78\x10\xc0", "UD"); // VEX map 19
+    TEST("\xc4\xf4\x78\x10\xc0", "UD"); // VEX map 20
+    TEST("\xc4\xf5\x78\x10\xc0", "UD"); // VEX map 21
+    TEST("\xc4\xf6\x78\x10\xc0", "UD"); // VEX map 22
+    TEST("\xc4\xf7\x78\x10\xc0", "UD"); // VEX map 23
+    TEST("\xc4\xf8\x78\x10\xc0", "UD"); // VEX map 24
+    TEST("\xc4\xf9\x78\x10\xc0", "UD"); // VEX map 25
+    TEST("\xc4\xfa\x78\x10\xc0", "UD"); // VEX map 26
+    TEST("\xc4\xfb\x78\x10\xc0", "UD"); // VEX map 27
+    TEST("\xc4\xfc\x78\x10\xc0", "UD"); // VEX map 28
+    TEST("\xc4\xfd\x78\x10\xc0", "UD"); // VEX map 29
+    TEST("\xc4\xfe\x78\x10\xc0", "UD"); // VEX map 30
+    TEST("\xc4\xff\x78\x10\xc0", "UD"); // VEX map 31
     TEST32("\xc4\x00", "les eax, fword ptr [eax]");
     TEST32("\xc5\x00", "lds eax, fword ptr [eax]");
     TEST32("\x0f\xb2\x00", "lss eax, fword ptr [eax]");
@@ -802,6 +916,7 @@ main(int argc, char** argv)
     TEST32("\xc4\xe2\x7d\x35\x00", "vpmovzxdq ymm0, xmmword ptr [eax]");
     TEST64("\xc4\xe2\x7d\x35\x00", "vpmovzxdq ymm0, xmmword ptr [rax]");
 
+    TEST("\xc4\xe3\x71\x4a\xc2", "PARTIAL");
     TEST("\xc4\xe3\x71\x4a\xc2\x30", "vblendvps xmm0, xmm1, xmm2, xmm3");
     TEST32("\xc4\xe3\x75\x4a\xc2\xf0", "vblendvps ymm0, ymm1, ymm2, ymm7"); // Bit 7 is ignored
     TEST64("\xc4\xe3\x75\x4a\xc2\xf0", "vblendvps ymm0, ymm1, ymm2, ymm15");
