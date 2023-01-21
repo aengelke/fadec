@@ -122,71 +122,54 @@ fd_decode(const uint8_t* buffer, size_t len_sz, int mode_int, uintptr_t address,
     int off = 0;
     uint8_t vex_operand = 0;
 
-    unsigned prefix_rep = 0;
-    bool prefix_lock = false;
-    bool prefix_66 = false;
     uint8_t addr_size = mode == DECODE_64 ? 3 : 2;
     unsigned prefix_rex = 0;
-    int rex_off = -1;
     unsigned vexl = 0;
     unsigned prefix_evex = 0;
     instr->segment = FD_REG_NONE;
 
-    if (mode == DECODE_32) {
-        while (LIKELY(off < len))
-        {
-            uint8_t prefix = buffer[off];
-            switch (UNLIKELY(prefix))
-            {
-            default: goto prefix_end;
-            // From segment overrides, the last one wins.
-            case 0x26: instr->segment = FD_REG_ES; break;
-            case 0x2e: instr->segment = FD_REG_CS; break;
-            case 0x36: instr->segment = FD_REG_SS; break;
-            case 0x3e: instr->segment = FD_REG_DS; break;
-            case 0x64: instr->segment = FD_REG_FS; break;
-            case 0x65: instr->segment = FD_REG_GS; break;
-            case 0x66: prefix_66 = true; break;
-            case 0x67: addr_size = 1; break;
-            case 0xf0: prefix_lock = true; break;
-            case 0xf3: prefix_rep = 2; break;
-            case 0xf2: prefix_rep = 3; break;
-            }
-            off++;
-        }
-    }
-    if (mode == DECODE_64) {
-        while (LIKELY(off < len))
-        {
-            uint8_t prefix = buffer[off];
-            switch (UNLIKELY(prefix))
-            {
-            default: goto prefix_end;
-            // ES/CS/SS/DS overrides are ignored.
-            case 0x26: case 0x2e: case 0x36: case 0x3e: break;
-            // From segment overrides, the last one wins.
-            case 0x64: instr->segment = FD_REG_FS; break;
-            case 0x65: instr->segment = FD_REG_GS; break;
-            case 0x66: prefix_66 = true; break;
-            case 0x67: addr_size = 2; break;
-            case 0xf0: prefix_lock = true; break;
-            case 0xf3: prefix_rep = 2; break;
-            case 0xf2: prefix_rep = 3; break;
-            case 0x40: case 0x41: case 0x42: case 0x43: case 0x44: case 0x45:
-            case 0x46: case 0x47: case 0x48: case 0x49: case 0x4a: case 0x4b:
-            case 0x4c: case 0x4d: case 0x4e: case 0x4f:
-                prefix_rex = prefix;
-                rex_off = off;
-                break;
-            }
-            off++;
-        }
-    }
+    enum {
+        PF_SEG1 = 1|8,
+        PF_SEG2 = 1,
+        PF_66 = 3,
+        PF_67 = 4,
+        PF_LOCK = 5,
+        PF_REP = 6,
+        PF_REX = 8,
+    };
 
-prefix_end:
-    // REX prefix is only considered if it is the last prefix.
-    if (rex_off != off - 1)
-        prefix_rex = 0;
+    static const uint8_t pflut[256] = {
+        [0x26] = PF_SEG1, [0x2e] = PF_SEG1, [0x36] = PF_SEG1, [0x3e] = PF_SEG1,
+        [0x64] = PF_SEG2, [0x65] = PF_SEG2, [0x66] = PF_66, [0x67] = PF_67,
+        [0xf0] = PF_LOCK, [0xf2] = PF_REP, [0xf3] = PF_REP,
+        [0x40] = PF_REX, [0x41] = PF_REX, [0x42] = PF_REX, [0x43] = PF_REX,
+        [0x44] = PF_REX, [0x45] = PF_REX, [0x46] = PF_REX, [0x47] = PF_REX,
+        [0x48] = PF_REX, [0x49] = PF_REX, [0x4a] = PF_REX, [0x4b] = PF_REX,
+        [0x4c] = PF_REX, [0x4d] = PF_REX, [0x4e] = PF_REX, [0x4f] = PF_REX,
+    };
+    uint8_t prefixes[12] = {0};
+    uint8_t lutmask = mode == DECODE_64 ? 0xff : 0x7;
+    while (LIKELY(off < len)) {
+        uint8_t prefix = buffer[off];
+        uint8_t lut = pflut[prefix] & lutmask;
+        if (LIKELY(!lut))
+            break;
+        prefixes[lut] = prefix;
+        off++;
+    }
+    if (off) {
+        if (UNLIKELY(prefixes[PF_SEG2])) {
+            if (prefixes[PF_SEG2] & 0x02)
+                instr->segment = prefixes[PF_SEG2] >> 3 & 3;
+            else
+                instr->segment = prefixes[PF_SEG2] & 7;
+        }
+        if (UNLIKELY(prefixes[PF_67]))
+            addr_size--;
+        if (buffer[off - 1] == prefixes[PF_REX])
+            prefix_rex = prefixes[PF_REX];
+    }
+    uint8_t prefix_rep = prefixes[PF_REP];
 
     if (UNLIKELY(off >= len))
         return FD_ERR_PARTIAL;
@@ -207,7 +190,7 @@ prefix_end:
 
         // If there is no REP/REPNZ prefix offer 66h as mandatory prefix. If
         // there is a REP prefix, then the 66h prefix is ignored here.
-        mandatory_prefix = prefix_rep ? prefix_rep : !!prefix_66;
+        mandatory_prefix = prefix_rep ? prefix_rep ^ 0xf1 : !!prefixes[PF_66];
     }
     else if (UNLIKELY((unsigned) buffer[off] - 0xc4 < 2 || buffer[off] == 0x62))
     {
@@ -221,7 +204,7 @@ prefix_end:
         // VEX/EVEX + 66/F3/F2/REX will #UD.
         // Note: REX is also here only respected if it immediately precedes the
         // opcode, in this case the VEX/EVEX "prefix".
-        if (prefix_66 || prefix_rep || prefix_rex)
+        if (prefixes[PF_66] || prefixes[PF_REP] || prefix_rex)
             return FD_ERR_UD;
 
         uint8_t byte = buffer[off + 1];
@@ -328,8 +311,8 @@ prefix_end:
 
     instr->type = desc->type;
     instr->addrsz = addr_size;
-    instr->flags = prefix_rep == 2 ? FD_FLAG_REP :
-                   prefix_rep == 3 ? FD_FLAG_REPNZ : 0;
+    instr->flags = prefix_rep == 0xf3 ? FD_FLAG_REP :
+                   prefix_rep == 0xf2 ? FD_FLAG_REPNZ : 0;
     if (mode == DECODE_64)
         instr->flags |= FD_FLAG_64;
     instr->address = address;
@@ -384,11 +367,11 @@ prefix_end:
             op_size = 1;
         else if (mode == DECODE_64)
             op_size = ((prefix_rex & PREFIX_REXW) || DESC_OPSIZE(desc) == 3) ? 4 :
-                                    UNLIKELY(prefix_66 && !DESC_IGN66(desc)) ? 2 :
+                              UNLIKELY(prefixes[PF_66] && !DESC_IGN66(desc)) ? 2 :
                                                            DESC_OPSIZE(desc) ? 4 :
                                                                                3;
         else
-            op_size = UNLIKELY(prefix_66 && !DESC_IGN66(desc)) ? 2 : 3;
+            op_size = UNLIKELY(prefixes[PF_66] && !DESC_IGN66(desc)) ? 2 : 3;
     } else {
         op_size = 5 + vexl;
         op_size_alt = op_size - (DESC_OPSIZE(desc) & 3);
@@ -694,7 +677,7 @@ prefix_end:
     }
 
 skip_modrm:
-    if (UNLIKELY(prefix_lock)) {
+    if (UNLIKELY(prefixes[PF_LOCK])) {
         if (!DESC_LOCK(desc) || instr->operands[0].type != FD_OT_MEM)
             return FD_ERR_UD;
         instr->flags |= FD_FLAG_LOCK;
