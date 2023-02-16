@@ -9,9 +9,11 @@
 #ifdef __GNUC__
 #define LIKELY(x) __builtin_expect((x), 1)
 #define UNLIKELY(x) __builtin_expect((x), 0)
+#define ASSUME(x) do { if (!(x)) __builtin_unreachable(); } while (0)
 #else
 #define LIKELY(x) (x)
 #define UNLIKELY(x) (x)
+#define ASSUME(x) ((void) 0)
 #endif
 
 // Defines FD_TABLE_OFFSET_32 and FD_TABLE_OFFSET_64, if available
@@ -442,8 +444,60 @@ fd_decode(const uint8_t* buffer, size_t len_sz, int mode_int, uintptr_t address,
         }
         else
         {
-            unsigned mod = op_byte & 0xc0;
             bool vsib = UNLIKELY(DESC_VSIB(desc));
+
+            // EVEX.z for memory destination operand is UD.
+            if (UNLIKELY(prefix_evex & 0x80) && DESC_MODRM_IDX(desc) == 0)
+                return FD_ERR_UD;
+
+            // EVEX.b for memory-operand without broadcast support is UD.
+            unsigned dispscale = 0;
+            if (UNLIKELY(prefix_evex & 0x10)) {
+                if (UNLIKELY(!DESC_EVEX_BCST(desc)))
+                    return FD_ERR_UD;
+                if (UNLIKELY(DESC_EVEX_BCST16(desc)))
+                    dispscale = 1;
+                else
+                    dispscale = prefix_rex & PREFIX_REXW ? 3 : 2;
+                instr->segment |= dispscale << 6; // Store broadcast size
+                op_modrm->type = FD_OT_MEMBCST;
+            } else {
+                if (UNLIKELY(prefix_evex))
+                    dispscale = op_modrm->size - 1;
+                op_modrm->type = FD_OT_MEM;
+            }
+
+            // 16-bit address size implies different ModRM encoding
+            if (UNLIKELY(addr_size == 1)) {
+                ASSUME(mode == DECODE_32);
+                if (vsib) // 16-bit address size + VSIB is UD
+                    return FD_ERR_UD;
+                if (rm < 6)
+                    op_modrm->misc = rm & 1 ? FD_REG_DI : FD_REG_SI;
+                else
+                    op_modrm->misc = FD_REG_NONE;
+
+                if (rm < 4)
+                    op_modrm->reg = rm & 2 ? FD_REG_BP : FD_REG_BX;
+                else if (rm < 6 || (op_byte & 0xc7) == 0x06)
+                    op_modrm->reg = FD_REG_NONE;
+                else
+                    op_modrm->reg = rm == 6 ? FD_REG_BP : FD_REG_BX;
+
+                const uint8_t* dispbase = &buffer[off];
+                if (op_byte & 0x40) {
+                    if (UNLIKELY((off += 1) > len))
+                        return FD_ERR_PARTIAL;
+                    instr->disp = (int8_t) LOAD_LE_1(dispbase) << dispscale;
+                } else if (op_byte & 0x80 || (op_byte & 0xc7) == 0x06) {
+                    if (UNLIKELY((off += 2) > len))
+                        return FD_ERR_PARTIAL;
+                    instr->disp = (int16_t) LOAD_LE_2(dispbase);
+                } else {
+                    instr->disp = 0;
+                }
+                goto end_modrm;
+            }
 
             // SIB byte
             uint8_t base = rm;
@@ -472,53 +526,27 @@ fd_decode(const uint8_t* buffer, size_t len_sz, int mode_int, uintptr_t address,
                 op_modrm->misc = FD_REG_NONE;
             }
 
-            // EVEX.z for memory destination operand is UD.
-            if (UNLIKELY(prefix_evex & 0x80) && DESC_MODRM_IDX(desc) == 0)
-                return FD_ERR_UD;
-
             // RIP-relative addressing only if SIB-byte is absent
-            if (mod == 0 && rm == 5 && mode == DECODE_64)
+            if (op_byte < 0x40 && rm == 5 && mode == DECODE_64)
                 op_modrm->reg = FD_REG_IP;
-            else if (mod == 0 && base == 5)
+            else if (op_byte < 0x40 && base == 5)
                 op_modrm->reg = FD_REG_NONE;
             else
                 op_modrm->reg = base + (prefix_rex & PREFIX_REXB ? 8 : 0);
 
-            // EVEX.b for memory-operand without broadcast support is UD.
-            unsigned scale = 0;
-            if (UNLIKELY(prefix_evex & 0x10)) {
-                if (UNLIKELY(!DESC_EVEX_BCST(desc)))
-                    return FD_ERR_UD;
-                if (UNLIKELY(DESC_EVEX_BCST16(desc)))
-                    scale = 1;
-                else
-                    scale = prefix_rex & PREFIX_REXW ? 3 : 2;
-                instr->segment |= scale << 6; // Store broadcast size
-                op_modrm->type = FD_OT_MEMBCST;
+            const uint8_t* dispbase = &buffer[off];
+            if (op_byte & 0x40) {
+                if (UNLIKELY((off += 1) > len))
+                    return FD_ERR_PARTIAL;
+                instr->disp = (int8_t) LOAD_LE_1(dispbase) << dispscale;
+            } else if (op_byte & 0x80 || (op_byte < 0x40 && base == 5)) {
+                if (UNLIKELY((off += 4) > len))
+                    return FD_ERR_PARTIAL;
+                instr->disp = (int32_t) LOAD_LE_4(dispbase);
             } else {
-                if (UNLIKELY(prefix_evex))
-                    scale = op_modrm->size - 1;
-                op_modrm->type = FD_OT_MEM;
-            }
-
-            if (op_byte & 0x40)
-            {
-                if (UNLIKELY(off + 1 > len))
-                    return FD_ERR_PARTIAL;
-                instr->disp = (int8_t) LOAD_LE_1(&buffer[off]) << scale;
-                off += 1;
-            }
-            else if (op_byte & 0x80 || (mod == 0 && base == 5))
-            {
-                if (UNLIKELY(off + 4 > len))
-                    return FD_ERR_PARTIAL;
-                instr->disp = (int32_t) LOAD_LE_4(&buffer[off]);
-                off += 4;
-            }
-            else
-            {
                 instr->disp = 0;
             }
+        end_modrm:;
         }
     }
 
