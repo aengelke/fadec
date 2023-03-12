@@ -950,14 +950,14 @@ TEST("\x01\x84\xbf\x11\x22\x33\x44", ADD32mr, 0, FE_MEM(FE_DI, 4, FE_DI, 0x44332
 TEST("\x01\x85\x11\x22\x33\x44", ADD32mr, 0, FE_MEM(FE_BP, 0, FE_NOREG, 0x44332211), FE_AX);
 TEST("\x01\x86\x11\x22\x33\x44", ADD32mr, 0, FE_MEM(FE_SI, 0, FE_NOREG, 0x44332211), FE_AX);
 TEST("\x01\x87\x11\x22\x33\x44", ADD32mr, 0, FE_MEM(FE_DI, 0, FE_NOREG, 0x44332211), FE_AX);
-TEST("\x01\xc0", ADD32mr, 0, FE_AX, FE_AX);
-TEST("\x01\xc1", ADD32mr, 0, FE_CX, FE_AX);
-TEST("\x01\xc2", ADD32mr, 0, FE_DX, FE_AX);
-TEST("\x01\xc3", ADD32mr, 0, FE_BX, FE_AX);
-TEST("\x01\xc4", ADD32mr, 0, FE_SP, FE_AX);
-TEST("\x01\xc5", ADD32mr, 0, FE_BP, FE_AX);
-TEST("\x01\xc6", ADD32mr, 0, FE_SI, FE_AX);
-TEST("\x01\xc7", ADD32mr, 0, FE_DI, FE_AX);
+TEST("\x01\xc0", ADD32rr, 0, FE_AX, FE_AX);
+TEST("\x01\xc1", ADD32rr, 0, FE_CX, FE_AX);
+TEST("\x01\xc2", ADD32rr, 0, FE_DX, FE_AX);
+TEST("\x01\xc3", ADD32rr, 0, FE_BX, FE_AX);
+TEST("\x01\xc4", ADD32rr, 0, FE_SP, FE_AX);
+TEST("\x01\xc5", ADD32rr, 0, FE_BP, FE_AX);
+TEST("\x01\xc6", ADD32rr, 0, FE_SI, FE_AX);
+TEST("\x01\xc7", ADD32rr, 0, FE_DI, FE_AX);
 
 
 // Test LOCK prefix
