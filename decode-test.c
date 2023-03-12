@@ -1068,6 +1068,8 @@ main(int argc, char** argv)
     TEST("\x03\xc1", "add eax, ecx");
     TEST("\x03\xd0", "add edx, eax");
     TEST("\x03\xff", "add edi, edi");
+    TEST("\x05\x01\x00\x00\x80", "add eax, 0x80000001");
+    TEST64("\x48\x05\x01\x00\x00\x80", "add rax, 0xffffffff80000001");
 
     TEST32("\x40", "inc eax");
     TEST32("\x43", "inc ebx");

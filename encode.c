@@ -176,80 +176,77 @@ enc_mr(uint8_t** restrict buf, uint64_t opc, uint64_t epfx, uint64_t op0,
 
     bool has_rex = opc & OPC_REXW || epfx & EPFX_REX_MSK;
     if (has_rex && (op_reg_gph(op0) || op_reg_gph(op1))) return -1;
+
+    if (LIKELY(op_reg(op0))) {
+        if (enc_opc(buf, opc, epfx)) return -1;
+        *(*buf)++ = 0xc0 | ((op_reg_idx(op1) & 7) << 3) | (op_reg_idx(op0) & 7);
+        return 0;
+    }
+
     unsigned opcsz = opc_size(opc, epfx);
 
     int mod = 0, reg = op1 & 7, rm;
     int scale = 0, idx = 4, base = 0;
-    int32_t off = 0;
-    bool withsib = false, mod0off = false;
-    if (op_reg(op0))
-    {
-        mod = 3;
-        rm = op_reg_idx(op0) & 7;
-    }
-    else
-    {
-        off = op_mem_offset(op0);
+    int32_t off = op_mem_offset(op0);
+    bool withsib = false;
 
-        if (!!op_mem_idx(op0) != !!op_mem_scale(op0)) return -1;
-        if (!op_mem_idx(op0) && (opc & OPC_VSIB)) return -1;
-        if (op_mem_idx(op0))
+    if (!!op_mem_idx(op0) != !!op_mem_scale(op0)) return -1;
+    if (!op_mem_idx(op0) && (opc & OPC_VSIB)) return -1;
+    if (op_mem_idx(op0))
+    {
+        if (opc & OPC_VSIB)
         {
-            if (opc & OPC_VSIB)
-            {
-                if (!op_reg_xmm(op_mem_idx(op0))) return -1;
-            }
-            else
-            {
-                if (!op_reg_gpl(op_mem_idx(op0))) return -1;
-                if (op_reg_idx(op_mem_idx(op0)) == 4) return -1;
-            }
-            idx = op_mem_idx(op0) & 7;
-            int scalabs = op_mem_scale(op0);
-            if (scalabs & (scalabs - 1)) return -1;
-            scale = (scalabs & 0xA ? 1 : 0) | (scalabs & 0xC ? 2 : 0);
-            withsib = true;
-        }
-
-        if (!op_mem_base(op0))
-        {
-            rm = 5;
-            mod0off = true;
-            withsib = true;
-        }
-        else if (op_mem_base(op0) == FE_IP)
-        {
-            rm = 5;
-            mod0off = true;
-            // Adjust offset, caller doesn't know instruction length.
-            off -= opcsz + 5 + immsz;
-            if (withsib) return -1;
+            if (!op_reg_xmm(op_mem_idx(op0))) return -1;
         }
         else
         {
-            if (!op_reg_gpl(op_mem_base(op0))) return -1;
-            rm = op_reg_idx(op_mem_base(op0)) & 7;
-            if (rm == 5) mod = 1;
+            if (!op_reg_gpl(op_mem_idx(op0))) return -1;
+            if (op_reg_idx(op_mem_idx(op0)) == 4) return -1;
         }
+        idx = op_mem_idx(op0) & 7;
+        int scalabs = op_mem_scale(op0);
+        if (scalabs & (scalabs - 1)) return -1;
+        scale = (scalabs & 0xA ? 1 : 0) | (scalabs & 0xC ? 2 : 0);
+        withsib = true;
+    }
 
-        if (off && op_imm_n(off, 1) && !mod0off)
-            mod = 1;
-        else if (off && !mod0off)
-            mod = 2;
-
-        if (withsib || rm == 4)
-        {
+    unsigned dispsz = 0;
+    if (!op_mem_base(op0))
+    {
+        base = 5;
+        rm = 4;
+        dispsz = 4;
+    }
+    else if (op_mem_base(op0) == FE_IP)
+    {
+        rm = 5;
+        dispsz = 4;
+        // Adjust offset, caller doesn't know instruction length.
+        off -= opcsz + 5 + immsz;
+        if (withsib) return -1;
+    }
+    else
+    {
+        if (!op_reg_gpl(op_mem_base(op0))) return -1;
+        rm = op_reg_idx(op_mem_base(op0)) & 7;
+        if (withsib || rm == 4) {
             base = rm;
             rm = 4;
         }
+        if (off) {
+            mod = op_imm_n(off, 1) ? 0x40 : 0x80;
+            dispsz = op_imm_n(off, 1) ? 1 : 4;
+        } else if (rm == 5) {
+            mod = 0x40;
+            dispsz = 1;
+        }
     }
 
-    unsigned dispsz = mod == 1 ? 1 : (mod == 2 || mod0off) ? 4 : 0;
-    if (opcsz + 1 + (mod != 3 && rm == 4) + dispsz + immsz > 15) return -1;
+    if (opcsz + 1 + (rm == 4) + dispsz + immsz > 15) return -1;
 
     if (enc_opc(buf, opc, epfx)) return -1;
-    *(*buf)++ = (mod << 6) | (reg << 3) | rm;
-    if (mod != 3 && rm == 4)
+    *(*buf)++ = mod | (reg << 3) | rm;
+    if (UNLIKELY(rm == 4))
         *(*buf)++ = (scale << 6) | (idx << 3) | base;
     return enc_imm(buf, off, dispsz);
 }

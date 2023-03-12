@@ -468,7 +468,7 @@ fd_format_impl(char buf[DECLARE_RESTRICTED_ARRAY_SIZE(128)], const FdInstr* inst
                 buf = fd_strpcat(buf, (struct FdStr) { bcstsize+1, *bcstsize });
             }
         } else if (op_type == FD_OT_IMM || op_type == FD_OT_OFF) {
-            size_t immediate = FD_OP_IMM(instr, i);
+            uint64_t immediate = FD_OP_IMM(instr, i);
             // Some instructions have actually two immediate operands which are
             // decoded as a single operand. Split them here appropriately.
             switch (FD_TYPE(instr)) {
