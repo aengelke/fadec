@@ -333,8 +333,8 @@ class EntryKind(Enum):
     TABLE_VEX = 6
     TABLE_ROOT = -1
     @property
-    def is_instr(self):
-        return self == EntryKind.INSTR or self == EntryKind.WEAKINSTR
+    def is_table(self):
+        return self != EntryKind.INSTR and self != EntryKind.WEAKINSTR
 
 opcode_regex = re.compile(
      r"^(?:(?P<prefixes>(?P<vex>E?VEX\.)?(?P<legacy>NP|66|F2|F3|NFx)\." +
@@ -471,7 +471,7 @@ class Trie:
         return len(self.trie) - 1
 
     def _clone(self, elem):
-        if not elem or elem[0].is_instr:
+        if not elem or not elem[0].is_table:
             return elem
         new_num = self._add_table(elem[0])
         self.trie[new_num] = [self._clone(e) for e in self.trie[elem[1]]]
@@ -534,7 +534,7 @@ class Trie:
             entry = self.trie[entry_num]
             if not entry[entry_idx] or entry[entry_idx][0] == EntryKind.WEAKINSTR:
                 kind = EntryKind.INSTR if not weak else EntryKind.WEAKINSTR
-                entry[entry_idx] = kind, descidx
+                entry[entry_idx] = kind, descidx << 3
             elif not weak:
                 raise Exception(f"redundant non-weak {opcode}")
 
@@ -546,7 +546,7 @@ class Trie:
                 # Replace previous synonyms
                 entry = self.trie[num]
                 for i, elem in enumerate(entry):
-                    if elem and not elem[0].is_instr and elem[1] in synonyms:
+                    if elem and elem[0].is_table and elem[1] in synonyms:
                         entry[i] = synonyms[elem[1]]
 
                 unique_entry = tuple(entry)
@@ -578,8 +578,8 @@ class Trie:
                 continue
             for i, elem in enumerate(entry, start=off):
                 if elem is not None:
-                    value = elem[1] << 2 if elem[0].is_instr else offsets[elem[1]]
-                    data[i] = (value << 1) | (elem[0].value & 7)
+                    value = (offsets[elem[1]] << 1) if elem[0].is_table else elem[1]
+                    data[i] = value | (elem[0].value & 7)
         return tuple(data), [offsets[v] for _, v in self.trie[0]]
 
     @property
