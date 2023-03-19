@@ -386,6 +386,14 @@ def verifyOpcodeDesc(opcode, desc):
         raise Exception(f"0f38 has no immediate operand {opcode}, {desc}")
     if opcode.escape == 3 and desc.imm_size(4) != 1:
         raise Exception(f"0f3a must have immediate byte {opcode}, {desc}")
+    if opcode.escape == 0 and opcode.prefix is not None:
+        raise Exception(f"unescaped opcode has prefix {opcode}, {desc}")
+    if opcode.escape == 0 and opcode.vexl is not None:
+        raise Exception(f"unescaped opcode has L specifier {opcode}, {desc}")
+    if opcode.escape == 0 and opcode.rexw is not None:
+        raise Exception(f"unescaped opcode has W specifier {opcode}, {desc}")
+    if opcode.vex and opcode.prefix not in ("NP", "66", "F2", "F3"):
+        raise Exception(f"VEX/EVEX must have mandatory prefix {opcode}, {desc}")
     if opcode.vexl == "IG" and desc.dynsizes() - {OpKind.SZ_OP}:
         raise Exception(f"(E)VEX.LIG with dynamic vector size {opcode}, {desc}")
     if "VSIB" in desc.flags and (not opcode.modreg or opcode.modreg[1] != "m"):
