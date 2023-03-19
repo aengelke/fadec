@@ -552,22 +552,29 @@ fd_decode(const uint8_t* buffer, size_t len_sz, int mode_int, uintptr_t address,
 
     if (UNLIKELY(DESC_HAS_VEXREG(desc)))
     {
-        // Without VEX prefix, this encodes an implicit register
         FdOp* operand = &instr->operands[DESC_VEXREG_IDX(desc)];
-        operand->type = FD_OT_REG;
-        operand->size = operand_sizes[(desc->operand_sizes >> 4) & 3];
-        if (mode == DECODE_32)
-            vex_operand &= 0x7;
-        // Note: 32-bit will never UD here. EVEX.V' is caught above already.
-        // Note: UD if > 16 for non-VEC. No EVEX-encoded instruction uses
-        // EVEX.vvvv to refer to non-vector registers. Verified in parseinstrs.
-        operand->reg = vex_operand | DESC_ZEROREG_VAL(desc);
+        if (DESC_ZEROREG_VAL(desc)) {
+            operand->type = FD_OT_REG;
+            operand->size = 1;
+            operand->reg = FD_REG_CL;
+            operand->misc = FD_RT_GPL;
+        } else {
+            operand->type = FD_OT_REG;
+            // Without VEX prefix, this encodes an implicit register
+            operand->size = operand_sizes[(desc->operand_sizes >> 4) & 3];
+            if (mode == DECODE_32)
+                vex_operand &= 0x7;
+            // Note: 32-bit will never UD here. EVEX.V' is caught above already.
+            // Note: UD if > 16 for non-VEC. No EVEX-encoded instruction uses
+            // EVEX.vvvv to refer to non-vector registers. Verified in parseinstrs.
+            operand->reg = vex_operand;
 
-        unsigned reg_ty = DESC_REGTY_VEXREG(desc); // VEC GPL MSK FPU
-        // In 64-bit mode: UD if FD_RT_MASK and vex_operand&8 != 0
-        if (reg_ty == 2 && vex_operand >= 8)
-            return FD_ERR_UD;
-        operand->misc = (04710 >> (3 * reg_ty)) & 0x7;
+            unsigned reg_ty = DESC_REGTY_VEXREG(desc); // VEC GPL MSK FPU
+            // In 64-bit mode: UD if FD_RT_MASK and vex_operand&8 != 0
+            if (reg_ty == 2 && vex_operand >= 8)
+                return FD_ERR_UD;
+            operand->misc = (04710 >> (3 * reg_ty)) & 0x7;
+        }
     }
     else if (vex_operand != 0)
     {
