@@ -149,6 +149,11 @@ main(int argc, char** argv)
     TEST("\x80\x04", "PARTIAL");
     TEST("\x80\x40", "PARTIAL");
     TEST("\x80\x80\x00\x00\x00", "PARTIAL");
+    TEST("\xb0", "PARTIAL");
+    TEST("\xb8", "PARTIAL");
+    TEST("\xb8\x00", "PARTIAL");
+    TEST("\xb8\x00\x00", "PARTIAL");
+    TEST("\xb8\x00\x00\x00", "PARTIAL");
     TEST32("\x0F\x01\x22", "smsw word ptr [edx]");
     TEST64("\x0F\x01\x22", "smsw word ptr [rdx]");
     TEST64("\x48\x0F\x01\x22", "smsw word ptr [rdx]");
@@ -2102,6 +2107,7 @@ main(int argc, char** argv)
     TEST32("\xff\x1f", "call far fword ptr [edi]");
     TEST64("\xff\x1f", "call far fword ptr [rdi]");
     TEST64("\x48\xff\x1f", "call far tbyte ptr [rdi]");
+    TEST("\x0f\xb4", "PARTIAL");
     TEST32("\x66\x0f\xb4\x07", "lfs ax, dword ptr [edi]");
     TEST64("\x66\x0f\xb4\x07", "lfs ax, dword ptr [rdi]");
     TEST32("\x0f\xb4\x07", "lfs eax, fword ptr [edi]");
@@ -2194,6 +2200,11 @@ main(int argc, char** argv)
     TEST("\x66\x66\x66\x66\x66\x66\x66\x66\x66\x66\x66\x66\x66\x66\x66\x90", "PARTIAL");
 
     // Complete test of VADDPS and all encoding options
+    TEST("\x62", "PARTIAL");
+    TEST("\x62\xf1", "PARTIAL");
+    TEST("\x62\xf1\x74", "PARTIAL");
+    TEST("\x62\xf1\x74\x18", "PARTIAL");
+    TEST("\x62\xf1\x74\x18\x58", "PARTIAL");
     TEST("\x62\xf1\x74\x18\x58\xc2", "vaddps zmm0, zmm1, zmm2, {rn-sae}");
     TEST("\x62\xf1\x74\x38\x58\xc2", "vaddps zmm0, zmm1, zmm2, {rd-sae}");
     TEST("\x62\xf1\x74\x58\x58\xc2", "vaddps zmm0, zmm1, zmm2, {ru-sae}");
