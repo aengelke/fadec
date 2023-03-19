@@ -583,7 +583,8 @@ fd_decode(const uint8_t* buffer, size_t len_sz, int mode_int, uintptr_t address,
     }
 
     uint32_t imm_control = UNLIKELY(DESC_IMM_CONTROL(desc));
-    if (UNLIKELY(imm_control == 1))
+    if (LIKELY(!imm_control)) {
+    } else if (UNLIKELY(imm_control == 1))
     {
         // 1 = immediate constant 1, used for shifts
         FdOp* operand = &instr->operands[DESC_IMM_IDX(desc)];
@@ -732,7 +733,7 @@ skip_modrm:
     }
 
     instr->size = off;
-    instr->operandsz = DESC_INSTR_WIDTH(desc) ? op_size - 1 : 0;
+    instr->operandsz = UNLIKELY(DESC_INSTR_WIDTH(desc)) ? op_size - 1 : 0;
 
     return off;
 }
