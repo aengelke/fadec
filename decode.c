@@ -38,14 +38,19 @@ typedef enum DecodeMode DecodeMode;
 #define ENTRY_TABLE_ROOT 8
 #define ENTRY_MASK 7
 
-static unsigned
-table_walk(unsigned cur_idx, unsigned entry_idx, unsigned* out_kind) {
+static uint16_t
+table_lookup(unsigned cur_idx, unsigned entry_idx) {
     static _Alignas(16) const uint16_t _decode_table[] = {
 #define FD_DECODE_TABLE_DATA
 #include <fadec-decode-private.inc>
 #undef FD_DECODE_TABLE_DATA
     };
-    unsigned entry = _decode_table[cur_idx + entry_idx];
+    return _decode_table[cur_idx + entry_idx];
+}
+
+static unsigned
+table_walk(unsigned cur_idx, unsigned entry_idx, unsigned* out_kind) {
+    unsigned entry = table_lookup(cur_idx, entry_idx);
     *out_kind = entry & ENTRY_MASK;
     return (entry & ~ENTRY_MASK) >> 1;
 }
@@ -126,37 +131,33 @@ fd_decode(const uint8_t* buffer, size_t len_sz, int mode_int, uintptr_t address,
 
     uint8_t addr_size = mode == DECODE_64 ? 3 : 2;
     unsigned prefix_rex = 0;
+    uint8_t prefix_rep = 0;
     unsigned vexl = 0;
     unsigned prefix_evex = 0;
     instr->segment = FD_REG_NONE;
 
+    // Values must match prefixes in parseinstrs.py.
     enum {
-        PF_SEG1 = 1|8,
-        PF_SEG2 = 1,
-        PF_66 = 3,
-        PF_67 = 4,
-        PF_LOCK = 5,
-        PF_REP = 6,
-        PF_REX = 8,
+        PF_SEG1 = 0xfff8 - 0xfff8,
+        PF_SEG2 = 0xfff9 - 0xfff8,
+        PF_66 = 0xfffa - 0xfff8,
+        PF_67 = 0xfffb - 0xfff8,
+        PF_LOCK = 0xfffc - 0xfff8,
+        PF_REP = 0xfffd - 0xfff8,
+        PF_REX = 0xfffe - 0xfff8,
     };
 
-    static const uint8_t pflut[256] = {
-        [0x26] = PF_SEG1, [0x2e] = PF_SEG1, [0x36] = PF_SEG1, [0x3e] = PF_SEG1,
-        [0x64] = PF_SEG2, [0x65] = PF_SEG2, [0x66] = PF_66, [0x67] = PF_67,
-        [0xf0] = PF_LOCK, [0xf2] = PF_REP, [0xf3] = PF_REP,
-        [0x40] = PF_REX, [0x41] = PF_REX, [0x42] = PF_REX, [0x43] = PF_REX,
-        [0x44] = PF_REX, [0x45] = PF_REX, [0x46] = PF_REX, [0x47] = PF_REX,
-        [0x48] = PF_REX, [0x49] = PF_REX, [0x4a] = PF_REX, [0x4b] = PF_REX,
-        [0x4c] = PF_REX, [0x4d] = PF_REX, [0x4e] = PF_REX, [0x4f] = PF_REX,
-    };
-    uint8_t prefixes[12] = {0};
-    uint8_t lutmask = mode == DECODE_64 ? 0xff : 0x7;
-    while (LIKELY(off < len)) {
+    uint8_t prefixes[8] = {0};
+    unsigned table_entry = 0;
+    while (true) {
+        if (UNLIKELY(off >= len))
+            return FD_ERR_PARTIAL;
         uint8_t prefix = buffer[off];
-        uint8_t lut = pflut[prefix] & lutmask;
-        if (LIKELY(!lut))
+        table_entry = table_lookup(table_idx, prefix);
+        if (LIKELY(table_entry - 0xfff8 >= 8))
             break;
-        prefixes[lut] = prefix;
+        prefixes[PF_REX] = 0;
+        prefixes[table_entry - 0xfff8] = prefix;
         off++;
     }
     if (off) {
@@ -168,10 +169,28 @@ fd_decode(const uint8_t* buffer, size_t len_sz, int mode_int, uintptr_t address,
         }
         if (UNLIKELY(prefixes[PF_67]))
             addr_size--;
-        if (buffer[off - 1] == prefixes[PF_REX])
-            prefix_rex = prefixes[PF_REX];
+        prefix_rex = prefixes[PF_REX];
+        prefix_rep = prefixes[PF_REP];
     }
-    uint8_t prefix_rep = prefixes[PF_REP];
+
+    kind = table_entry & ENTRY_MASK;
+    table_idx = (table_entry & ~ENTRY_MASK) >> 1;
+    if (LIKELY(kind != 7)) {
+        off++;
+
+        // Then, walk through ModR/M-encoded opcode extensions.
+        if (kind == ENTRY_TABLE16 && LIKELY(off < len)) {
+            unsigned isreg = (buffer[off] & 0xc0) == 0xc0 ? 8 : 0;
+            table_idx = table_walk(table_idx, ((buffer[off] >> 3) & 7) | isreg, &kind);
+            if (kind == ENTRY_TABLE8E)
+                table_idx = table_walk(table_idx, buffer[off] & 7, &kind);
+        }
+
+        if (UNLIKELY(kind != ENTRY_INSTR))
+            return kind == 0 ? FD_ERR_UD : FD_ERR_PARTIAL;
+
+        goto direct;
+    }
 
     if (UNLIKELY(off >= len))
         return FD_ERR_PARTIAL;
@@ -200,8 +219,11 @@ fd_decode(const uint8_t* buffer, size_t len_sz, int mode_int, uintptr_t address,
         // VEX (C4/C5) or EVEX (62)
         if (UNLIKELY(off + 1 >= len))
             return FD_ERR_PARTIAL;
-        if (mode == DECODE_32 && (buffer[off + 1] & 0xc0) != 0xc0)
-            goto skipvex;
+        if (UNLIKELY(mode == DECODE_32 && buffer[off + 1] < 0xc0)) {
+            off++;
+            table_idx = table_walk(table_idx, 0, &kind);
+            goto direct;
+        }
 
         // VEX/EVEX + 66/F3/F2/REX will #UD.
         // Note: REX is also here only respected if it immediately precedes the
@@ -212,7 +234,7 @@ fd_decode(const uint8_t* buffer, size_t len_sz, int mode_int, uintptr_t address,
         uint8_t byte = buffer[off + 1];
         if (vex_prefix == 0xc5) // 2-byte VEX
         {
-            opcode_escape = 1 | 4; // 4 is table index with VEX, 0f escape
+            opcode_escape = 1;
             prefix_rex = byte & 0x80 ? 0 : PREFIX_REXR;
         }
         else // 3-byte VEX or EVEX
@@ -224,7 +246,7 @@ fd_decode(const uint8_t* buffer, size_t len_sz, int mode_int, uintptr_t address,
             {
                 if (byte & 0x08) // Bit 3 of opcode_escape must be clear.
                     return FD_ERR_UD;
-                opcode_escape = (byte & 0x07) | 8; // 8 is table index with EVEX
+                opcode_escape = (byte & 0x07);
                 _Static_assert(PREFIX_REXRR == 0x10, "wrong REXRR value");
                 if (mode == DECODE_64)
                     prefix_rex |= (byte & PREFIX_REXRR) ^ PREFIX_REXRR;
@@ -233,7 +255,13 @@ fd_decode(const uint8_t* buffer, size_t len_sz, int mode_int, uintptr_t address,
             {
                 if (byte & 0x1c) // Bits 4:2 of opcode_escape must be clear.
                     return FD_ERR_UD;
-                opcode_escape = (byte & 0x03) | 4; // 4 is table index with VEX
+                opcode_escape = (byte & 0x03); // 4 is table index with VEX
+            }
+
+            if (UNLIKELY(opcode_escape == 0)) {
+                int prefix_len = vex_prefix == 0x62 ? 4 : 3;
+                // Pretend to decode the prefix plus one opcode byte.
+                return off + prefix_len > len ? FD_ERR_PARTIAL : FD_ERR_UD;
             }
 
             // Load third byte of VEX prefix
@@ -267,8 +295,6 @@ fd_decode(const uint8_t* buffer, size_t len_sz, int mode_int, uintptr_t address,
             vexl = byte & 0x04 ? 1 : 0;
             off += 0xc7 - vex_prefix; // 3 for c4, 2 for c5
         }
-
-    skipvex:;
     }
 
     table_idx = table_walk(table_idx, opcode_escape, &kind);
@@ -304,6 +330,7 @@ fd_decode(const uint8_t* buffer, size_t len_sz, int mode_int, uintptr_t address,
     if (UNLIKELY(kind != ENTRY_INSTR))
         return kind == 0 ? FD_ERR_UD : FD_ERR_PARTIAL;
 
+direct:;
     static _Alignas(16) const struct InstrDesc descs[] = {
 #define FD_DECODE_TABLE_DESCS
 #include <fadec-decode-private.inc>

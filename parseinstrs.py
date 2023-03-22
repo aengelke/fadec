@@ -324,6 +324,8 @@ class InstrDesc(NamedTuple):
 
 class EntryKind(Enum):
     NONE = 0
+    PREFIX = 8
+    ESCAPE = 7
     INSTR = 1
     WEAKINSTR = 9
     TABLE256 = 2
@@ -334,7 +336,7 @@ class EntryKind(Enum):
     TABLE_ROOT = -1
     @property
     def is_table(self):
-        return self != EntryKind.INSTR and self != EntryKind.WEAKINSTR
+        return self != EntryKind.INSTR and self != EntryKind.WEAKINSTR and self != EntryKind.PREFIX
 
 opcode_regex = re.compile(
      r"^(?:(?P<prefixes>(?P<vex>E?VEX\.)?(?P<legacy>NP|66|F2|F3|NFx)\." +
@@ -392,6 +394,8 @@ def verifyOpcodeDesc(opcode, desc):
         raise Exception(f"unescaped opcode has L specifier {opcode}, {desc}")
     if opcode.escape == 0 and opcode.rexw is not None:
         raise Exception(f"unescaped opcode has W specifier {opcode}, {desc}")
+    if opcode.escape == 0 and opcode.vex:
+        raise Exception(f"VEX opcode without escape {opcode}, {desc}")
     if opcode.vex and opcode.prefix not in ("NP", "66", "F2", "F3"):
         raise Exception(f"VEX/EVEX must have mandatory prefix {opcode}, {desc}")
     if opcode.vexl == "IG" and desc.dynsizes() - {OpKind.SZ_OP}:
@@ -456,11 +460,12 @@ def verifyOpcodeDesc(opcode, desc):
                 raise Exception(f"memory size {opsz} != {tupsz} {opcode}, {desc}")
 
 class Trie:
-    KIND_ORDER = (EntryKind.TABLE_ROOT, EntryKind.TABLE256,
+    KIND_ORDER = (EntryKind.TABLE_ROOT, EntryKind.ESCAPE, EntryKind.TABLE256,
                   EntryKind.TABLE_PREFIX, EntryKind.TABLE16,
                   EntryKind.TABLE8E, EntryKind.TABLE_VEX)
     TABLE_LENGTH = {
-        EntryKind.TABLE_ROOT: 16,
+        EntryKind.TABLE_ROOT: 256,
+        EntryKind.ESCAPE: 8,
         EntryKind.TABLE256: 256,
         EntryKind.TABLE_PREFIX: 4,
         EntryKind.TABLE16: 16,
@@ -486,8 +491,22 @@ class Trie:
         return elem[0], new_num
 
     def _transform_opcode(self, opc):
-        troot = [opc.escape | opc.vex << 2]
-        t256 = [opc.opc + i for i in range(8 if opc.extended and not opc.opcext else 1)]
+        topc = [opc.opc + i for i in range(8 if opc.extended and not opc.opcext else 1)]
+        if opc.escape == 0 and opc.opc in (0xc4, 0xc5, 0x62):
+            assert opc.prefix is None
+            assert opc.opcext is None
+            assert opc.modreg == (None, "m")
+            assert opc.rexw is None
+            assert opc.vexl is None
+            # We do NOT encode /m, this is handled by prefix code.
+            # Order must match KIND_ORDER.
+            return topc, [0], None, None, None, None, None
+        elif opc.escape == 0:
+            troot, tescape, topc = topc, None, None
+        else:
+            troot = [[0x0f], [0xc4, 0xc5], [0x62]][opc.vex]
+            tescape = [opc.escape]
+
         tprefix, t16, t8e, tvex = None, None, None, None
         if opc.prefix == "NFx":
             tprefix = [0, 1]
@@ -510,7 +529,7 @@ class Trie:
                 vexl = {"0": [0], "12": [1<<1, 2<<1], "2": [2<<1], "IG": [0, 1<<1, 2<<1, 3<<1]}[opc.vexl or "IG"]
             tvex = list(map(sum, product(rexw, vexl)))
         # Order must match KIND_ORDER.
-        return troot, t256, tprefix, t16, t8e, tvex
+        return troot, tescape, topc, tprefix, t16, t8e, tvex
 
     def add_opcode(self, opcode, descidx, root_idx, weak=False):
         opcode = self._transform_opcode(opcode)
@@ -545,6 +564,11 @@ class Trie:
                 entry[entry_idx] = kind, descidx << 3
             elif not weak:
                 raise Exception(f"redundant non-weak {opcode}")
+
+    def add_prefix(self, byte, prefix, root_idx):
+        if self.trie[0][root_idx] is None:
+            self.trie[0][root_idx] = EntryKind.TABLE_ROOT, self._add_table(EntryKind.TABLE_ROOT)
+        self.trie[self.trie[0][root_idx][1]][byte] = EntryKind.PREFIX, prefix
 
     def deduplicate(self):
         synonyms = {}
@@ -627,6 +651,21 @@ def decode_table(entries, args):
     modes = args.modes
 
     trie = Trie(root_count=len(modes))
+    for i, mode in enumerate(modes):
+        # Magic values must match PF_* enum in decode.c.
+        trie.add_prefix(0x66, 0xfffa, i)
+        trie.add_prefix(0x67, 0xfffb, i)
+        trie.add_prefix(0xf0, 0xfffc, i)
+        trie.add_prefix(0xf2, 0xfffd, i)
+        trie.add_prefix(0xf3, 0xfffd, i)
+        trie.add_prefix(0x64, 0xfff9, i)
+        trie.add_prefix(0x65, 0xfff9, i)
+        for seg in (0x26, 0x2e, 0x36, 0x3e):
+            trie.add_prefix(seg, 0xfff8 + (mode <= 32), i)
+        if mode > 32:
+            for rex in range(0x40, 0x50):
+                trie.add_prefix(rex, 0xfffe, i)
+
     mnems, descs, desc_map = set(), [], {}
     for weak, opcode, desc in entries:
         ign66 = opcode.prefix in ("NP", "66", "F2", "F3")
