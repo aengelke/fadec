@@ -323,16 +323,16 @@ class InstrDesc(NamedTuple):
         return f"{{FDI_{mnem}, {enc[0]}, {enc[1]}, {enc[2]}}}"
 
 class EntryKind(Enum):
-    NONE = 0
-    PREFIX = 8
-    ESCAPE = 7
-    INSTR = 1
-    WEAKINSTR = 9
-    TABLE256 = 2
-    TABLE16 = 3
-    TABLE8E = 4
-    TABLE_PREFIX = 5
-    TABLE_VEX = 6
+    NONE = 0x00
+    PREFIX = 0x10
+    INSTR = 0x20
+    WEAKINSTR = 0x30
+    TABLE16 = 0x01
+    TABLE8E = 0x11
+    ESCAPE = 0x02
+    TABLE256 = 0x12
+    TABLE_VEX = 0x22
+    TABLE_PREFIX = 0x03
     TABLE_ROOT = -1
     @property
     def is_table(self):
@@ -561,7 +561,7 @@ class Trie:
             entry = self.trie[entry_num]
             if not entry[entry_idx] or entry[entry_idx][0] == EntryKind.WEAKINSTR:
                 kind = EntryKind.INSTR if not weak else EntryKind.WEAKINSTR
-                entry[entry_idx] = kind, descidx << 3
+                entry[entry_idx] = kind, descidx << 2
             elif not weak:
                 raise Exception(f"redundant non-weak {opcode}")
 
@@ -610,8 +610,8 @@ class Trie:
                 continue
             for i, elem in enumerate(entry, start=off):
                 if elem is not None:
-                    value = (offsets[elem[1]] << 1) if elem[0].is_table else elem[1]
-                    data[i] = value | (elem[0].value & 7)
+                    value = offsets[elem[1]] if elem[0].is_table else elem[1]
+                    data[i] = value | (elem[0].value & 3)
         return tuple(data), [offsets[v] for _, v in self.trie[0]]
 
     @property
@@ -667,6 +667,7 @@ def decode_table(entries, args):
                 trie.add_prefix(rex, 0xfffe, i)
 
     mnems, descs, desc_map = set(), [], {}
+    descs.append("{0}") # desc index zero is "invalid"
     for weak, opcode, desc in entries:
         ign66 = opcode.prefix in ("NP", "66", "F2", "F3")
         modrm = opcode.modreg or opcode.opcext

@@ -49,10 +49,8 @@ table_lookup(unsigned cur_idx, unsigned entry_idx) {
 }
 
 static unsigned
-table_walk(unsigned cur_idx, unsigned entry_idx, unsigned* out_kind) {
-    unsigned entry = table_lookup(cur_idx, entry_idx);
-    *out_kind = entry & ENTRY_MASK;
-    return (entry & ~ENTRY_MASK) >> 1;
+table_walk(unsigned table_entry, unsigned entry_idx) {
+    return table_lookup(table_entry & ~0x3, entry_idx);
 }
 
 #define LOAD_LE_1(buf) ((uint64_t) *(uint8_t*) (buf))
@@ -113,15 +111,14 @@ fd_decode(const uint8_t* buffer, size_t len_sz, int mode_int, uintptr_t address,
 
     // Ensure that we can actually handle the decode request
     DecodeMode mode;
-    unsigned table_idx;
-    unsigned kind = ENTRY_TABLE_ROOT;
+    unsigned table_root_idx;
     switch (mode_int)
     {
 #if defined(FD_TABLE_OFFSET_32)
-    case 32: table_idx = FD_TABLE_OFFSET_32; mode = DECODE_32; break;
+    case 32: table_root_idx = FD_TABLE_OFFSET_32; mode = DECODE_32; break;
 #endif
 #if defined(FD_TABLE_OFFSET_64)
-    case 64: table_idx = FD_TABLE_OFFSET_64; mode = DECODE_64; break;
+    case 64: table_root_idx = FD_TABLE_OFFSET_64; mode = DECODE_64; break;
 #endif
     default: return FD_ERR_INTERNAL;
     }
@@ -153,7 +150,7 @@ fd_decode(const uint8_t* buffer, size_t len_sz, int mode_int, uintptr_t address,
         if (UNLIKELY(off >= len))
             return FD_ERR_PARTIAL;
         uint8_t prefix = buffer[off];
-        table_entry = table_lookup(table_idx, prefix);
+        table_entry = table_lookup(table_root_idx, prefix);
         if (LIKELY(table_entry - 0xfff8 >= 8))
             break;
         prefixes[PF_REX] = 0;
@@ -173,22 +170,22 @@ fd_decode(const uint8_t* buffer, size_t len_sz, int mode_int, uintptr_t address,
         prefix_rep = prefixes[PF_REP];
     }
 
-    kind = table_entry & ENTRY_MASK;
-    table_idx = (table_entry & ~ENTRY_MASK) >> 1;
-    if (LIKELY(kind != 7)) {
+    // table_entry kinds: INSTR(0), T16(1), ESCAPE_A(2), ESCAPE_B(3)
+    if (LIKELY(!(table_entry & 2))) {
         off++;
 
         // Then, walk through ModR/M-encoded opcode extensions.
-        if (kind == ENTRY_TABLE16 && LIKELY(off < len)) {
+        if (table_entry & 1) {
+            if (UNLIKELY(off >= len))
+                return FD_ERR_PARTIAL;
             unsigned isreg = (buffer[off] & 0xc0) == 0xc0 ? 8 : 0;
-            table_idx = table_walk(table_idx, ((buffer[off] >> 3) & 7) | isreg, &kind);
-            if (kind == ENTRY_TABLE8E)
-                table_idx = table_walk(table_idx, buffer[off] & 7, &kind);
+            table_entry = table_walk(table_entry, ((buffer[off] >> 3) & 7) | isreg);
+            // table_entry kinds: INSTR(0), T8E(1)
+            if (table_entry & 1)
+                table_entry = table_walk(table_entry, buffer[off] & 7);
         }
 
-        if (UNLIKELY(kind != ENTRY_INSTR))
-            return kind == 0 ? FD_ERR_UD : FD_ERR_PARTIAL;
-
+        // table_entry kinds: INSTR(0)
         goto direct;
     }
 
@@ -221,7 +218,8 @@ fd_decode(const uint8_t* buffer, size_t len_sz, int mode_int, uintptr_t address,
             return FD_ERR_PARTIAL;
         if (UNLIKELY(mode == DECODE_32 && buffer[off + 1] < 0xc0)) {
             off++;
-            table_idx = table_walk(table_idx, 0, &kind);
+            table_entry = table_walk(table_entry, 0);
+            // table_entry kinds: INSTR(0)
             goto direct;
         }
 
@@ -297,46 +295,56 @@ fd_decode(const uint8_t* buffer, size_t len_sz, int mode_int, uintptr_t address,
         }
     }
 
-    table_idx = table_walk(table_idx, opcode_escape, &kind);
-    if (kind == ENTRY_TABLE256 && LIKELY(off < len))
-        table_idx = table_walk(table_idx, buffer[off++], &kind);
+    table_entry = table_walk(table_entry, opcode_escape);
+    // table_entry kinds: INSTR(0) [only for invalid], T256(2)
+    if (UNLIKELY(!table_entry))
+        return FD_ERR_UD;
+    if (UNLIKELY(off >= len))
+        return FD_ERR_PARTIAL;
+    table_entry = table_walk(table_entry, buffer[off++]);
+    // table_entry kinds: INSTR(0), T16(1), TVEX(2), TPREFIX(3)
 
     // Handle mandatory prefixes (which behave like an opcode ext.).
-    if (kind == ENTRY_TABLE_PREFIX)
-    {
-        table_idx = table_walk(table_idx, mandatory_prefix, &kind);
-    }
+    if ((table_entry & 3) == 3)
+        table_entry = table_walk(table_entry, mandatory_prefix);
+    // table_entry kinds: INSTR(0), T16(1), TVEX(2)
 
     // Then, walk through ModR/M-encoded opcode extensions.
-    if (kind == ENTRY_TABLE16 && LIKELY(off < len)) {
+    if (table_entry & 1) {
+        if (UNLIKELY(off >= len))
+            return FD_ERR_PARTIAL;
         unsigned isreg = (buffer[off] & 0xc0) == 0xc0 ? 8 : 0;
-        table_idx = table_walk(table_idx, ((buffer[off] >> 3) & 7) | isreg, &kind);
-        if (kind == ENTRY_TABLE8E)
-            table_idx = table_walk(table_idx, buffer[off] & 7, &kind);
+        table_entry = table_walk(table_entry, ((buffer[off] >> 3) & 7) | isreg);
+        // table_entry kinds: INSTR(0), T8E(1), TVEX(2)
+        if (table_entry & 1)
+            table_entry = table_walk(table_entry, buffer[off] & 7);
     }
+    // table_entry kinds: INSTR(0), TVEX(2)
 
     // For VEX prefix, we have to distinguish between VEX.W and VEX.L which may
     // be part of the opcode.
-    if (UNLIKELY(kind == ENTRY_TABLE_VEX))
+    if (UNLIKELY(table_entry & 2))
     {
         uint8_t index = 0;
         index |= prefix_rex & PREFIX_REXW ? (1 << 0) : 0;
         // When EVEX.L'L is the rounding mode, the instruction must not have
         // L'L constraints.
         index |= vexl << 1;
-        table_idx = table_walk(table_idx, index, &kind);
+        table_entry = table_walk(table_entry, index);
     }
+    // table_entry kinds: INSTR(0)
 
-    if (UNLIKELY(kind != ENTRY_INSTR))
-        return kind == 0 ? FD_ERR_UD : FD_ERR_PARTIAL;
+direct:
+    // table_entry kinds: INSTR(0)
+    if (UNLIKELY(!table_entry))
+        return FD_ERR_UD;
 
-direct:;
     static _Alignas(16) const struct InstrDesc descs[] = {
 #define FD_DECODE_TABLE_DESCS
 #include <fadec-decode-private.inc>
 #undef FD_DECODE_TABLE_DESCS
     };
-    const struct InstrDesc* desc = &descs[table_idx >> 2];
+    const struct InstrDesc* desc = &descs[table_entry >> 2];
 
     instr->type = desc->type;
     instr->addrsz = addr_size;
