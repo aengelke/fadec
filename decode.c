@@ -91,6 +91,10 @@ struct InstrDesc
 #define DESC_LOCK(desc) (((desc)->operand_indices >> 11) & 1)
 #define DESC_VSIB(desc) (((desc)->operand_indices >> 15) & 1)
 #define DESC_OPSIZE(desc) (((desc)->reg_types >> 11) & 7)
+#define DESC_MODRM_SIZE(desc) (((desc)->operand_sizes >> 0) & 3)
+#define DESC_MODREG_SIZE(desc) (((desc)->operand_sizes >> 2) & 3)
+#define DESC_VEXREG_SIZE(desc) (((desc)->operand_sizes >> 4) & 3)
+#define DESC_IMM_SIZE(desc) (((desc)->operand_sizes >> 6) & 3)
 #define DESC_LEGACY(desc) (((desc)->operand_sizes >> 8) & 1)
 #define DESC_SIZE_FIX1(desc) (((desc)->operand_sizes >> 10) & 7)
 #define DESC_SIZE_FIX2(desc) (((desc)->operand_sizes >> 13) & 3)
@@ -450,14 +454,14 @@ direct:
         else if (UNLIKELY(prefix_rex & PREFIX_REXRR))
             return FD_ERR_UD;
         op_modreg->type = FD_OT_REG;
-        op_modreg->size = operand_sizes[(desc->operand_sizes >> 2) & 3];
+        op_modreg->size = operand_sizes[DESC_MODREG_SIZE(desc)];
         op_modreg->reg = reg_idx;
     }
 
     if (DESC_HAS_MODRM(desc))
     {
         FdOp* op_modrm = &instr->operands[DESC_MODRM_IDX(desc)];
-        op_modrm->size = operand_sizes[(desc->operand_sizes >> 0) & 3];
+        op_modrm->size = operand_sizes[DESC_MODRM_SIZE(desc)];
 
         unsigned rm = op_byte & 0x07;
         if (op_byte >= 0xc0)
@@ -591,7 +595,7 @@ direct:
         } else {
             operand->type = FD_OT_REG;
             // Without VEX prefix, this encodes an implicit register
-            operand->size = operand_sizes[(desc->operand_sizes >> 4) & 3];
+            operand->size = operand_sizes[DESC_VEXREG_SIZE(desc)];
             if (mode == DECODE_32)
                 vex_operand &= 0x7;
             // Note: 32-bit will never UD here. EVEX.V' is caught above already.
@@ -627,7 +631,7 @@ direct:
         // 2 = memory, address-sized, used for mov with moffs operand
         FdOp* operand = &instr->operands[DESC_IMM_IDX(desc)];
         operand->type = FD_OT_MEM;
-        operand->size = operand_sizes[(desc->operand_sizes >> 6) & 3];
+        operand->size = operand_sizes[DESC_IMM_SIZE(desc)];
         operand->reg = FD_REG_NONE;
         operand->misc = FD_REG_NONE;
 
@@ -674,9 +678,9 @@ direct:
             if (UNLIKELY(off + 1 > len))
                 return FD_ERR_PARTIAL;
             instr->imm = (int8_t) LOAD_LE_1(&buffer[off++]);
-            operand->size = desc->operand_sizes & 0x40 ? 1 : op_size;
+            operand->size = DESC_IMM_SIZE(desc) & 1 ? 1 : op_size;
         } else {
-            operand->size = operand_sizes[(desc->operand_sizes >> 6) & 3];
+            operand->size = operand_sizes[DESC_IMM_SIZE(desc)];
 
             uint8_t imm_size;
             if (UNLIKELY(instr->type == FDI_RET || instr->type == FDI_RETF ||
