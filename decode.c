@@ -349,10 +349,7 @@ direct:
 
     instr->type = desc->type;
     instr->addrsz = addr_size;
-    instr->flags = prefix_rep == 0xf3 ? FD_FLAG_REP :
-                   prefix_rep == 0xf2 ? FD_FLAG_REPNZ : 0;
-    if (mode == DECODE_64)
-        instr->flags |= FD_FLAG_64;
+    instr->flags = ((prefix_rep + 1) & 6) + (mode == DECODE_64 ? FD_FLAG_64 : 0);
     instr->address = address;
 
     for (unsigned i = 0; i < sizeof(instr->operands) / sizeof(FdOp); i++)

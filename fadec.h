@@ -37,8 +37,8 @@ typedef enum {
 /** Internal use only. **/
 enum {
     FD_FLAG_LOCK = 1 << 0,
-    FD_FLAG_REP = 1 << 1,
-    FD_FLAG_REPNZ = 1 << 2,
+    FD_FLAG_REP = 1 << 2,
+    FD_FLAG_REPNZ = 1 << 1,
     FD_FLAG_64 = 1 << 7,
 };
 
