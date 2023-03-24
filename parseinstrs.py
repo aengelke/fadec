@@ -24,7 +24,8 @@ INSTR_FLAGS_FIELDS, INSTR_FLAGS_SIZES = zip(*[
     ("modreg_size", 2),
     ("vexreg_size", 2),
     ("imm_size", 2),
-    ("unused2", 2),
+    ("legacy", 1),
+    ("unused2", 1),
     ("size_fix1", 3),
     ("size_fix2", 2),
     ("instr_width", 1),
@@ -274,11 +275,18 @@ class InstrDesc(NamedTuple):
                 raise Exception(f"conflicting vector operand sizes in {self}")
         else: # either empty or GP operand size
             dynsizes = [OpKind.SZ_OP]
-            if "SZ8" in self.flags: extraflags["opsize"] = 1
+            if "SZ8" in self.flags:
+                extraflags["opsize"] = 1
+                dynsizes = []
             if "D64" in self.flags: extraflags["opsize"] = 2
             if "F64" in self.flags: extraflags["opsize"] = 3
             extraflags["instr_width"] = "INSTR_WIDTH" in self.flags
             extraflags["lock"] = "LOCK" in self.flags
+
+        if "SZ8" in self.flags or mnem in ("MOVSX", "MOVZX", "XCHG_NOP", "3DNOW"):
+            if "SZ8" not in self.flags and "INSTR_WIDTH" in self.flags:
+                raise Exception("legacy instr with +w without SZ8")
+            extraflags["legacy"] = 1
 
         imm_byte = self.imm_size(4) == 1
         extraflags["imm_control"] = flags.imm_control | imm_byte
@@ -297,7 +305,7 @@ class InstrDesc(NamedTuple):
         for i, opkind in enumerate(self.operands):
             sz = self.OPKIND_SIZES[opkind.size] if opkind.size >= 0 else opkind.size
             if opkind.kind == "IMM":
-                if imm_byte and sz not in (dynsizes[0], 1):
+                if imm_byte and sz not in [1] + dynsizes[:1]:
                     raise Exception(f"imm_byte with opsize {sz} in {self}")
                 extraflags[f"imm_size"] = sz == 1 if imm_byte else sizes.index(sz)
             else:

@@ -91,6 +91,7 @@ struct InstrDesc
 #define DESC_LOCK(desc) (((desc)->operand_indices >> 11) & 1)
 #define DESC_VSIB(desc) (((desc)->operand_indices >> 15) & 1)
 #define DESC_OPSIZE(desc) (((desc)->reg_types >> 11) & 7)
+#define DESC_LEGACY(desc) (((desc)->operand_sizes >> 8) & 1)
 #define DESC_SIZE_FIX1(desc) (((desc)->operand_sizes >> 10) & 7)
 #define DESC_SIZE_FIX2(desc) (((desc)->operand_sizes >> 13) & 3)
 #define DESC_INSTR_WIDTH(desc) (((desc)->operand_sizes >> 15) & 1)
@@ -400,9 +401,7 @@ direct:
     unsigned op_size;
     unsigned op_size_alt = 0;
     if (!(DESC_OPSIZE(desc) & 4)) {
-        if (DESC_OPSIZE(desc) == 1)
-            op_size = 1;
-        else if (mode == DECODE_64)
+        if (mode == DECODE_64)
             op_size = ((prefix_rex & PREFIX_REXW) || DESC_OPSIZE(desc) == 3) ? 4 :
                               UNLIKELY(prefixes[PF_66] && !DESC_IGN66(desc)) ? 2 :
                                                            DESC_OPSIZE(desc) ? 4 :
@@ -632,7 +631,7 @@ direct:
         // 2 = memory, address-sized, used for mov with moffs operand
         FdOp* operand = &instr->operands[DESC_IMM_IDX(desc)];
         operand->type = FD_OT_MEM;
-        operand->size = op_size;
+        operand->size = operand_sizes[(desc->operand_sizes >> 6) & 3];
         operand->reg = FD_REG_NONE;
         operand->misc = FD_REG_NONE;
 
@@ -722,31 +721,6 @@ direct:
         }
     }
 
-    if (instr->type == FDI_XCHG_NOP)
-    {
-        // Only 4890, 90, and 6690 are true NOPs.
-        if (instr->operands[0].reg == 0 && instr->operands[1].reg == 0)
-        {
-            instr->operands[0].type = FD_OT_NONE;
-            instr->operands[1].type = FD_OT_NONE;
-            instr->type = FDI_NOP;
-        }
-        else
-        {
-            instr->type = FDI_XCHG;
-        }
-    }
-
-    if (UNLIKELY(instr->type == FDI_3DNOW))
-    {
-        unsigned opc3dn = instr->imm;
-        if (opc3dn & 0x40)
-            return FD_ERR_UD;
-        uint64_t msk = opc3dn & 0x80 ? 0x88d144d144d14400 : 0x30003000;
-        if (!(msk >> (opc3dn & 0x3f) & 1))
-            return FD_ERR_UD;
-    }
-
 skip_modrm:
     if (UNLIKELY(prefixes[PF_LOCK])) {
         if (!DESC_LOCK(desc) || instr->operands[0].type != FD_OT_MEM)
@@ -754,7 +728,10 @@ skip_modrm:
         instr->flags |= FD_FLAG_LOCK;
     }
 
-    if (UNLIKELY(op_size == 1 || instr->type == FDI_MOVSX || instr->type == FDI_MOVZX)) {
+    if (UNLIKELY(DESC_LEGACY(desc))) {
+        // Without REX prefix, convert one-byte GP regs to high-byte regs
+        // This actually only applies to SZ8/MOVSX/MOVZX; but no VEX-encoded
+        // instructions have a byte-sized GP register in the first two operands.
         if (!(prefix_rex & PREFIX_REX)) {
             for (int i = 0; i < 2; i++) {
                 FdOp* operand = &instr->operands[i];
@@ -765,10 +742,33 @@ skip_modrm:
                     operand->misc = FD_RT_GPH;
             }
         }
+
+        if (instr->type == FDI_XCHG_NOP) {
+            // Only 4890, 90, and 6690 are true NOPs.
+            if (instr->operands[0].reg == 0 && instr->operands[1].reg == 0) {
+                instr->operands[0].type = FD_OT_NONE;
+                instr->operands[1].type = FD_OT_NONE;
+                instr->type = FDI_NOP;
+            } else {
+                instr->type = FDI_XCHG;
+            }
+        }
+
+        if (UNLIKELY(instr->type == FDI_3DNOW)) {
+            unsigned opc3dn = instr->imm;
+            if (opc3dn & 0x40)
+                return FD_ERR_UD;
+            uint64_t msk = opc3dn & 0x80 ? 0x88d144d144d14400 : 0x30003000;
+            if (!(msk >> (opc3dn & 0x3f) & 1))
+                return FD_ERR_UD;
+        }
+
+        instr->operandsz = 0;
+    } else {
+        instr->operandsz = UNLIKELY(DESC_INSTR_WIDTH(desc)) ? op_size - 1 : 0;
     }
 
     instr->size = off;
-    instr->operandsz = UNLIKELY(DESC_INSTR_WIDTH(desc)) ? op_size - 1 : 0;
 
     return off;
 }
