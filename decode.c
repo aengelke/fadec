@@ -179,8 +179,8 @@ fd_decode(const uint8_t* buffer, size_t len_sz, int mode_int, uintptr_t address,
         if (table_entry & 1) {
             if (UNLIKELY(off >= len))
                 return FD_ERR_PARTIAL;
-            unsigned isreg = buffer[off] >= 0xc0 ? 8 : 0;
-            table_entry = table_walk(table_entry, ((buffer[off] >> 3) & 7) | isreg);
+            unsigned isreg = buffer[off] >= 0xc0;
+            table_entry = table_walk(table_entry, ((buffer[off] >> 2) & 0xe) | isreg);
             // table_entry kinds: INSTR(0), T8E(1)
             if (table_entry & 1)
                 table_entry = table_walk(table_entry, buffer[off] & 7);
@@ -314,8 +314,8 @@ fd_decode(const uint8_t* buffer, size_t len_sz, int mode_int, uintptr_t address,
     if (table_entry & 1) {
         if (UNLIKELY(off >= len))
             return FD_ERR_PARTIAL;
-        unsigned isreg = buffer[off] >= 0xc0 ? 8 : 0;
-        table_entry = table_walk(table_entry, ((buffer[off] >> 3) & 7) | isreg);
+        unsigned isreg = buffer[off] >= 0xc0;
+        table_entry = table_walk(table_entry, ((buffer[off] >> 2) & 0xe) | isreg);
         // table_entry kinds: INSTR(0), T8E(1), TVEX(2)
         if (table_entry & 1)
             table_entry = table_walk(table_entry, buffer[off] & 7);

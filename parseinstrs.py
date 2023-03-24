@@ -521,14 +521,14 @@ class Trie:
         elif opc.prefix:
             tprefix = [["NP", "66", "F3", "F2"].index(opc.prefix)]
         if opc.opcext:
-            t16 = [((opc.opcext - 0xc0) >> 3) | 8]
+            t16 = [((opc.opcext - 0xc0) >> 2) | 1]
             if not opc.extended:
                 t8e = [opc.opcext & 7]
         elif opc.modreg:
             # TODO: optimize for /r and /m specifiers to reduce size
-            mod = {"m": [0], "r": [1<<3], "rm": [0, 1<<3]}[opc.modreg[1]]
+            mod = {"m": [0], "r": [1], "rm": [0, 1]}[opc.modreg[1]]
             reg = [opc.modreg[0]] if opc.modreg[0] is not None else list(range(8))
-            t16 = [x + y for x in mod for y in reg]
+            t16 = [x + (y << 1) for x in mod for y in reg]
         if opc.rexw is not None or (opc.vexl or "IG") != "IG":
             rexw = {"0": [0], "1": [1<<0], None: [0, 1<<0]}[opc.rexw]
             if opc.vex < 2:
