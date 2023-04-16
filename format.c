@@ -26,7 +26,7 @@ struct FdStr {
     unsigned sz;
 };
 
-#define fd_stre(s) ((struct FdStr) { (s "\0\0\0\0\0\0\0\0\0\0"), sizeof (s)-1 })
+#define fd_stre(s) ((struct FdStr) { (s "\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0"), sizeof (s)-1 })
 
 static char*
 fd_strpcat(char* restrict dst, struct FdStr src) {
