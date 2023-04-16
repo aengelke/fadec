@@ -1547,6 +1547,7 @@ main(int argc, char** argv)
 
     TEST("\xc4\xe3\x71\x20\xc0\x00", "vpinsrb xmm0, xmm1, al, 0x0");
     TEST("\xc4\xe3\xf1\x20\xc0\x00", "vpinsrb xmm0, xmm1, al, 0x0");
+    TEST("\xc4\xe3\x71\x20\xc6\x00", "vpinsrb xmm0, xmm1, sil, 0x0");
     TEST("\xc4\xe1\x71\xc4\xc0\x00", "vpinsrw xmm0, xmm1, ax, 0x0");
     TEST("\xc4\xe1\xf1\xc4\xc0\x00", "vpinsrw xmm0, xmm1, ax, 0x0");
     TEST("\xc4\xe3\x71\x22\xc0\x00", "vpinsrd xmm0, xmm1, eax, 0x0");
