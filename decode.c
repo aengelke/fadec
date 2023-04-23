@@ -478,7 +478,6 @@ direct:
         }
         else
         {
-            bool vsib = UNLIKELY(DESC_VSIB(desc));
             unsigned dispscale = 0;
 
             if (UNLIKELY(prefix_evex)) {
@@ -507,7 +506,7 @@ direct:
             // 16-bit address size implies different ModRM encoding
             if (UNLIKELY(addr_size == 1)) {
                 ASSUME(mode == DECODE_32);
-                if (vsib) // 16-bit address size + VSIB is UD
+                if (UNLIKELY(DESC_VSIB(desc))) // 16-bit addr size + VSIB is UD
                     return FD_ERR_UD;
                 if (rm < 6)
                     op_modrm->misc = rm & 1 ? FD_REG_DI : FD_REG_SI;
@@ -538,8 +537,7 @@ direct:
 
             // SIB byte
             uint8_t base = rm;
-            if (rm == 4)
-            {
+            if (rm == 4) {
                 if (UNLIKELY(off >= len))
                     return FD_ERR_PARTIAL;
                 uint8_t sib = buffer[off++];
@@ -547,20 +545,23 @@ direct:
                 unsigned idx = (sib & 0x38) >> 3;
                 idx += prefix_rex & PREFIX_REXX ? 8 : 0;
                 base = sib & 0x07;
-                if (!vsib && idx == 4)
+                if (idx == 4)
                     idx = FD_REG_NONE;
-                if (vsib && prefix_evex) {
-                    // EVEX.V':EVEX.X:SIB.idx
-                    idx |= prefix_evex & 0x8 ? 0 : 0x10;
-                }
                 op_modrm->misc = scale | idx;
-            }
-            else
-            {
-                // VSIB must have a memory operand with SIB byte.
-                if (vsib)
-                    return FD_ERR_UD;
+            } else {
                 op_modrm->misc = FD_REG_NONE;
+            }
+
+            if (UNLIKELY(DESC_VSIB(desc))) {
+                // VSIB must have a memory operand with SIB byte.
+                if (rm != 4)
+                    return FD_ERR_UD;
+                _Static_assert(FD_REG_NONE == 0x3f, "unexpected FD_REG_NONE");
+                // idx 4 is valid for VSIB
+                if ((op_modrm->misc & 0x3f) == FD_REG_NONE)
+                    op_modrm->misc &= 0xc4;
+                if (prefix_evex) // EVEX.V':EVEX.X:SIB.idx
+                    op_modrm->misc |= prefix_evex & 0x8 ? 0 : 0x10;
             }
 
             // RIP-relative addressing only if SIB-byte is absent
