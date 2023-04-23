@@ -479,25 +479,28 @@ direct:
         else
         {
             bool vsib = UNLIKELY(DESC_VSIB(desc));
-
-            // EVEX.z for memory destination operand is UD.
-            if (UNLIKELY(prefix_evex & 0x80) && DESC_MODRM_IDX(desc) == 0)
-                return FD_ERR_UD;
-
-            // EVEX.b for memory-operand without broadcast support is UD.
             unsigned dispscale = 0;
-            if (UNLIKELY(prefix_evex & 0x10)) {
-                if (UNLIKELY(!DESC_EVEX_BCST(desc)))
+
+            if (UNLIKELY(prefix_evex)) {
+                // EVEX.z for memory destination operand is UD.
+                if (UNLIKELY(prefix_evex & 0x80) && DESC_MODRM_IDX(desc) == 0)
                     return FD_ERR_UD;
-                if (UNLIKELY(DESC_EVEX_BCST16(desc)))
-                    dispscale = 1;
-                else
-                    dispscale = prefix_rex & PREFIX_REXW ? 3 : 2;
-                instr->segment |= dispscale << 6; // Store broadcast size
-                op_modrm->type = FD_OT_MEMBCST;
-            } else {
-                if (UNLIKELY(prefix_evex))
+
+                // EVEX.b for memory-operand without broadcast support is UD.
+                if (UNLIKELY(prefix_evex & 0x10)) {
+                    if (UNLIKELY(!DESC_EVEX_BCST(desc)))
+                        return FD_ERR_UD;
+                    if (UNLIKELY(DESC_EVEX_BCST16(desc)))
+                        dispscale = 1;
+                    else
+                        dispscale = prefix_rex & PREFIX_REXW ? 3 : 2;
+                    instr->segment |= dispscale << 6; // Store broadcast size
+                    op_modrm->type = FD_OT_MEMBCST;
+                } else {
                     dispscale = op_modrm->size - 1;
+                    op_modrm->type = FD_OT_MEM;
+                }
+            } else {
                 op_modrm->type = FD_OT_MEM;
             }
 
