@@ -245,18 +245,17 @@ fd_decode(const uint8_t* buffer, size_t len_sz, int mode_int, uintptr_t address,
             {
                 if (byte & 0x08) // Bit 3 of opcode_escape must be clear.
                     return FD_ERR_UD;
-                opcode_escape = (byte & 0x07);
                 _Static_assert(PREFIX_REXRR == 0x10, "wrong REXRR value");
                 if (mode == DECODE_64)
                     prefix_rex |= (byte & PREFIX_REXRR) ^ PREFIX_REXRR;
             }
             else // 3-byte VEX
             {
-                if (byte & 0x1c) // Bits 4:2 of opcode_escape must be clear.
+                if (byte & 0x18) // Bits 4:3 of opcode_escape must be clear.
                     return FD_ERR_UD;
-                opcode_escape = (byte & 0x03); // 4 is table index with VEX
             }
 
+            opcode_escape = (byte & 0x07);
             if (UNLIKELY(opcode_escape == 0)) {
                 int prefix_len = vex_prefix == 0x62 ? 4 : 3;
                 // Pretend to decode the prefix plus one opcode byte.
