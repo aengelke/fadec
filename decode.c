@@ -767,9 +767,9 @@ skip_modrm:
                 return FD_ERR_UD;
         }
 
-        instr->operandsz = 0;
-    } else {
         instr->operandsz = UNLIKELY(DESC_INSTR_WIDTH(desc)) ? op_size - 1 : 0;
+    } else {
+        instr->operandsz = 0;
     }
 
     instr->size = off;

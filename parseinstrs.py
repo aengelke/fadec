@@ -276,17 +276,17 @@ class InstrDesc(NamedTuple):
         else: # either empty or GP operand size
             dynsizes = [OpKind.SZ_OP]
             if "SZ8" in self.flags:
-                extraflags["opsize"] = 1
                 dynsizes = []
             if "D64" in self.flags: extraflags["opsize"] = 2
             if "F64" in self.flags: extraflags["opsize"] = 3
-            extraflags["instr_width"] = "INSTR_WIDTH" in self.flags
             extraflags["lock"] = "LOCK" in self.flags
 
-        if "SZ8" in self.flags or mnem in ("MOVSX", "MOVZX", "XCHG_NOP", "3DNOW"):
-            if "SZ8" not in self.flags and "INSTR_WIDTH" in self.flags:
-                raise Exception("legacy instr with +w without SZ8")
+        if (self.flags & {"SZ8", "INSTR_WIDTH"} or
+            mnem in ("MOVSX", "MOVZX", "XCHG_NOP", "3DNOW")):
             extraflags["legacy"] = 1
+            # INSTR_WIDTH defaults to zero, so only enable when SZ8 is unset
+            if "INSTR_WIDTH" in self.flags and "SZ8" not in self.flags:
+                extraflags["instr_width"] = 1
 
         imm_byte = self.imm_size(4) == 1
         extraflags["imm_control"] = flags.imm_control | imm_byte
