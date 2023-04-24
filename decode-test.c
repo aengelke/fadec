@@ -1449,6 +1449,9 @@ main(int argc, char** argv)
     TEST("\xc5\xf9\x6e\xc8", "vmovd xmm1, eax");
     TEST64("\xc4\xe1\xf9\x6e\xc8", "vmovq xmm1, rax");
     TEST32("\xc4\xe1\xf9\x6e\xc8", "vmovd xmm1, eax");
+    TEST("\xc5\xf9\x7e\xc8", "vmovd eax, xmm1");
+    TEST64("\xc4\xe1\xf9\x7e\xc8", "vmovq rax, xmm1");
+    TEST32("\xc4\xe1\xf9\x7e\xc8", "vmovd eax, xmm1");
     TEST("\xc5\xf2\x10\xc2", "vmovss xmm0, xmm1, xmm2");
     TEST("\xc5\xf6\x10\xc2", "vmovss xmm0, xmm1, xmm2"); // VEX.L=1
     TEST("\xc5\xfa\x10\x04\x25\x34\x12\x00\x00", "vmovss xmm0, dword ptr [0x1234]");
