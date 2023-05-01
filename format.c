@@ -148,7 +148,7 @@ fd_strpcatreg(char* restrict dst, size_t rt, size_t ri, unsigned size) {
         [FD_RT_BND] = 0 * 17*8 + 0 * 8 + 3,
         [FD_RT_CR]  = 3 * 17*8 + 0 * 8 + 4,
         [FD_RT_DR]  = 3 * 17*8 + 9 * 8 + 4,
-        // [FD_RT_TMM] = 1 * 17*8 + 0 * 8 + 3,
+        [FD_RT_TMM] = 1 * 17*8 + 0 * 8 + 3,
     };
 
     unsigned idx = rt == FD_RT_GPL ? size * 17*8 : nametabidx[rt];

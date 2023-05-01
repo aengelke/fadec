@@ -119,6 +119,16 @@ typedef struct FeRegMASK { unsigned char idx; } FeRegMASK;
 #define FE_K5 FE_MASK(5)
 #define FE_K6 FE_MASK(6)
 #define FE_K7 FE_MASK(7)
+typedef struct FeRegTMM { unsigned char idx; } FeRegTMM;
+#define FE_TMM(idx) (FE_STRUCT(FeRegTMM) { idx })
+#define FE_TMM0 FE_TMM(0)
+#define FE_TMM1 FE_TMM(1)
+#define FE_TMM2 FE_TMM(2)
+#define FE_TMM3 FE_TMM(3)
+#define FE_TMM4 FE_TMM(4)
+#define FE_TMM5 FE_TMM(5)
+#define FE_TMM6 FE_TMM(6)
+#define FE_TMM7 FE_TMM(7)
 typedef struct FeRegCR { unsigned char idx; } FeRegCR;
 #define FE_CR(idx) (FE_STRUCT(FeRegCR) { idx })
 typedef struct FeRegDR { unsigned char idx; } FeRegDR;

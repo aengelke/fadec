@@ -67,6 +67,7 @@ enum
     PREFIX_REXW = 0x08,
     PREFIX_REX = 0x40,
     PREFIX_REXRR = 0x10,
+    PREFIX_VEX = 0x20,
 };
 
 struct InstrDesc
@@ -275,6 +276,7 @@ fd_decode(const uint8_t* buffer, size_t len_sz, int mode_int, uintptr_t address,
 
         mandatory_prefix = byte & 3;
         vex_operand = ((byte & 0x78) >> 3) ^ 0xf;
+        prefix_rex |= PREFIX_VEX;
 
         if (vex_prefix == 0x62) // EVEX
         {
@@ -607,11 +609,17 @@ direct:
             // EVEX.vvvv to refer to non-vector registers. Verified in parseinstrs.
             operand->reg = vex_operand;
 
-            unsigned reg_ty = DESC_REGTY_VEXREG(desc); // VEC GPL MSK FPU
-            // In 64-bit mode: UD if FD_RT_MASK and vex_operand&8 != 0
-            if (reg_ty == 2 && vex_operand >= 8)
-                return FD_ERR_UD;
-            operand->misc = (04710 >> (3 * reg_ty)) & 0x7;
+            unsigned reg_ty = DESC_REGTY_VEXREG(desc); // VEC GPL MSK FPU/TMM
+            if (prefix_rex & PREFIX_VEX) { // TMM with VEX, FPU otherwise
+                // In 64-bit mode: UD if FD_RT_MASK and vex_operand&8 != 0
+                if (reg_ty == 2 && vex_operand >= 8)
+                    return FD_ERR_UD;
+                if (UNLIKELY(reg_ty == 3)) // TMM
+                    operand->reg &= 0x7; // TODO: verify
+                operand->misc = (06710 >> (3 * reg_ty)) & 0x7;
+            } else {
+                operand->misc = (04710 >> (3 * reg_ty)) & 0x7;
+            }
         }
     }
     else if (vex_operand != 0)

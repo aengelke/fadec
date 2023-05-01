@@ -1676,6 +1676,23 @@ F2.0f00/6              M    Ew  -   -   -   LKGS                F=FRED
 F3.0f01ca              NP   -   -   -   -   ERETU               F=FRED
 F2.0f01ca              NP   -   -   -   -   ERETS               F=FRED
 
+# AMX
+VEX.NP.W0.L0.0f3849/0m M    M   -   -   -   LDTILECFG   O64     F=AMX-TILE
+VEX.66.W0.L0.0f3849/0m M    M   -   -   -   STTILECFG   O64     F=AMX-TILE
+VEX.NP.W0.L0.0f3849c0  NP   -   -   -   -   TILERELEASE O64     F=AMX-TILE
+VEX.F2.W0.L0.0f3849/r0 R    T   -   -   -   TILEZERO    O64     F=AMX-TILE
+VEX.66.W0.L0.0f384b/m4 RM   T   M   -   -   TILELOADDT1 O64     F=AMX-TILE
+VEX.F3.W0.L0.0f384b/m4 MR   M   T   -   -   TILESTORED  O64     F=AMX-TILE
+VEX.F2.W0.L0.0f384b/m4 RM   T   M   -   -   TILELOADD   O64     F=AMX-TILE
+VEX.F3.W0.L0.0f385c/r  RMV  T   T   T   -   TDPBF16PS   O64     F=AMX-BF16
+VEX.F2.W0.L0.0f385c/r  RMV  T   T   T   -   TDPFP16PS   O64     F=AMX-FP16
+VEX.NP.W0.L0.0f385e/r  RMV  T   T   T   -   TDPBUUD     O64     F=AMX-INT8
+VEX.66.W0.L0.0f385e/r  RMV  T   T   T   -   TDPBUSD     O64     F=AMX-INT8
+VEX.F3.W0.L0.0f385e/r  RMV  T   T   T   -   TDPBSUD     O64     F=AMX-INT8
+VEX.F2.W0.L0.0f385e/r  RMV  T   T   T   -   TDPBSSD     O64     F=AMX-INT8
+VEX.NP.W0.L0.0f386c/r  RMV  T   T   T   -   TCMMRLFP16PS O64    F=AMX-COMPLEX
+VEX.66.W0.L0.0f386c/r  RMV  T   T   T   -   TCMMIMFP16PS O64    F=AMX-COMPLEX
+
 # AVX512
 EVEX.NP.W0.0f58        RVM  Vps Hps Wps -   EVX_ADDPS+kbr       F=AVX512F TUPLE_FULL_32
 EVEX.66.W1.0f58        RVM  Vpd Hpd Wpd -   EVX_ADDPD+kbr       F=AVX512F TUPLE_FULL_64

@@ -40,20 +40,16 @@ enc_imm(uint8_t* restrict buf, uint64_t imm, unsigned immsz) {
 }
 
 static int
-enc_mem(uint8_t* restrict buf, unsigned bufidx, FeMem op0, uint64_t op1,
-        unsigned immsz, unsigned vsib) {
+enc_mem_common(uint8_t* restrict buf, unsigned bufidx, FeMem op0, uint64_t op1,
+               unsigned immsz, unsigned sibidx) {
     int mod = 0, reg = op1 & 7, rm;
     int scale = 0, idx = 4, base = 0;
     bool withsib = false, mod0off = false;
     unsigned dispsz = 0;
     int32_t off = op0.off;
 
-    if ((op_reg_idx(op0.idx) != op_reg_idx(FE_NOREG)) != !!op0.scale)
-        return 0;
-    if (vsib || op_reg_idx(op0.idx) != op_reg_idx(FE_NOREG)) {
-        if (!vsib && op_reg_idx(op0.idx) == 4)
-            return 0;
-        idx = op_reg_idx(op0.idx) & 7;
+    if (sibidx < 8) {
+        idx = sibidx;
         int scalabs = op0.scale;
         if (scalabs & (scalabs - 1))
             return 0;
@@ -101,11 +97,27 @@ enc_mem(uint8_t* restrict buf, unsigned bufidx, FeMem op0, uint64_t op1,
 }
 
 static int
+enc_mem(uint8_t* restrict buf, unsigned bufidx, FeMem op0, uint64_t op1,
+        unsigned immsz, unsigned forcesib) {
+    if ((op_reg_idx(op0.idx) != op_reg_idx(FE_NOREG)) != !!op0.scale)
+        return 0;
+    unsigned sibidx = forcesib ? 4 : 8;
+    if (op_reg_idx(op0.idx) != op_reg_idx(FE_NOREG)) {
+        if (op_reg_idx(op0.idx) == 4)
+            return 0;
+        sibidx = op_reg_idx(op0.idx) & 7;
+    }
+    return enc_mem_common(buf, bufidx, op0, op1, immsz, sibidx);
+}
+
+static int
 enc_mem_vsib(uint8_t* restrict buf, unsigned bufidx, FeMemV op0, uint64_t op1,
-             unsigned immsz, unsigned vsib) {
-    (void) vsib;
-    FeMem mem = FE_MEM(op0.base, op0.scale, FE_GP(op0.idx.idx), op0.off);
-    return enc_mem(buf, bufidx, mem, op1, immsz, 1);
+             unsigned immsz, unsigned forcesib) {
+    (void) forcesib;
+    if (!op0.scale)
+        return 0;
+    FeMem mem = FE_MEM(op0.base, op0.scale, FE_NOREG, op0.off);
+    return enc_mem_common(buf, bufidx, mem, op1, immsz, op_reg_idx(op0.idx) & 7);
 }
 
 unsigned fe64_NOP(uint8_t* buf, unsigned flags) {

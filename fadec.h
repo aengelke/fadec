@@ -65,6 +65,8 @@ typedef enum {
     FD_RT_FPU = 4,
     /** MMX register MMn **/
     FD_RT_MMX = 5,
+    /** TMM register TMMn **/
+    FD_RT_TMM = 6,
     /** Vector mask (AVX-512) register Kn **/
     FD_RT_MASK = 7,
     /** Bound register BNDn **/

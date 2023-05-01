@@ -2204,6 +2204,48 @@ main(int argc, char** argv)
     // Maximum instruction length is 15 bytes.
     TEST("\x66\x66\x66\x66\x66\x66\x66\x66\x66\x66\x66\x66\x66\x66\x66\x90", "PARTIAL");
 
+    // AMX
+    TEST64("\xc4\xe2\x78\x49\x00", "ldtilecfg [rax]");
+    TEST64("\xc4\xe2\x79\x49\x00", "sttilecfg [rax]");
+    TEST64("\xc4\xe2\x78\x49\xc0", "tilerelease");
+    TEST64("\xc4\xe2\x7b\x49\x00", "UD"); // ModRM.mod != 11
+    TEST64("\xc4\xe2\x7b\x49\xc0", "tilezero tmm0");
+    TEST64("\xc4\xe2\x7b\x49\xc1", "UD"); // ModRM.rm != 0
+    TEST64("\xc4\xe2\x7b\x49\xc7", "UD"); // ModRM.rm != 0
+    TEST64("\xc4\xe2\x7b\x49\xc8", "tilezero tmm1");
+    TEST64("\xc4\xe2\x7b\x49\xf8", "tilezero tmm7");
+    TEST64("\xc4\x02\x7b\x49\xf8", "tilezero tmm7"); // VEX.RXB ignored
+    TEST64("\xc4\xe2\x7b\x4b\x04\x10", "tileloadd tmm0, [rax+1*rdx]");
+    TEST64("\xc4\xe2\x7b\x4b\x04\x20", "tileloadd tmm0, [rax]"); // riz
+    TEST64("\xc4\x02\x7b\x4b\x3c\x10", "tileloadd tmm7, [r8+1*r10]"); // VEX.R ignored
+    TEST64("\xc4\xe2\x7b\x4b\x00", "UD"); // must have SIB byte
+    TEST64("\xc4\xe2\x7b\x4b\xff", "UD"); // must have memory operand
+    TEST64("\xc4\xe2\x79\x4b\x04\x10", "tileloaddt1 tmm0, [rax+1*rdx]");
+    TEST64("\xc4\xe2\x79\x4b\x04\x20", "tileloaddt1 tmm0, [rax]"); // riz
+    TEST64("\xc4\x02\x79\x4b\x3c\x10", "tileloaddt1 tmm7, [r8+1*r10]"); // VEX.R ignored
+    TEST64("\xc4\xe2\x79\x4b\x00", "UD"); // must have SIB byte
+    TEST64("\xc4\xe2\x79\x4b\xff", "UD"); // must have memory operand
+    TEST64("\xc4\xe2\x7a\x4b\x04\x10", "tilestored [rax+1*rdx], tmm0");
+    TEST64("\xc4\xe2\x7a\x4b\x04\x20", "tilestored [rax], tmm0"); // riz
+    TEST64("\xc4\x02\x7a\x4b\x3c\x10", "tilestored [r8+1*r10], tmm7"); // VEX.R ignored
+    TEST64("\xc4\xe2\x7a\x4b\x00", "UD"); // must have SIB byte
+    TEST64("\xc4\xe2\x7a\x4b\xff", "UD"); // must have memory operand
+    TEST64("\xc4\xe2\x68\x5e\x00", "UD"); // must have register operand
+    TEST64("\xc4\xe2\x68\x5e\xc8", "tdpbuud tmm1, tmm0, tmm2");
+    TEST64("\xc4\x02\x28\x5e\xc8", "tdpbuud tmm1, tmm0, tmm2"); // VEX.RBV3 ignored
+    // TODO: enforce that all registers must be different
+    //TEST64("\xc4\xe2\x68\x5e\xc0", "UD"); // ModRM.rm == ModRM.reg
+    //TEST64("\xc4\xe2\x68\x5e\xca", "UD"); // ModRM.rm == VEX.vvvv
+    //TEST64("\xc4\xe2\x68\x5e\xd0", "UD"); // ModRM.reg == VEX.vvvv
+    TEST64("\xc4\xe2\x6a\x5c\xc8", "tdpbf16ps tmm1, tmm0, tmm2");
+    TEST64("\xc4\xe2\x6b\x5c\xc8", "tdpfp16ps tmm1, tmm0, tmm2");
+    TEST64("\xc4\xe2\x68\x5e\xc8", "tdpbuud tmm1, tmm0, tmm2");
+    TEST64("\xc4\xe2\x69\x5e\xc8", "tdpbusd tmm1, tmm0, tmm2");
+    TEST64("\xc4\xe2\x6a\x5e\xc8", "tdpbsud tmm1, tmm0, tmm2");
+    TEST64("\xc4\xe2\x6b\x5e\xc8", "tdpbssd tmm1, tmm0, tmm2");
+    TEST64("\xc4\xe2\x68\x6c\xc8", "tcmmrlfp16ps tmm1, tmm0, tmm2");
+    TEST64("\xc4\xe2\x69\x6c\xc8", "tcmmimfp16ps tmm1, tmm0, tmm2");
+
     // Complete test of VADDPS and all encoding options
     TEST("\x62", "PARTIAL");
     TEST("\x62\xf1", "PARTIAL");

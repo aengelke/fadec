@@ -52,6 +52,7 @@ class InstrFlags(namedtuple("InstrFlags", INSTR_FLAGS_FIELDS)):
 ENCODINGS = {
     "NP": InstrFlags(),
     "M": InstrFlags(modrm=1, modrm_idx=0^3),
+    "R": InstrFlags(modrm=1, modreg_idx=0^3), # AMX TILEZERO
     "M1": InstrFlags(modrm=1, modrm_idx=0^3, imm_idx=1^3, imm_control=1),
     "MI": InstrFlags(modrm=1, modrm_idx=0^3, imm_idx=1^3, imm_control=4),
     "MC": InstrFlags(modrm=1, modrm_idx=0^3, vexreg_idx=1^3, zeroreg_val=1),
@@ -186,6 +187,7 @@ class InstrDesc(NamedTuple):
         ("modrm", "XMM"): 0,  ("modreg", "XMM"): 0,  ("vexreg", "XMM"): 0,
         ("modrm", "MMX"): 5,  ("modreg", "MMX"): 5,
         ("modrm", "FPU"): 4,                         ("vexreg", "FPU"): 3,
+        ("modrm", "TMM"): 6,  ("modreg", "TMM"): 6,  ("vexreg", "TMM"): 3,
         ("modrm", "MASK"): 7, ("modreg", "MASK"): 7, ("vexreg", "MASK"): 2,
                               ("modreg", "SEG"): 3,
                               ("modreg", "DR"): 0, # handled in code
@@ -351,14 +353,14 @@ opcode_regex = re.compile(
                      r"(?:W(?P<rexw>[01])\.)?(?:L(?P<vexl>0|1|12|2|IG)\.)?))?" +
      r"(?P<escape>0f38|0f3a|0f|M[56]\.|)" +
      r"(?P<opcode>[0-9a-f]{2})" +
-     r"(?:/(?P<modreg>[0-7]|[rm]|[0-7][rm])|(?P<opcext>[c-f][0-9a-f]))?(?P<extended>\+)?$")
+     r"(?:/(?P<modreg>[0-7]|[rm][0-7]?|[0-7][rm])|(?P<opcext>[c-f][0-9a-f]))?(?P<extended>\+)?$")
 
 class Opcode(NamedTuple):
     prefix: Union[None, str] # None/NP/66/F2/F3/NFx
     escape: int # [0, 0f, 0f38, 0f3a]
     opc: int
     extended: bool # Extend opc or opcext in ModRM.rm, if present
-    # Fixed ModRM.mod ("r"/"m"), ModRM.reg, ModRM.rm (opcext)
+    # Fixed ModRM.mod ("r"/"m"), ModRM.reg, ModRM.rm (opcext + AMX)
     modrm: Tuple[Union[None, str], Union[None, int], Union[None, int]]
     vex: int # 0 = legacy, 1 = VEX, 2 = EVEX
     vexl: Union[str, None] # 0, 1, 12, 2, IG, None = used, both
@@ -377,7 +379,7 @@ class Opcode(NamedTuple):
             modrm = "r", (opcext >> 3) & 7, opcext & 7
         elif modreg:
             if modreg[0] in "rm":
-                modrm = modreg[0], None, None
+                modrm = modreg[0], None, int(modreg[1:]) if modreg[1:] else None
             else:
                 modrm = modreg[1:] or None, int(modreg[0]), None
         else:
@@ -858,6 +860,8 @@ def encode_table(entries, args):
                 opc_i |= 0xc000 | opcode.modrm[1] << 11 | opcode.modrm[2] << 8
             elif opcode.modrm[1] is not None:
                 opc_i |= opcode.modrm[1] << 8
+            if opcode.modrm == ("m", None, 4):
+                opc_i |= 0x2000000000 # FORCE_SIB
             opc_i |= opcode.escape * 0x10000
             opc_i |= 0x80000 if opcode.prefix == "66" or opsize == 16 else 0
             opc_i |= 0x100000 if opcode.prefix == "F2" else 0
@@ -874,8 +878,8 @@ def encode_table(entries, args):
                 raise Exception("encode alternate bits exhausted")
             opc_i |= sum(1 << i for i in supports_high_regs) << 45
             opc_i |= desc.imm_size(opsize//8) << 47
-            opc_i |= ["INVALID",
-                "NP", "M", "M1", "MI", "MC", "MR", "RM", "RMA", "MRI", "RMI", "MRC",
+            opc_i |= ["NP", "M", "R",
+                "M1", "MI", "MC", "MR", "RM", "RMA", "MRI", "RMI", "MRC",
                 "AM", "MA", "I", "IA", "O", "OI", "OA", "S", "A", "D", "FD", "TD",
                 "RVM", "RVMI", "RVMR", "RMV", "VM", "VMI", "MVR", "MRV",
             ].index(desc.encoding) << 51
@@ -1051,18 +1055,23 @@ def encode2_table(entries, args):
                 code += f"  buf[idx++] = {opcext:#x};\n"
 
             if flags.modrm:
-                modrm = f"op{flags.modrm_idx^3}"
                 if flags.modreg_idx:
                     modreg = f"op_reg_idx(op{flags.modreg_idx^3})"
                 else:
                     modreg = opcode.modrm[1] or 0
-                if ismem:
+                if flags.modrm_idx and ots[flags.modrm_idx^3] == "m":
                     imm_size_expr = "imm_size" if flags.imm_control >= 2 else 0
                     memfn = "enc_mem_vsib" if "VSIB" in desc.flags else "enc_mem"
-                    code += f"  memoff = {memfn}(buf, idx, {modrm}, {modreg}, {imm_size_expr}, 0);\n"
+                    assert opcode.modrm[2] in (None, 4)
+                    forcesib = 1 if opcode.modrm[2] == 4 else 0
+                    modrm = f"op{flags.modrm_idx^3}"
+                    code += f"  memoff = {memfn}(buf, idx, {modrm}, {modreg}, {imm_size_expr}, {forcesib});\n"
                     code += f"  if (!memoff) return 0;\n  idx += memoff;\n"
                 else:
-                    modrm = f"op_reg_idx({modrm})"
+                    if flags.modrm_idx:
+                        modrm = f"op_reg_idx(op{flags.modrm_idx^3})"
+                    else:
+                        modrm = f"{opcode.modrm[2] or 0}"
                     code += f"  buf[idx++] = 0xC0|(({modreg}&7)<<3)|({modrm}&7);\n"
             elif flags.modrm_idx:
                 code += f"  buf[idx-1] |= op_reg_idx(op{flags.modrm_idx^3}) & 7;\n"

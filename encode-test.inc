@@ -959,6 +959,31 @@ TEST("\x01\xc5", ADD32rr, 0, FE_BP, FE_AX);
 TEST("\x01\xc6", ADD32rr, 0, FE_SI, FE_AX);
 TEST("\x01\xc7", ADD32rr, 0, FE_DI, FE_AX);
 
+// AMX
+TEST("\xc4\xe2\x78\x49\x00", LDTILECFGm, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0));
+TEST("\xc4\xe2\x79\x49\x00", STTILECFGm, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0));
+TEST("\xc4\xe2\x78\x49\xc0", TILERELEASE, 0);
+TEST("\xc4\xe2\x7b\x49\xc0", TILEZEROr, 0, FE_TMM0);
+TEST("\xc4\xe2\x7b\x49\xc8", TILEZEROr, 0, FE_TMM1);
+TEST("\xc4\xe2\x7b\x49\xf8", TILEZEROr, 0, FE_TMM7);
+TEST("\xc4\xe2\x7b\x4b\x04\x10", TILELOADDrm, 0, FE_TMM0, FE_MEM(FE_AX, 1, FE_DX, 0));
+TEST("\xc4\xe2\x7b\x4b\x04\x20", TILELOADDrm, 0, FE_TMM0, FE_MEM(FE_AX, 0, FE_NOREG, 0)); // has SIB
+TEST("\xc4\xe2\x79\x4b\x04\x10", TILELOADDT1rm, 0, FE_TMM0, FE_MEM(FE_AX, 1, FE_DX, 0));
+TEST("\xc4\xe2\x79\x4b\x04\x20", TILELOADDT1rm, 0, FE_TMM0, FE_MEM(FE_AX, 0, FE_NOREG, 0)); // has SIB
+TEST("\xc4\xe2\x7a\x4b\x04\x10", TILESTOREDmr, 0, FE_MEM(FE_AX, 1, FE_DX, 0), FE_TMM0);
+TEST("\xc4\xe2\x7a\x4b\x04\x20", TILESTOREDmr, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0), FE_TMM0); // has SIB
+// TODO: enforce that all registers must be different
+//TEST("", TDPBUUDrrr, 0, FE_TMM0, FE_TMM0, FE_TMM2");
+//TEST("", TDPBUUDrrr, 0, FE_TMM2, FE_TMM0, FE_TMM2");
+//TEST("", TDPBUUDrrr, 0, FE_TMM1, FE_TMM2, FE_TMM2");
+TEST("\xc4\xe2\x6a\x5c\xc8", TDPBF16PSrrr, 0, FE_TMM1, FE_TMM0, FE_TMM2);
+TEST("\xc4\xe2\x6b\x5c\xc8", TDPFP16PSrrr, 0, FE_TMM1, FE_TMM0, FE_TMM2);
+TEST("\xc4\xe2\x68\x5e\xc8", TDPBUUDrrr, 0, FE_TMM1, FE_TMM0, FE_TMM2);
+TEST("\xc4\xe2\x69\x5e\xc8", TDPBUSDrrr, 0, FE_TMM1, FE_TMM0, FE_TMM2);
+TEST("\xc4\xe2\x6a\x5e\xc8", TDPBSUDrrr, 0, FE_TMM1, FE_TMM0, FE_TMM2);
+TEST("\xc4\xe2\x6b\x5e\xc8", TDPBSSDrrr, 0, FE_TMM1, FE_TMM0, FE_TMM2);
+TEST("\xc4\xe2\x68\x6c\xc8", TCMMRLFP16PSrrr, 0, FE_TMM1, FE_TMM0, FE_TMM2);
+TEST("\xc4\xe2\x69\x6c\xc8", TCMMIMFP16PSrrr, 0, FE_TMM1, FE_TMM0, FE_TMM2);
 
 // Test LOCK prefix
 TEST("\xf0\x87\x08", LOCK_XCHG32mr, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0), FE_CX);

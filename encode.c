@@ -32,6 +32,7 @@
 #define OPC_JMPL FE_JMPL
 #define OPC_MASK_MSK 0x1e00000000
 #define OPC_USER_MSK (OPC_67|OPC_SEG_MSK|OPC_MASK_MSK)
+#define OPC_FORCE_SIB 0x2000000000
 #define OPC_GPH_OP0 0x200000000000
 #define OPC_GPH_OP1 0x400000000000
 
@@ -188,7 +189,7 @@ enc_mr(uint8_t** restrict buf, uint64_t opc, uint64_t epfx, uint64_t op0,
     int mod = 0, reg = op1 & 7, rm;
     int scale = 0, idx = 4, base = 0;
     int32_t off = op_mem_offset(op0);
-    bool withsib = false;
+    bool withsib = opc & OPC_FORCE_SIB;
 
     if (!!op_mem_idx(op0) != !!op_mem_scale(op0)) return -1;
     if (!op_mem_idx(op0) && (opc & OPC_VSIB)) return -1;
@@ -252,9 +253,8 @@ enc_mr(uint8_t** restrict buf, uint64_t opc, uint64_t epfx, uint64_t op0,
 }
 
 typedef enum {
-    ENC_INVALID = 0,
-    ENC_NP,
-    ENC_M, ENC_M1, ENC_MI, ENC_MC, ENC_MR, ENC_RM, ENC_RMA, ENC_MRI, ENC_RMI, ENC_MRC,
+    ENC_NP, ENC_M, ENC_R,
+    ENC_M1, ENC_MI, ENC_MC, ENC_MR, ENC_RM, ENC_RMA, ENC_MRI, ENC_RMI, ENC_MRC,
     ENC_AM, ENC_MA,
     ENC_I, ENC_IA, ENC_O, ENC_OI, ENC_OA, ENC_S, ENC_A, ENC_D, ENC_FD, ENC_TD,
     ENC_RVM, ENC_RVMI, ENC_RVMR, ENC_RMV, ENC_VM, ENC_VMI, ENC_MVR, ENC_MRV,
@@ -272,9 +272,9 @@ struct EncodingInfo {
 };
 
 const struct EncodingInfo encoding_infos[ENC_MAX] = {
-    [ENC_INVALID] = { 0 },
     [ENC_NP]      = { 0 },
     [ENC_M]       = { .modrm = 0x0^3 },
+    [ENC_R]       = { .modreg = 0x0^3 },
     [ENC_M1]      = { .modrm = 0x0^3, .immctl = 1, .immidx = 1 },
     [ENC_MI]      = { .modrm = 0x0^3, .immctl = 4, .immidx = 1 },
     [ENC_MC]      = { .modrm = 0x0^3, .zregidx = 0x1^3, .zregval = 1 },
@@ -364,7 +364,9 @@ try_encode:;
     // NOP has no operands, so this must be the 32-bit OA XCHG
     if ((opc & 0xfffffff) == 0x90 && ops[0] == FE_AX) goto next;
 
-    if (ei->modrm) {
+    if (UNLIKELY(enc == ENC_R)) {
+        if (enc_mr(buf, opc, epfx, 0, ops[0], immsz)) goto fail;
+    } else if (ei->modrm) {
         FeOp modreg = ei->modreg ? ops[ei->modreg^3] : (opc & 0xff00) >> 8;
         if (ei->vexreg)
             epfx |= ((uint64_t) op_reg_idx(ops[ei->vexreg^3])) << EPFX_VVVV_IDX;
