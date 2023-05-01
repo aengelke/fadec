@@ -357,9 +357,9 @@ class Opcode(NamedTuple):
     prefix: Union[None, str] # None/NP/66/F2/F3/NFx
     escape: int # [0, 0f, 0f38, 0f3a]
     opc: int
-    extended: bool # Extend opc or opcext, if present
-    modreg: Union[None, Tuple[Union[None, int], str]] # (modreg, "r"/"m"/"rm"), None
-    opcext: Union[None, int] # 0xc0-0xff, or 0
+    extended: bool # Extend opc or opcext in ModRM.rm, if present
+    # Fixed ModRM.mod ("r"/"m"), ModRM.reg, ModRM.rm (opcext)
+    modrm: Tuple[Union[None, str], Union[None, int], Union[None, int]]
     vex: int # 0 = legacy, 1 = VEX, 2 = EVEX
     vexl: Union[str, None] # 0, 1, 12, 2, IG, None = used, both
     rexw: Union[str, None] # 0, 1, None = both (or ignored)
@@ -371,20 +371,24 @@ class Opcode(NamedTuple):
             raise Exception(opcode_string)
             return None
 
+        opcext = int(match.group("opcext") or "0", 16)
         modreg = match.group("modreg")
-        if modreg:
+        if opcext:
+            modrm = "r", (opcext >> 3) & 7, opcext & 7
+        elif modreg:
             if modreg[0] in "rm":
-                modreg = None, modreg[0]
+                modrm = modreg[0], None, None
             else:
-                modreg = int(modreg[0]), modreg[1] if len(modreg) == 2 else "rm"
+                modrm = modreg[1:] or None, int(modreg[0]), None
+        else:
+            modrm = None, None, None
 
         return cls(
             prefix=match.group("legacy"),
             escape=["", "0f", "0f38", "0f3a", "M4.", "M5.", "M6."].index(match.group("escape")),
             opc=int(match.group("opcode"), 16),
             extended=match.group("extended") is not None,
-            modreg=modreg,
-            opcext=int(match.group("opcext") or "0", 16) or None,
+            modrm=modrm,
             vex=[None, "VEX.", "EVEX."].index(match.group("vex")),
             vexl=match.group("vexl"),
             rexw=match.group("rexw"),
@@ -408,7 +412,7 @@ def verifyOpcodeDesc(opcode, desc):
         raise Exception(f"VEX/EVEX must have mandatory prefix {opcode}, {desc}")
     if opcode.vexl == "IG" and desc.dynsizes() - {OpKind.SZ_OP}:
         raise Exception(f"(E)VEX.LIG with dynamic vector size {opcode}, {desc}")
-    if "VSIB" in desc.flags and (not opcode.modreg or opcode.modreg[1] != "m"):
+    if "VSIB" in desc.flags and opcode.modrm[0] != "m":
         raise Exception(f"VSIB for non-memory opcode {opcode}, {desc}")
     if opcode.vex == 2 and flags.vexreg_idx:
         # Checking this here allows to omit check for V' in decoder.
@@ -419,7 +423,7 @@ def verifyOpcodeDesc(opcode, desc):
         if desc.operands[flags.modreg_idx ^ 3].kind == "MASK":
             raise Exception(f"ModRM.reg mask not first operand {opcode}, {desc}")
     # Verify tuple type
-    if opcode.vex == 2 and (not opcode.modreg or "m" in opcode.modreg[1]):
+    if opcode.vex == 2 and opcode.modrm[0] != "r":
         tts = [s for s in desc.flags if s.startswith("TUPLE")]
         if len(tts) != 1:
             raise Exception(f"missing tuple type in {opcode}, {desc}")
@@ -499,11 +503,11 @@ class Trie:
         return elem[0], new_num
 
     def _transform_opcode(self, opc):
-        topc = [opc.opc + i for i in range(8 if opc.extended and not opc.opcext else 1)]
+        realopcext = opc.extended and opc.modrm[2] is None
+        topc = [opc.opc + i for i in range(8 if realopcext else 1)]
         if opc.escape == 0 and opc.opc in (0xc4, 0xc5, 0x62):
             assert opc.prefix is None
-            assert opc.opcext is None
-            assert opc.modreg == (None, "m")
+            assert opc.modrm == ("m", None, None)
             assert opc.rexw is None
             assert opc.vexl is None
             # We do NOT encode /m, this is handled by prefix code.
@@ -520,15 +524,13 @@ class Trie:
             tprefix = [0, 1]
         elif opc.prefix:
             tprefix = [["NP", "66", "F3", "F2"].index(opc.prefix)]
-        if opc.opcext:
-            t16 = [((opc.opcext - 0xc0) >> 2) | 1]
-            if not opc.extended:
-                t8e = [opc.opcext & 7]
-        elif opc.modreg:
+        if opc.modrm != (None, None, None):
             # TODO: optimize for /r and /m specifiers to reduce size
-            mod = {"m": [0], "r": [1], "rm": [0, 1]}[opc.modreg[1]]
-            reg = [opc.modreg[0]] if opc.modreg[0] is not None else list(range(8))
+            mod = {"m": [0], "r": [1], None: [0, 1]}[opc.modrm[0]]
+            reg = [opc.modrm[1]] if opc.modrm[1] is not None else list(range(8))
             t16 = [x + (y << 1) for x in mod for y in reg]
+            if opc.modrm[2] is not None and not opc.extended:
+                t8e = [opc.modrm[2]]
         if opc.rexw is not None or (opc.vexl or "IG") != "IG":
             rexw = {"0": [0], "1": [1<<0], None: [0, 1<<0]}[opc.rexw]
             if opc.vex < 2:
@@ -678,7 +680,7 @@ def decode_table(entries, args):
     descs.append("{0}") # desc index zero is "invalid"
     for weak, opcode, desc in entries:
         ign66 = opcode.prefix in ("NP", "66", "F2", "F3")
-        modrm = opcode.modreg or opcode.opcext
+        modrm = opcode.modrm != (None, None, None)
         mnem = {
             "PUSH_SEG": "PUSH", "POP_SEG": "POP",
             "MOV_CR2G": "MOV_CR", "MOV_G2CR": "MOV_CR",
@@ -781,7 +783,7 @@ def encode_mnems(entries):
                 vecsizes -= {128 if opcode.vexl == "1" else 256}
             prepend_vecsize = not separate_opsize
 
-        modrm_type = opcode.modreg[1] if opcode.modreg else "rm"
+        modrm_type = opcode.modrm[0] or "rm"
         optypes_base = desc.optype_str()
         optypes = {optypes_base.replace("M", t) for t in modrm_type}
 
@@ -852,10 +854,10 @@ def encode_table(entries, args):
         enc_opcs = []
         for alt, (opcode, desc) in zip(alt_indices, variants):
             opc_i = opcode.opc
-            if opcode.opcext:
-                opc_i |= opcode.opcext << 8
-            if opcode.modreg and opcode.modreg[0] is not None:
-                opc_i |= opcode.modreg[0] << 8
+            if None not in opcode.modrm:
+                opc_i |= 0xc000 | opcode.modrm[1] << 11 | opcode.modrm[2] << 8
+            elif opcode.modrm[1] is not None:
+                opc_i |= opcode.modrm[1] << 8
             opc_i |= opcode.escape * 0x10000
             opc_i |= 0x80000 if opcode.prefix == "66" or opsize == 16 else 0
             opc_i |= 0x100000 if opcode.prefix == "F2" else 0
@@ -1044,15 +1046,16 @@ def encode2_table(entries, args):
                     elif opcode.escape == 3:
                         code += f"  buf[idx++] = 0x3A;\n"
             code += f"  buf[idx++] = {opcode.opc:#x};\n"
-            if opcode.opcext:
-                code += f"  buf[idx++] = {opcode.opcext:#x};\n"
+            if None not in opcode.modrm:
+                opcext = 0xc0 | opcode.modrm[1] << 3 | opcode.modrm[2]
+                code += f"  buf[idx++] = {opcext:#x};\n"
 
             if flags.modrm:
                 modrm = f"op{flags.modrm_idx^3}"
                 if flags.modreg_idx:
                     modreg = f"op_reg_idx(op{flags.modreg_idx^3})"
                 else:
-                    modreg = int(opcode.modreg[0]) if opcode.modreg else 0
+                    modreg = opcode.modrm[1] or 0
                 if ismem:
                     imm_size_expr = "imm_size" if flags.imm_control >= 2 else 0
                     memfn = "enc_mem_vsib" if "VSIB" in desc.flags else "enc_mem"
