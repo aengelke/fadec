@@ -1,6 +1,6 @@
 # Fadec — Fast Decoder for x86-32 and x86-64 and Encoder for x86-64
 
-Fadec is a fast and lightweight decoder for x86-32 and x86-64. To meet the goal of speed, lookup tables are used to map the opcode the (internal) description of the instruction encoding. This table currently has a size of roughly 24 kiB (for 32/64-bit combined).
+Fadec is a fast and lightweight decoder for x86-32 and x86-64. To meet the goal of speed, lookup tables are used to map the opcode the (internal) description of the instruction encoding. This table currently has a size of roughly 37 kiB (for 32/64-bit combined).
 
 Fadec-Enc (or Faenc) is a small, lightweight and easy-to-use encoder, currently for x86-64 only.
 
@@ -10,8 +10,8 @@ Fadec-Enc (or Faenc) is a small, lightweight and easy-to-use encoder, currently 
 >
 > A: I needed to embed a small and fast decoder in a project for a freestanding environment (i.e., no libc). Further, only very few plain encoding libraries are available for x86-64; and most of them are large or make heavy use of external dependencies.
 
-- **Small size:** the entire library with a x86-64/32 decoder and a x86-64 encoder uses only 80 kiB; for specific use cases, the size can be reduced even further. The main decode/encode routines are only a few hundreds lines of code.
-- **Performance:** Fadec is significantly faster than libopcodes or Capstone due to the absence of high-level abstractions and the small lookup table.
+- **Small size:** the entire library with the x86-64/32 decoder and the x86-64 encoder are only 95 kiB; for specific use cases, the size can be reduced even further (e.g., by dropping AVX-512). The main decode/encode routines are only a few hundreds lines of code.
+- **Performance:** Fadec is significantly faster than libopcodes, Capstone, or Zydis due to the absence of high-level abstractions and the small lookup table.
 - **Zero dependencies:** the entire library has no dependencies, even on the standard library, making it suitable for freestanding environments without a full libc or `malloc`-style memory allocation.
 - **Correctness:** even corner cases should be handled correctly (if not, that's a bug), e.g., the order of prefixes, immediate sizes of jump instructions, the presence of the `lock` prefix, or properly handling VEX.W in 32-bit mode.
 
@@ -104,11 +104,21 @@ The API consists of one function to handle encode requests, as well as some macr
         - For offset operands, specify the target address.
 
 ## Known issues
-- The EVEX prefix (AVX-512) is not supported (yet).
-- MPX instructions are not supported.
-- HLE prefixes `xacquire`/`xrelease` are not supported by the encoder (yet).
+- Decoder/Encoder: register uniqueness constraints are not enforced. This affects:
+    - VSIB-encoded instructions: no vector register may be used more than once
+    - AMX instructions: no tile register may be used more than once
+    - AVX-512 complex FP16 multiplication: destination must be not be equal to a source register
+- Encoder: AVX-512 not supported (yet).
 - Prefixes for indirect jumps and calls are not properly decoded, e.g. `notrack`, `bnd`.
 - Low test coverage. (Help needed.)
 - No Python API.
+
+Some ISA extensions are not supported, often because they are deprecated or unsupported by recent hardware. These are unlikely to be implemented in the near future:
+
+- (Intel) MPX: Intel lists MPX as deprecated.
+- (Intel) HLE prefixes `xacquire`/`xrelease`: Intel lists HLE as deprecated. The formatter for decoded instructions is able to reconstruct these in most cases, though.
+- (Intel) Xeon Phi (KNC/KNL/KNM) extensions, including the MVEX prefix: the hardware is discontinued/no longer available.
+- (AMD) XOP: unsupported by newer hardware.
+- (AMD) FMA4: unsupported by newer hardware.
 
 If you find any other issues, please report a bug. Or, even better, send a patch fixing the issue.
