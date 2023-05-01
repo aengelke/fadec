@@ -171,7 +171,8 @@ fd_mnemonic(char buf[DECLARE_RESTRICTED_ARRAY_SIZE(48)], const FdInstr* instr) {
 #define FD_DECODE_TABLE_STRTAB1
     static const char* mnemonic_str =
 #include <fadec-decode-private.inc>
-        "\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0"; // 15 NULL Bytes to prevent overflow
+        // 20 NULL Bytes to prevent out-of-bounds reads
+        "\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0";
 #undef FD_DECODE_TABLE_STRTAB1
 
 #define FD_DECODE_TABLE_STRTAB2
@@ -314,7 +315,7 @@ fd_mnemonic(char buf[DECLARE_RESTRICTED_ARRAY_SIZE(48)], const FdInstr* instr) {
         *buf++ = ' ';
     }
 
-    for (unsigned i = 0; i < 16; i++)
+    for (unsigned i = 0; i < 20; i++)
         buf[i] = mnem[i];
     buf += mnemlen;
     for (unsigned i = 0; i < 4; i++)

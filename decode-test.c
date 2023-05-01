@@ -3868,6 +3868,17 @@ main(int argc, char** argv)
     TEST("\x62\xf5\x66\x4c\x11\xd5", "vmovsh xmm5{k4}, xmm3, xmm2");
     TEST64("\x62\x25\x66\x4c\x11\xd5", "vmovsh xmm21{k4}, xmm3, xmm26");
 
+    // GFNI
+    TEST("\x66\x0f\x38\xcf\xc1", "gf2p8mulb xmm0, xmm1");
+    TEST("\x66\x0f\x3a\xce\xc1\x01", "gf2p8affineqb xmm0, xmm1, 0x1");
+    TEST("\x66\x0f\x3a\xcf\xc1\x01", "gf2p8affineinvqb xmm0, xmm1, 0x1");
+    TEST("\xc4\xe2\x69\xcf\xc1", "vgf2p8mulb xmm0, xmm2, xmm1");
+    TEST("\xc4\xe2\x6d\xcf\xc1", "vgf2p8mulb ymm0, ymm2, ymm1");
+    TEST("\xc4\xe3\xe9\xce\xc1\x01", "vgf2p8affineqb xmm0, xmm2, xmm1, 0x1");
+    TEST("\xc4\xe3\xed\xce\xc1\x01", "vgf2p8affineqb ymm0, ymm2, ymm1, 0x1");
+    TEST("\xc4\xe3\xe9\xcf\xc1\x01", "vgf2p8affineinvqb xmm0, xmm2, xmm1, 0x1");
+    TEST("\xc4\xe3\xed\xcf\xc1\x01", "vgf2p8affineinvqb ymm0, ymm2, ymm1, 0x1");
+
     puts(failed ? "Some tests FAILED" : "All tests PASSED");
     return failed ? EXIT_FAILURE : EXIT_SUCCESS;
 }
