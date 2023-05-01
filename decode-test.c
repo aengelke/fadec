@@ -22,6 +22,7 @@ test(const void* buf, size_t buf_len, unsigned mode, const char* exp_fmt)
     FdInstr instr;
     char fmt[128];
 
+    memset(fmt, 0, sizeof(fmt));
     int retval = fd_decode(buf, buf_len, mode, 0, &instr);
 
     if (retval == FD_ERR_INTERNAL) {
