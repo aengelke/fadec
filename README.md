@@ -29,7 +29,7 @@ int ret = fd_decode(buffer, sizeof(buffer), 64, 0, &instr);
 // Relevant properties of instructions can now be queried using the FD_* macros.
 // Or, we can format the instruction to a string buffer:
 char fmtbuf[64];
-fd_format(instr, fmtbuf, sizeof(fmtbuf));
+fd_format(&instr, fmtbuf, sizeof(fmtbuf));
 // fmtbuf now reads: "xchg r8, rax"
 ```
 
