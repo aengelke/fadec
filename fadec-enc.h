@@ -30,7 +30,7 @@ typedef int64_t FeOp;
  * encoded instruction will be subtracted during encoding. scale must be 1, 2,
  * 4, or 8; but is ignored if  idx == 0. **/
 #define FE_MEM(base,sc,idx,off) (INT64_MIN | ((int64_t) ((base) & 0xfff) << 32) | ((int64_t) ((idx) & 0xfff) << 44) | ((int64_t) ((sc) & 0xf) << 56) | ((off) & 0xffffffff))
-#define FE_NOREG 0
+#define FE_NOREG ((FeReg) 0)
 
 /** Add segment override prefix. This may or may not generate prefixes for the
  * ignored prefixes ES/CS/DS/SS in 64-bit mode. **/
