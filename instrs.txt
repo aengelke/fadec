@@ -1471,19 +1471,19 @@ F3.0fa7e0              NP   -   -   -   -   REP_XCRYPTCFB       F=PADLOCK ONLYVI
 F3.0fa7e8              NP   -   -   -   -   REP_XCRYPTOFB       F=PADLOCK ONLYVIA
 
 # VMX
-66.0f3880/m            RM   Gy  Mdq -   -   INVEPT          D64 F=VMX
-66.0f3881/m            RM   Gy  Mdq -   -   INVVPID         D64 F=VMX
-NP.0f01c1              NP   -   -   -   -   VMCALL              F=VMX
-66.0fc7/6m             M    Mq  -   -   -   VMCLEAR             F=VMX
-NP.0f01d4              NP   -   -   -   -   VMFUNC              F=VMX
-NP.0f01c2              NP   -   -   -   -   VMLAUNCH            F=VMX
-NP.0f01c3              NP   -   -   -   -   VMRESUME            F=VMX
-NP.0fc7/6m             M    Mq  -   -   -   VMPTRLD             F=VMX
-NP.0fc7/7m             M    Mq  -   -   -   VMPTRST             F=VMX
-NP.0f78                MR   Ey  Gy  -   -   VMREAD          D64 F=VMX
-NP.0f79                RM   Gy  Ey  -   -   VMWRITE         D64 F=VMX
-NP.0f01c4              NP   -   -   -   -   VMXOFF              F=VMX
-F3.0fc7/6m             M    Mq  -   -   -   VMXON               F=VMX
+66.0f3880/m            RM   Gy  Mdq -   -   INVEPT          D64 F=VMX EFL=0--0m00m CPL0
+66.0f3881/m            RM   Gy  Mdq -   -   INVVPID         D64 F=VMX EFL=0--0m00m CPL0
+NP.0f01c1              NP   -   -   -   -   VMCALL              F=VMX EFL=0--0m00m CPL0
+66.0fc7/6m             M    Mq  -   -   -   VMCLEAR             F=VMX EFL=0--0m00m CPL0
+NP.0f01d4              NP   -   -   -   -   VMFUNC              F=VMX EFL=0--0m00m
+NP.0f01c2              NP   -   -   -   -   VMLAUNCH            F=VMX EFL=0--0m00m CPL0
+NP.0f01c3              NP   -   -   -   -   VMRESUME            F=VMX EFL=0--0m00m CPL0
+NP.0fc7/6m             M    Mq  -   -   -   VMPTRLD             F=VMX EFL=0--0m00m CPL0
+NP.0fc7/7m             M    Mq  -   -   -   VMPTRST             F=VMX EFL=0--0m00m CPL0
+NP.0f78                MR   Ey  Gy  -   -   VMREAD          D64 F=VMX EFL=0--0m00m CPL0
+NP.0f79                RM   Gy  Ey  -   -   VMWRITE         D64 F=VMX EFL=0--0m00m CPL0
+NP.0f01c4              NP   -   -   -   -   VMXOFF              F=VMX EFL=0--0m00m CPL0
+F3.0fc7/6m             M    Mq  -   -   -   VMXON               F=VMX EFL=0--0m00m CPL0
 # SEAM/TDX
 66.0f01cc              NP   -   -   -   -   TDCALL              F=SEAM
 66.0f01cd              NP   -   -   -   -   SEAMRET             F=SEAM
@@ -1521,6 +1521,7 @@ F2.0f01ff              NP   -   -   -   -   PVALIDATE   O64     F=SNP ONLYAMD
 
 # WAITPKG
 66.0fae/6r             M    Rd  -   -   -   TPAUSE              F=WAITPKG EFL=0--0000m
+# TODO: Ry operand is address-sized
 F3.0fae/6r             M    Ry  -   -   -   UMONITOR            F=WAITPKG
 F2.0fae/6r             M    Rd  -   -   -   UMWAIT              F=WAITPKG EFL=0--0000m
 
