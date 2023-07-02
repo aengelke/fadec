@@ -824,6 +824,12 @@ def encode_mnems(entries):
                 if separate_opsize:
                     name += f"{op.abssize(opsize//8, vecsize//8)*8}"
             mnemonics[name, opsize, ots].append((spec_opcode, desc))
+            altname = {
+                "C_EX16": "CBW", "C_EX32": "CWDE", "C_EX64": "CDQE",
+                "C_SEP16": "CWD", "C_SEP32": "CDQ", "C_SEP64": "CQO",
+            }.get(name)
+            if altname:
+                mnemonics[altname, opsize, ots].append((spec_opcode, desc))
 
     for (mnem, opsize, ots), variants in mnemonics.items():
         dedup = OrderedDict()

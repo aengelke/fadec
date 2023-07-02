@@ -155,6 +155,18 @@ TEST("\x67\x66\x0f\xf7\xc1", SSE_MASKMOVDQUrr, FE_ADDR32, FE_XMM0, FE_XMM1);
 TEST("\x0f\xae\xe8", LFENCE, 0);
 TEST("\x0f\xae\xf0", MFENCE, 0);
 TEST("\x0f\xae\xf8", SFENCE, 0);
+TEST("\x66\x98", C_EX16, 0);
+TEST("\x66\x98", CBW, 0);
+TEST("\x98", C_EX32, 0);
+TEST("\x98", CWDE, 0);
+TEST("\x48\x98", C_EX64, 0);
+TEST("\x48\x98", CDQE, 0);
+TEST("\x66\x99", C_SEP16, 0);
+TEST("\x66\x99", CWD, 0);
+TEST("\x99", C_SEP32, 0);
+TEST("\x99", CDQ, 0);
+TEST("\x48\x99", C_SEP64, 0);
+TEST("\x48\x99", CQO, 0);
 
 // Test FD/TD encodings
 TEST("\xa0\x00\x00\x00\x00\x00\x00\x00\x00", MOV8ra, 0, FE_AX, 0);
