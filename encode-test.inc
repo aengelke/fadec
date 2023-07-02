@@ -167,6 +167,10 @@ TEST("\x99", C_SEP32, 0);
 TEST("\x99", CDQ, 0);
 TEST("\x48\x99", C_SEP64, 0);
 TEST("\x48\x99", CQO, 0);
+TEST("\x0f\xc7\x0f", CMPXCHGD32m, 0, FE_MEM(FE_DI, 0, FE_NOREG, 0));
+TEST("\x0f\xc7\x0f", CMPXCHG8Bm, 0, FE_MEM(FE_DI, 0, FE_NOREG, 0));
+TEST("\x48\x0f\xc7\x0f", CMPXCHGD64m, 0, FE_MEM(FE_DI, 0, FE_NOREG, 0));
+TEST("\x48\x0f\xc7\x0f", CMPXCHG16Bm, 0, FE_MEM(FE_DI, 0, FE_NOREG, 0));
 
 // Test FD/TD encodings
 TEST("\xa0\x00\x00\x00\x00\x00\x00\x00\x00", MOV8ra, 0, FE_AX, 0);

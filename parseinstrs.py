@@ -827,6 +827,7 @@ def encode_mnems(entries):
             altname = {
                 "C_EX16": "CBW", "C_EX32": "CWDE", "C_EX64": "CDQE",
                 "C_SEP16": "CWD", "C_SEP32": "CDQ", "C_SEP64": "CQO",
+                "CMPXCHGD32m": "CMPXCHG8Bm", "CMPXCHGD64m": "CMPXCHG16Bm",
             }.get(name)
             if altname:
                 mnemonics[altname, opsize, ots].append((spec_opcode, desc))
