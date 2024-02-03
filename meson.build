@@ -31,6 +31,8 @@ if get_option('warning_level').to_int() >= 3
   endforeach
 endif
 
+has_cpp = add_languages('cpp', required: false)
+
 sources = []
 headers = []
 components = []
@@ -103,6 +105,11 @@ foreach component : components
   test(component, executable('@0@-test'.format(component),
                              '@0@-test.c'.format(component),
                              dependencies: fadec))
+  if component == 'encode2' and has_cpp
+    test(component + '-cpp', executable('@0@-test-cpp'.format(component),
+                                        '@0@-test.cc'.format(component),
+                                        dependencies: fadec))
+  endif
 endforeach
 
 if meson.version().version_compare('>=0.54.0')
