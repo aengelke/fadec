@@ -398,6 +398,23 @@ class Opcode(NamedTuple):
 
 def verifyOpcodeDesc(opcode, desc):
     flags = ENCODINGS[desc.encoding]
+    oporder = ENCODING_OPORDER[desc.encoding]
+    expected_immkinds = ["", "I", "O", "L", "IA", "", "J"][flags.imm_control]
+    fixed_mod = opcode.modrm[0]
+    if opcode.extended or desc.mnemonic in ("MOV_CR2G", "MOV_DR2G", "MOV_G2CR", "MOV_G2DR"):
+        fixed_mod = "r"
+    expected_modrmkinds = {None: "EQWFKT", "r": "RNUFKT", "m": "M"}[fixed_mod]
+    # allow F and R for zeroreg, which we overlap with vexreg
+    expected_vexkinds = "BHKT" if opcode.vex else "BHRF"
+    for i, opkind in enumerate(desc.operands):
+        if oporder[i] == "modrm" and opkind.regkind not in expected_modrmkinds:
+            raise Exception(f"modrm operand-regkind mismatch {opcode}, {desc}")
+        if oporder[i] == "modreg" and opkind.regkind not in "GPVSCDFKT":
+            raise Exception(f"modreg operand-regkind mismatch {opcode}, {desc}")
+        if oporder[i] == "vexreg" and opkind.regkind not in expected_vexkinds:
+            raise Exception(f"vexreg operand-regkind mismatch {opcode}, {desc}")
+        if oporder[i] == "imm" and opkind.regkind not in expected_immkinds:
+            raise Exception(f"imm operand-regkind mismatch {opcode}, {desc}")
     if opcode.escape == 2 and flags.imm_control != 0:
         raise Exception(f"0f38 has no immediate operand {opcode}, {desc}")
     if opcode.escape == 3 and desc.imm_size(4) != 1:
@@ -410,6 +427,8 @@ def verifyOpcodeDesc(opcode, desc):
         raise Exception(f"unescaped opcode has W specifier {opcode}, {desc}")
     if opcode.escape == 0 and opcode.vex:
         raise Exception(f"VEX opcode without escape {opcode}, {desc}")
+    if opcode.vex and opcode.extended:
+        raise Exception(f"VEX/EVEX must not be extended {opcode}, {desc}")
     if opcode.vex and opcode.prefix not in ("NP", "66", "F2", "F3"):
         raise Exception(f"VEX/EVEX must have mandatory prefix {opcode}, {desc}")
     if opcode.vexl == "IG" and desc.dynsizes() - {OpKind.SZ_OP}:
