@@ -120,6 +120,65 @@ enc_mem_vsib(uint8_t* restrict buf, unsigned bufidx, FeMemV op0, uint64_t op1,
     return enc_mem_common(buf, bufidx, mem, op1, immsz, op_reg_idx(op0.idx) & 7);
 }
 
+enum {
+    FE_OPC_VEX_XMM_WPP_SHIFT = 8,
+    FE_OPC_VEX_XMM_WPP_MASK = 0x83 << FE_OPC_VEX_XMM_WPP_SHIFT,
+    FE_OPC_VEX_XMM_MMM_SHIFT = 10,
+    FE_OPC_VEX_XMM_MMM_MASK = 0x1f << FE_OPC_VEX_XMM_MMM_SHIFT,
+};
+
+static int
+enc_vex_common(uint8_t* restrict buf, unsigned opcode, unsigned base,
+               unsigned idx, unsigned reg, unsigned vvvv) {
+    if ((base | idx | reg | vvvv) & 0x10) return 0;
+    bool vex3 = ((base | idx) & 0x08) || (opcode & 0xfc00) != 0x0400;
+    if (vex3) {
+        *buf++ = 0xc4;
+        unsigned b1 = (opcode & FE_OPC_VEX_XMM_MMM_MASK) >> FE_OPC_VEX_XMM_MMM_SHIFT;
+        if (!(reg & 0x08)) b1 |= 0x80;
+        if (!(idx & 0x08)) b1 |= 0x40;
+        if (!(base & 0x08)) b1 |= 0x20;
+        *buf++ = b1;
+        unsigned b2 = (opcode & FE_OPC_VEX_XMM_WPP_MASK) >> FE_OPC_VEX_XMM_WPP_SHIFT;
+        if (opcode & 0x04) b2 |= 0x04;
+        b2 |= (vvvv ^ 0xf) << 3;
+        *buf++ = b2;
+    } else {
+        *buf++ = 0xc5;
+        unsigned b2 = opcode >> FE_OPC_VEX_XMM_WPP_SHIFT & 3;
+        if (opcode & 0x04) b2 |= 0x04;
+        if (!(reg & 0x08)) b2 |= 0x80;
+        b2 |= (vvvv ^ 0xf) << 3;
+        *buf++ = b2;
+    }
+    *buf++ = (opcode & 0xff0000) >> 16;
+    return 3 + vex3;
+}
+
+static int
+enc_vex_reg(uint8_t* restrict buf, unsigned opcode, uint64_t rm, uint64_t reg,
+            uint64_t vvvv) {
+    unsigned off = enc_vex_common(buf, opcode, rm, 0, reg, vvvv);
+    buf[off] = 0xc0 | (reg << 3 & 0x38) | (rm & 7);
+    return off ? off + 1 : 0;
+}
+
+static int
+enc_vex_mem(uint8_t* restrict buf, unsigned opcode, FeMem rm, uint64_t reg,
+            uint64_t vvvv, unsigned immsz, bool forcesib) {
+    unsigned off = enc_vex_common(buf, opcode, op_reg_idx(rm.base), op_reg_idx(rm.idx), reg, vvvv);
+    unsigned memoff = enc_mem(buf, off, rm, reg, immsz, forcesib);
+    return off && memoff ? off + memoff : 0;
+}
+
+static int
+enc_vex_mem_vsib(uint8_t* restrict buf, unsigned opcode, FeMemV rm, uint64_t reg,
+            uint64_t vvvv, unsigned immsz, bool forcesib) {
+    unsigned off = enc_vex_common(buf, opcode, op_reg_idx(rm.base), op_reg_idx(rm.idx), reg, vvvv);
+    unsigned memoff = enc_mem_vsib(buf, off, rm, reg, immsz, forcesib);
+    return off && memoff ? off + memoff : 0;
+}
+
 unsigned fe64_NOP(uint8_t* buf, unsigned flags) {
     unsigned len = flags ? flags : 1;
     // Taken from Intel SDM

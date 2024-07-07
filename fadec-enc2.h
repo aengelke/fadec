@@ -39,7 +39,7 @@ typedef struct FeRegGP { unsigned char idx; } FeRegGP;
 #define FE_R13 FE_GP(13)
 #define FE_R14 FE_GP(14)
 #define FE_R15 FE_GP(15)
-#define FE_IP FE_GP(16)
+#define FE_IP FE_GP(0x20)
 #define FE_NOREG FE_GP(0x80)
 typedef struct FeRegGPH { unsigned char idx; } FeRegGPH;
 #define FE_GPH(idx) (FE_STRUCT(FeRegGPH) { idx })
