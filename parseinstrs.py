@@ -195,8 +195,6 @@ class InstrDesc(NamedTuple):
         ("modrm", "MEM"): 0,
         ("imm", "MEM"): 0, ("imm", "IMM"): 0, ("imm", "XMM"): 0,
     }
-    OPKIND_REGTYS_ENC = {"SEG": 3, "FPU": 4, "MMX": 5, "XMM": 6, "MASK": 7,
-                         "BND": 8, "CR": 9, "DR": 10}
     OPKIND_SIZES = {
         0: 0, 1: 1, 2: 2, 4: 3, 8: 4, 16: 5, 32: 6, 64: 7, 10: 0,
         # OpKind.SZ_OP: -2, OpKind.SZ_VEC: -3, OpKind.SZ_HALFVEC: -4,
@@ -227,32 +225,6 @@ class InstrDesc(NamedTuple):
         if self.mnemonic == "ENTER":
             return 3
         return self.operands[flags.imm_idx^3].immsize(opsz)
-
-    def optype_str(self):
-        optypes = ["", "", "", ""]
-        flags = ENCODINGS[self.encoding]
-        if flags.modrm_idx:   optypes[flags.modrm_idx^3] = "rM"[flags.modrm]
-        if flags.modreg_idx:  optypes[flags.modreg_idx^3] = "r"
-        if flags.vexreg_idx:  optypes[flags.vexreg_idx^3] = "r"
-        if flags.imm_control: optypes[flags.imm_idx^3] = " iariioo"[flags.imm_control]
-        return "".join(optypes)
-
-    def encode_regtys(self, ots, opsz):
-        tys = []
-        for ot, op in zip(ots, self.operands):
-            if ot == "m":
-                tys.append(0xf)
-            elif ot in "ioa":
-                tys.append(0)
-            elif op.kind == "GP":
-                if (self.mnemonic == "MOVSX" or self.mnemonic == "MOVZX" or
-                    opsz == 1):
-                    tys.append(2 if op.abssize(opsz) == 1 else 1)
-                else:
-                    tys.append(1)
-            else:
-                tys.append(self.OPKIND_REGTYS_ENC[op.kind])
-        return sum(ty << (4*i) for i, ty in enumerate(tys))
 
     def dynsizes(self):
         dynopsz = set(op.size for op in self.operands if op.size < 0)
@@ -808,9 +780,20 @@ def encode_mnems(entries):
                 vecsizes -= {128 if opcode.vexl == "1" else 256}
             prepend_vecsize = not separate_opsize
 
-        modrm_type = opcode.modrm[0] or "rm"
-        optypes_base = desc.optype_str()
-        optypes = {optypes_base.replace("M", t) for t in modrm_type}
+        # All encoding types; reg is r; modrm is r/m
+        optypes_base = []
+        for i, opkind in enumerate(desc.operands):
+            opname = ENCODING_OPORDER[desc.encoding][i]
+            if opname == "modrm":
+                modrm_type = opcode.modrm[0] or "rm"
+                if opcode.extended or desc.mnemonic in ("MOV_CR2G", "MOV_DR2G", "MOV_G2CR", "MOV_G2DR"):
+                    modrm_type = "r"
+                optypes_base.append(modrm_type)
+            elif opname == "modreg" or opname == "vexreg":
+                optypes_base.append("r")
+            else:
+                optypes_base.append(" iariioo"[ENCODINGS[desc.encoding].imm_control])
+        optypes = {"".join(x) for x in product(*optypes_base)}
 
         prefixes = [("", "")]
         if "LOCK" in desc.flags:
