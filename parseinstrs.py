@@ -768,6 +768,10 @@ def decode_table(entries, args):
 #endif
 """
 
+class EncodeVariant(NamedTuple):
+    opcode: Opcode
+    desc: InstrDesc
+
 def encode_mnems(entries):
     # mapping from (mnem, opsize, ots) -> (opcode, desc)
     mnemonics = defaultdict(list)
@@ -842,31 +846,32 @@ def encode_mnems(entries):
                 name += ot.replace("o", "")
                 if separate_opsize:
                     name += f"{op.abssize(opsize//8, vecsize//8)*8}"
-            mnemonics[name, opsize, ots].append((spec_opcode, desc))
+            variant = EncodeVariant(spec_opcode, desc)
+            mnemonics[name, opsize, ots].append(variant)
             altname = {
                 "C_EX16": "CBW", "C_EX32": "CWDE", "C_EX64": "CDQE",
                 "C_SEP16": "CWD", "C_SEP32": "CDQ", "C_SEP64": "CQO",
                 "CMPXCHGD32m": "CMPXCHG8Bm", "CMPXCHGD64m": "CMPXCHG16Bm",
             }.get(name)
             if altname:
-                mnemonics[altname, opsize, ots].append((spec_opcode, desc))
+                mnemonics[altname, opsize, ots].append(variant)
 
     for (mnem, opsize, ots), variants in mnemonics.items():
         dedup = OrderedDict()
-        for i, (opcode, desc) in enumerate(variants):
+        for i, variant in enumerate(variants):
             PRIO = ["O", "OA", "AO", "AM", "MA", "IA", "OI"]
-            enc_prio = PRIO.index(desc.encoding) if desc.encoding in PRIO else len(PRIO)
-            unique = 0 if desc.encoding != "S" else i
-            key = desc.imm_size(opsize//8), enc_prio, unique
+            enc_prio = PRIO.index(variant.desc.encoding) if variant.desc.encoding in PRIO else len(PRIO)
+            unique = 0 if variant.desc.encoding != "S" else i
+            key = variant.desc.imm_size(opsize//8), enc_prio, unique
             if key not in dedup:
-                dedup[key] = opcode, desc
+                dedup[key] = variant
         mnemonics[mnem, opsize, ots] = [dedup[k] for k in sorted(dedup.keys())]
 
     return dict(mnemonics)
 
 def encode_table(entries, args):
     mnemonics = encode_mnems(entries)
-    mnemonics["NOP", 0, ""] = [(Opcode.parse("90"), InstrDesc.parse("NP - - - - NOP"))]
+    mnemonics["NOP", 0, ""] = [EncodeVariant(Opcode.parse("90"), InstrDesc.parse("NP - - - - NOP"))]
     mnem_map = {}
     alt_table = [0] # first entry is unused
     for (mnem, opsize, ots), variants in mnemonics.items():
@@ -880,7 +885,8 @@ def encode_table(entries, args):
 
         alt_indices = [i + len(alt_table) for i in range(len(variants) - 1)] + [0]
         enc_opcs = []
-        for alt, (opcode, desc) in zip(alt_indices, variants):
+        for alt, variant in zip(alt_indices, variants):
+            opcode, desc = variant.opcode, variant.desc
             opc_i = opcode.opc
             if None not in opcode.modrm:
                 opc_i |= 0xc000 | opcode.modrm[1] << 11 | opcode.modrm[2] << 8
@@ -918,26 +924,30 @@ def encode_table(entries, args):
     alt_tab = "".join(f"[{i}] = {v:#x},\n" for i, v in enumerate(alt_table))
     return mnem_tab, alt_tab
 
+def unique(it):
+    vals = set(it)
+    if len(vals) != 1:
+        raise Exception(f"multiple values: {vals}")
+    return next(iter(vals))
+
 def encode2_table(entries, args):
     mnemonics = encode_mnems(entries)
 
     enc_decls, enc_code = "", ""
     for (mnem, opsize, ots), variants in mnemonics.items():
-        max_imm_size = max(desc.imm_size(opsize//8) for _, desc in variants)
+        max_imm_size = max(v.desc.imm_size(opsize//8) for v in variants)
 
         supports_high_regs = []
-        if variants[0][1].mnemonic in ("MOVSX", "MOVZX") or opsize == 8:
+        if variants[0].desc.mnemonic in ("MOVSX", "MOVZX") or opsize == 8:
             # Should be the same for all variants
-            desc = variants[0][1]
-            for i, (ot, op) in enumerate(zip(ots, desc.operands)):
+            for i, (ot, op) in enumerate(zip(ots, variants[0].desc.operands)):
                 if ot == "r" and op.kind == "GP" and op.abssize(opsize//8) == 1:
                     supports_high_regs.append(i)
-        supports_vsib = "VSIB" in variants[0][1].flags
+        supports_vsib = unique("VSIB" in v.desc.flags for v in variants)
+        opkinds = unique(tuple(op.kind for op in v.desc.operands) for v in variants)
 
-        if len({tuple(op.kind for op in v[1].operands) for v in variants}) > 1:
-            raise Exception(f"ambiguous operand kinds for {mnem}")
         OPKIND_LUT = {"FPU": "ST", "SEG": "SREG", "MMX": "MM"}
-        reg_tys = [OPKIND_LUT.get(op.kind, op.kind) for op in variants[0][1].operands]
+        reg_tys = [OPKIND_LUT.get(opkind, opkind) for opkind in opkinds]
 
         fnname = f"fe64_{mnem}{'_impl' if supports_high_regs else ''}"
         op_tys = [{
@@ -965,7 +975,8 @@ def encode2_table(entries, args):
         code += "  (void) flags; (void) memoff;\n"
 
         neednext = True
-        for i, (opcode, desc) in enumerate(variants):
+        for i, variant in enumerate(variants):
+            opcode, desc = variant.opcode, variant.desc
             if not neednext:
                 break
             if i > 0:
