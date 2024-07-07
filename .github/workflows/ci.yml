@@ -10,7 +10,7 @@ jobs:
     - name: Install dependencies
       run: sudo apt install -y ninja-build meson
     - name: Configure
-      run: mkdir build; meson -Dbuildtype=debugoptimized -Dwith_encode2=true build
+      run: mkdir build; CC=clang CXX=clang++ meson -Dbuildtype=debugoptimized -Dwith_encode2=true build
     - name: Build
       run: ninja -v -C build
     - name: Test
