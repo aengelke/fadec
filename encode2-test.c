@@ -42,6 +42,7 @@ main(void) {
 #define ENC_TEST_TYPESAFE
     // Silence -Warray-bounds with double cast
 #define FE_PTR(off) (const void*) ((uintptr_t) buf + (off))
+#define FLAGMASK(flags, mask) flags, mask
 #include "encode-test.inc"
 
     TEST("\x90", NOP, 0);

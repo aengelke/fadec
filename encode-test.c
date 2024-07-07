@@ -54,6 +54,7 @@ main(int argc, char** argv)
     // VSIB encoding doesn't differ for this API
 #define FE_MEMV FE_MEM
 #define FE_PTR(off) ((intptr_t) buf + (off))
+#define FLAGMASK(flags, mask) (flags | FE_MASK(mask & 7))
 #include "encode-test.inc"
 
     puts(failed ? "Some tests FAILED" : "All tests PASSED");

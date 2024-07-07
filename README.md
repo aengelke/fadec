@@ -90,25 +90,26 @@ failed |= fe_enc64(&cur, FE_RET);
 The API consists of one function to handle encode requests, as well as some macros. More information can be found in [fadec-enc.h](fadec-enc.h). Usage of internals like enum values is not recommended.
 
 - `int fe_enc64(uint8_t** buf, uint64_t mnem, int64_t operands...)`
-    - Encodes an instruction for x86-64 into `*buf`.
+    - Encodes an instruction for x86-64 into `*buf`. EVEX-encoded instructions will transparently encode with the shorter VEX prefix where permitted.
     - Return value: `0` on success, a negative value in error cases.
     - `buf`: Pointer to the pointer to the instruction buffer. The pointer (`*buf`) will be advanced by the number of bytes written. The instruction buffer must have at least 15 bytes left.
     - `mnem`: Instruction mnemonic to encode combined with extra flags:
         - `FE_SEG(segreg)`: override segment to specified segment register.
         - `FE_ADDR32`: override address size to 32-bit.
         - `FE_JMPL`: use longest possible offset encoding, useful when jump target is not known.
+        - `FE_MASK(maskreg)`: specify non-zero mask register (1--7) for instructions that support masking (suffixed with `_mask` or `_maskz`) or require a mask (AVX-512 gather/scatter).
+        - `FE_RC_RN/RD/RU/RZ`: set rounding mode for instructions with static rounding control (suffixed `_er`).
     - `operands...`: Up to 4 instruction operands. The operand kinds must match the requirements of the mnemonic.
-        - For register operands, use the register: `FE_AX`, `FE_AH`, `FE_XMM12`.
-        - For immediate operands, use the constant: `12`, `-0xbeef`.
-        - For memory operands, use: `FE_MEM(basereg,scale,indexreg,offset)`. Use `0` to specify _no register_. For RIP-relative addressing, the size of the instruction is added automatically.
-        - For offset operands, specify the target address.
+        - For register operands (`r`=non-mask register, `k`=mask register), use the register: `FE_AX`, `FE_AH`, `FE_XMM12`.
+        - For immediate operands (`i`=regular, `a`=absolute address), use the constant: `12`, `-0xbeef`.
+        - For memory operands (`m`=regular or `b`=broadcast), use: `FE_MEM(basereg,scale,indexreg,offset)`. Use `0` to specify _no register_. For RIP-relative addressing, the size of the instruction is added automatically.
+        - For offset operands (`o`), specify the target address.
 
 ## Known issues
 - Decoder/Encoder: register uniqueness constraints are not enforced. This affects:
     - VSIB-encoded instructions: no vector register may be used more than once
     - AMX instructions: no tile register may be used more than once
     - AVX-512 complex FP16 multiplication: destination must be not be equal to a source register
-- Encoder: AVX-512 not supported (yet).
 - Prefixes for indirect jumps and calls are not properly decoded, e.g. `notrack`, `bnd`.
 - Low test coverage. (Help needed.)
 - No Python API.

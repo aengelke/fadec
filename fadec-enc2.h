@@ -20,6 +20,11 @@ extern "C" {
 #define FE_ADDR32 0x10
 #define FE_SEG_MASK 0x7
 #define FE_SEG(seg) (((seg).idx + 1) & FE_SEG_MASK)
+#define FE_RC_MASK 0x60
+#define FE_RC_RN 0x00
+#define FE_RC_RD 0x20
+#define FE_RC_RU 0x40
+#define FE_RC_RZ 0x60
 
 typedef struct FeRegGP { unsigned char idx; } FeRegGP;
 #define FE_GP(idx) (FE_STRUCT(FeRegGP) { idx })
@@ -111,14 +116,14 @@ typedef struct FeRegXMM { unsigned char idx; } FeRegXMM;
 #define FE_XMM31 FE_XMM(31)
 typedef struct FeRegMASK { unsigned char idx; } FeRegMASK;
 #define FE_K(idx) (FE_STRUCT(FeRegMASK) { idx })
-#define FE_K0 FE_MASK(0)
-#define FE_K1 FE_MASK(1)
-#define FE_K2 FE_MASK(2)
-#define FE_K3 FE_MASK(3)
-#define FE_K4 FE_MASK(4)
-#define FE_K5 FE_MASK(5)
-#define FE_K6 FE_MASK(6)
-#define FE_K7 FE_MASK(7)
+#define FE_K0 FE_K(0)
+#define FE_K1 FE_K(1)
+#define FE_K2 FE_K(2)
+#define FE_K3 FE_K(3)
+#define FE_K4 FE_K(4)
+#define FE_K5 FE_K(5)
+#define FE_K6 FE_K(6)
+#define FE_K7 FE_K(7)
 typedef struct FeRegTMM { unsigned char idx; } FeRegTMM;
 #define FE_TMM(idx) (FE_STRUCT(FeRegTMM) { idx })
 #define FE_TMM0 FE_TMM(0)

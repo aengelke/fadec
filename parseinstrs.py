@@ -176,6 +176,10 @@ class OpKind(NamedTuple):
     def parse(cls, op):
         return cls(op[0], op[1:])
 
+    def __eq__(self, other):
+        # Custom equality for canonicalization of kind/size.
+        return isinstance(other, OpKind) and self.kind == other.kind and self.size == other.size
+
 class InstrDesc(NamedTuple):
     mnemonic: str
     encoding: str
@@ -743,6 +747,11 @@ def decode_table(entries, args):
 class EncodeVariant(NamedTuple):
     opcode: Opcode
     desc: InstrDesc
+    evexbcst: bool = False
+    evexmask: int = 0 # 0 = none, 1 = must have mask, 2 = mask + EVEX.z
+    evexsae: int = 0 # 0 = no EVEX.b, 1 = EVEX.b, 2 = EVEX.b + L'L is rounding mode
+    evexdisp8scale: int = 0 # EVEX disp8 shift
+    downgrade: int = 0 # 0 = none, 1 = to VEX, 2 = to VEX flipping REXW
 
 def encode_mnems(entries):
     # mapping from (mnem, opsize, ots) -> (opcode, desc)
@@ -750,8 +759,8 @@ def encode_mnems(entries):
     for weak, opcode, desc in entries:
         if "I64" in desc.flags or desc.mnemonic[:9] == "RESERVED_":
             continue
-        if opcode.vex == 2: # EVEX not implemented
-            continue
+        mnem_name = {"MOVABS": "MOV", "XCHG_NOP": "XCHG"}.get(desc.mnemonic, desc.mnemonic)
+        mnem_name = mnem_name.replace("EVX_", "V")
 
         opsizes, vecsizes = {0}, {0}
         prepend_opsize, prepend_vecsize = False, False
@@ -775,22 +784,25 @@ def encode_mnems(entries):
                 opsizes = {64}
                 prepend_opsize = False
         elif opcode.vex and opcode.vexl != "IG": # vectors; don't care for SSE
-            vecsizes = {128, 256} # TODO-EVEX
+            vecsizes = {128, 256, 512} if opcode.vex == 2 else {128, 256}
             if opcode.vexl:
-                vecsizes -= {128 if opcode.vexl == "1" else 256}
+                vecsizes = {128 << int(c) for c in opcode.vexl}
             prepend_vecsize = not separate_opsize
 
-        # All encoding types; reg is r; modrm is r/m
+        # All encoding types; reg is r/k (mask); modrm is r/m/b (broadcast)
         optypes_base = []
         for i, opkind in enumerate(desc.operands):
+            reg = "k" if opkind.kind == "MASK" else "r"
             opname = ENCODING_OPORDER[desc.encoding][i]
             if opname == "modrm":
-                modrm_type = opcode.modrm[0] or "rm"
+                modrm_type = (opcode.modrm[0] or "rm").replace("r", reg)
                 if opcode.extended or desc.mnemonic in ("MOV_CR2G", "MOV_DR2G", "MOV_G2CR", "MOV_G2DR"):
-                    modrm_type = "r"
+                    modrm_type = reg
+                if "BCST" in desc.flags:
+                    modrm_type += "b"
                 optypes_base.append(modrm_type)
             elif opname == "modreg" or opname == "vexreg":
-                optypes_base.append("r")
+                optypes_base.append(reg)
             else:
                 optypes_base.append(" iariioo"[ENCODINGS[desc.encoding].imm_control])
         optypes = {"".join(x) for x in product(*optypes_base)}
@@ -804,29 +816,89 @@ def encode_mnems(entries):
             prefixes.append(("REPNZ_", "F2"))
             prefixes.append(("REPZ_", "F3"))
 
-        for opsize, vecsize, prefix, ots in product(opsizes, vecsizes, prefixes, optypes):
+        evexmasks = [0]
+        if "MASK" in desc.flags:
+            if "VSIB" in desc.flags:
+                evexmasks = [1]
+            else:
+                evexmasks.append(1)
+                if desc.operands[0].kind != "MASK":
+                    evexmasks.append(2) # maskz only for non-mask destinations
+        evexsaes = [0]
+        if "SAE" in desc.flags:
+            evexsaes.append(1)
+        elif "ER" in desc.flags:
+            evexsaes.append(2)
+
+        keys = (opsizes, vecsizes, prefixes, optypes, evexmasks, evexsaes)
+        for opsize, vecsize, prefix, ots, evexmask, evexsae in product(*keys):
+            has_memory = "m" in ots or "b" in ots
             if prefix[1] == "LOCK" and ots[0] != "m":
                 continue
+            if evexmask == 2 and ots[0] != "r":
+                continue # EVEX.z must be zero for memory destination
+            if evexsae and (vecsize not in (0, 512) or has_memory):
+                continue # SAE/ER only works with 512 bit width and no memory
 
             spec_opcode = opcode
             if prefix[1]:
                 spec_opcode = spec_opcode._replace(prefix=prefix[1])
             if opsize == 64 and "D64" not in desc.flags and "F64" not in desc.flags:
                 spec_opcode = spec_opcode._replace(rexw="1")
+            if vecsize == 512:
+                spec_opcode = spec_opcode._replace(vexl="2")
             if vecsize == 256:
                 spec_opcode = spec_opcode._replace(vexl="1")
+            if vecsize == 128:
+                spec_opcode = spec_opcode._replace(vexl="0")
             if spec_opcode.vexl == "IG":
                 spec_opcode = spec_opcode._replace(vexl="0")
             if ENCODINGS[desc.encoding].modrm_idx:
-                has_memory = "m" in ots
                 modrm = ("m" if has_memory else "r",) + spec_opcode.modrm[1:]
                 spec_opcode = spec_opcode._replace(modrm=modrm)
             if ENCODINGS[desc.encoding].modrm or None not in opcode.modrm:
                 assert spec_opcode.modrm[0] in ("r", "m")
 
+            evexbcst = "b" in ots
+            evexdisp8scale = 0
+            if spec_opcode.vex == 2 and has_memory:
+                if not evexbcst:
+                    op = desc.operands[ENCODINGS[desc.encoding].modrm_idx^3]
+                    size = op.abssize(opsize//8, vecsize//8)
+                    evexdisp8scale = size.bit_length() - 1
+                elif "BCST16" in desc.flags:
+                    evexdisp8scale = 1
+                else:
+                    evexdisp8scale = 2 if spec_opcode.rexw != "1" else 3
+
             # Construct mnemonic name
-            mnem_name = {"MOVABS": "MOV", "XCHG_NOP": "XCHG"}.get(desc.mnemonic, desc.mnemonic)
             name = prefix[0] + mnem_name
+
+            # Transform MOV_G2X/X2G into MOVD/MOVQ_G2X/X2G. This isn't done for
+            # VEX for historical reasons and there's no reason to break
+            # backwards compatibility. This enables EVEX->VEX fallback.
+            if desc.mnemonic in ("EVX_MOV_G2X", "EVX_MOV_X2G"):
+                name = name[:-4] + "DQ"[opsize == 64] + name[-4:]
+                prepend_opsize, opsize = False, 0
+            # For VMOVD with memory operand, there's no need to be explicit
+            # about G2X/X2G, as there's no alternative. For VMOVQ, another
+            # opcode exists, so keep G2X/X2G there for distinguishing.
+            if name in ("VMOVD_G2X", "VMOVD_X2G") and has_memory:
+                name = name.replace("_G2X", "").replace("_X2G", "")
+            # PEXTR/PBROADCAST/PINSR are stored without size suffix in the table
+            # to avoid having different tables for 32/64 bit mode due to EVEX.W
+            # being ignored in 32-bit mode. Add suffix here.
+            if desc.mnemonic == "EVX_PEXTR":
+                name += " BW D   Q"[desc.operands[0].abssize(opsize//8, vecsize//8)]
+                prepend_opsize, opsize = False, 0
+            if desc.mnemonic == "EVX_PBROADCAST":
+                name += " BW D   Q"[desc.operands[1].abssize(opsize//8, vecsize//8)]
+                name += "_GP"
+                prepend_opsize, opsize = False, 0
+            if desc.mnemonic == "EVX_PINSR":
+                name += " BW D   Q"[desc.operands[2].abssize(opsize//8, vecsize//8)]
+                prepend_opsize, opsize = False, 0
+
             if prepend_opsize and not ("D64" in desc.flags and opsize == 64):
                 name += f"_{opsize}"[name[-1] not in "0123456789":]
             if prepend_vecsize:
@@ -835,7 +907,11 @@ def encode_mnems(entries):
                 name += ot.replace("o", "")
                 if separate_opsize:
                     name += f"{op.abssize(opsize//8, vecsize//8)*8}"
-            variant = EncodeVariant(spec_opcode, desc)
+            if "VSIB" not in desc.flags:
+                # VSIB implies non-zero mask register, so suffix is not required
+                name += ["", "_mask", "_maskz"][evexmask]
+            name += ["", "_sae", "_er"][evexsae]
+            variant = EncodeVariant(spec_opcode, desc, evexbcst, evexmask, evexsae, evexdisp8scale)
             mnemonics[name, opsize, ots].append(variant)
             altname = {
                 "C_EX16": "CBW", "C_EX32": "CWDE", "C_EX64": "CDQE",
@@ -845,16 +921,56 @@ def encode_mnems(entries):
             if altname:
                 mnemonics[altname, opsize, ots].append(variant)
 
-    for (mnem, opsize, ots), variants in mnemonics.items():
+    for (mnem, opsize, ots), all_variants in mnemonics.items():
         dedup = OrderedDict()
-        for i, variant in enumerate(variants):
+        for i, variant in enumerate(all_variants):
             PRIO = ["O", "OA", "AO", "AM", "MA", "IA", "OI"]
             enc_prio = PRIO.index(variant.desc.encoding) if variant.desc.encoding in PRIO else len(PRIO)
             unique = 0 if variant.desc.encoding != "S" else i
-            key = variant.desc.imm_size(opsize//8), enc_prio, unique
+            # Prefer VEX over EVEX for shorter encoding
+            key = variant.desc.imm_size(opsize//8), variant.opcode.vex, enc_prio, unique
             if key not in dedup:
                 dedup[key] = variant
-        mnemonics[mnem, opsize, ots] = [dedup[k] for k in sorted(dedup.keys())]
+        variants = [dedup[k] for k in sorted(dedup.keys())]
+        if len(variants) > 1 and any(v.opcode.vex for v in variants):
+            # Case 1: VEX -> EVEX promotion (AVX-512, APX)
+            # Case 2: legacy -> EVEX promotion (APX)
+            # In any case, there should be exactly one EVEX opcode.
+            if len(variants) != 2:
+                raise Exception(f"VEX/EVEX mnemonic with more than two encodings {mnem} {opcode}")
+            if variants[0].opcode.vex == 2 or variants[1].opcode.vex != 2:
+                raise Exception(f"EVEX mnemonic not with non-EVEX pair {mnem} {opcode} {variants}")
+            no_evex, evex = variants[0], variants[1]
+
+            # Make sure that for promotions, only minor things vary.
+            # REX.W is special, EVEX might mandate W1 while VEX mandates W0/WIG.
+            # Technically ok: IG -> IG/IG -> 0/0 -> IG/0 -> 0/1 -> IG/1 -> 1
+            # rexwdowngrade = (no_evex.opcode.rexw is None or
+            #                  no_evex.opcode.rexw == evex.opcode.rexw)
+            #
+            # However, other encoders always use W0 in case of WIG for VEX, and
+            # that's probably most beneficial... so:
+            # Possible downgrades: IG -> IG/IG -> 0/0 -> IG/0 -> 0/1 -> 1
+            # This affects quite a few instructions, so we use an extra bit to
+            # flip EVEX.W to VEX.W.
+
+            if (no_evex.opcode.prefix != evex.opcode.prefix or
+                no_evex.opcode.escape != evex.opcode.escape or
+                no_evex.opcode.opc != evex.opcode.opc or
+                # reg/mem doesn't matter, it's already fixed in the mnemonic
+                no_evex.opcode.modrm[1:] != evex.opcode.modrm[1:] or
+                no_evex.opcode.vexl != evex.opcode.vexl or
+                # we don't check rexw_flip here, we can always handle it
+                no_evex.desc.encoding != evex.desc.encoding or
+                no_evex.desc.operands != evex.desc.operands):
+                print(mnem, no_evex)
+                print(mnem, evex)
+                # Should not happen.
+                raise Exception("cannot downgrade EVEX?")
+            else:
+                rexw_flip = (no_evex.opcode.rexw == "1") != (evex.opcode.rexw == "1")
+                variants = [evex._replace(downgrade=1 if not rexw_flip else 2)]
+        mnemonics[mnem, opsize, ots] = variants
 
     return dict(mnemonics)
 
@@ -883,18 +999,39 @@ def encode_table(entries, args):
                 opc_i |= opcode.modrm[1] << 8
             if opcode.modrm == ("m", None, 4):
                 opc_i |= 0x2000000000 # FORCE_SIB
-            opc_i |= opcode.escape * 0x10000
-            opc_i |= 0x80000 if opcode.prefix == "66" or opsize == 16 else 0
-            opc_i |= 0x100000 if opcode.prefix == "F2" else 0
-            opc_i |= 0x200000 if opcode.prefix == "F3" else 0
+            if not opcode.vex:
+                assert opcode.escape < 4
+                opc_i |= opcode.escape * 0x10000
+                opc_i |= 0x80000 if opcode.prefix == "66" or opsize == 16 else 0
+                opc_i |= 0x100000 if opcode.prefix == "F2" else 0
+                opc_i |= 0x200000 if opcode.prefix == "F3" else 0
+            else:
+                assert opcode.escape < 8
+                opc_i |= opcode.escape * 0x10000
+                if opcode.prefix == "66" or opsize == 16:
+                    assert opcode.prefix not in ("F2", "F3")
+                    opc_i |= 0x100000
+                if opcode.prefix == "F3":
+                    opc_i |= 0x200000
+                elif opcode.prefix == "F2":
+                    opc_i |= 0x300000
             opc_i |= 0x400000 if opcode.rexw == "1" else 0
             if opcode.prefix == "LOCK":
                 opc_i |= 0x800000
             elif opcode.vex == 1:
                 opc_i |= 0x1000000 + 0x800000 * int(opcode.vexl or 0)
-            elif opcode.vex == 2: # TODO-EVEX
-                opc_i |= 0x2000000 + 0x800000 * int(opcode.vexl or 0)
+            elif opcode.vex == 2:
+                opc_i |= 0x2000000
+                # L'L encodes SAE rounding mode otherwise
+                if not variant.evexsae:
+                    opc_i |= 0x800000 * int(opcode.vexl or 0)
+            assert not (variant.evexsae and variant.evexbcst)
+            opc_i |= 0x4000000 if variant.evexsae or variant.evexbcst else 0
             opc_i |= 0x8000000 if "VSIB" in desc.flags else 0
+            opc_i |= 0x1000000000 if variant.evexmask == 2 else 0
+            opc_i |= 0x4000000000 if variant.downgrade in (1, 2) else 0
+            opc_i |= 0x40000000000 if variant.downgrade == 2 else 0
+            opc_i |= 0x8000000000 * variant.evexdisp8scale
             if alt >= 0x100:
                 raise Exception("encode alternate bits exhausted")
             opc_i |= sum(1 << i for i in supports_high_regs) << 45
@@ -974,7 +1111,7 @@ def encode2_gen_legacy(variant: EncodeVariant, opsize: int, supports_high_regs: 
             assert "VSIB" not in desc.flags
             assert opcode.modrm[2] is None
             modrm = f"op{flags.modrm_idx^3}"
-            code += f"  unsigned memoff = enc_mem(buf, idx, {modrm}, {modreg}, {imm_size_expr}, 0);\n"
+            code += f"  unsigned memoff = enc_mem(buf, idx, {modrm}, {modreg}, {imm_size_expr}, 0, 0);\n"
             code += f"  if (!memoff) return 0;\n  idx += memoff;\n"
         else:
             if flags.modrm_idx:
@@ -989,13 +1126,26 @@ def encode2_gen_legacy(variant: EncodeVariant, opsize: int, supports_high_regs: 
 def encode2_gen_vex(variant: EncodeVariant) -> str:
     opcode = variant.opcode
     flags = ENCODINGS[variant.desc.encoding]
-    code = "  unsigned vexoff;\n"
+    code = ""
 
     helperopc = opcode.opc << 16
     helperopc |= ["NP", "66", "F3", "F2"].index(opcode.prefix) << 8
     helperopc |= 0x8000 if opcode.rexw == "1" else 0
-    helperopc |= 0x0004 if opcode.vexl == "1" else 0
+    if not variant.evexsae:
+        # ER: L'L encodes rounding mode for SAE
+        helperopc |= 0x0020 * int(opcode.vexl or 0) # EVEX.L'L
     helperopc |= opcode.escape << 10
+    helperopc |= 0x10 if variant.evexsae or variant.evexbcst else 0 # EVEX.b
+    helperopc |= 0x80 if variant.evexmask == 2 else 0 # EVEX.z
+    helperopc |= 0x1000000 if variant.downgrade in (1, 2) else 0
+    helperopc |= 0x2000000 if variant.downgrade == 2 else 0
+    helperopc = f"{helperopc:#x}"
+    if variant.evexsae == 2:
+        helperopc += "|(flags&FE_RC_MASK)"
+    if variant.evexmask:
+        code += "  if (!op_reg_idx(opmask)) return 0;\n"
+        helperopc += "|(op_reg_idx(opmask)&7)"
+
     if flags.modreg_idx:
         modreg = f"op_reg_idx(op{flags.modreg_idx^3})"
     else:
@@ -1003,21 +1153,28 @@ def encode2_gen_vex(variant: EncodeVariant) -> str:
     vexop = f"op_reg_idx(op{flags.vexreg_idx^3})" if flags.vexreg_idx else 0
     if not flags.modrm and opcode.modrm == (None, None, None):
         # No ModRM, prefix only (VZEROUPPER/VZEROALL)
-        code += f"  vexoff = enc_vex_common(buf+idx, {helperopc:#x}, 0, 0, 0, 0);\n"
+        assert opcode.vex == 1
+        vexcall = f"enc_vex_common(buf+idx, {helperopc}, 0, 0, 0, 0)"
     elif opcode.modrm[0] == "m":
         imm_size_expr = "imm_size" if flags.imm_control >= 2 else 0
-        memfn = "enc_vex_mem_vsib" if "VSIB" in variant.desc.flags else "enc_vex_mem"
+        vsib = "VSIB" in variant.desc.flags
+        memfn = "enc" + ["", "_vex", "_evex"][opcode.vex] + ["_mem", "_vsib"][vsib]
         assert opcode.modrm[2] in (None, 4)
         forcesib = 1 if opcode.modrm[2] == 4 else 0 # AMX
         modrm = f"op{flags.modrm_idx^3}"
-        code += (f"  vexoff = {memfn}(buf+idx, {helperopc:#x}, {modrm}, " +
-                 f"{modreg}, {vexop}, {imm_size_expr}, {forcesib});\n")
+        vexcall = (f"{memfn}(buf+idx, {helperopc}, {modrm}, {modreg}, {vexop}, " +
+                   f"{imm_size_expr}, {forcesib}, {variant.evexdisp8scale})")
     else:
         if flags.modrm_idx:
             modrm = f"op_reg_idx(op{flags.modrm_idx^3})"
         else:
             modrm = f"{opcode.modrm[2] or 0}"
-        code += f"  vexoff = enc_vex_reg(buf+idx, {helperopc:#x}, {modrm}, {modreg}, {vexop});\n"
+        suffix = "_reg"
+        if opcode.vex == 2 and flags.modreg_idx and desc.operands[flags.modreg_idx^3].kind == "XMM":
+            suffix = "_xmm"
+        regfn = "enc" + ["", "_vex", "_evex"][opcode.vex] + suffix
+        vexcall = f"{regfn}(buf+idx, {helperopc}, {modrm}, {modreg}, {vexop})"
+    code += f"  unsigned vexoff = {vexcall};\n"
     code += f"  if (!vexoff) return 0;\n  idx += vexoff;\n"
     return code
 
@@ -1036,6 +1193,8 @@ def encode2_table(entries, args):
                     supports_high_regs.append(i)
         supports_vsib = unique("VSIB" in v.desc.flags for v in variants)
         opkinds = unique(tuple(op.kind for op in v.desc.operands) for v in variants)
+        evexmask = unique(v.evexmask for v in variants)
+        evexsae = unique(v.evexsae for v in variants)
 
         OPKIND_LUT = {"FPU": "ST", "SEG": "SREG", "MMX": "MM"}
         reg_tys = [OPKIND_LUT.get(opkind, opkind) for opkind in opkinds]
@@ -1045,10 +1204,13 @@ def encode2_table(entries, args):
             "i": f"int{max_imm_size*8 if max_imm_size != 3 else 32}_t",
             "a": "uintptr_t",
             "r": f"FeReg{reg_ty if i not in supports_high_regs else 'GPLH'}",
+            "k": "FeRegMASK",
             "m": "FeMem" if not supports_vsib else "FeMemV",
+            "b": "FeMem",
             "o": "const void*",
         }[ot] for i, (ot, reg_ty) in enumerate(zip(ots, reg_tys))]
-        fn_opargs = "".join(f", {ty} op{i}" for i, ty in enumerate(op_tys))
+        fn_opargs = ", FeRegMASK opmask" if evexmask else ""
+        fn_opargs += "".join(f", {ty} op{i}" for i, ty in enumerate(op_tys))
         fn_sig = f"unsigned {fnname}(uint8_t* buf, int flags{fn_opargs})"
         enc_decls += f"{fn_sig};\n"
         if supports_high_regs:
@@ -1120,9 +1282,7 @@ def encode2_table(entries, args):
                 # STOS, SCAS, JCXZ, LOOP, LOOPcc
                 code += "  if (UNLIKELY(flags & FE_ADDR32)) buf[idx++] = 0x67;\n"
 
-            if opcode.vex == 2:
-                assert False
-            elif opcode.vex == 1:
+            if opcode.vex:
                 code += encode2_gen_vex(variant)
             else:
                 code += encode2_gen_legacy(variant, opsize, supports_high_regs)

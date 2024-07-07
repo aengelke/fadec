@@ -43,6 +43,7 @@ int main() {
 #define ENC_TEST_TYPESAFE
     // Silence -Warray-bounds with double cast
 #define FE_PTR(off) (const void*) ((uintptr_t) buf.data() + (off))
+#define FLAGMASK(flags, mask) flags, mask
 #include "encode-test.inc"
 
     std::puts(failed ? "Some tests FAILED" : "All tests PASSED");

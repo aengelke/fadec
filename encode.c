@@ -30,24 +30,32 @@
 #define OPC_67 FE_ADDR32
 #define OPC_SEG_MSK 0xe0000000
 #define OPC_JMPL FE_JMPL
-#define OPC_MASK_MSK 0x1e00000000
+#define OPC_MASK_MSK 0xe00000000
+#define OPC_EVEXZ 0x1000000000
 #define OPC_USER_MSK (OPC_67|OPC_SEG_MSK|OPC_MASK_MSK)
 #define OPC_FORCE_SIB 0x2000000000
+#define OPC_DOWNGRADE_VEX 0x4000000000
+#define OPC_DOWNGRADE_VEX_FLIPW 0x40000000000
+#define OPC_EVEX_DISP8SCALE 0x38000000000
 #define OPC_GPH_OP0 0x200000000000
 #define OPC_GPH_OP1 0x400000000000
 
-#define EPFX_REX_MSK 0x0f
-#define EPFX_REX 0x08
-#define EPFX_REXR 0x04
-#define EPFX_REXX 0x02
-#define EPFX_REXB 0x01
-#define EPFX_VVVV_IDX 4
+#define EPFX_REX_MSK 0x43f
+#define EPFX_REX 0x20
+#define EPFX_EVEX 0x40
+#define EPFX_REXR 0x10
+#define EPFX_REXX 0x08
+#define EPFX_REXB 0x04
+#define EPFX_REXR4 0x02
+#define EPFX_REXB4 0x01
+#define EPFX_REXX4 0x400
+#define EPFX_VVVV_IDX 11
 
 static bool op_mem(FeOp op) { return op < 0; }
 static bool op_reg(FeOp op) { return op >= 0; }
-static bool op_reg_gpl(FeOp op) { return (op & ~0xf) == 0x100; }
+static bool op_reg_gpl(FeOp op) { return (op & ~0x1f) == 0x100; }
 static bool op_reg_gph(FeOp op) { return (op & ~0x3) == 0x204; }
-static bool op_reg_xmm(FeOp op) { return (op & ~0xf) == 0x600; }
+static bool op_reg_xmm(FeOp op) { return (op & ~0x1f) == 0x600; }
 static int64_t op_mem_offset(FeOp op) { return (int32_t) op; }
 static unsigned op_mem_base(FeOp op) { return (op >> 32) & 0xfff; }
 static unsigned op_mem_idx(FeOp op) { return (op >> 44) & 0xfff; }
@@ -97,13 +105,29 @@ enc_opc(uint8_t** restrict buf, uint64_t opc, uint64_t epfx)
         *(*buf)++ = (0x65643e362e2600 >> (8 * ((opc >> 29) & 7))) & 0xff;
     if (opc & OPC_67) *(*buf)++ = 0x67;
     if (opc & OPC_EVEXL0) {
-        return -1;
+        *(*buf)++ = 0x62;
+        unsigned b1 = opc >> 16 & 7;
+        if (!(epfx & EPFX_REXR)) b1 |= 0x80;
+        if (!(epfx & EPFX_REXX)) b1 |= 0x40;
+        if (!(epfx & EPFX_REXB)) b1 |= 0x20;
+        if (!(epfx & EPFX_REXR4)) b1 |= 0x10;
+        if ((epfx & EPFX_REXB4)) b1 |= 0x08;
+        *(*buf)++ = b1;
+        unsigned b2 = opc >> 20 & 3;
+        if (!(epfx & EPFX_REXX4)) b2 |= 0x04;
+        b2 |= (~(epfx >> EPFX_VVVV_IDX) & 0xf) << 3;
+        if (opc & OPC_REXW) b2 |= 0x80;
+        *(*buf)++ = b2;
+        unsigned b3 = opc >> 33 & 7;
+        b3 |= (~(epfx >> EPFX_VVVV_IDX) & 0x10) >> 1;
+        if (opc & OPC_EVEXB) b3 |= 0x10;
+        b3 |= (opc >> 23 & 3) << 5;
+        if (opc & OPC_EVEXZ) b3 |= 0x80;
+        *(*buf)++ = b3;
     } else if (opc & OPC_VEXL0) {
+        if (epfx & (EPFX_REXR4|EPFX_REXX4|EPFX_REXB4|(0x10<<EPFX_VVVV_IDX))) return -1;
         bool vex3 = opc & (OPC_REXW|0x20000) || epfx & (EPFX_REXX|EPFX_REXB);
-        unsigned pp = 0;
-        if (opc & OPC_66) pp = 1;
-        if (opc & OPC_F3) pp = 2;
-        if (opc & OPC_F2) pp = 3;
+        unsigned pp = opc >> 20 & 3;
         *(*buf)++ = 0xc4 | !vex3;
         unsigned b2 = pp | (opc & 0x800000 ? 0x4 : 0);
         if (vex3) {
@@ -171,12 +195,27 @@ enc_mr(uint8_t** restrict buf, uint64_t opc, uint64_t epfx, uint64_t op0,
 {
     // If !op_reg(op1), it is a constant value for ModRM.reg
     if (op_reg(op0) && (op_reg_idx(op0) & 0x8)) epfx |= EPFX_REXB;
+    if (op_reg(op0) && (op_reg_idx(op0) & 0x10))
+        epfx |= 0 ? EPFX_REXB4 : EPFX_REXX|EPFX_EVEX;
     if (op_mem(op0) && (op_mem_base(op0) & 0x8)) epfx |= EPFX_REXB;
+    if (op_mem(op0) && (op_mem_base(op0) & 0x10)) epfx |= EPFX_REXB4;
     if (op_mem(op0) && (op_mem_idx(op0) & 0x8)) epfx |= EPFX_REXX;
-    if (op_reg(op1) && op_reg_idx(op1) & 0x8) epfx |= EPFX_REXR;
+    if (op_mem(op0) && (op_mem_idx(op0) & 0x10))
+        epfx |= opc & OPC_VSIB ? 0x10<<EPFX_VVVV_IDX : EPFX_REXX4;
+    if (op_reg(op1) && (op_reg_idx(op1) & 0x8)) epfx |= EPFX_REXR;
+    if (op_reg(op1) && (op_reg_idx(op1) & 0x10)) epfx |= EPFX_REXR4;
 
-    bool has_rex = opc & OPC_REXW || epfx & EPFX_REX_MSK;
+    bool has_rex = opc & (OPC_REXW|OPC_VEXL0|OPC_EVEXL0) || (epfx & EPFX_REX_MSK);
     if (has_rex && (op_reg_gph(op0) || op_reg_gph(op1))) return -1;
+
+    if (epfx & (EPFX_EVEX|EPFX_REXB4|EPFX_REXX4|EPFX_REXR4|(0x10<<EPFX_VVVV_IDX))) {
+        if (!(opc & OPC_EVEXL0)) return -1;
+    } else if (opc & OPC_DOWNGRADE_VEX) { // downgrade EVEX to VEX
+        // clear EVEX and disp8scale, set VEX
+        opc = (opc & ~(uint64_t) (OPC_EVEXL0|OPC_EVEX_DISP8SCALE)) | OPC_VEXL0;
+        if (opc & OPC_DOWNGRADE_VEX_FLIPW)
+            opc ^= OPC_REXW;
+    }
 
     if (LIKELY(op_reg(op0))) {
         if (enc_opc(buf, opc, epfx)) return -1;
@@ -198,6 +237,8 @@ enc_mr(uint8_t** restrict buf, uint64_t opc, uint64_t epfx, uint64_t op0,
         if (opc & OPC_VSIB)
         {
             if (!op_reg_xmm(op_mem_idx(op0))) return -1;
+            // EVEX VSIB requires non-zero opmask
+            if ((opc & OPC_EVEXL0) && !(opc & OPC_MASK_MSK)) return -1;
         }
         else
         {
@@ -235,8 +276,15 @@ enc_mr(uint8_t** restrict buf, uint64_t opc, uint64_t epfx, uint64_t op0,
             rm = 4;
         }
         if (off) {
-            mod = op_imm_n(off, 1) ? 0x40 : 0x80;
-            dispsz = op_imm_n(off, 1) ? 1 : 4;
+            unsigned disp8scale = (opc & OPC_EVEX_DISP8SCALE) >> 39;
+            if (!(off & ((1 << disp8scale) - 1)) && op_imm_n(off >> disp8scale, 1)) {
+                mod = 0x40;
+                dispsz = 1;
+                off >>= disp8scale;
+            } else {
+                mod = 0x80;
+                dispsz = 4;
+            }
         } else if (rm == 5) {
             mod = 0x40;
             dispsz = 1;
@@ -370,7 +418,8 @@ try_encode:;
         FeOp modreg = ei->modreg ? ops[ei->modreg^3] : (opc & 0xff00) >> 8;
         if (ei->vexreg)
             epfx |= ((uint64_t) op_reg_idx(ops[ei->vexreg^3])) << EPFX_VVVV_IDX;
-        if (enc_mr(buf, opc, epfx, ops[ei->modrm^3], modreg, immsz)) goto fail;
+        // Can fail for upgrade to EVEX due to high register numbers
+        if (enc_mr(buf, opc, epfx, ops[ei->modrm^3], modreg, immsz)) goto next;
     } else if (ei->modreg) {
         if (enc_o(buf, opc, epfx, ops[ei->modreg^3])) goto fail;
     } else {

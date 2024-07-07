@@ -1727,7 +1727,7 @@ EVEX.F2.W1.LIG.0f5a    RVM  Vdq Hdq Wsd -   EVX_CVTSD2SS+kr     F=AVX512F TUPLE1
 EVEX.F3.LIG.0f2a       RVM  Vdq Hdq Ey  -   EVX_CVTSI2SS+r      F=AVX512F TUPLE1_SCALAR_OPSZ
 # Note: for W0, ER is ignored (i.e., will not UD, according to Intel SDM)
 EVEX.F2.LIG.0f2a       RVM  Vdq Hdq Ey  -   EVX_CVTSI2SD+r      F=AVX512F TUPLE1_SCALAR_OPSZ
-EVEX.66.W1.0fe6        RM   Vps Wpd -   -   EVX_CVTTPD2DQ+kbe   F=AVX512F TUPLE_FULL_64
+EVEX.66.W1.0fe6        RM   Vh  Wpd -   -   EVX_CVTTPD2DQ+kbe   F=AVX512F TUPLE_FULL_64
 EVEX.F3.W0.0f5b        RM   Vps Wps -   -   EVX_CVTTPS2DQ+kbe   F=AVX512F TUPLE_FULL_32
 EVEX.F2.LIG.0f2c       RM   Gy  Wsd -   -   EVX_CVTTSD2SI+e     F=AVX512F TUPLE1_FIXED_64
 EVEX.F3.LIG.0f2c       RM   Gy  Wss -   -   EVX_CVTTSS2SI+e     F=AVX512F TUPLE1_FIXED_32
