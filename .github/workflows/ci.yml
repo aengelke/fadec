@@ -6,11 +6,11 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
     - name: Install dependencies
       run: sudo apt install -y ninja-build meson
     - name: Configure
-      run: mkdir build; meson -Dbuildtype=debugoptimized build
+      run: mkdir build; meson -Dbuildtype=debugoptimized -Dwith_encode2=true build
     - name: Build
       run: ninja -v -C build
     - name: Test
