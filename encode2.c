@@ -31,7 +31,7 @@ enc_seg(int flags) {
 }
 
 static int
-enc_imm(uint8_t* restrict buf, uint64_t imm, unsigned immsz) {
+enc_imm(uint8_t* buf, uint64_t imm, unsigned immsz) {
     if (!op_imm_n(imm, immsz))
         return -1;
     for (unsigned i = 0; i < immsz; i++)
@@ -40,7 +40,7 @@ enc_imm(uint8_t* restrict buf, uint64_t imm, unsigned immsz) {
 }
 
 static int
-enc_mem_common(uint8_t* restrict buf, unsigned bufidx, FeMem op0, uint64_t op1,
+enc_mem_common(uint8_t* buf, unsigned bufidx, FeMem op0, uint64_t op1,
                unsigned immsz, unsigned sibidx) {
     int mod = 0, reg = op1 & 7, rm;
     int scale = 0, idx = 4, base = 0;
@@ -97,8 +97,8 @@ enc_mem_common(uint8_t* restrict buf, unsigned bufidx, FeMem op0, uint64_t op1,
 }
 
 static int
-enc_mem(uint8_t* restrict buf, unsigned bufidx, FeMem op0, uint64_t op1,
-        unsigned immsz, unsigned forcesib) {
+enc_mem(uint8_t* buf, unsigned bufidx, FeMem op0, uint64_t op1, unsigned immsz,
+        unsigned forcesib) {
     if ((op_reg_idx(op0.idx) != op_reg_idx(FE_NOREG)) != !!op0.scale)
         return 0;
     unsigned sibidx = forcesib ? 4 : 8;
@@ -111,7 +111,7 @@ enc_mem(uint8_t* restrict buf, unsigned bufidx, FeMem op0, uint64_t op1,
 }
 
 static int
-enc_mem_vsib(uint8_t* restrict buf, unsigned bufidx, FeMemV op0, uint64_t op1,
+enc_mem_vsib(uint8_t* buf, unsigned bufidx, FeMemV op0, uint64_t op1,
              unsigned immsz, unsigned forcesib) {
     (void) forcesib;
     if (!op0.scale)
@@ -128,7 +128,7 @@ enum {
 };
 
 static int
-enc_vex_common(uint8_t* restrict buf, unsigned opcode, unsigned base,
+enc_vex_common(uint8_t* buf, unsigned opcode, unsigned base,
                unsigned idx, unsigned reg, unsigned vvvv) {
     if ((base | idx | reg | vvvv) & 0x10) return 0;
     bool vex3 = ((base | idx) & 0x08) || (opcode & 0xfc00) != 0x0400;
@@ -156,7 +156,7 @@ enc_vex_common(uint8_t* restrict buf, unsigned opcode, unsigned base,
 }
 
 static int
-enc_vex_reg(uint8_t* restrict buf, unsigned opcode, uint64_t rm, uint64_t reg,
+enc_vex_reg(uint8_t* buf, unsigned opcode, uint64_t rm, uint64_t reg,
             uint64_t vvvv) {
     unsigned off = enc_vex_common(buf, opcode, rm, 0, reg, vvvv);
     buf[off] = 0xc0 | (reg << 3 & 0x38) | (rm & 7);
@@ -164,7 +164,7 @@ enc_vex_reg(uint8_t* restrict buf, unsigned opcode, uint64_t rm, uint64_t reg,
 }
 
 static int
-enc_vex_mem(uint8_t* restrict buf, unsigned opcode, FeMem rm, uint64_t reg,
+enc_vex_mem(uint8_t* buf, unsigned opcode, FeMem rm, uint64_t reg,
             uint64_t vvvv, unsigned immsz, bool forcesib) {
     unsigned off = enc_vex_common(buf, opcode, op_reg_idx(rm.base), op_reg_idx(rm.idx), reg, vvvv);
     unsigned memoff = enc_mem(buf, off, rm, reg, immsz, forcesib);
@@ -172,8 +172,8 @@ enc_vex_mem(uint8_t* restrict buf, unsigned opcode, FeMem rm, uint64_t reg,
 }
 
 static int
-enc_vex_mem_vsib(uint8_t* restrict buf, unsigned opcode, FeMemV rm, uint64_t reg,
-            uint64_t vvvv, unsigned immsz, bool forcesib) {
+enc_vex_mem_vsib(uint8_t* buf, unsigned opcode, FeMemV rm, uint64_t reg,
+                 uint64_t vvvv, unsigned immsz, bool forcesib) {
     unsigned off = enc_vex_common(buf, opcode, op_reg_idx(rm.base), op_reg_idx(rm.idx), reg, vvvv);
     unsigned memoff = enc_mem_vsib(buf, off, rm, reg, immsz, forcesib);
     return off && memoff ? off + memoff : 0;
