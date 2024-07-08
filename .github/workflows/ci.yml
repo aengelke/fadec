@@ -3,7 +3,7 @@ name: CI
 on: [push]
 
 jobs:
-  build:
+  build-linux:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
@@ -13,5 +13,17 @@ jobs:
       run: mkdir build; CC=clang CXX=clang++ meson -Dbuildtype=debugoptimized -Dwith_encode2=true build
     - name: Build
       run: ninja -v -C build
+    - name: Test
+      run: meson test -v -C build
+  build-windows:
+    runs-on: windows-latest
+    steps:
+    - uses: actions/checkout@v4
+    - name: Install dependencies
+      run: pip install ninja meson
+    - name: Configure
+      run: mkdir build; meson setup --vsenv -Dbuildtype=debugoptimized -Dwith_encode2=true build
+    - name: Build
+      run: meson compile -v -C build
     - name: Test
       run: meson test -v -C build
