@@ -17,7 +17,7 @@ void print_hex(const uint8_t* buf, size_t len) {
 
 static int
 check(const Buffer& buf, const char* exp, size_t exp_len, unsigned res, const char* name) {
-    if (__builtin_expect(res == exp_len && !std::memcmp(buf.data(), exp, exp_len), 1))
+    if (res == exp_len && !std::memcmp(buf.data(), exp, exp_len))
         return 0;
     std::printf("Failed case (new) %s:\n", name);
     std::printf("  Exp (%2zu): ", exp_len);

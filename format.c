@@ -10,8 +10,8 @@
 
 
 #ifdef __GNUC__
-#define LIKELY(x) __builtin_expect((x), 1)
-#define UNLIKELY(x) __builtin_expect((x), 0)
+#define LIKELY(x) __builtin_expect(!!(x), 1)
+#define UNLIKELY(x) __builtin_expect(!!(x), 0)
 #define DECLARE_ARRAY_SIZE(n) static n
 #define DECLARE_RESTRICTED_ARRAY_SIZE(n) restrict static n
 #else
@@ -44,16 +44,12 @@ fd_strpcat(char* restrict dst, struct FdStr src) {
 static unsigned
 fd_clz64(uint64_t v) {
 #if defined(__GNUC__)
-#if INTPTR_MAX == INT64_MAX
-    return __builtin_clzl(v);
-#else
-    if (v <= 0xffffffff)
-        return 32 + __builtin_clzl(v);
-    return __builtin_clzl(v >> 32);
-#endif
+    return __builtin_clzll(v);
 #elif defined(_MSC_VER)
     unsigned long index;
 
+    // 32-bit MSVC doesn't support _BitScanReverse64. This is an attempt to
+    // identify this case.
 #if INTPTR_MAX == INT64_MAX
     _BitScanReverse64(&index, v);
 #else
@@ -199,7 +195,7 @@ fd_mnemonic(char buf[DECLARE_RESTRICTED_ARRAY_SIZE(48)], const FdInstr* instr) {
     if (UNLIKELY(FD_OP_TYPE(instr, 0) == FD_OT_OFF && FD_OP_SIZELG(instr, 0) == 1))
         sizesuffix[0] = 'w', sizesuffixlen = 1;
 
-    switch (UNLIKELY(FD_TYPE(instr))) {
+    switch (FD_TYPE(instr)) {
     case FDI_C_SEP:
         mnem += FD_OPSIZE(instr) & 0xc;
         mnemlen = 3;
