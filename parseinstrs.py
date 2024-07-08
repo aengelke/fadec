@@ -1130,8 +1130,11 @@ def encode2_table(entries, args):
                         neednext = True
 
             if opcode.modrm[0] == "m" or "USEG" in desc.flags:
-                code += "  if (UNLIKELY(flags & FE_SEG_MASK)) buf[idx++] = enc_seg(flags);\n"
-            if opcode.modrm[0] == "m" or "U67" in desc.flags:
+                # segment override without addrsize override shouldn't happen
+                assert opcode.modrm[0] == "m" or "U67" in desc.flags
+                code += "  if (UNLIKELY(flags & (FE_SEG_MASK|FE_ADDR32))) idx += enc_seg67(buf+idx, flags);\n"
+            elif "U67" in desc.flags:
+                # STOS, SCAS, JCXZ, LOOP, LOOPcc
                 code += "  if (UNLIKELY(flags & FE_ADDR32)) buf[idx++] = 0x67;\n"
 
             if opcode.vex == 2:

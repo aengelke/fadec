@@ -6,8 +6,15 @@
 #include <fadec-enc2.h>
 
 
-#define LIKELY(x) __builtin_expect((x), 1)
-#define UNLIKELY(x) __builtin_expect((x), 0)
+#ifdef __GNUC__
+#define LIKELY(x) __builtin_expect(!!(x), 1)
+#define UNLIKELY(x) __builtin_expect(!!(x), 0)
+#define HINT_COLD __attribute__((cold))
+#else
+#define LIKELY(x) (x)
+#define UNLIKELY(x) (x)
+#define HINT_COLD
+#endif
 
 #define op_reg_idx(op) (op).idx
 #define op_reg_gph(op) (((op).idx & ~0x3) == 0x24)
@@ -25,9 +32,15 @@ op_imm_n(int64_t imm, unsigned immsz) {
     return false;
 }
 
-static __attribute__((cold)) __attribute__((const)) uint8_t
-enc_seg(int flags) {
-    return (0x65643e362e2600 >> (8 * (flags & FE_SEG_MASK))) & 0xff;
+HINT_COLD static unsigned
+enc_seg67(uint8_t* buf, unsigned flags) {
+    unsigned idx = 0;
+    if (UNLIKELY(flags & FE_SEG_MASK)) {
+        unsigned seg = (0x65643e362e2600 >> (8 * (flags & FE_SEG_MASK))) & 0xff;
+        buf[idx++] = seg;
+    }
+    if (UNLIKELY(flags & FE_ADDR32)) buf[idx++] = 0x67;
+    return idx;
 }
 
 static int
