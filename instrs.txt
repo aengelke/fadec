@@ -86,8 +86,8 @@
 69                     RMI  Gv  Ev  Iz  -   IMUL                EFL=m--uuuum
 6a                     I    Ibs -   -   -   PUSH            D64
 6b                     RMI  Gv  Ev  Ibs -   IMUL                EFL=m--uuuum
-6c                     NP   -   -   -   -   INS+ws          SZ8 ENC_REP EFL=-t------
-6d                     NP   -   -   -   -   INS+ws              ENC_REP EFL=-t------
+6c                     NP   -   -   -   -   INS+wa          SZ8 ENC_REP EFL=-t------
+6d                     NP   -   -   -   -   INS+wa              ENC_REP EFL=-t------
 6e                     NP   -   -   -   -   OUTS+was        SZ8 ENC_REP EFL=-t------
 6f                     NP   -   -   -   -   OUTS+was            ENC_REP EFL=-t------
 70                     D    Jbs -   -   -   JO              F64 EFL=t-------
