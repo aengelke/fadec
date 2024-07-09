@@ -1061,25 +1061,25 @@ def encode2_gen_legacy(variant: EncodeVariant, opsize: int, supports_high_regs: 
     desc = variant.desc
     flags = ENCODINGS[variant.desc.encoding]
     code = "  {\n"
-    code += "  unsigned rex = 0; (void) rex;\n"
 
+    rex_expr = "0" if opcode.rexw != "1" else "0x48"
     for i in supports_high_regs:
-        code += f"  if (op_reg_idx(op{i}) >= 4 && op_reg_idx(op{i}) <= 15) rex = 0x40;\n"
-    if opcode.rexw == "1":
-        code += f"  rex |= 0x48;\n"
+        rex_expr += f"|(op_reg_idx(op{i}) >= 4 && op_reg_idx(op{i}) <= 15?0x40:0)"
     if flags.modrm_idx:
         if opcode.modrm[0] == "m":
-            code += f"  if (op_mem_base(op{flags.modrm_idx^3})&8) rex |= 0x41;\n"
-            code += f"  if (op_mem_idx(op{flags.modrm_idx^3})&8) rex |= 0x42;\n"
+            rex_expr += f"|(op_mem_base(op{flags.modrm_idx^3})&8?0x41:0)"
+            rex_expr += f"|(op_mem_idx(op{flags.modrm_idx^3})&8?0x42:0)"
         elif desc.operands[flags.modrm_idx^3].kind in ("GP", "XMM"):
-            code += f"  if (op_reg_idx(op{flags.modrm_idx^3})&8) rex |= 0x41;\n"
+            rex_expr += f"|(op_reg_idx(op{flags.modrm_idx^3})&8?0x41:0)"
         if flags.modreg_idx:
             if desc.operands[flags.modreg_idx^3].kind in ("GP", "XMM", "CR", "DR"):
-                code += f"  if (op_reg_idx(op{flags.modreg_idx^3})&8) rex |= 0x44;\n"
+                rex_expr += f"|(op_reg_idx(op{flags.modreg_idx^3})&8?0x44:0)"
     elif flags.modreg_idx: # O encoding
         if desc.operands[flags.modreg_idx^3].kind in ("GP", "XMM"):
-            code += f"  if (op_reg_idx(op{flags.modreg_idx^3})&8) rex |= 0x41;\n"
+            rex_expr += f"|(op_reg_idx(op{flags.modreg_idx^3})&8?0x41:0)"
 
+    if rex_expr != "0":
+        code += f"  unsigned rex = {rex_expr};\n"
     for i in supports_high_regs:
         code += f"  if (rex && op_reg_gph(op{i})) return 0;\n"
 
@@ -1089,7 +1089,8 @@ def encode2_gen_legacy(variant: EncodeVariant, opsize: int, supports_high_regs: 
         code += "  buf[idx++] = 0x66;\n"
     if opcode.prefix in ("F2", "F3"):
         code += f"  buf[idx++] = 0x{opcode.prefix};\n"
-    code += f"  if (rex) buf[idx++] = rex;\n"
+    if rex_expr != "0":
+        code += f"  if (rex) buf[idx++] = rex;\n"
     if opcode.escape:
         code += f"  buf[idx++] = 0x0F;\n"
         if opcode.escape == 2:
