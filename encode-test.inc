@@ -672,7 +672,7 @@ TEST("\xc4\xe2\xf5\xb5\xc2", VPMADD52HUQ256rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2);
 // NB: VEX instructions are here to test automatic downgrading from EVEX to VEX.
 
 // EVEX functionality; VEX-downgrade occasionally prevented with mask
-// Part 1: register extension bits for rrr
+// Part 1: register extension bits for rrr/rri
 TEST("\xc5\xf0\x58\xc2", VADDPS128rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2);
 TEST("\x62\xf1\x74\x09\x58\xc2", VADDPS128rrr_mask, FLAGMASK(0, FE_K1), FE_XMM0, FE_XMM1, FE_XMM2);
 TEST("\xc5\x70\x58\xc2", VADDPS128rrr, 0, FE_XMM8, FE_XMM1, FE_XMM2);
@@ -741,6 +741,54 @@ TEST("\x62\x91\x34\x00\x58\xc2", VADDPS128rrr, 0, FE_XMM0, FE_XMM25, FE_XMM26);
 TEST("\x62\x11\x34\x00\x58\xc2", VADDPS128rrr, 0, FE_XMM8, FE_XMM25, FE_XMM26);
 TEST("\x62\x81\x34\x00\x58\xc2", VADDPS128rrr, 0, FE_XMM16, FE_XMM25, FE_XMM26);
 TEST("\x62\x01\x34\x00\x58\xc2", VADDPS128rrr, 0, FE_XMM24, FE_XMM25, FE_XMM26);
+TEST("\xc5\xf9\x71\xd1\x01", VPSRLW128rri, 0, FE_XMM0, FE_XMM1, 1);
+TEST("\xc5\xb9\x71\xd1\x01", VPSRLW128rri, 0, FE_XMM8, FE_XMM1, 1);
+TEST("\x62\xf1\x7d\x00\x71\xd1\x01", VPSRLW128rri, 0, FE_XMM16, FE_XMM1, 1);
+TEST("\x62\xf1\x3d\x00\x71\xd1\x01", VPSRLW128rri, 0, FE_XMM24, FE_XMM1, 1);
+TEST("\xc4\xc1\x79\x71\xd1\x01", VPSRLW128rri, 0, FE_XMM0, FE_XMM9, 1);
+TEST("\xc4\xc1\x39\x71\xd1\x01", VPSRLW128rri, 0, FE_XMM8, FE_XMM9, 1);
+TEST("\x62\xd1\x7d\x00\x71\xd1\x01", VPSRLW128rri, 0, FE_XMM16, FE_XMM9, 1);
+TEST("\x62\xd1\x3d\x00\x71\xd1\x01", VPSRLW128rri, 0, FE_XMM24, FE_XMM9, 1);
+TEST("\x62\xb1\x7d\x08\x71\xd1\x01", VPSRLW128rri, 0, FE_XMM0, FE_XMM17, 1);
+TEST("\x62\xb1\x3d\x08\x71\xd1\x01", VPSRLW128rri, 0, FE_XMM8, FE_XMM17, 1);
+TEST("\x62\xb1\x7d\x00\x71\xd1\x01", VPSRLW128rri, 0, FE_XMM16, FE_XMM17, 1);
+TEST("\x62\xb1\x3d\x00\x71\xd1\x01", VPSRLW128rri, 0, FE_XMM24, FE_XMM17, 1);
+TEST("\x62\x91\x7d\x08\x71\xd1\x01", VPSRLW128rri, 0, FE_XMM0, FE_XMM25, 1);
+TEST("\x62\x91\x3d\x08\x71\xd1\x01", VPSRLW128rri, 0, FE_XMM8, FE_XMM25, 1);
+TEST("\x62\x91\x7d\x00\x71\xd1\x01", VPSRLW128rri, 0, FE_XMM16, FE_XMM25, 1);
+TEST("\x62\x91\x3d\x00\x71\xd1\x01", VPSRLW128rri, 0, FE_XMM24, FE_XMM25, 1);
+TEST("\xc5\xfd\x71\xd1\x01", VPSRLW256rri, 0, FE_XMM0, FE_XMM1, 1);
+TEST("\xc5\xbd\x71\xd1\x01", VPSRLW256rri, 0, FE_XMM8, FE_XMM1, 1);
+TEST("\x62\xf1\x7d\x20\x71\xd1\x01", VPSRLW256rri, 0, FE_XMM16, FE_XMM1, 1);
+TEST("\x62\xf1\x3d\x20\x71\xd1\x01", VPSRLW256rri, 0, FE_XMM24, FE_XMM1, 1);
+TEST("\xc4\xc1\x7d\x71\xd1\x01", VPSRLW256rri, 0, FE_XMM0, FE_XMM9, 1);
+TEST("\xc4\xc1\x3d\x71\xd1\x01", VPSRLW256rri, 0, FE_XMM8, FE_XMM9, 1);
+TEST("\x62\xd1\x7d\x20\x71\xd1\x01", VPSRLW256rri, 0, FE_XMM16, FE_XMM9, 1);
+TEST("\x62\xd1\x3d\x20\x71\xd1\x01", VPSRLW256rri, 0, FE_XMM24, FE_XMM9, 1);
+TEST("\x62\xb1\x7d\x28\x71\xd1\x01", VPSRLW256rri, 0, FE_XMM0, FE_XMM17, 1);
+TEST("\x62\xb1\x3d\x28\x71\xd1\x01", VPSRLW256rri, 0, FE_XMM8, FE_XMM17, 1);
+TEST("\x62\xb1\x7d\x20\x71\xd1\x01", VPSRLW256rri, 0, FE_XMM16, FE_XMM17, 1);
+TEST("\x62\xb1\x3d\x20\x71\xd1\x01", VPSRLW256rri, 0, FE_XMM24, FE_XMM17, 1);
+TEST("\x62\x91\x7d\x28\x71\xd1\x01", VPSRLW256rri, 0, FE_XMM0, FE_XMM25, 1);
+TEST("\x62\x91\x3d\x28\x71\xd1\x01", VPSRLW256rri, 0, FE_XMM8, FE_XMM25, 1);
+TEST("\x62\x91\x7d\x20\x71\xd1\x01", VPSRLW256rri, 0, FE_XMM16, FE_XMM25, 1);
+TEST("\x62\x91\x3d\x20\x71\xd1\x01", VPSRLW256rri, 0, FE_XMM24, FE_XMM25, 1);
+TEST("\x62\xf1\x7d\x48\x71\xd1\x01", VPSRLW512rri, 0, FE_XMM0, FE_XMM1, 1);
+TEST("\x62\xf1\x3d\x48\x71\xd1\x01", VPSRLW512rri, 0, FE_XMM8, FE_XMM1, 1);
+TEST("\x62\xf1\x7d\x40\x71\xd1\x01", VPSRLW512rri, 0, FE_XMM16, FE_XMM1, 1);
+TEST("\x62\xf1\x3d\x40\x71\xd1\x01", VPSRLW512rri, 0, FE_XMM24, FE_XMM1, 1);
+TEST("\x62\xd1\x7d\x48\x71\xd1\x01", VPSRLW512rri, 0, FE_XMM0, FE_XMM9, 1);
+TEST("\x62\xd1\x3d\x48\x71\xd1\x01", VPSRLW512rri, 0, FE_XMM8, FE_XMM9, 1);
+TEST("\x62\xd1\x7d\x40\x71\xd1\x01", VPSRLW512rri, 0, FE_XMM16, FE_XMM9, 1);
+TEST("\x62\xd1\x3d\x40\x71\xd1\x01", VPSRLW512rri, 0, FE_XMM24, FE_XMM9, 1);
+TEST("\x62\xb1\x7d\x48\x71\xd1\x01", VPSRLW512rri, 0, FE_XMM0, FE_XMM17, 1);
+TEST("\x62\xb1\x3d\x48\x71\xd1\x01", VPSRLW512rri, 0, FE_XMM8, FE_XMM17, 1);
+TEST("\x62\xb1\x7d\x40\x71\xd1\x01", VPSRLW512rri, 0, FE_XMM16, FE_XMM17, 1);
+TEST("\x62\xb1\x3d\x40\x71\xd1\x01", VPSRLW512rri, 0, FE_XMM24, FE_XMM17, 1);
+TEST("\x62\x91\x7d\x48\x71\xd1\x01", VPSRLW512rri, 0, FE_XMM0, FE_XMM25, 1);
+TEST("\x62\x91\x3d\x48\x71\xd1\x01", VPSRLW512rri, 0, FE_XMM8, FE_XMM25, 1);
+TEST("\x62\x91\x7d\x40\x71\xd1\x01", VPSRLW512rri, 0, FE_XMM16, FE_XMM25, 1);
+TEST("\x62\x91\x3d\x40\x71\xd1\x01", VPSRLW512rri, 0, FE_XMM24, FE_XMM25, 1);
 // Part 2: register extension bits with rrm
 TEST("\xc5\xf0\x58\x44\x1a\x40", VADDPS128rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 1, FE_BX, 0x40));
 TEST("\x62\xf1\x74\x09\x58\x44\x1a\x04", VADDPS128rrm_mask, FLAGMASK(0, FE_K1), FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 1, FE_BX, 0x40));

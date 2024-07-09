@@ -1170,7 +1170,8 @@ def encode2_gen_vex(variant: EncodeVariant) -> str:
         else:
             modrm = f"{opcode.modrm[2] or 0}"
         suffix = "_reg"
-        if opcode.vex == 2 and flags.modreg_idx and desc.operands[flags.modreg_idx^3].kind == "XMM":
+        if (opcode.vex == 2 and flags.modrm_idx and
+            variant.desc.operands[flags.modrm_idx^3].kind == "XMM"):
             suffix = "_xmm"
         regfn = "enc" + ["", "_vex", "_evex"][opcode.vex] + suffix
         vexcall = f"{regfn}(buf+idx, {helperopc}, {modrm}, {modreg}, {vexop})"
