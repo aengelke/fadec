@@ -67,19 +67,22 @@ enc_mem_common(uint8_t* buf, unsigned ripoff, FeMem op0, uint64_t op1,
         withsib = true;
     }
 
-    if (UNLIKELY(op0.base.idx == op_reg_idx(FE_NOREG))) {
-        *buf++ = (reg << 3) | 4;
-        *buf++ = sib | 5;
-        enc_imm(buf, off, 4);
-        return 6;
-    } else if (UNLIKELY(op0.base.idx == FE_IP.idx)) {
-        if (withsib)
+    if (UNLIKELY(op0.base.idx >= 0x20)) {
+        if (UNLIKELY(op0.base.idx >= op_reg_idx(FE_NOREG))) {
+            *buf++ = (reg << 3) | 4;
+            *buf++ = sib | 5;
+            enc_imm(buf, off, 4);
+            return 6;
+        } else if (LIKELY(op0.base.idx == FE_IP.idx)) {
+            if (withsib)
+                return 0;
+            *buf++ = (reg << 3) | 5;
+            // Adjust offset, caller doesn't know instruction length.
+            enc_imm(buf, off - ripoff - 5, 4);
+            return 5;
+        } else {
             return 0;
-        // Adjust offset, caller doesn't know instruction length.
-        off -= ripoff + 5;
-        *buf++ = (reg << 3) | 5;
-        enc_imm(buf, off, 4);
-        return 5;
+        }
     }
 
     rm = op_reg_idx(op0.base) & 7;
@@ -116,13 +119,15 @@ enc_mem_common(uint8_t* buf, unsigned ripoff, FeMem op0, uint64_t op1,
 static int
 enc_mem(uint8_t* buf, unsigned ripoff, FeMem op0, uint64_t op1, bool forcesib,
         unsigned disp8scale) {
-    if ((op_reg_idx(op0.idx) != op_reg_idx(FE_NOREG)) != !!op0.scale)
-        return 0;
     unsigned sibidx = forcesib ? 4 : 8;
-    if (op_reg_idx(op0.idx) != op_reg_idx(FE_NOREG)) {
+    if (op_reg_idx(op0.idx) < op_reg_idx(FE_NOREG)) {
+        if (!op0.scale)
+            return 0;
         if (op_reg_idx(op0.idx) == 4)
             return 0;
         sibidx = op_reg_idx(op0.idx) & 7;
+    } else if (op0.scale) {
+        return 0;
     }
     return enc_mem_common(buf, ripoff, op0, op1, sibidx, disp8scale);
 }
