@@ -1056,11 +1056,11 @@ def unique(it):
         raise Exception(f"multiple values: {vals}")
     return next(iter(vals))
 
-def encode2_gen_legacy(variant: EncodeVariant, opsize: int, supports_high_regs: list[int], imm_size_expr: str) -> str:
+def encode2_gen_legacy(variant: EncodeVariant, opsize: int, supports_high_regs: list[int], imm_expr: str, imm_size_expr: str, has_idx: bool) -> str:
     opcode = variant.opcode
     desc = variant.desc
     flags = ENCODINGS[variant.desc.encoding]
-    code = "  {\n"
+    code = ""
 
     rex_expr = "0" if opcode.rexw != "1" else "0x48"
     for i in supports_high_regs:
@@ -1083,13 +1083,17 @@ def encode2_gen_legacy(variant: EncodeVariant, opsize: int, supports_high_regs: 
     for i in supports_high_regs:
         code += f"  if (rex && op_reg_gph(op{i})) return 0;\n"
 
+    if not has_idx:
+        code += "  unsigned idx = 0;\n"
     if opcode.prefix == "LOCK":
         code += f"  buf[idx++] = 0xF0;\n"
     if opsize == 16 or opcode.prefix == "66":
         code += "  buf[idx++] = 0x66;\n"
     if opcode.prefix in ("F2", "F3"):
         code += f"  buf[idx++] = 0x{opcode.prefix};\n"
-    if rex_expr != "0":
+    if opcode.rexw:
+        code += f"  buf[idx++] = rex;\n"
+    elif rex_expr != "0":
         code += f"  if (rex) buf[idx++] = rex;\n"
     if opcode.escape:
         code += f"  buf[idx++] = 0x0F;\n"
@@ -1118,12 +1122,19 @@ def encode2_gen_legacy(variant: EncodeVariant, opsize: int, supports_high_regs: 
                 modrm = f"op_reg_idx(op{flags.modrm_idx^3})"
             else:
                 modrm = f"{opcode.modrm[2] or 0}"
-            code += f"  buf[idx++] = 0xC0|(({modreg}&7)<<3)|({modrm}&7);\n"
+            code += f"  buf[idx++] = 0xC0|({modreg}<<3)|({modrm}&7);\n"
     elif flags.modrm_idx:
         code += f"  buf[idx-1] |= op_reg_idx(op{flags.modrm_idx^3}) & 7;\n"
-    return code + "  }\n"
+    if flags.imm_control >= 2:
+        if flags.imm_control == 6:
+            imm_expr += " - idx"
+        code += f"  enc_imm(buf+idx, {imm_expr}, {imm_size_expr});\n"
+        code += f"  return idx + {imm_size_expr};\n"
+    else:
+        code += f"  return idx;\n"
+    return code
 
-def encode2_gen_vex(variant: EncodeVariant, imm_size_expr: str) -> str:
+def encode2_gen_vex(variant: EncodeVariant, imm_expr: str, imm_size_expr: str, has_idx: bool) -> str:
     opcode = variant.opcode
     flags = ENCODINGS[variant.desc.encoding]
     code = ""
@@ -1154,15 +1165,15 @@ def encode2_gen_vex(variant: EncodeVariant, imm_size_expr: str) -> str:
     if not flags.modrm and opcode.modrm == (None, None, None):
         # No ModRM, prefix only (VZEROUPPER/VZEROALL)
         assert opcode.vex == 1
-        vexcall = f"enc_vex_common(buf+idx, {helperopc}, 0, 0, 0, 0 )"
+        helperfn, helperargs = "enc_vex_common", f"0, 0, 0, 0"
     elif opcode.modrm[0] == "m":
         vsib = "VSIB" in variant.desc.flags
-        memfn = "enc" + ["", "_vex", "_evex"][opcode.vex] + ["_mem", "_vsib"][vsib]
+        helperfn = "enc" + ["", "_vex", "_evex"][opcode.vex] + ["_mem", "_vsib"][vsib]
         assert opcode.modrm[2] in (None, 4)
         forcesib = 1 if opcode.modrm[2] == 4 else 0 # AMX
         modrm = f"op{flags.modrm_idx^3}"
-        vexcall = (f"{memfn}(buf+idx, {helperopc}, {modrm}, {modreg}, {vexop}, " +
-                   f"{imm_size_expr}, {forcesib}, {variant.evexdisp8scale})")
+        helperargs = (f"{modrm}, {modreg}, {vexop}, {imm_size_expr}, " +
+                      f"{forcesib}, {variant.evexdisp8scale}")
     else:
         if flags.modrm_idx:
             modrm = f"op_reg_idx(op{flags.modrm_idx^3})"
@@ -1172,10 +1183,20 @@ def encode2_gen_vex(variant: EncodeVariant, imm_size_expr: str) -> str:
         if (opcode.vex == 2 and flags.modrm_idx and
             variant.desc.operands[flags.modrm_idx^3].kind == "XMM"):
             suffix = "_xmm"
-        regfn = "enc" + ["", "_vex", "_evex"][opcode.vex] + suffix
-        vexcall = f"{regfn}(buf+idx, {helperopc}, {modrm}, {modreg}, {vexop})"
-    code += f"  unsigned vexoff = {vexcall};\n"
-    code += f"  if (!vexoff) return 0;\n  idx += vexoff;\n"
+        helperfn = "enc" + ["", "_vex", "_evex"][opcode.vex] + suffix
+        helperargs = f"{modrm}, {modreg}, {vexop}"
+    bufidx = "buf" if not has_idx else "buf+idx"
+    helpercall = f"{helperfn}({bufidx}, {helperopc}, {helperargs})"
+    if flags.imm_control >= 2:
+        assert flags.imm_control < 6, "jmp with VEX/EVEX?"
+        code += f"  unsigned vexoff = {helpercall};\n"
+        code += f"  enc_imm({bufidx}+vexoff, {imm_expr}, {imm_size_expr});\n"
+        code += f"  return vexoff ? vexoff+{imm_size_expr}{'+idx' if has_idx else ''} : 0;\n"
+    elif has_idx:
+        code += f"  unsigned vexoff = {helpercall};\n"
+        code += f"  return vexoff ? vexoff+idx : 0;\n"
+    else:
+        code += f"  return {helpercall};\n"
     return code
 
 def encode2_table(entries, args):
@@ -1222,80 +1243,75 @@ def encode2_table(entries, args):
 
         code = f"{fn_sig} {{\n"
 
-        code += "  unsigned idx = 0;\n"
-        code += "  (void) flags;\n"
+        has_memory = unique(v.opcode.modrm[0] == "m" for v in variants)
+        has_useg = unique("USEG" in v.desc.flags for v in variants)
+        has_u67 = unique("U67" in v.desc.flags for v in variants)
+        if has_memory or has_useg:
+            # segment override without addrsize override shouldn't happen
+            assert has_memory or has_u67
+            code += f"  unsigned idx = UNLIKELY(flags & (FE_SEG_MASK|FE_ADDR32)) ? enc_seg67(buf, flags) : 0;\n"
+        elif has_u67:
+            # STOS, SCAS, JCXZ, LOOP, LOOPcc
+            code += f"  unsigned idx = UNLIKELY(flags & FE_ADDR32) ? (*buf=0x67, 1) : 0;\n"
+        else:
+            code += "  (void) flags;\n"
 
-        neednext = True
+        # indicate whether an idx variable exists
+        has_idx = has_memory or has_useg or has_u67
+
         for i, variant in enumerate(variants):
             opcode, desc = variant.opcode, variant.desc
-            if not neednext:
-                break
-            if i > 0:
-                code += f"\nnext{i-1}:\n"
-            neednext = False
-
             flags = ENCODINGS[desc.encoding]
+
+            conds = []
             # Select usable encoding.
             if desc.encoding == "S":
                 # Segment encoding is weird.
-                code += f"  if (op_reg_idx(op0)!={(opcode.opc>>3)&0x7:#x}) goto next{i};\n"
-                neednext = True
+                conds.append(f"op_reg_idx(op0)=={(opcode.opc>>3)&0x7:#x}")
             if desc.mnemonic == "XCHG_NOP" and opsize == 32:
                 # XCHG eax, eax must not be encoded as 90 -- that'd be NOP.
-                code += f"  if (op_reg_idx(op0)==0&&op_reg_idx(op1)==0) goto next{i};\n"
-                neednext = True
+                conds.append(f"!(op_reg_idx(op0)==0&&op_reg_idx(op1)==0)")
             if flags.vexreg_idx and not opcode.vex: # vexreg w/o vex is zeroreg
-                code += f"  if (op_reg_idx(op{flags.vexreg_idx^3})!={flags.zeroreg_val}) goto next{i};\n"
-                neednext = True
+                conds.append(f"op_reg_idx(op{flags.vexreg_idx^3})=={flags.zeroreg_val}")
 
             imm_size = desc.imm_size(opsize//8)
             imm_size_expr = f"{imm_size}"
             imm_expr = f"(int64_t) op{flags.imm_idx^3}"
             if flags.imm_control == 1:
-                code += f"  if (op{flags.imm_idx^3} != 1) goto next{i};\n"
-                neednext = True
+                conds.append(f"op{flags.imm_idx^3} == 1")
             elif flags.imm_control == 2:
                 imm_size_expr = "(flags & FE_ADDR32 ? 4 : 8)"
                 imm_expr = f"(int64_t) (flags & FE_ADDR32 ? (int32_t) {imm_expr} : {imm_expr})"
             elif flags.imm_control == 3:
                 imm_expr = f"op_reg_idx(op{flags.imm_idx^3}) << 4"
+                code += f"  if (op_reg_idx(op{flags.imm_idx^3}) >= 16) return 0;\n"
+            elif flags.imm_control == 4 and imm_size == 3: # ENTER
+                code += f"  if ((uint32_t) op{flags.imm_idx^3} >= 0x1000000) return 0;\n"
             elif flags.imm_control == 4 and imm_size < max_imm_size:
-                code += f"  if (!op_imm_n({imm_expr}, {imm_size})) goto next{i};\n"
-                neednext = True
+                conds.append(f"op_imm_n({imm_expr}, {imm_size})")
             elif flags.imm_control == 6:
                 imm_expr = f"{imm_expr} - (int64_t) buf - {imm_size}"
                 if i != len(variants) - 1: # only Jcc+JMP
-                    code += f"  if (flags & FE_JMPL) goto next{i};\n"
+                    conds.append(f"!(flags & FE_JMPL)")
                     # assume one-byte opcode without escape/prefixes
-                    code += f"  if (!op_imm_n({imm_expr}-1, {imm_size})) goto next{i};\n"
-                    neednext = True
+                    conds.append(f"op_imm_n({imm_expr}-1, {imm_size})")
 
-            if opcode.modrm[0] == "m" or "USEG" in desc.flags:
-                # segment override without addrsize override shouldn't happen
-                assert opcode.modrm[0] == "m" or "U67" in desc.flags
-                code += "  if (UNLIKELY(flags & (FE_SEG_MASK|FE_ADDR32))) idx += enc_seg67(buf+idx, flags);\n"
-            elif "U67" in desc.flags:
-                # STOS, SCAS, JCXZ, LOOP, LOOPcc
-                code += "  if (UNLIKELY(flags & FE_ADDR32)) buf[idx++] = 0x67;\n"
+            if conds:
+                code += f"  if ({'&&'.join(conds)}) {{\n"
 
             if opcode.vex:
-                code += encode2_gen_vex(variant, imm_size_expr)
+                code += encode2_gen_vex(variant, imm_expr, imm_size_expr, has_idx)
             else:
-                code += encode2_gen_legacy(variant, opsize, supports_high_regs, imm_size_expr)
+                code += encode2_gen_legacy(variant, opsize, supports_high_regs, imm_expr, imm_size_expr, has_idx)
 
-            if flags.imm_control >= 2:
-                if flags.imm_control == 6:
-                    imm_expr += " - idx"
-                code += f"  if (enc_imm(buf+idx, {imm_expr}, {imm_size_expr})) return 0;\n"
-                code += f"  return idx + {imm_size_expr};\n"
+            if conds:
+                code += "  }\n"
             else:
-                code += f"  return idx;\n"
+                break
+        else:
+            code += "  return 0;\n"
 
-        if neednext:
-            code += f"next{len(variants)-1}: return 0;\n"
-        code += "}\n"
-
-        enc_code += code
+        enc_code += code + "}\n"
 
     return enc_decls, enc_code
 

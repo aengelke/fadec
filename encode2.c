@@ -43,13 +43,10 @@ enc_seg67(uint8_t* buf, unsigned flags) {
     return idx;
 }
 
-static int
+static void
 enc_imm(uint8_t* buf, uint64_t imm, unsigned immsz) {
-    if (!op_imm_n(imm, immsz))
-        return -1;
     for (unsigned i = 0; i < immsz; i++)
         *buf++ = imm >> 8 * i;
-    return 0;
 }
 
 static int
@@ -107,8 +104,7 @@ enc_mem_common(uint8_t* buf, unsigned bufidx, FeMem op0, uint64_t op1,
     buf[bufidx++] = (mod << 6) | (reg << 3) | rm;
     if (mod != 3 && rm == 4)
         buf[bufidx++] = (scale << 6) | (idx << 3) | base;
-    if (enc_imm(buf + bufidx, off, dispsz))
-        return 0;
+    enc_imm(buf + bufidx, off, dispsz);
     return 1 + (mod != 3 && rm == 4) + dispsz;
 }
 
