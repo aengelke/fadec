@@ -1115,7 +1115,7 @@ def encode2_gen_legacy(variant: EncodeVariant, opsize: int, supports_high_regs: 
             assert "VSIB" not in desc.flags
             assert opcode.modrm[2] is None
             modrm = f"op{flags.modrm_idx^3}"
-            code += f"  unsigned memoff = enc_mem(buf, idx, {modrm}, {modreg}, {imm_size_expr}, 0, 0);\n"
+            code += f"  unsigned memoff = enc_mem(buf+idx, idx+{imm_size_expr}, {modrm}, {modreg}, 0, 0);\n"
             code += f"  if (!memoff) return 0;\n  idx += memoff;\n"
         else:
             if flags.modrm_idx:
@@ -1172,7 +1172,8 @@ def encode2_gen_vex(variant: EncodeVariant, imm_expr: str, imm_size_expr: str, h
         assert opcode.modrm[2] in (None, 4)
         forcesib = 1 if opcode.modrm[2] == 4 else 0 # AMX
         modrm = f"op{flags.modrm_idx^3}"
-        helperargs = (f"{modrm}, {modreg}, {vexop}, {imm_size_expr}, " +
+        ripoff = imm_size_expr + ("" if not has_idx else "+idx")
+        helperargs = (f"{modrm}, {modreg}, {vexop}, {ripoff}, " +
                       f"{forcesib}, {variant.evexdisp8scale}")
     else:
         if flags.modrm_idx:
