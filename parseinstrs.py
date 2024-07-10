@@ -1056,7 +1056,7 @@ def unique(it):
         raise Exception(f"multiple values: {vals}")
     return next(iter(vals))
 
-def encode2_gen_legacy(variant: EncodeVariant, opsize: int, supports_high_regs: list[int]) -> str:
+def encode2_gen_legacy(variant: EncodeVariant, opsize: int, supports_high_regs: list[int], imm_size_expr: str) -> str:
     opcode = variant.opcode
     desc = variant.desc
     flags = ENCODINGS[variant.desc.encoding]
@@ -1108,7 +1108,6 @@ def encode2_gen_legacy(variant: EncodeVariant, opsize: int, supports_high_regs: 
         else:
             modreg = opcode.modrm[1] or 0
         if opcode.modrm[0] == "m":
-            imm_size_expr = "imm_size" if flags.imm_control >= 2 else 0
             assert "VSIB" not in desc.flags
             assert opcode.modrm[2] is None
             modrm = f"op{flags.modrm_idx^3}"
@@ -1124,7 +1123,7 @@ def encode2_gen_legacy(variant: EncodeVariant, opsize: int, supports_high_regs: 
         code += f"  buf[idx-1] |= op_reg_idx(op{flags.modrm_idx^3}) & 7;\n"
     return code + "  }\n"
 
-def encode2_gen_vex(variant: EncodeVariant) -> str:
+def encode2_gen_vex(variant: EncodeVariant, imm_size_expr: str) -> str:
     opcode = variant.opcode
     flags = ENCODINGS[variant.desc.encoding]
     code = ""
@@ -1155,9 +1154,8 @@ def encode2_gen_vex(variant: EncodeVariant) -> str:
     if not flags.modrm and opcode.modrm == (None, None, None):
         # No ModRM, prefix only (VZEROUPPER/VZEROALL)
         assert opcode.vex == 1
-        vexcall = f"enc_vex_common(buf+idx, {helperopc}, 0, 0, 0, 0)"
+        vexcall = f"enc_vex_common(buf+idx, {helperopc}, 0, 0, 0, 0 )"
     elif opcode.modrm[0] == "m":
-        imm_size_expr = "imm_size" if flags.imm_control >= 2 else 0
         vsib = "VSIB" in variant.desc.flags
         memfn = "enc" + ["", "_vex", "_evex"][opcode.vex] + ["_mem", "_vsib"][vsib]
         assert opcode.modrm[2] in (None, 4)
@@ -1225,8 +1223,6 @@ def encode2_table(entries, args):
         code = f"{fn_sig} {{\n"
 
         code += "  unsigned idx = 0;\n"
-        if max_imm_size or "a" in ots:
-            code += "  int64_t imm; unsigned imm_size;\n"
         code += "  (void) flags;\n"
 
         neednext = True
@@ -1238,7 +1234,6 @@ def encode2_table(entries, args):
                 code += f"\nnext{i-1}:\n"
             neednext = False
 
-            imm_size = desc.imm_size(opsize//8)
             flags = ENCODINGS[desc.encoding]
             # Select usable encoding.
             if desc.encoding == "S":
@@ -1252,29 +1247,28 @@ def encode2_table(entries, args):
             if flags.vexreg_idx and not opcode.vex: # vexreg w/o vex is zeroreg
                 code += f"  if (op_reg_idx(op{flags.vexreg_idx^3})!={flags.zeroreg_val}) goto next{i};\n"
                 neednext = True
-            if flags.imm_control:
-                if flags.imm_control != 3:
-                    code += f"  imm = (int64_t) op{flags.imm_idx^3};\n"
-                else:
-                    code += f"  imm = op_reg_idx(op{flags.imm_idx^3}) << 4;\n"
-                code += f"  imm_size = {imm_size};\n"
-                if flags.imm_control == 1:
-                    code += f"  if (imm != 1) goto next{i};\n"
+
+            imm_size = desc.imm_size(opsize//8)
+            imm_size_expr = f"{imm_size}"
+            imm_expr = f"(int64_t) op{flags.imm_idx^3}"
+            if flags.imm_control == 1:
+                code += f"  if (op{flags.imm_idx^3} != 1) goto next{i};\n"
+                neednext = True
+            elif flags.imm_control == 2:
+                imm_size_expr = "(flags & FE_ADDR32 ? 4 : 8)"
+                imm_expr = f"(int64_t) (flags & FE_ADDR32 ? (int32_t) {imm_expr} : {imm_expr})"
+            elif flags.imm_control == 3:
+                imm_expr = f"op_reg_idx(op{flags.imm_idx^3}) << 4"
+            elif flags.imm_control == 4 and imm_size < max_imm_size:
+                code += f"  if (!op_imm_n({imm_expr}, {imm_size})) goto next{i};\n"
+                neednext = True
+            elif flags.imm_control == 6:
+                imm_expr = f"{imm_expr} - (int64_t) buf - {imm_size}"
+                if i != len(variants) - 1: # only Jcc+JMP
+                    code += f"  if (flags & FE_JMPL) goto next{i};\n"
+                    # assume one-byte opcode without escape/prefixes
+                    code += f"  if (!op_imm_n({imm_expr}-1, {imm_size})) goto next{i};\n"
                     neednext = True
-                if flags.imm_control == 2:
-                    code += "  imm_size = flags & FE_ADDR32 ? 4 : 8;\n"
-                    code += "  if (imm_size == 4) imm = (int32_t) imm;\n"
-                if imm_size < max_imm_size and 2 <= flags.imm_control < 6:
-                    code += f"  if (!op_imm_n(imm, imm_size)) goto next{i};\n"
-                    neednext = True
-                if flags.imm_control == 6:
-                    # idx is subtracted below.
-                    code += f"  imm -= (int64_t) buf + imm_size;\n"
-                    if i != len(variants) - 1: # only Jcc+JMP
-                        code += f"  if (flags&FE_JMPL) goto next{i};\n"
-                        # assume one-byte opcode without escape/prefixes
-                        code += f"  if (!op_imm_n(imm-1, imm_size)) goto next{i};\n"
-                        neednext = True
 
             if opcode.modrm[0] == "m" or "USEG" in desc.flags:
                 # segment override without addrsize override shouldn't happen
@@ -1285,16 +1279,17 @@ def encode2_table(entries, args):
                 code += "  if (UNLIKELY(flags & FE_ADDR32)) buf[idx++] = 0x67;\n"
 
             if opcode.vex:
-                code += encode2_gen_vex(variant)
+                code += encode2_gen_vex(variant, imm_size_expr)
             else:
-                code += encode2_gen_legacy(variant, opsize, supports_high_regs)
+                code += encode2_gen_legacy(variant, opsize, supports_high_regs, imm_size_expr)
 
             if flags.imm_control >= 2:
                 if flags.imm_control == 6:
-                    code += f"  imm -= idx;\n"
-                code += f"  if (enc_imm(buf+idx, imm, imm_size)) return 0;\n"
-                code += f"  idx += imm_size;\n"
-            code += f"  return idx;\n"
+                    imm_expr += " - idx"
+                code += f"  if (enc_imm(buf+idx, {imm_expr}, {imm_size_expr})) return 0;\n"
+                code += f"  return idx + {imm_size_expr};\n"
+            else:
+                code += f"  return idx;\n"
 
         if neednext:
             code += f"next{len(variants)-1}: return 0;\n"
