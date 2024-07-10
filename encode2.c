@@ -53,59 +53,64 @@ static int
 enc_mem_common(uint8_t* buf, unsigned bufidx, FeMem op0, uint64_t op1,
                unsigned immsz, unsigned sibidx, unsigned disp8scale) {
     int mod = 0, reg = op1 & 7, rm;
-    int scale = 0, idx = 4, base = 0;
-    bool withsib = false, mod0off = false;
+    unsigned sib = 0x20;
+    bool withsib = false;
     unsigned dispsz = 0;
     int32_t off = op0.off;
 
     if (sibidx < 8) {
-        idx = sibidx;
         int scalabs = op0.scale;
         if (scalabs & (scalabs - 1))
             return 0;
-        scale = (scalabs & 0xA ? 1 : 0) | (scalabs & 0xC ? 2 : 0);
+        unsigned scale = (scalabs & 0xA ? 1 : 0) | (scalabs & 0xC ? 2 : 0);
+        sib = scale << 6 | sibidx << 3;
         withsib = true;
     }
 
-    if (op0.base.idx == op_reg_idx(FE_NOREG)) {
-        rm = 5;
-        mod0off = true;
-        withsib = true;
-    } else if (op0.base.idx == FE_IP.idx) {
+    if (UNLIKELY(op0.base.idx == op_reg_idx(FE_NOREG))) {
+        buf[bufidx] = (reg << 3) | 4;
+        buf[bufidx+1] = sib | 5;
+        enc_imm(buf + bufidx + 2, off, 4);
+        return 6;
+    } else if (UNLIKELY(op0.base.idx == FE_IP.idx)) {
         if (withsib)
             return 0;
-        rm = 5;
-        mod0off = true;
         // Adjust offset, caller doesn't know instruction length.
         off -= bufidx + 5 + immsz;
-    } else {
-        rm = op_reg_idx(op0.base) & 7;
-        if (rm == 5)
-            mod = 1;
+        buf[bufidx] = (reg << 3) | 5;
+        enc_imm(buf + bufidx + 1, off, 4);
+        return 5;
     }
 
-    if (off && !mod0off) {
-        mod = 1;
-        if (!(off & ((1 << disp8scale) - 1)) && op_imm_n(off >> disp8scale, 1))
-            off >>= disp8scale;
-        else
-            mod = 2;
+    rm = op_reg_idx(op0.base) & 7;
+
+    if (off) {
+        if (LIKELY(!disp8scale)) {
+            mod = (int8_t) off == off ? 0x40 : 0x80;
+            dispsz = (int8_t) off == off ? 1 : 4;
+        } else {
+            if (!(off & ((1 << disp8scale) - 1)) && op_imm_n(off >> disp8scale, 1))
+                off >>= disp8scale, mod = 0x40, dispsz = 1;
+            else
+                mod = 0x80, dispsz = 4;
+        }
+    } else if (rm == 5) {
+        dispsz = 1;
+        mod = 0x40;
     }
 
+    // Always write four bytes of displacement. The buffer is always large
+    // enough, and we truncate by returning a smaller "written bytes" count.
     if (withsib || rm == 4) {
-        base = rm;
-        rm = 4;
+        buf[bufidx] = mod | (reg << 3) | 4;
+        buf[bufidx+1] = sib | rm;
+        enc_imm(buf + bufidx + 2, off, 4);
+        return 2 + dispsz;
+    } else {
+        buf[bufidx] = mod | (reg << 3) | rm;
+        enc_imm(buf + bufidx + 1, off, 4);
+        return 1 + dispsz;
     }
-
-    dispsz = mod == 1 ? 1 : (mod == 2 || mod0off) ? 4 : 0;
-    if (bufidx + 1 + (mod != 3 && rm == 4) + dispsz + immsz > 15)
-        return 0;
-
-    buf[bufidx++] = (mod << 6) | (reg << 3) | rm;
-    if (mod != 3 && rm == 4)
-        buf[bufidx++] = (scale << 6) | (idx << 3) | base;
-    enc_imm(buf + bufidx, off, dispsz);
-    return 1 + (mod != 3 && rm == 4) + dispsz;
 }
 
 static int
