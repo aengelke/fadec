@@ -54,7 +54,9 @@ The API consists of two functions to decode and format instructions, as well as 
 
 ## Encoder Usage
 
-### Example
+The encoder has two API variants: "v1" has a single entry point (`fe_enc64`) and the instruction is specified as integer parameter. "v2" has one entry point per instruction. v2 is currently about 3x faster than v1, but also has much larger code size (v1: <10 kiB; v2: ~3 MiB) and takes much longer to compile. It is therefore off by default and can be enabled by passing `-Dwith_encode2=true` to Meson. Both variants are supported.
+
+### Example (API v1)
 
 ```c
 int failed = 0;
@@ -85,7 +87,38 @@ failed |= fe_enc64(&cur, FE_RET);
 // cur now points to the end of the buffer, failed indicates any failures.
 ```
 
-### API
+### Example (API v2)
+
+```c
+uint8_t buf[64];
+uint8_t* cur = buf;
+
+// xor eax, eax
+cur += fe64_XOR32rr(cur, 0, FE_AX, FE_AX);
+// movzx ecx, byte ptr [rdi + 1*rax + 0]
+cur += fe64_MOVZXr32m8(cur, 0, FE_CX, FE_MEM(FE_DI, 1, FE_AX, 0));
+// test ecx, ecx
+cur += fe64_TEST32rr(cur, 0, FE_CX, FE_CX);
+// jnz $
+// This will be replaced later; FE_JMPL enforces use of longest offset
+uint8_t* fwd_jmp = cur;
+cur += fe64_JNZ(cur, FE_JMPL, cur);
+uint8_t* loop_tgt = cur;
+// add rax, rcx
+cur += fe64_ADD64rr(cur, 0, FE_AX, FE_CX);
+// sub ecx, 1
+cur += fe64_SUB32ri(cur, 0, FE_CX, 1);
+// jnz loop_tgt
+cur += fe64_JNZ(cur, 0, loop_tgt);
+// Update previous jump to jump here. Note that we _must_ specify FE_JMPL too.
+fe64_JNZ(fwd_jmp, FE_JMPL, cur);
+// ret
+cur += fe64_RET(cur, 0);
+// cur now points to the end of the buffer
+// errors are ignored, this example should not cause any :-)
+```
+
+### API v1
 
 The API consists of one function to handle encode requests, as well as some macros. More information can be found in [fadec-enc.h](fadec-enc.h). Usage of internals like enum values is not recommended.
 
@@ -104,6 +137,28 @@ The API consists of one function to handle encode requests, as well as some macr
         - For immediate operands (`i`=regular, `a`=absolute address), use the constant: `12`, `-0xbeef`.
         - For memory operands (`m`=regular or `b`=broadcast), use: `FE_MEM(basereg,scale,indexreg,offset)`. Use `0` to specify _no register_. For RIP-relative addressing, the size of the instruction is added automatically.
         - For offset operands (`o`), specify the target address.
+
+### API v2
+
+The API consists of one function per instruction, as well as some macros. The API provides type safety for different register types as well as for memory operands (regular vs. VSIB). Besides a few details listed here, the usage is very similar to API v1. More information can be found in [fadec-enc2.h](fadec-enc2.h). Usage of internals like enum values is not recommended.
+
+- `int fe64_<mnemonic>(uint8_t* buf, int flags, <operands...>)`
+    - Encodes the specified instruction for x86-64 into `buf`. EVEX-encoded instructions will transparently encode with the shorter VEX prefix where permitted.
+    - Return value: `0` on failure, otherwise the instruction length.
+    - `buf`: Pointer to the instruction buffer. The instruction buffer must have at least 15 bytes left. Bytes beyond the returned instruction length can be overwritten.
+    - `flags`: combination of extra flags, default to `0`:
+        - `FE_SEG(segreg)`: override segment to specified segment register.
+        - `FE_ADDR32`: override address size to 32-bit.
+        - `FE_JMPL`: use longest possible offset encoding, useful when jump target is not known.
+        - `FE_RC_RN/RD/RU/RZ`: set rounding mode for instructions with static rounding control (suffixed `_er`).
+    - `FeRegMASK opmask` (instructions with opmask only): specify non-zero mask register (1--7) for instructions suffixed with `_mask`/`_maskz` and AVX-512 gather/scatter.
+    - `operands...`: up to four instruction operands.
+        - Registers have types `FeRegGP`/`FeRegXMM`/`FeRegMASK`/etc.; byte registers accepting high-byte operands also accept `FeRegGPH`.
+        - Immediate operands have an appropriately sized integer type.
+        - Memory operands use a `FeMem` (VSIB: `FeMemV`) structure, use the macro `FE_MEM(basereg,scale,indexreg,offset)` (VSIB: `FE_MEMV(...)`). Use `FE_NOREG` to specify _no register_. For RIP-relative addressing, the size of the instruction is added automatically.
+        - For offset operands (`o`), specify the target address relative to `buf`.
+- `int fe64_NOP(uint8_t* buf, unsigned size)`
+    - Encode a series of `nop`s of `size` bytes, but at least emit one byte. This will use larger the `nop` encodings to reduce the number of instructions and is intended for filling padding.
 
 ## Known issues
 - Decoder/Encoder: register uniqueness constraints are not enforced. This affects:
