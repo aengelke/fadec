@@ -1,10 +1,112 @@
-# Opcode              ENC  OP1 OP2 OP3 OP4 MNEM       COND SZ? MISC FLAGS
-#                                                     LOCK SZ8 = op size 1
-#                                                      I64 D64 = default 64
-#                                                      O64 F64 = force 64 (Intel)
-#                                                     VSIB U66 = respect 66 prefix
-#                                                          I66 = ignore 66 prefix
-# ------------------- ---- --- --- --- --- -------    ---- --- ----------
+# Fadec Instruction Description Table
+#
+# This file table contains all supported instructions. The format is custom,
+# this parsed and processed into decode tables/encoders in parseinstrs.py.
+#
+#
+# The opcode is used to determine the instruction row when decoding from
+# instruction bytes. There are multiple components up to the opcode byte:
+#
+#   (VEX\.|EVEX\.)? -> VEX/EVEX prefix; or legacy if absent
+#   ((NP|66|F2|F3|NFx)\.)? -> optional mandatory prefix
+#   (W[01]\.)? -> W0/W1, ignored if absent
+#   (L(0|1|12|IG)\.)? -> VEX.L/EVEX.L'L constraint, must not occur for legacy
+#       opcodes; not really used for distinguishing instructions/encodings
+#       (exceptions: VZEROUPPER/VZEROALL and VMOVDDUP)
+#   (|0f|0f38|0f3a|M[56]\.) -> legacy escape; or VEX/EVEX opcode map
+#   [0-9a-f]{2} -> actual opcode byte
+#
+# After the opcode byte, at most one of the following specifiers can follow:
+#
+#   /[rm] -> ModRM.mod specifier (register or memory operand only)
+#   /[0-7] -> ModRM.reg specifier (used as opcode extension)
+#   /[0-7][rm] -> ModRM.mod and ModRM.reg specifier
+#   /[rm][0-7] -> ModRM.mod and ModRM.r/m specifier (AMX only)
+#   [c-f][0-9a-f] -> complete ModRM specifier, whole byte used as opcode ext.
+#   + -> for O-encoded instructions, the last three bits are an operand
+#
+# A legacy opcode may be prefixed with "*", making it a weak opcode which can be
+# overwritten by later opcode definitions. This is used for reserved nops,
+# reserved prefetch, BSF/BSR (overwritten by TZCNT/LZCNT), and WBINVD
+# (overwritten by WBNOINVD).
+#
+# The encoding description follows the naming found in older (pre-AVX-512) Intel
+# SDMs. It maps encoding fields to operand indices and specifies the immediate
+# encoding. The gist is: M=ModRM.r/m; R=ModRM.reg; V=VEX.vvvv; A=EAX/XMM0; C=CL;
+# I=imm; O=opcode bits 5:7; S=opcode bits 2:4; FD/TD=absolute address; D=jump
+# destination. RVMR is an exception, the register is encoded in imm8[7:4].
+# MOV_CR/MOV_DR are another exception, they ignore ModRM.mod and always encode a
+# register operand.
+#
+# For operands, the first letter specified the operand kind. Naming is mostly
+# consistent with Intel's SDM, except for F (Intel: eflags; here: FPU).
+#
+#                   GP  MMX XMM MSK TMM FPU CR  DR  SEG
+#   ModRM.r/m (reg) R   N   U   K   T   F   -   -   -
+#   ModRM.r/m (r/m) E   Q   W   K   T   -   -   -   -
+#   ModRM.reg       G   P   V   K   T   F   C   D   S
+#   VEX.vvvv        B   -   H   K   T   -   -   -   -
+#   imm8[7:4]       -   -   L   -   -   -   -   -   -
+#
+#   M=memory only; O=direct address
+#   I=immediate; A=address/far jmp; J=rip-relative address/jmp
+#
+# The remaining one or two letters specify the operand size:
+#
+# - Fixed sizes: b=1; w=2, d/ss=4; q/sd=8; dq=16; qq=32; oq=64
+# - GP operand sizes: v=2/4/8 (66/REX.W); y=4/8 (66 ignored)
+# - Vector sizes: x/ps/pd=16/32/64 (EVEX.L'L); h=half x, f=fourth x; e=eighth x
+# - Other immediate sizes: z=v with max. 4 bytes; bs=v (sign-extended byte);
+#   zd=z (but always four byte imm); zq=z (but always eight byte imm)
+# - Special operand size: a=z:z (BOUND only); p=w:z (far pointer)
+# - If not letter is specified, the operand size is decoded as zero. The size
+#   is implicitly part of the operand and can be reconstructed by the user.
+#
+# The instruction mnemonic is generally specified as decoded/formatted (there
+# are a few exceptions, see parseinstrs.py decode_table and encode_mnems).
+#
+# After the mnemonic, flags can be specified. Some common flags have a short
+# form immediately after the mnemonic (e.g., EVX_ADDSD+kr), others do not.
+#
+# - I64: invalid in 64-bit mode
+# - O64: only valid in 64-bit mode
+# - +w (INSTR_WIDTH): store operand size as instruction attribute; used for
+#   instructions that depend on the operand size but have no explicit operands.
+# - +a (U67): respects addr-size override even without memory operand.
+# - +s (USEG): respects segment override even without memory operand.
+# - +k (MASK): supports EVEX masking.
+# - +e (SAE): supports EVEX suppress all exceptions.
+# - +r (ER): supports EVEX embedded rounding control.
+# - +b (BCST): supports EVEX embedded broadcast. Broadcast size depends on REX.W
+#   (REX.W=0 => 32 bits; REX.W=1 => 64 bits).
+# - BCST16: set EVEX embedded broadcast size to 16 bits.
+# - SZ8: has effective operand size of 8 bits (encode only).
+# - U66: uses 66 prefix as operand size override even with a mandatory prefix.
+# - I66: ignores 66 prefix as operand size override.
+# - LOCK: supports LOCK prefix when the first operand is memory.
+# - D64: defaults to 64-bit operand size in 64-bit mode (REX.W ignored).
+# - F64: forced to 64-bit operand size in 64-bit mode (66/REX.W ignored).
+#   NB: this is Intel-specific. On AMD, F64 behaves like D64.
+# - VSIB: memory operand uses VSIB encoding (SIB required, idx is vector).
+# - ENC_SEPSZ: attach size suffixes to each operand (encode only).
+# - ENC_NOSZ: do not attach size suffix (encode only).
+# - ENC_REP: supports REP prefix.
+# - ENC_REPCC: supports REPZ/REPNZ prefix.
+# - UNDOC: undocumented, ignored by default.
+# - TUPLE_*: AVX-512 tuple size. Only used to verify operand sizes.
+# - CPL0: only valid if CPL=0 (system mode). Annotation only.
+# - F=<feature flags>: feature flags. Annotation only.
+# - EFL=<flags>: status flags use/modifications. Order: OF/DF/IF/SF/ZF/AF/PF/CF.
+#   t=test; m=modify; 0=clear; 1=set; M=test-and-modify; u=undefined
+#
+#
+# Opcode               ENC  OP1 OP2 OP3 OP4 MNEM       COND SZ? MISC FLAGS
+#                                                      LOCK SZ8
+#                                                       I64 D64
+#                                                       O64 F64
+#                                                      VSIB U66
+#                                                           I66
+# -------------------  ---- --- --- --- --- -------    ---- --- ----------
 00                     MR   Eb  Gb  -   -   ADD        LOCK SZ8 EFL=m--mmmmm
 01                     MR   Ev  Gv  -   -   ADD        LOCK     EFL=m--mmmmm
 02                     RM   Gb  Eb  -   -   ADD             SZ8 EFL=m--mmmmm
