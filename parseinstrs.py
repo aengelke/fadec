@@ -1091,7 +1091,7 @@ def encode2_gen_legacy(variant: EncodeVariant, opsize: int, supports_high_regs: 
         code += "  buf[idx++] = 0x66;\n"
     if opcode.prefix in ("F2", "F3"):
         code += f"  buf[idx++] = 0x{opcode.prefix};\n"
-    if opcode.rexw:
+    if opcode.rexw == "1":
         code += f"  buf[idx++] = rex;\n"
     elif rex_expr != "0":
         code += f"  if (rex) buf[idx++] = rex;\n"
