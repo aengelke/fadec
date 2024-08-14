@@ -3921,6 +3921,19 @@ main(int argc, char** argv)
     TEST("\xc4\xe3\xe9\xcf\xc1\x01", "vgf2p8affineinvqb xmm0, xmm2, xmm1, 0x1");
     TEST("\xc4\xe3\xed\xcf\xc1\x01", "vgf2p8affineinvqb ymm0, ymm2, ymm1, 0x1");
 
+    // AMD RDPRU
+    TEST64("\x0f\x01\xfd", "rdpru");
+    TEST64("\x66\x0f\x01\xfd", "rdpru"); // 66 prefix ignored
+
+    // AMD SNP
+    TEST64("\xf3\x0f\x01\xfd", "rmpquery");
+    TEST64("\xf2\x0f\x01\xfd", "rmpread");
+    TEST64("\xf3\x0f\x01\xfe", "rmpadjust");
+    TEST64("\xf2\x0f\x01\xfe", "rmpupdate");
+    TEST64("\xf3\x0f\x01\xff", "psmash");
+    TEST64("\xf2\x0f\x01\xff", "pvalidate");
+
+
     puts(failed ? "Some tests FAILED" : "All tests PASSED");
     return failed ? EXIT_FAILURE : EXIT_SUCCESS;
 }

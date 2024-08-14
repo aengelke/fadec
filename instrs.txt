@@ -1596,7 +1596,8 @@ F3.0fc7/6m             M    Mq  -   -   -   VMXON               F=VMX EFL=0--0m0
 0f01fc                 A    Rv  -   -   -   CLZERO              F=CLZERO ONLYAMD
 
 # AMD RDPRU
-0f01fd                 NP   -   -   -   -   RDPRU               F=RDPRU ONLYAMD
+# Tested on hardware, 66 prefix also accepted. F2/F3 trigger UD.
+NFx.0f01fd             NP   -   -   -   -   RDPRU               F=RDPRU ONLYAMD
 
 # AMD SVM
 0f01d8                 NP   -   -   -   -   VMRUN               F=SVM ONLYAMD CPL0
@@ -1607,7 +1608,7 @@ F2.0f01d9              NP   -   -   -   -   VMGEXIT             F=SEVES ONLYAMD
 0f01db                 NP   -   -   -   -   VMSAVE              F=SVM ONLYAMD CPL0
 0f01dc                 NP   -   -   -   -   STGI                F=SKINIT ONLYAMD CPL0
 0f01dd                 NP   -   -   -   -   CLGI                F=SKINIT ONLYAMD CPL0
-0f01de                 NP   -   -   -   -   SKINIT              F=SKINIT ONLYAMD CPL0
+0f01de                 NP   -   -   -   -   SKINIT              EFL=00000000 F=SKINIT ONLYAMD CPL0
 0f01df                 NP   -   -   -   -   INVLPGA             F=SVM ONLYAMD CPL0
 NP.0f01fa              NP   -   -   -   -   MONITORX            F=MONITORX ONLYAMD
 F3.0f01fa              NP   -   -   -   -   MCOMMIT             F=MCOMMIT ONLYAMD
@@ -1616,10 +1617,12 @@ NP.0f01fe              NP   -   -   -   -   INVLPGB             F=INVLPGB ONLYAM
 NP.0f01ff              NP   -   -   -   -   TLBSYNC             F=INVLPGB ONLYAMD CPL0
 
 # AMD SNP
-F3.0f01fe              NP   -   -   -   -   RMPADJUST   O64     F=SNP ONLYAMD CPL0
-F2.0f01fe              NP   -   -   -   -   RMPUPDATE   O64     F=SNP ONLYAMD CPL0
-F3.0f01ff              NP   -   -   -   -   PSMASH      O64     F=SNP ONLYAMD
-F2.0f01ff              NP   -   -   -   -   PVALIDATE   O64     F=SNP ONLYAMD
+F3.0f01fd              NP   -   -   -   -   RMPQUERY    O64     EFL=m--mmmm- F=RMPQUERY ONLYAMD CPL0
+F2.0f01fd              NP   -   -   -   -   RMPREAD     O64     EFL=m--mmmm- F=RMPREAD ONLYAMD CPL0
+F3.0f01fe              NP   -   -   -   -   RMPADJUST   O64     EFL=m--mmmm- F=SNP ONLYAMD CPL0
+F2.0f01fe              NP   -   -   -   -   RMPUPDATE   O64     EFL=m--mmmm- F=SNP ONLYAMD CPL0
+F3.0f01ff              NP   -   -   -   -   PSMASH      O64     EFL=m--mmmm- F=SNP ONLYAMD
+F2.0f01ff              NP   -   -   -   -   PVALIDATE   O64     EFL=m--mmmmm F=SNP ONLYAMD
 
 # WAITPKG
 66.0fae/6r             M    Rd  -   -   -   TPAUSE              F=WAITPKG EFL=0--0000m
