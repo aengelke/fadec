@@ -526,7 +526,7 @@ direct:
                 if (op_byte & 0x40) {
                     if (UNLIKELY((off += 1) > len))
                         return FD_ERR_PARTIAL;
-                    instr->disp = (int8_t) LOAD_LE_1(dispbase) << dispscale;
+                    instr->disp = (int8_t) ((uint8_t) ((int8_t) LOAD_LE_1(dispbase)) << dispscale);
                 } else if (op_byte & 0x80 || (op_byte & 0xc7) == 0x06) {
                     if (UNLIKELY((off += 2) > len))
                         return FD_ERR_PARTIAL;
@@ -578,7 +578,7 @@ direct:
             if (op_byte & 0x40) {
                 if (UNLIKELY((off += 1) > len))
                     return FD_ERR_PARTIAL;
-                instr->disp = (int8_t) LOAD_LE_1(dispbase) << dispscale;
+                instr->disp = (int8_t) ((uint8_t) ((int8_t) LOAD_LE_1(dispbase)) << dispscale);
             } else if (op_byte & 0x80 || (op_byte < 0x40 && base == 5)) {
                 if (UNLIKELY((off += 4) > len))
                     return FD_ERR_PARTIAL;
