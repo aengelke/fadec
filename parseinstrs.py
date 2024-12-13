@@ -805,7 +805,7 @@ def encode_mnems(entries):
                 optypes_base.append(reg)
             else:
                 optypes_base.append(" iariioo"[ENCODINGS[desc.encoding].imm_control])
-        optypes = {"".join(x) for x in product(*optypes_base)}
+        optypes = ["".join(x) for x in product(*optypes_base)]
 
         prefixes = [("", "")]
         if "LOCK" in desc.flags:
