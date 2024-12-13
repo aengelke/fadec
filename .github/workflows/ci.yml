@@ -15,6 +15,18 @@ jobs:
       run: ninja -v -C build
     - name: Test
       run: meson test -v -C build
+  build-linux-cmake:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - name: Install dependencies
+      run: sudo apt install -y ninja-build cmake
+    - name: Configure
+      run: CC=clang CXX=clang++ cmake -B build -G Ninja -DFADEC_ENCODE2=ON
+    - name: Build
+      run: cmake --build build -v
+    - name: Test
+      run: ctest --test-dir build -V
   build-windows:
     runs-on: windows-latest
     steps:
@@ -27,3 +39,13 @@ jobs:
       run: meson compile -v -C build
     - name: Test
       run: meson test -v -C build
+  build-windows-cmake:
+    runs-on: windows-latest
+    steps:
+    - uses: actions/checkout@v4
+    - name: Configure
+      run: cmake -B build -DFADEC_ENCODE2=ON
+    - name: Build
+      run: cmake --build build -v
+    - name: Test
+      run: ctest --test-dir build -V -C Debug
