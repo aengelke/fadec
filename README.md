@@ -15,7 +15,7 @@ Fadec-Enc (or Faenc) is a small, lightweight and easy-to-use encoder, currently 
 - **Zero dependencies:** the entire library has no dependencies, even on the standard library, making it suitable for freestanding environments without a full libc or `malloc`-style memory allocation.
 - **Correctness:** even corner cases should be handled correctly (if not, that's a bug), e.g., the order of prefixes, immediate sizes of jump instructions, the presence of the `lock` prefix, or properly handling VEX.W in 32-bit mode.
 
-All components of this library target the Intel 64 implementations of x86. While AMD64 is _mostly similar_, there are some minor differences (e.g. operand sizes for jump instructions, more instructions, `cr8` can be accessed with `lock` prefix) which are currently not handled.
+All components of this library target the Intel 64 implementations of x86. While AMD64 is _mostly similar_, there are some minor differences (e.g. operand sizes for jump instructions, more instructions, `cr8` can be accessed with `lock` prefix, `f34190` is `xchg`, not `pause`) which are currently not handled.
 
 ## Decoder Usage
 

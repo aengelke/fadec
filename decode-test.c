@@ -99,11 +99,35 @@ main(int argc, char** argv)
     TEST("\xf3\x66\x0f\x10\xc1", "movss xmm0, xmm1");
     TEST("\xf3\xf2\x66\x0f\x10\xc1", "movsd xmm0, xmm1");
     TEST("\xf2\x66\xf3\x66\x0f\x10\xc1", "movss xmm0, xmm1");
-    TEST64("\x48\x90", "nop");
-    TEST64("\x49\x90", "xchg r8, rax");
+
     TEST64("\x48\x91", "xchg rcx, rax");
     TEST64("\x48\x26\x91", "xchg ecx, eax");
-    TEST64("\x66\x90", "nop");
+    TEST("\x90", "nop");
+    TEST("\xf2\x90", "nop");
+    TEST("\x66\x90", "nop"); // NB: could be xchg ax, ax
+    TEST("\x66\xf2\x90", "nop"); // NB: could be xchg ax, ax
+    TEST64("\x41\x90", "xchg r8d, eax");
+    TEST64("\xf2\x41\x90", "xchg r8d, eax");
+    TEST64("\x66\x41\x90", "xchg r8w, ax");
+    TEST64("\x66\xf2\x41\x90", "xchg r8w, ax");
+    TEST64("\x48\x90", "nop"); // NB: could be xchg rax, rax
+    TEST64("\xf2\x48\x90", "nop"); // NB: could be xchg rax, rax
+    TEST64("\x66\x48\x90", "nop"); // NB: could be xchg rax, rax
+    TEST64("\x66\xf2\x48\x90", "nop"); // NB: could be xchg rax, rax
+    TEST64("\x49\x90", "xchg r8, rax");
+    TEST64("\xf2\x49\x90", "xchg r8, rax");
+    TEST64("\x66\x49\x90", "xchg r8, rax");
+    TEST64("\x66\xf2\x49\x90", "xchg r8, rax");
+    TEST("\xf3\x90", "pause");
+    TEST("\x66\xf3\x90", "pause");
+    TEST64("\xf3\x41\x90", "pause"); // NB: xchg for AMD
+    TEST64("\x66\xf3\x41\x90", "pause"); // NB: xchg for AMD
+    TEST64("\xf3\x48\x90", "pause");
+    TEST64("\x66\xf3\x48\x90", "pause");
+    TEST64("\xf3\x49\x90", "pause"); // NB: xchg for AMD
+    TEST64("\x66\xf3\x49\x90", "pause"); // NB: xchg for AMD
+    TEST("\xf3\x91", "xchg ecx, eax");
+
     TEST32("\x0f\xc7\x0f", "cmpxchg8b qword ptr [edi]");
     TEST64("\x0f\xc7\x0f", "cmpxchg8b qword ptr [rdi]");
     TEST32("\x66\x0f\xc7\x0f", "cmpxchg8b qword ptr [edi]"); // 66h is ignored

@@ -757,10 +757,15 @@ skip_modrm:
 
         if (instr->type == FDI_XCHG_NOP) {
             // Only 4890, 90, and 6690 are true NOPs.
-            if (instr->operands[0].reg == 0 && instr->operands[1].reg == 0) {
+            if (instr->operands[0].reg == 0) {
                 instr->operands[0].type = FD_OT_NONE;
                 instr->operands[1].type = FD_OT_NONE;
-                instr->type = FDI_NOP;
+                instr->type = FD_HAS_REP(instr) ? FDI_PAUSE : FDI_NOP;
+            } else if ((instr->operands[0].reg & 7) == 0 && FD_HAS_REP(instr)) {
+                // On Intel, REX.B is ignored for F3.90.
+                instr->operands[0].type = FD_OT_NONE;
+                instr->operands[1].type = FD_OT_NONE;
+                instr->type = FDI_PAUSE;
             } else {
                 instr->type = FDI_XCHG;
             }

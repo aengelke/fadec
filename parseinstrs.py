@@ -673,7 +673,8 @@ def decode_table(entries, args):
             for rex in range(0x40, 0x50):
                 trie.add_prefix(rex, 0xfffe, i)
 
-    mnems, descs, desc_map = set(), [], {}
+    # pause is hardcoded together with XCHG_NOP.
+    mnems, descs, desc_map = {"PAUSE"}, [], {}
     descs.append("{0}") # desc index zero is "invalid"
     for weak, opcode, desc in entries:
         ign66 = opcode.prefix in ("NP", "66", "F2", "F3")
@@ -756,6 +757,9 @@ class EncodeVariant(NamedTuple):
 def encode_mnems(entries):
     # mapping from (mnem, opsize, ots) -> (opcode, desc)
     mnemonics = defaultdict(list)
+    # Cannot have PAUSE in instrs.txt, because opcodes in without escape must
+    # not have mandatory prefixes. For decode, this is hardcoded.
+    mnemonics["PAUSE", 0, ""] = [EncodeVariant(Opcode.parse("F3.90"), InstrDesc.parse("NP - - - - NOP"))]
     for weak, opcode, desc in entries:
         if "I64" in desc.flags or desc.mnemonic[:9] == "RESERVED_":
             continue
