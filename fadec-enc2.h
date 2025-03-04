@@ -140,21 +140,21 @@ typedef struct FeRegDR { unsigned char idx; } FeRegDR;
 #define FE_DR(idx) (FE_STRUCT(FeRegDR) { idx })
 
 // Internal only
-typedef struct FeRegGPLH { unsigned char idx; } FeRegGPLH;
-#define FE_GPLH(idx) (FE_STRUCT(FeRegGPLH) { idx })
-// Disambiguate GP and GPH -- C++ uses overloading; C uses _Generic.
+// Disambiguate GP and GPH -- C++ uses conversion constructors; C uses _Generic.
 #ifdef __cplusplus
 }
 namespace {
-    static constexpr inline FeRegGPLH FE_MAKE_GPLH(FeRegGP reg) {
-        return FE_GPLH(reg.idx);
-    }
-    static constexpr inline FeRegGPLH FE_MAKE_GPLH(FeRegGPH reg) {
-        return FE_GPLH(static_cast<unsigned char>(reg.idx + 0x20));
-    }
+    struct FeRegGPLH {
+        unsigned char idx;
+        FeRegGPLH(FeRegGP gp) : idx(gp.idx) {}
+        FeRegGPLH(FeRegGPH gp) : idx(gp.idx | 0x20) {}
+    };
 }
 extern "C" {
+#define FE_MAKE_GPLH(reg) reg
 #else
+typedef struct FeRegGPLH { unsigned char idx; } FeRegGPLH;
+#define FE_GPLH(idx) (FE_STRUCT(FeRegGPLH) { idx })
 #define FE_MAKE_GPLH(reg) FE_GPLH(_Generic((reg), FeRegGPH: 0x20, FeRegGP: 0) | (reg).idx)
 #endif
 

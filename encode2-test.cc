@@ -35,6 +35,13 @@ check(const Buffer& buf, const char* exp, size_t exp_len, unsigned res, const ch
         } while (0)
 #define TEST(exp, ...) TEST1(#__VA_ARGS__, exp, __VA_ARGS__)
 
+#define TEST_CPP1(str, exp, expr) do { \
+            buf.fill(0); \
+            unsigned res = (expr); \
+            failed |= check(buf, exp, sizeof(exp) - 1, res, str); \
+        } while (0)
+#define TEST_CPP(exp, ...) TEST_CPP1(#__VA_ARGS__, exp, __VA_ARGS__)
+
 int main() {
     int failed = 0;
     Buffer buf{};
@@ -45,6 +52,12 @@ int main() {
 #define FE_PTR(off) (const void*) ((uintptr_t) buf.data() + (off))
 #define FLAGMASK(flags, mask) flags, mask
 #include "encode-test.inc"
+
+    // Test implicit conversion of parameters also on the actual functions
+    TEST_CPP("\x0f\x90\xc0", fe64_SETO8r(buf.data(), 0, FE_AX));
+    TEST_CPP("\x0f\x90\xc0", (fe64_SETO8r)(buf.data(), 0, FE_AX));
+    TEST_CPP("\x0f\x90\xc4", fe64_SETO8r(buf.data(), 0, FE_AH));
+    TEST_CPP("\x0f\x90\xc4", (fe64_SETO8r)(buf.data(), 0, FE_AH));
 
     std::puts(failed ? "Some tests FAILED" : "All tests PASSED");
     return failed ? EXIT_FAILURE : EXIT_SUCCESS;

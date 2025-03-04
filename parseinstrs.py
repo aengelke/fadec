@@ -1225,7 +1225,7 @@ def encode2_table(entries, args):
         OPKIND_LUT = {"FPU": "ST", "SEG": "SREG", "MMX": "MM"}
         reg_tys = [OPKIND_LUT.get(opkind, opkind) for opkind in opkinds]
 
-        fnname = f"fe64_{mnem}{'_impl' if supports_high_regs else ''}"
+        fnname = f"fe64_{mnem}"
         op_tys = [{
             "i": f"int{max_imm_size*8 if max_imm_size != 3 else 32}_t",
             "a": "uintptr_t",
@@ -1237,7 +1237,7 @@ def encode2_table(entries, args):
         }[ot] for i, (ot, reg_ty) in enumerate(zip(ots, reg_tys))]
         fn_opargs = ", FeRegMASK opmask" if evexmask else ""
         fn_opargs += "".join(f", {ty} op{i}" for i, ty in enumerate(op_tys))
-        fn_sig = f"unsigned {fnname}(uint8_t* buf, int flags{fn_opargs})"
+        fn_sig = f"unsigned ({fnname})(uint8_t* buf, int flags{fn_opargs})"
         enc_decls += f"{fn_sig};\n"
         if supports_high_regs:
             enc_decls += f"#define fe64_{mnem}(buf, flags"
