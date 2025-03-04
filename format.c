@@ -21,6 +21,15 @@
 #define DECLARE_RESTRICTED_ARRAY_SIZE(n) n
 #endif
 
+#if defined(__has_attribute)
+#if __has_attribute(fallthrough)
+#define FALLTHROUGH() __attribute__((fallthrough))
+#endif
+#endif
+#if !defined(FALLTHROUGH)
+#define FALLTHROUGH() ((void)0)
+#endif
+
 struct FdStr {
     const char* s;
     unsigned sz;
@@ -218,7 +227,7 @@ fd_mnemonic(char buf[DECLARE_RESTRICTED_ARRAY_SIZE(48)], const FdInstr* instr) {
     case FDI_PUSH:
         if (FD_OP_SIZELG(instr, 0) == 1 && FD_OP_TYPE(instr, 0) == FD_OT_IMM)
             sizesuffix[0] = 'w', sizesuffixlen = 1;
-        // FALLTHROUGH
+        FALLTHROUGH();
     case FDI_POP:
         if (FD_OP_SIZELG(instr, 0) == 1 && FD_OP_TYPE(instr, 0) == FD_OT_REG &&
             FD_OP_REG_TYPE(instr, 0) == FD_RT_SEG)
@@ -270,7 +279,7 @@ fd_mnemonic(char buf[DECLARE_RESTRICTED_ARRAY_SIZE(48)], const FdInstr* instr) {
     case FDI_CMPS:
     case FDI_OUTS:
         prefix_segment = true;
-        // FALLTHROUGH
+        FALLTHROUGH();
     case FDI_STOS:
     case FDI_SCAS:
     case FDI_INS:
@@ -282,7 +291,7 @@ fd_mnemonic(char buf[DECLARE_RESTRICTED_ARRAY_SIZE(48)], const FdInstr* instr) {
             buf = fd_strpcat(buf, fd_stre("addr32 "));
         if (!FD_IS64(instr) && FD_ADDRSIZELG(instr) == 1)
             buf = fd_strpcat(buf, fd_stre("addr16 "));
-        // FALLTHROUGH
+        FALLTHROUGH();
     case FDI_PUSHA:
     case FDI_POPA:
     case FDI_PUSHF:
