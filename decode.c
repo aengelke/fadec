@@ -53,11 +53,11 @@ table_walk(unsigned table_entry, unsigned entry_idx) {
     return table_lookup(table_entry & ~0x3, entry_idx);
 }
 
-#define LOAD_LE_1(buf) ((uint64_t) *(uint8_t*) (buf))
-#define LOAD_LE_2(buf) (LOAD_LE_1(buf) | LOAD_LE_1((uint8_t*) (buf) + 1)<<8)
-#define LOAD_LE_3(buf) (LOAD_LE_2(buf) | LOAD_LE_1((uint8_t*) (buf) + 2)<<16)
-#define LOAD_LE_4(buf) (LOAD_LE_2(buf) | LOAD_LE_2((uint8_t*) (buf) + 2)<<16)
-#define LOAD_LE_8(buf) (LOAD_LE_4(buf) | LOAD_LE_4((uint8_t*) (buf) + 4)<<32)
+#define LOAD_LE_1(buf) ((uint64_t) *(const uint8_t*) (buf))
+#define LOAD_LE_2(buf) (LOAD_LE_1(buf) | LOAD_LE_1((const uint8_t*) (buf) + 1)<<8)
+#define LOAD_LE_3(buf) (LOAD_LE_2(buf) | LOAD_LE_1((const uint8_t*) (buf) + 2)<<16)
+#define LOAD_LE_4(buf) (LOAD_LE_2(buf) | LOAD_LE_2((const uint8_t*) (buf) + 2)<<16)
+#define LOAD_LE_8(buf) (LOAD_LE_4(buf) | LOAD_LE_4((const uint8_t*) (buf) + 4)<<32)
 
 enum
 {
