@@ -1046,11 +1046,16 @@ def encode_table(entries, args):
                 # Must be an arbitrary non-zero value, replaced by address size
                 # for imm_ctl=2 and zero for imm_ctl=1 (constant 1).
                 opc_i |= 1 << 47
-            opc_i |= ["NP", "M", "R",
-                "M1", "MI", "MC", "MR", "RM", "RMA", "MRI", "RMI", "MRC",
-                "AM", "MA", "I", "IA", "O", "OI", "OA", "S", "A", "D", "FD", "TD",
-                "RVM", "RVMI", "RVMR", "RMV", "VM", "VMI", "MVR", "MRV",
-            ].index(desc.encoding) << 51
+
+            enc_encoding = desc.encoding
+            if desc.encoding != "I" and desc.encoding.endswith("I"):
+                enc_encoding = desc.encoding[:-1]
+            elif desc.encoding == "IA":
+                enc_encoding = "A"
+            opc_i |= ["NP", "M", "R", "M1", "MC", "MR", "RM", "RMA", "MRC",
+                "AM", "MA", "I", "O", "OA", "S", "A", "D", "FD", "TD",
+                "RVM", "RVMR", "RMV", "VM", "MVR", "MRV",
+            ].index(enc_encoding) << 51
             opc_i |= alt << 56
             enc_opcs.append(opc_i)
         mnem_map[f"FE_{mnem}"] = enc_opcs[0]
