@@ -1276,9 +1276,25 @@ main(int argc, char** argv)
     // TODO: MOVDIR64B first operand has address size.
     // TEST32("\x67\x66\x0f\x38\xf8\x01", "movdir64b ax, zmmword ptr [cx]");
     // TEST64("\x67\x66\x0f\x38\xf8\x01", "movdir64b eax, zmmword ptr [ecx]");
+    TEST("\x0f\x30", "wrmsr");
+    TEST("\x0f\x32", "rdmsr");
     TEST("\x0f\x01\xc6", "wrmsrns");
+    TEST32("\xf2\x0f\x01\xc6", "UD");
     TEST64("\xf2\x0f\x01\xc6", "rdmsrlist");
+    TEST32("\xf3\x0f\x01\xc6", "UD");
     TEST64("\xf3\x0f\x01\xc6", "wrmsrlist");
+    TEST32("\xc4\xe7\x7b\xf6\xc1\x10\x20\x30\x40", "UD");
+    TEST64("\xc4\xe7\x7b\xf6\xc1\x10\x20\x30\x40", "rdmsr rcx, 0x40302010");
+    TEST32("\xc4\xe7\x7a\xf6\xc1\x10\x20\x30\x40", "UD");
+    TEST64("\xc4\xe7\x7a\xf6\xc1\x10\x20\x30\x40", "wrmsrns 0x40302010, rcx");
+    TEST32("\xf2\x0f\x38\xf8\xc1", "UD");
+    TEST64("\xf2\x0f\x38\xf8\xc1", "urdmsr rcx, rax");
+    TEST32("\xf3\x0f\x38\xf8\xc1", "UD");
+    TEST64("\xf3\x0f\x38\xf8\xc1", "uwrmsr rcx, rax");
+    TEST32("\xc4\xe7\x7b\xf8\xc1\x10\x20\x30\x40", "UD");
+    TEST64("\xc4\xe7\x7b\xf8\xc1\x10\x20\x30\x40", "urdmsr rcx, 0x40302010");
+    TEST32("\xc4\xe7\x7a\xf8\xc1\x10\x20\x30\x40", "UD");
+    TEST64("\xc4\xe7\x7a\xf8\xc1\x10\x20\x30\x40", "uwrmsr 0x40302010, rcx");
 
     TEST("\x0f\x38\xfc\xc1", "UD"); // Must be memory operand
     TEST32("\x0f\x38\xfc\x01", "aadd dword ptr [ecx], eax");

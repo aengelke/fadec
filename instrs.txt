@@ -1799,6 +1799,16 @@ VEX.F2.W0.L0.0f385e/r  RMV  T   T   T   -   TDPBSSD     O64     F=AMX-INT8
 VEX.NP.W0.L0.0f386c/r  RMV  T   T   T   -   TCMMRLFP16PS O64    F=AMX-COMPLEX
 VEX.66.W0.L0.0f386c/r  RMV  T   T   T   -   TCMMIMFP16PS O64    F=AMX-COMPLEX
 
+# MSR_IMM
+VEX.F2.W0.L0.M7.f6/0r  MI   Rq  Id  -   -   RDMSR       O64     F=MSR_IMM CPL0
+VEX.F3.W0.L0.M7.f6/0r  IM   Id  Rq  -   -   WRMSRNS     O64     F=MSR_IMM CPL0
+
+# USER_MSR
+F2.0f38f8/r            MR   Rq  Gq  -   -   URDMSR      O64     F=USER_MSR
+F3.0f38f8/r            MR   Rq  Gq  -   -   UWRMSR      O64     F=USER_MSR
+VEX.F2.W0.L0.M7.f8/0r  MI   Rq  Id  -   -   URDMSR      O64     F=USER_MSR
+VEX.F3.W0.L0.M7.f8/0r  IM   Id  Rq  -   -   UWRMSR      O64     F=USER_MSR
+
 # AVX512
 EVEX.NP.W0.0f58        RVM  Vps Hps Wps -   EVX_ADDPS+kbr       F=AVX512F TUPLE_FULL_32
 EVEX.66.W1.0f58        RVM  Vpd Hpd Wpd -   EVX_ADDPD+kbr       F=AVX512F TUPLE_FULL_64

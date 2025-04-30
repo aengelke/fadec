@@ -55,6 +55,7 @@ ENCODINGS = {
     "R": InstrFlags(modrm=1, modreg_idx=0^3), # AMX TILEZERO
     "M1": InstrFlags(modrm=1, modrm_idx=0^3, imm_idx=1^3, imm_control=1),
     "MI": InstrFlags(modrm=1, modrm_idx=0^3, imm_idx=1^3, imm_control=4),
+    "IM": InstrFlags(modrm=1, modrm_idx=1^3, imm_idx=0^3, imm_control=4),
     "MC": InstrFlags(modrm=1, modrm_idx=0^3, vexreg_idx=1^3, zeroreg_val=1),
     "MR": InstrFlags(modrm=1, modrm_idx=0^3, modreg_idx=1^3),
     "RM": InstrFlags(modrm=1, modrm_idx=1^3, modreg_idx=0^3),
@@ -327,7 +328,7 @@ class EntryKind(Enum):
 opcode_regex = re.compile(
      r"^(?:(?P<prefixes>(?P<vex>E?VEX\.)?(?P<legacy>NP|66|F2|F3|NFx)\." +
                      r"(?:W(?P<rexw>[01])\.)?(?:L(?P<vexl>0|1|12|2|IG)\.)?))?" +
-     r"(?P<escape>0f38|0f3a|0f|M[56]\.|)" +
+     r"(?P<escape>0f38|0f3a|0f|M[567]\.|)" +
      r"(?P<opcode>[0-9a-f]{2})" +
      r"(?:/(?P<modreg>[0-7]|[rm][0-7]?|[0-7][rm])|(?P<opcext>[c-f][0-9a-f]))?(?P<extended>\+)?$")
 
@@ -363,7 +364,7 @@ class Opcode(NamedTuple):
 
         return cls(
             prefix=match.group("legacy"),
-            escape=["", "0f", "0f38", "0f3a", "M4.", "M5.", "M6."].index(match.group("escape")),
+            escape=["", "0f", "0f38", "0f3a", "M4.", "M5.", "M6.", "M7."].index(match.group("escape")),
             opc=int(match.group("opcode"), 16),
             extended=match.group("extended") is not None,
             modrm=modrm,
@@ -1053,7 +1054,7 @@ def encode_table(entries, args):
             elif desc.encoding == "IA":
                 enc_encoding = "A"
             opc_i |= ["NP", "M", "R", "M1", "MC", "MR", "RM", "RMA", "MRC",
-                "AM", "MA", "I", "O", "OA", "S", "A", "D", "FD", "TD",
+                "AM", "MA", "I", "O", "OA", "S", "A", "D", "FD", "TD", "IM",
                 "RVM", "RVMR", "RMV", "VM", "MVR", "MRV",
             ].index(enc_encoding) << 51
             opc_i |= alt << 56

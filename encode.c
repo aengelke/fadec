@@ -131,7 +131,7 @@ enc_opc(uint8_t** restrict buf, uint64_t opc, uint64_t epfx)
         *(*buf)++ = 0xc4 | !vex3;
         unsigned b2 = pp | (opc & 0x800000 ? 0x4 : 0);
         if (vex3) {
-            unsigned b1 = opc >> 16 & 3;
+            unsigned b1 = opc >> 16 & 7;
             if (!(epfx & EPFX_REXR)) b1 |= 0x80;
             if (!(epfx & EPFX_REXX)) b1 |= 0x40;
             if (!(epfx & EPFX_REXB)) b1 |= 0x20;
@@ -303,6 +303,7 @@ enc_mr(uint8_t** restrict buf, uint64_t opc, uint64_t epfx, uint64_t op0,
 typedef enum {
     ENC_NP, ENC_M, ENC_R, ENC_M1, ENC_MC, ENC_MR, ENC_RM, ENC_RMA, ENC_MRC,
     ENC_AM, ENC_MA, ENC_I, ENC_O, ENC_OA, ENC_S, ENC_A, ENC_D, ENC_FD, ENC_TD,
+    ENC_IM,
     ENC_RVM, ENC_RVMR, ENC_RMV, ENC_VM, ENC_MVR, ENC_MRV,
     ENC_MAX
 } Encoding;
@@ -338,6 +339,7 @@ const struct EncodingInfo encoding_infos[ENC_MAX] = {
     [ENC_D]       = { .immidx = 0 },
     [ENC_FD]      = { .zregidx = 0x0^3, .zregval = 0, .immctl = 2, .immidx = 1 },
     [ENC_TD]      = { .zregidx = 0x1^3, .zregval = 0, .immctl = 2, .immidx = 0 },
+    [ENC_IM]      = { .modrm = 0x1^3, .immidx = 0 },
     [ENC_RVM]     = { .modrm = 0x2^3, .modreg = 0x0^3, .vexreg = 0x1^3, .immidx = 3 },
     [ENC_RVMR]    = { .modrm = 0x2^3, .modreg = 0x0^3, .vexreg = 0x1^3, .immctl = 3, .immidx = 3 },
     [ENC_RMV]     = { .modrm = 0x1^3, .modreg = 0x0^3, .vexreg = 0x2^3 },

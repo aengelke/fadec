@@ -273,9 +273,17 @@ TEST("\xc4\xc2\x98\xf7\xc7", BEXTR64rrr, 0, FE_AX, FE_R15, FE_R12);
 TEST("\xc4\x42\x18\xf7\xc7", BEXTR32rrr, 0, FE_R8, FE_R15, FE_R12);
 TEST("\xc4\x42\x98\xf7\xc7", BEXTR64rrr, 0, FE_R8, FE_R15, FE_R12);
 
+TEST("\x0f\x30", WRMSR, 0);
+TEST("\x0f\x32", RDMSR, 0);
 TEST("\x0f\x01\xc6", WRMSRNS, 0);
 TEST("\xf2\x0f\x01\xc6", RDMSRLIST, 0);
 TEST("\xf3\x0f\x01\xc6", WRMSRLIST, 0);
+TEST("\xc4\xe7\x7b\xf6\xc1\x10\x20\x30\x40", RDMSRri, 0, FE_CX, 0x40302010);
+TEST("\xc4\xe7\x7a\xf6\xc1\x10\x20\x30\x40", WRMSRNSir, 0, 0x40302010, FE_CX);
+TEST("\xf2\x0f\x38\xf8\xc1", URDMSRrr, 0, FE_CX, FE_AX);
+TEST("\xf3\x0f\x38\xf8\xc1", UWRMSRrr, 0, FE_CX, FE_AX);
+TEST("\xc4\xe7\x7b\xf8\xc1\x10\x20\x30\x40", URDMSRri, 0, FE_CX, 0x40302010);
+TEST("\xc4\xe7\x7a\xf8\xc1\x10\x20\x30\x40", UWRMSRir, 0, 0x40302010, FE_CX);
 
 TEST("\x0f\x38\xfc\x01", AADD32mr, 0, FE_MEM(FE_CX, 0, FE_NOREG, 0), FE_AX);
 TEST("\x48\x0f\x38\xfc\x01", AADD64mr, 0, FE_MEM(FE_CX, 0, FE_NOREG, 0), FE_AX);
