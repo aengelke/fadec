@@ -1809,6 +1809,12 @@ F3.0f38f8/r            MR   Rq  Gq  -   -   UWRMSR      O64     F=USER_MSR
 VEX.F2.W0.L0.M7.f8/0r  MI   Rq  Id  -   -   URDMSR      O64     F=USER_MSR
 VEX.F3.W0.L0.M7.f8/0r  IM   Id  Rq  -   -   UWRMSR      O64     F=USER_MSR
 
+# SM4
+VEX.F3.W0.0f38da       RVM  Vx  Hx  Wx  -   VSM4KEY4            F=AVX,SM4
+VEX.F2.W0.0f38da       RVM  Vx  Hx  Wx  -   VSM4RNDS4           F=AVX,SM4
+EVEX.F3.W0.0f38da      RVM  Vx  Hx  Wx  -   VSM4KEY4            F=AVX10.2,SM4 TUPLE_FULL_MEM
+EVEX.F2.W0.0f38da      RVM  Vx  Hx  Wx  -   VSM4RNDS4           F=AVX10.2,SM4 TUPLE_FULL_MEM
+
 # AVX512
 EVEX.NP.W0.0f58        RVM  Vps Hps Wps -   EVX_ADDPS+kbr       F=AVX512F TUPLE_FULL_32
 EVEX.66.W1.0f58        RVM  Vpd Hpd Wpd -   EVX_ADDPD+kbr       F=AVX512F TUPLE_FULL_64

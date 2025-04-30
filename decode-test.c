@@ -3960,6 +3960,9 @@ main(int argc, char** argv)
     TEST("\xc4\xe3\xed\xce\xc1\x01", "vgf2p8affineqb ymm0, ymm2, ymm1, 0x1");
     TEST("\xc4\xe3\xe9\xcf\xc1\x01", "vgf2p8affineinvqb xmm0, xmm2, xmm1, 0x1");
     TEST("\xc4\xe3\xed\xcf\xc1\x01", "vgf2p8affineinvqb ymm0, ymm2, ymm1, 0x1");
+    TEST32("\x62\xf3\xdd\x18\xcf\x49\x01\x07", "vgf2p8affineinvqb xmm1, xmm4, qword ptr [ecx+0x8]{1to2}, 0x7");
+    TEST64("\x62\xf3\xdd\x18\xcf\x49\x01\x07", "vgf2p8affineinvqb xmm1, xmm4, qword ptr [rcx+0x8]{1to2}, 0x7");
+    TEST64("\x62\xf3\xdd\x10\xcf\x49\x01\x07", "vgf2p8affineinvqb xmm1, xmm20, qword ptr [rcx+0x8]{1to2}, 0x7");
 
     // AMD RDPRU
     TEST64("\x0f\x01\xfd", "rdpru");
@@ -3972,6 +3975,38 @@ main(int argc, char** argv)
     TEST64("\xf2\x0f\x01\xfe", "rmpupdate");
     TEST64("\xf3\x0f\x01\xff", "psmash");
     TEST64("\xf2\x0f\x01\xff", "pvalidate");
+
+    // SM4
+    TEST32("\xc4\xe2\x6a\xda\x01", "vsm4key4 xmm0, xmm2, xmmword ptr [ecx]");
+    TEST64("\xc4\xe2\x6a\xda\x01", "vsm4key4 xmm0, xmm2, xmmword ptr [rcx]");
+    TEST32("\xc4\xe2\x6e\xda\x01", "vsm4key4 ymm0, ymm2, ymmword ptr [ecx]");
+    TEST64("\xc4\xe2\x6e\xda\x01", "vsm4key4 ymm0, ymm2, ymmword ptr [rcx]");
+    TEST("\xc4\xe2\x6a\xda\xc1", "vsm4key4 xmm0, xmm2, xmm1");
+    TEST("\xc4\xe2\x6e\xda\xc1", "vsm4key4 ymm0, ymm2, ymm1");
+    TEST32("\x62\xf2\x6e\x08\xda\x01", "vsm4key4 xmm0, xmm2, xmmword ptr [ecx]");
+    TEST64("\x62\xf2\x6e\x08\xda\x01", "vsm4key4 xmm0, xmm2, xmmword ptr [rcx]");
+    TEST32("\x62\xf2\x6e\x28\xda\x01", "vsm4key4 ymm0, ymm2, ymmword ptr [ecx]");
+    TEST64("\x62\xf2\x6e\x28\xda\x01", "vsm4key4 ymm0, ymm2, ymmword ptr [rcx]");
+    TEST32("\x62\xf2\x6e\x48\xda\x01", "vsm4key4 zmm0, zmm2, zmmword ptr [ecx]");
+    TEST64("\x62\xf2\x6e\x48\xda\x01", "vsm4key4 zmm0, zmm2, zmmword ptr [rcx]");
+    TEST("\x62\xf2\x6e\x08\xda\xc1", "vsm4key4 xmm0, xmm2, xmm1");
+    TEST("\x62\xf2\x6e\x28\xda\xc1", "vsm4key4 ymm0, ymm2, ymm1");
+    TEST("\x62\xf2\x6e\x48\xda\xc1", "vsm4key4 zmm0, zmm2, zmm1");
+    TEST32("\xc4\xe2\x6b\xda\x01", "vsm4rnds4 xmm0, xmm2, xmmword ptr [ecx]");
+    TEST64("\xc4\xe2\x6b\xda\x01", "vsm4rnds4 xmm0, xmm2, xmmword ptr [rcx]");
+    TEST32("\xc4\xe2\x6f\xda\x01", "vsm4rnds4 ymm0, ymm2, ymmword ptr [ecx]");
+    TEST64("\xc4\xe2\x6f\xda\x01", "vsm4rnds4 ymm0, ymm2, ymmword ptr [rcx]");
+    TEST("\xc4\xe2\x6b\xda\xc1", "vsm4rnds4 xmm0, xmm2, xmm1");
+    TEST("\xc4\xe2\x6f\xda\xc1", "vsm4rnds4 ymm0, ymm2, ymm1");
+    TEST32("\x62\xf2\x6f\x08\xda\x01", "vsm4rnds4 xmm0, xmm2, xmmword ptr [ecx]");
+    TEST64("\x62\xf2\x6f\x08\xda\x01", "vsm4rnds4 xmm0, xmm2, xmmword ptr [rcx]");
+    TEST32("\x62\xf2\x6f\x28\xda\x01", "vsm4rnds4 ymm0, ymm2, ymmword ptr [ecx]");
+    TEST64("\x62\xf2\x6f\x28\xda\x01", "vsm4rnds4 ymm0, ymm2, ymmword ptr [rcx]");
+    TEST32("\x62\xf2\x6f\x48\xda\x01", "vsm4rnds4 zmm0, zmm2, zmmword ptr [ecx]");
+    TEST64("\x62\xf2\x6f\x48\xda\x01", "vsm4rnds4 zmm0, zmm2, zmmword ptr [rcx]");
+    TEST("\x62\xf2\x6f\x08\xda\xc1", "vsm4rnds4 xmm0, xmm2, xmm1");
+    TEST("\x62\xf2\x6f\x28\xda\xc1", "vsm4rnds4 ymm0, ymm2, ymm1");
+    TEST("\x62\xf2\x6f\x48\xda\xc1", "vsm4rnds4 zmm0, zmm2, zmm1");
 
 
     puts(failed ? "Some tests FAILED" : "All tests PASSED");
