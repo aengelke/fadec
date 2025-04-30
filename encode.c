@@ -314,6 +314,7 @@ struct EncodingInfo {
     uint8_t modreg : 2;
     uint8_t vexreg : 2;
     uint8_t immidx : 2;
+    // 0 = normal or jump, 1 = constant 1, 2 = address-size, 3 = RVMR
     uint8_t immctl : 3;
     uint8_t zregidx : 2;
     uint8_t zregval : 1;
@@ -324,32 +325,32 @@ const struct EncodingInfo encoding_infos[ENC_MAX] = {
     [ENC_M]       = { .modrm = 0x0^3 },
     [ENC_R]       = { .modreg = 0x0^3 },
     [ENC_M1]      = { .modrm = 0x0^3, .immctl = 1, .immidx = 1 },
-    [ENC_MI]      = { .modrm = 0x0^3, .immctl = 4, .immidx = 1 },
+    [ENC_MI]      = { .modrm = 0x0^3, .immidx = 1 },
     [ENC_MC]      = { .modrm = 0x0^3, .zregidx = 0x1^3, .zregval = 1 },
     [ENC_MR]      = { .modrm = 0x0^3, .modreg = 0x1^3 },
     [ENC_RM]      = { .modrm = 0x1^3, .modreg = 0x0^3 },
     [ENC_RMA]     = { .modrm = 0x1^3, .modreg = 0x0^3, .zregidx = 0x2^3, .zregval = 0 },
-    [ENC_MRI]     = { .modrm = 0x0^3, .modreg = 0x1^3, .immctl = 4, .immidx = 2 },
-    [ENC_RMI]     = { .modrm = 0x1^3, .modreg = 0x0^3, .immctl = 4, .immidx = 2 },
+    [ENC_MRI]     = { .modrm = 0x0^3, .modreg = 0x1^3, .immidx = 2 },
+    [ENC_RMI]     = { .modrm = 0x1^3, .modreg = 0x0^3, .immidx = 2 },
     [ENC_MRC]     = { .modrm = 0x0^3, .modreg = 0x1^3, .zregidx = 0x2^3, .zregval = 1 },
     [ENC_AM]      = { .modrm = 0x1^3, .zregidx = 0x0^3, .zregval = 0 },
     [ENC_MA]      = { .modrm = 0x0^3, .zregidx = 0x1^3, .zregval = 0 },
-    [ENC_I]       = { .immctl = 4, .immidx = 0 },
-    [ENC_IA]      = { .zregidx = 0x0^3, .zregval = 0, .immctl = 4, .immidx = 1 },
+    [ENC_I]       = { .immidx = 0 },
+    [ENC_IA]      = { .zregidx = 0x0^3, .zregval = 0, .immidx = 1 },
     [ENC_O]       = { .modreg = 0x0^3 },
-    [ENC_OI]      = { .modreg = 0x0^3, .immctl = 4, .immidx = 1 },
+    [ENC_OI]      = { .modreg = 0x0^3, .immidx = 1 },
     [ENC_OA]      = { .modreg = 0x0^3, .zregidx = 0x1^3, .zregval = 0 },
     [ENC_S]       = { 0 },
     [ENC_A]       = { .zregidx = 0x0^3, .zregval = 0 },
-    [ENC_D]       = { .immctl = 6, .immidx = 0 },
+    [ENC_D]       = { .immidx = 0 },
     [ENC_FD]      = { .zregidx = 0x0^3, .zregval = 0, .immctl = 2, .immidx = 1 },
     [ENC_TD]      = { .zregidx = 0x1^3, .zregval = 0, .immctl = 2, .immidx = 0 },
     [ENC_RVM]     = { .modrm = 0x2^3, .modreg = 0x0^3, .vexreg = 0x1^3 },
-    [ENC_RVMI]    = { .modrm = 0x2^3, .modreg = 0x0^3, .vexreg = 0x1^3, .immctl = 4, .immidx = 3 },
+    [ENC_RVMI]    = { .modrm = 0x2^3, .modreg = 0x0^3, .vexreg = 0x1^3, .immidx = 3 },
     [ENC_RVMR]    = { .modrm = 0x2^3, .modreg = 0x0^3, .vexreg = 0x1^3, .immctl = 3, .immidx = 3 },
     [ENC_RMV]     = { .modrm = 0x1^3, .modreg = 0x0^3, .vexreg = 0x2^3 },
     [ENC_VM]      = { .modrm = 0x1^3, .vexreg = 0x0^3 },
-    [ENC_VMI]     = { .modrm = 0x1^3, .vexreg = 0x0^3, .immctl = 4, .immidx = 2 },
+    [ENC_VMI]     = { .modrm = 0x1^3, .vexreg = 0x0^3, .immidx = 2 },
     [ENC_MVR]     = { .modrm = 0x0^3, .modreg = 0x2^3, .vexreg = 0x1^3 },
     [ENC_MRV]     = { .modrm = 0x0^3, .modreg = 0x1^3, .vexreg = 0x2^3 },
 };
@@ -391,22 +392,27 @@ try_encode:;
         opc |= op_reg_idx(op0) << 3;
     }
 
-    if (ei->immctl > 0) {
+    if (immsz) {
         imm = ops[ei->immidx];
-        if (ei->immctl == 2) {
-            immsz = UNLIKELY(opc & OPC_67) ? 4 : 8;
-            if (immsz == 4) imm = (int32_t) imm; // address are zero-extended
+        if (UNLIKELY(ei->immctl)) {
+            if (ei->immctl == 2) {
+                immsz = UNLIKELY(opc & OPC_67) ? 4 : 8;
+                if (immsz == 4) imm = (int32_t) imm; // address are zero-extended
+            } else if (ei->immctl == 3) {
+                if (!op_reg_xmm(imm)) goto fail;
+                imm = op_reg_idx(imm) << 4;
+                if (!op_imm_n(imm, 1)) goto fail;
+            } else if (ei->immctl == 1) {
+                if (imm != 1) goto next;
+                immsz = 0;
+            }
+        } else {
+            if (enc == ENC_D) {
+                if (UNLIKELY(opc & FE_JMPL) && opc >> 56) goto next;
+                imm -= (int64_t) *buf + opc_size(opc, epfx) + immsz;
+            }
+            if (!op_imm_n(imm, immsz)) goto next;
         }
-        if (ei->immctl == 3) {
-            if (!op_reg_xmm(imm)) goto fail;
-            imm = op_reg_idx(imm) << 4;
-        }
-        if (ei->immctl == 6) {
-            if (UNLIKELY(opc & FE_JMPL) && opc >> 56) goto next;
-            imm -= (int64_t) *buf + opc_size(opc, epfx) + immsz;
-        }
-        if (UNLIKELY(ei->immctl == 1) && imm != 1) goto next;
-        if (ei->immctl >= 2 && !op_imm_n(imm, immsz)) goto next;
     }
 
     // NOP has no operands, so this must be the 32-bit OA XCHG
@@ -426,7 +432,7 @@ try_encode:;
         if (enc_opc(buf, opc, epfx)) goto fail;
     }
 
-    if (ei->immctl >= 2)
+    if (immsz)
         if (enc_imm(buf, imm, immsz)) goto fail;
 
     return 0;

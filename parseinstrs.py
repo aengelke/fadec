@@ -996,6 +996,7 @@ def encode_table(entries, args):
         enc_opcs = []
         for alt, variant in zip(alt_indices, variants):
             opcode, desc = variant.opcode, variant.desc
+            encoding = ENCODINGS[desc.encoding]
             opc_i = opcode.opc
             if None not in opcode.modrm:
                 opc_i |= 0xc000 | opcode.modrm[1] << 11 | opcode.modrm[2] << 8
@@ -1039,7 +1040,12 @@ def encode_table(entries, args):
             if alt >= 0x100:
                 raise Exception("encode alternate bits exhausted")
             opc_i |= sum(1 << i for i in supports_high_regs) << 45
-            opc_i |= desc.imm_size(opsize//8) << 47
+            if encoding.imm_control >= 3:
+                opc_i |= desc.imm_size(opsize//8) << 47
+            elif encoding.imm_control in (1, 2):
+                # Must be an arbitrary non-zero value, replaced by address size
+                # for imm_ctl=2 and zero for imm_ctl=1 (constant 1).
+                opc_i |= 1 << 47
             opc_i |= ["NP", "M", "R",
                 "M1", "MI", "MC", "MR", "RM", "RMA", "MRI", "RMI", "MRC",
                 "AM", "MA", "I", "IA", "O", "OI", "OA", "S", "A", "D", "FD", "TD",
