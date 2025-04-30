@@ -1824,6 +1824,9 @@ TEST("\x64\x67\xf0\x41\x81\x84\x00\x00\xff\xff\xff\x78\x56\x34\x12", LOCK_ADD32m
 TEST("\x64\xf0\x66\x41\x81\x84\x00\x00\xff\xff\xff\x34\x12", LOCK_ADD16mi, FE_SEG(FE_FS), FE_MEM(FE_R8, 1, FE_AX, -0x100), 0x1234);
 TEST("\x64\x67\xf0\x41\x0f\xba\xac\x00\x00\xff\xff\xff\x78", LOCK_BTS32mi, FE_ADDR32|FE_SEG(FE_FS), FE_MEM(FE_R8, 1, FE_AX, -0x100), 0x78);
 
+// PBNDKB
+TEST("\x0f\x01\xc7", PBNDKB, 0);
+
 // SM4
 TEST("\xc4\xe2\x6a\xda\xc1", VSM4KEY4_128rrr, 0, FE_XMM0, FE_XMM2, FE_XMM1);
 TEST("\x62\xf2\x6e\x00\xda\xc1", VSM4KEY4_128rrr, 0, FE_XMM0, FE_XMM18, FE_XMM1);

@@ -3976,6 +3976,10 @@ main(int argc, char** argv)
     TEST64("\xf3\x0f\x01\xff", "psmash");
     TEST64("\xf2\x0f\x01\xff", "pvalidate");
 
+    // PBNDKB
+    TEST32("\x0f\x01\xc7", "UD");
+    TEST64("\x0f\x01\xc7", "pbndkb");
+
     // SM4
     TEST32("\xc4\xe2\x6a\xda\x01", "vsm4key4 xmm0, xmm2, xmmword ptr [ecx]");
     TEST64("\xc4\xe2\x6a\xda\x01", "vsm4key4 xmm0, xmm2, xmmword ptr [rcx]");

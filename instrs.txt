@@ -1799,6 +1799,9 @@ VEX.F2.W0.L0.0f385e/r  RMV  T   T   T   -   TDPBSSD     O64     F=AMX-INT8
 VEX.NP.W0.L0.0f386c/r  RMV  T   T   T   -   TCMMRLFP16PS O64    F=AMX-COMPLEX
 VEX.66.W0.L0.0f386c/r  RMV  T   T   T   -   TCMMIMFP16PS O64    F=AMX-COMPLEX
 
+# PBNDKB
+NP.0f01c7              NP   -   -   -   -   PBNDKB      O64     F=PBNDKB CPL0
+
 # MSR_IMM
 VEX.F2.W0.L0.M7.f6/0r  MI   Rq  Id  -   -   RDMSR       O64     F=MSR_IMM CPL0
 VEX.F3.W0.L0.M7.f6/0r  IM   Id  Rq  -   -   WRMSRNS     O64     F=MSR_IMM CPL0
