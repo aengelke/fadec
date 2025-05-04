@@ -180,8 +180,11 @@ enc_o(uint8_t** restrict buf, uint64_t opc, uint64_t epfx, uint64_t op0)
 {
     if (op_reg_idx(op0) & 0x8) epfx |= EPFX_REXB;
 
-    bool has_rex = opc & OPC_REXW || epfx & EPFX_REX_MSK;
-    if (has_rex && op_reg_gph(op0)) return -1;
+    // NB: this cannot happen. There is only one O-encoded instruction which
+    // accepts high-byte registers (b0+/MOVABS Rb,Ib), which will never have a
+    // REx prefix if the operand is a high-byte register.
+    // bool has_rex = opc & OPC_REXW || epfx & EPFX_REX_MSK;
+    // if (has_rex && op_reg_gph(op0)) return -1;
 
     if (enc_opc(buf, opc, epfx)) return -1;
     *(*buf - 1) = (*(*buf - 1) & 0xf8) | (op_reg_idx(op0) & 0x7);
