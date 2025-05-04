@@ -392,6 +392,8 @@ def verifyOpcodeDesc(opcode, desc):
             raise Exception(f"vexreg operand-regkind mismatch {opcode}, {desc}")
         if oporder[i] == "imm" and opkind.regkind not in expected_immkinds:
             raise Exception(f"imm operand-regkind mismatch {opcode}, {desc}")
+    if "INSTR_WIDTH" in desc.flags and len(desc.operands) > 3:
+        raise Exception(f"+w with four operands {opcode}, {desc}")
     if opcode.escape == 2 and flags.imm_control != 0:
         raise Exception(f"0f38 has no immediate operand {opcode}, {desc}")
     if opcode.escape == 3 and desc.imm_size(4) != 1:

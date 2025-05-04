@@ -223,6 +223,7 @@ main(int argc, char** argv)
     TEST("\x01\x04\x25\x01\x00\x00\x00", "add dword ptr [0x1], eax");
     TEST3264("\x01\x04\x25\x00\x00\x00\x80", "add dword ptr [0x80000000], eax", "add dword ptr [0xffffffff80000000], eax");
     TEST64("\x41\x01\x04\x25\x01\x00\x00\x00", "add dword ptr [0x1], eax");
+    TEST("\x01\x04\x25\x00\x00\x00\x00", "add dword ptr [0x0], eax");
     // [rip+disp32]
     TEST64("\x01\x05\x01\x00\x00\x00", "add dword ptr [rip+0x1], eax");
     TEST64("\x41\x01\x05\x01\x00\x00\x00", "add dword ptr [rip+0x1], eax");
@@ -1146,6 +1147,10 @@ main(int argc, char** argv)
     TEST32("\xc5\x00", "lds eax, fword ptr [eax]");
     TEST("\x0f\xb2\x00", "lss eax, fword ptr [@ax]");
     TEST64("\x48\x0f\xb2\x00", "lss rax, tbyte ptr [rax]");
+    TEST("\x0f\xb4\x00", "lfs eax, fword ptr [@ax]");
+    TEST64("\x48\x0f\xb4\x00", "lfs rax, tbyte ptr [rax]");
+    TEST("\x0f\xb5\x00", "lgs eax, fword ptr [@ax]");
+    TEST64("\x48\x0f\xb5\x00", "lgs rax, tbyte ptr [rax]");
     TEST("\xc5\xf2\x2a\xc0", "vcvtsi2ss xmm0, xmm1, eax");
     TEST("\xc4\xe1\xf2\x2a\xc0", "vcvtsi2ss xmm0, xmm1, @ax"); // VEX.W ignored
     TEST("\xf3\xc5\xf2\x2a\xc0", "UD"); // VEX+REP
@@ -1615,6 +1620,20 @@ main(int argc, char** argv)
 
     TEST("\x0f\xae\x00", "fxsave [@ax]");
     TEST64("\x48\x0f\xae\x00", "fxsave64 [rax]");
+    TEST("\x0f\xae\x08", "fxrstor [@ax]");
+    TEST64("\x48\x0f\xae\x08", "fxrstor64 [rax]");
+    TEST("\x0f\xae\x20", "xsave [@ax]");
+    TEST64("\x48\x0f\xae\x20", "xsave64 [rax]");
+    TEST("\x0f\xc7\x20", "xsavec [@ax]");
+    TEST64("\x48\x0f\xc7\x20", "xsavec64 [rax]");
+    TEST("\x0f\xae\x30", "xsaveopt [@ax]");
+    TEST64("\x48\x0f\xae\x30", "xsaveopt64 [rax]");
+    TEST("\x0f\xc7\x28", "xsaves [@ax]");
+    TEST64("\x48\x0f\xc7\x28", "xsaves64 [rax]");
+    TEST("\x0f\xae\x28", "xrstor [@ax]");
+    TEST64("\x48\x0f\xae\x28", "xrstor64 [rax]");
+    TEST("\x0f\xc7\x18", "xrstors [@ax]");
+    TEST64("\x48\x0f\xc7\x18", "xrstors64 [rax]");
     TEST("\xff\xe0", "jmp @ax");
     TEST3264("\x66\xff\xe0", "jmp ax", "jmp rax");
     TEST64("\x48\xff\xe0", "jmp rax");
@@ -1672,6 +1691,8 @@ main(int argc, char** argv)
     // TEST64("\x48\xe7\xff", "out eax, 0xff"); // TODO
     TEST32("\x66\x61", "popaw");
     TEST32("\x61", "popad");
+    TEST("\x66\x9c", "pushfw");
+    TEST3264("\x9c", "pushfd", "pushfq");
     TEST("\x66\x9d", "popfw");
     TEST3264("\x9d", "popfd", "popfq");
     TEST("\x66\xcf", "iretw");
