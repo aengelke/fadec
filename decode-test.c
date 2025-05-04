@@ -1649,6 +1649,27 @@ main(int argc, char** argv)
     TEST("\xaf", "scasd");
     TEST("\x64\xaf", "scasd"); // SCAS doesn't use segment overrides
     TEST("\xec", "inb");
+    TEST("\x66\xed", "inw");
+    TEST("\xed", "ind");
+    // TEST64("\x48\xed", "ind"); // TODO
+    // TEST64("\x66\x48\xed", "ind"); // TODO
+    TEST("\xee", "outb");
+    TEST("\x66\xef", "outw");
+    TEST("\xef", "outd");
+    // TEST64("\x48\xef", "outd"); // TODO
+    // TEST64("\x66\x48\xef", "outd"); // TODO
+    TEST("\xe4\x00", "in al, 0x0");
+    TEST("\xe4\xff", "in al, 0xff");
+    TEST("\x66\xe5\xff", "in ax, 0xff");
+    TEST("\xe5\xff", "in eax, 0xff");
+    // TEST64("\x66\x48\xe5\xff", "in eax, 0xff"); // TODO
+    // TEST64("\x48\xe5\xff", "in eax, 0xff"); // TODO
+    TEST("\xe6\x00", "out al, 0x0");
+    TEST("\xe6\xff", "out al, 0xff");
+    TEST("\x66\xe7\xff", "out ax, 0xff");
+    TEST("\xe7\xff", "out eax, 0xff");
+    // TEST64("\x66\x48\xe7\xff", "out eax, 0xff"); // TODO
+    // TEST64("\x48\xe7\xff", "out eax, 0xff"); // TODO
     TEST32("\x66\x61", "popaw");
     TEST32("\x61", "popad");
     TEST("\x66\x9d", "popfw");

@@ -292,14 +292,17 @@ fd_mnemonic(char buf[DECLARE_RESTRICTED_ARRAY_SIZE(48)], const FdInstr* instr) {
         if (!FD_IS64(instr) && FD_ADDRSIZELG(instr) == 1)
             buf = fd_strpcat(buf, fd_stre("addr16 "));
         FALLTHROUGH();
+    case FDI_IN:
+    case FDI_OUT:
+        if (FD_OP_TYPE(instr, 0) != FD_OT_NONE)
+            break;
+        FALLTHROUGH();
     case FDI_PUSHA:
     case FDI_POPA:
     case FDI_PUSHF:
     case FDI_POPF:
     case FDI_RETF:
     case FDI_IRET:
-    case FDI_IN:
-    case FDI_OUT:
         sizesuffix[0] = "bwdq"[FD_OPSIZELG(instr)];
         sizesuffixlen = 1;
         break;
