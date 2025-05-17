@@ -72,14 +72,14 @@ enc_mem_common(uint8_t* buf, unsigned ripoff, FeMem op0, uint64_t op1,
             *buf++ = (reg << 3) | 4;
             *buf++ = sib | 5;
             enc_imm(buf, off, 4);
-            return 6;
+            return ripoff + 6;
         } else if (LIKELY(op0.base.idx == FE_IP.idx)) {
             if (withsib)
                 return 0;
             *buf++ = (reg << 3) | 5;
             // Adjust offset, caller doesn't know instruction length.
             enc_imm(buf, off - ripoff - 5, 4);
-            return 5;
+            return ripoff + 5;
         } else {
             return 0;
         }
@@ -108,11 +108,11 @@ enc_mem_common(uint8_t* buf, unsigned ripoff, FeMem op0, uint64_t op1,
         *buf++ = mod | (reg << 3) | 4;
         *buf++ = sib | rm;
         enc_imm(buf, off, 4);
-        return 2 + dispsz;
+        return ripoff + 2 + dispsz;
     } else {
         *buf++ = mod | (reg << 3) | rm;
         enc_imm(buf, off, 4);
-        return 1 + dispsz;
+        return ripoff + 1 + dispsz;
     }
 }
 
@@ -198,7 +198,7 @@ enc_vex_mem(uint8_t* buf, unsigned opcode, FeMem rm, uint64_t reg,
             uint64_t vvvv, unsigned ripoff, bool forcesib, unsigned disp8scale) {
     unsigned off = enc_vex_common(buf, opcode, op_reg_idx(rm.base), op_reg_idx(rm.idx), reg, vvvv);
     unsigned memoff = enc_mem(buf + off, ripoff + off, rm, reg, forcesib, disp8scale);
-    return off && memoff ? off + memoff : 0;
+    return off && memoff ? memoff : 0;
 }
 
 static int
@@ -206,7 +206,7 @@ enc_vex_vsib(uint8_t* buf, unsigned opcode, FeMemV rm, uint64_t reg,
              uint64_t vvvv, unsigned ripoff, bool forcesib, unsigned disp8scale) {
     unsigned off = enc_vex_common(buf, opcode, op_reg_idx(rm.base), op_reg_idx(rm.idx), reg, vvvv);
     unsigned memoff = enc_mem_vsib(buf + off, ripoff + off, rm, reg, forcesib, disp8scale);
-    return off && memoff ? off + memoff : 0;
+    return off && memoff ? memoff : 0;
 }
 
 static int
@@ -282,7 +282,7 @@ enc_evex_mem(uint8_t* buf, unsigned opcode, FeMem rm, uint64_t reg,
         off = enc_evex_common(buf, opcode, op_reg_idx(rm.base), op_reg_idx(rm.idx), reg, vvvv);
     }
     unsigned memoff = enc_mem(buf + off, ripoff + off, rm, reg, forcesib, disp8scale);
-    return off && memoff ? off + memoff : 0;
+    return off && memoff ? memoff : 0;
 }
 
 static int
@@ -295,7 +295,7 @@ enc_evex_vsib(uint8_t* buf, unsigned opcode, FeMemV rm, uint64_t reg,
     unsigned idx = op_reg_idx(rm.idx);
     unsigned off = enc_evex_common(buf, opcode, op_reg_idx(rm.base), idx & 0x0f, reg, idx & 0x10);
     unsigned memoff = enc_mem_vsib(buf + off, ripoff + off, rm, reg, forcesib, disp8scale);
-    return off && memoff ? off + memoff : 0;
+    return off && memoff ? memoff : 0;
 }
 
 unsigned fe64_NOP(uint8_t* buf, unsigned flags) {

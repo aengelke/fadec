@@ -1148,8 +1148,8 @@ def encode2_gen_legacy(variant: EncodeVariant, opsize: int, supports_high_regs: 
             assert "VSIB" not in desc.flags
             assert opcode.modrm[2] is None
             modrm = f"op{flags.modrm_idx^3}"
-            code += f"  unsigned memoff = enc_mem(buf+idx, idx+{imm_size_expr}, {modrm}, {modreg}, 0, 0);\n"
-            code += f"  if (!memoff) return 0;\n  idx += memoff;\n"
+            code += f"  idx = enc_mem(buf+idx, idx+{imm_size_expr}, {modrm}, {modreg}, 0, 0);\n"
+            code += f"  if (!idx) return 0;\n  idx -= {imm_size_expr};\n"
         else:
             if flags.modrm_idx:
                 modrm = f"op_reg_idx(op{flags.modrm_idx^3})"
@@ -1197,9 +1197,11 @@ def encode2_gen_vex(variant: EncodeVariant, imm_expr: str, imm_size_expr: str, h
     else:
         modreg = opcode.modrm[1] or 0
     vexop = f"op_reg_idx(op{flags.vexreg_idx^3})" if flags.vexreg_idx else 0
+    is_memory = opcode.modrm[0] == "m"
     if not flags.modrm and opcode.modrm == (None, None, None):
         # No ModRM, prefix only (VZEROUPPER/VZEROALL)
         assert opcode.vex == 1
+        assert not has_idx
         helperfn, helperargs = "enc_vex_common", f"0, 0, 0, 0"
     elif opcode.modrm[0] == "m":
         vsib = "VSIB" in variant.desc.flags
@@ -1225,10 +1227,15 @@ def encode2_gen_vex(variant: EncodeVariant, imm_expr: str, imm_size_expr: str, h
     helpercall = f"{helperfn}({bufidx}, {helperopc}, {helperargs})"
     if flags.imm_control >= 2:
         assert flags.imm_control < 6, "jmp with VEX/EVEX?"
-        code += f"  unsigned vexoff = {helpercall};\n"
-        code += f"  enc_imm({bufidx}+vexoff, {imm_expr}, {imm_size_expr});\n"
-        code += f"  return vexoff ? vexoff+{imm_size_expr}{'+idx' if has_idx else ''} : 0;\n"
-    elif has_idx:
+        if is_memory:
+            code += f"  unsigned instlen = {helpercall};\n"
+            code += f"  if (instlen) enc_imm(buf+instlen-{imm_size_expr}, {imm_expr}, {imm_size_expr});\n"
+            code += f"  return instlen;\n"
+        else:
+            code += f"  unsigned vexoff = {helpercall};\n"
+            code += f"  enc_imm({bufidx}+vexoff, {imm_expr}, {imm_size_expr});\n"
+            code += f"  return vexoff ? vexoff+{imm_size_expr}{'+idx' if has_idx else ''} : 0;\n"
+    elif has_idx and not is_memory:
         code += f"  unsigned vexoff = {helpercall};\n"
         code += f"  return vexoff ? vexoff+idx : 0;\n"
     else:

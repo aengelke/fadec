@@ -702,6 +702,12 @@ TEST("\xc5\xf5\x71\xd7\x02", VPSRLW256rri, 0, FE_XMM1, FE_XMM7, 0x2);
 TEST("\xc4\xc3\xfd\x00\xc9\x12", VPERMQ256rri, 0, FE_XMM1, FE_XMM9, 0x12);
 TEST("\xc4\xe3\xfd\x01\xcf\x12", VPERMPD256rri, 0, FE_XMM1, FE_XMM7, 0x12);
 TEST("\xc5\xf9\xc5\xc0\x00", VPEXTRWrri, 0, FE_AX, FE_XMM0, 0x0);
+// VMASKMOVDQU is the only VEX instruction which supports addrsize/segment
+// overrides without a memory operand.
+TEST("\xc5\xf9\xf7\xc1", VMASKMOVDQU128rr, 0, FE_XMM0, FE_XMM1);
+TEST("\x64\xc5\xf9\xf7\xc1", VMASKMOVDQU128rr, FE_SEG(FE_FS), FE_XMM0, FE_XMM1);
+TEST("\x67\xc5\xf9\xf7\xc1", VMASKMOVDQU128rr, FE_ADDR32, FE_XMM0, FE_XMM1);
+TEST("\x64\x67\xc5\xf9\xf7\xc1", VMASKMOVDQU128rr, FE_ADDR32|FE_SEG(FE_FS), FE_XMM0, FE_XMM1);
 
 // Test VEX.RXBv
 TEST("\xc5\xf4\x58\xc2", VADDPS256rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2);
