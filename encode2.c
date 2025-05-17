@@ -9,7 +9,13 @@
 #ifdef __GNUC__
 #define LIKELY(x) __builtin_expect(!!(x), 1)
 #define UNLIKELY(x) __builtin_expect(!!(x), 0)
-#define HINT_COLD __attribute__((cold))
+#if __has_attribute(cold) && __has_attribute(preserve_most)
+#define HINT_COLD __attribute__((cold,preserve_most,noinline))
+#elif  __has_attribute(cold)
+#define HINT_COLD __attribute__((cold,noinline))
+#else
+#define HINT_COLD
+#endif
 #else
 #define LIKELY(x) (x)
 #define UNLIKELY(x) (x)
