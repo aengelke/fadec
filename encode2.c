@@ -57,20 +57,23 @@ enc_imm(uint8_t* buf, uint64_t imm, unsigned immsz) {
 
 static int
 enc_mem_common(uint8_t* buf, unsigned ripoff, FeMem op0, uint64_t op1,
-               unsigned sibidx, unsigned disp8scale) {
+               unsigned disp8scale) {
     int mod = 0, reg = op1 & 7, rm;
     unsigned sib = 0x20;
     bool withsib = false;
     unsigned dispsz = 0;
     int32_t off = op0.off;
 
-    if (sibidx < 8) {
+    if (op_reg_idx(op0.idx) < 0x80) {
         int scalabs = op0.scale;
-        if (scalabs & (scalabs - 1))
+        if (UNLIKELY((unsigned) (op0.scale - 1) >= 8 ||
+                     (op0.scale & (op0.scale - 1))))
             return 0;
         unsigned scale = (scalabs & 0xA ? 1 : 0) | (scalabs & 0xC ? 2 : 0);
-        sib = scale << 6 | sibidx << 3;
+        sib = scale << 6 | (op_reg_idx(op0.idx) & 7) << 3;
         withsib = true;
+    } else if (UNLIKELY(op0.scale != 0)) {
+        return 0;
     }
 
     if (UNLIKELY(op0.base.idx >= 0x20)) {
@@ -125,28 +128,21 @@ enc_mem_common(uint8_t* buf, unsigned ripoff, FeMem op0, uint64_t op1,
 static int
 enc_mem(uint8_t* buf, unsigned ripoff, FeMem op0, uint64_t op1, bool forcesib,
         unsigned disp8scale) {
-    unsigned sibidx = forcesib ? 4 : 8;
-    if (op_reg_idx(op0.idx) < op_reg_idx(FE_NOREG)) {
-        if (!op0.scale)
-            return 0;
-        if (op_reg_idx(op0.idx) == 4)
-            return 0;
-        sibidx = op_reg_idx(op0.idx) & 7;
-    } else if (op0.scale) {
+    if (UNLIKELY(op_reg_idx(op0.idx) == 4))
         return 0;
+    if (forcesib && op_reg_idx(op0.idx) == op_reg_idx(FE_NOREG)) {
+        op0.scale = 1;
+        op0.idx = FE_GP(4);
     }
-    return enc_mem_common(buf, ripoff, op0, op1, sibidx, disp8scale);
+    return enc_mem_common(buf, ripoff, op0, op1, disp8scale);
 }
 
 static int
 enc_mem_vsib(uint8_t* buf, unsigned ripoff, FeMemV op0, uint64_t op1,
              bool forcesib, unsigned disp8scale) {
     (void) forcesib;
-    if (!op0.scale)
-        return 0;
-    FeMem mem = FE_MEM(op0.base, op0.scale, FE_NOREG, op0.off);
-    return enc_mem_common(buf, ripoff, mem, op1, op_reg_idx(op0.idx) & 7,
-                          disp8scale);
+    FeMem mem = FE_MEM(op0.base, op0.scale, FE_GP(op_reg_idx(op0.idx)), op0.off);
+    return enc_mem_common(buf, ripoff, mem, op1, disp8scale);
 }
 
 // EVEX/VEX "Opcode" format:
