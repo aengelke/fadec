@@ -7,7 +7,7 @@ from enum import Enum
 from itertools import product
 import re
 import struct
-from typing import NamedTuple, FrozenSet, List, Tuple, Union, Optional, ByteString
+from typing import NamedTuple, FrozenSet, List, Tuple, Union, Optional
 
 INSTR_FLAGS_FIELDS, INSTR_FLAGS_SIZES = zip(*[
     ("modrm_idx", 2),
