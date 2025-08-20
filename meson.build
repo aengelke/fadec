@@ -6,8 +6,8 @@ python3 = find_program('python3')
 # Check Python version
 py_version_res = run_command(python3, ['--version'], check: true)
 py_version = py_version_res.stdout().split(' ')[1]
-if not py_version.version_compare('>=3.6')
-  error('Python 3.6 required, got @0@'.format(py_version))
+if not py_version.version_compare('>=3.9')
+  error('Python 3.9 required, got @0@'.format(py_version))
 endif
 
 has_cpp = add_languages('cpp', required: false)

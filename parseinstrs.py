@@ -2,12 +2,11 @@
 
 import argparse
 import bisect
-from collections import OrderedDict, defaultdict, namedtuple, Counter
+from collections import OrderedDict, defaultdict, namedtuple
 from enum import Enum
 from itertools import product
 import re
-import struct
-from typing import NamedTuple, FrozenSet, List, Tuple, Union, Optional
+from typing import NamedTuple, FrozenSet, List, Tuple, Union
 
 INSTR_FLAGS_FIELDS, INSTR_FLAGS_SIZES = zip(*[
     ("modrm_idx", 2),

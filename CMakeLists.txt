@@ -24,7 +24,7 @@ else()
     add_compile_options(-Wall -Wextra -Wpedantic -Wno-overlength-strings)
 endif()
 
-find_package(Python3 3.6 REQUIRED)
+find_package(Python3 3.9 REQUIRED)
 
 add_library(fadec)
 add_library(fadec::fadec ALIAS fadec)
