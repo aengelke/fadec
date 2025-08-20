@@ -53,6 +53,39 @@ typedef int64_t FeOp;
 #define FE_RC_RU 0x1000000
 #define FE_RC_RZ 0x1800000
 
+enum {
+    FE_CC_O = 0x0,
+    FE_CC_NO = 0x1,
+    FE_CC_C = 0x2,
+    FE_CC_B = FE_CC_C,
+    FE_CC_NAE = FE_CC_C,
+    FE_CC_NC = 0x3,
+    FE_CC_AE = FE_CC_NC,
+    FE_CC_NB = FE_CC_NC,
+    FE_CC_Z = 0x4,
+    FE_CC_E = FE_CC_Z,
+    FE_CC_NZ = 0x5,
+    FE_CC_NE = FE_CC_NZ,
+    FE_CC_BE = 0x6,
+    FE_CC_NA = FE_CC_BE,
+    FE_CC_A = 0x7,
+    FE_CC_NBE = FE_CC_A,
+    FE_CC_S = 0x8,
+    FE_CC_NS = 0x9,
+    FE_CC_P = 0xa,
+    FE_CC_PE = FE_CC_P,
+    FE_CC_NP = 0xb,
+    FE_CC_PO = FE_CC_NP,
+    FE_CC_L = 0xc,
+    FE_CC_NGE = FE_CC_L,
+    FE_CC_GE = 0xd,
+    FE_CC_NL = FE_CC_GE,
+    FE_CC_LE = 0xe,
+    FE_CC_NG = FE_CC_LE,
+    FE_CC_G = 0xf,
+    FE_CC_NLE = FE_CC_G,
+};
+
 #include <fadec-encode-public.inc>
 
 /** Do not use. **/

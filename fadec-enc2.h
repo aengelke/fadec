@@ -26,6 +26,42 @@ extern "C" {
 #define FE_RC_RU 0x40
 #define FE_RC_RZ 0x60
 
+// Condition codes
+typedef enum FeCond {
+    FE_CC_O = 0x00000,
+    FE_CC_NO = 0x10000,
+    FE_CC_C = 0x20000,
+    FE_CC_B = FE_CC_C,
+    FE_CC_NAE = FE_CC_C,
+    FE_CC_NC = 0x30000,
+    FE_CC_AE = FE_CC_NC,
+    FE_CC_NB = FE_CC_NC,
+    FE_CC_Z = 0x40000,
+    FE_CC_E = FE_CC_Z,
+    FE_CC_NZ = 0x50000,
+    FE_CC_NE = FE_CC_NZ,
+    FE_CC_BE = 0x60000,
+    FE_CC_NA = FE_CC_BE,
+    FE_CC_A = 0x70000,
+    FE_CC_NBE = FE_CC_A,
+    FE_CC_S = 0x80000,
+    FE_CC_NS = 0x90000,
+    FE_CC_P = 0xa0000,
+    FE_CC_PE = FE_CC_P,
+    FE_CC_NP = 0xb0000,
+    FE_CC_PO = FE_CC_NP,
+    FE_CC_L = 0xc0000,
+    FE_CC_NGE = FE_CC_L,
+    FE_CC_GE = 0xd0000,
+    FE_CC_NL = FE_CC_GE,
+    FE_CC_LE = 0xe0000,
+    FE_CC_NG = FE_CC_LE,
+    FE_CC_G = 0xf0000,
+    FE_CC_NLE = FE_CC_G,
+
+    FE_CC_MASK = 0xf0000
+} FeCond;
+
 typedef struct FeRegGP { unsigned char idx; } FeRegGP;
 #define FE_GP(idx) (FE_STRUCT(FeRegGP) { idx })
 #define FE_AX FE_GP(0)

@@ -402,11 +402,24 @@ try_encode:;
                 if (imm != 1) goto next;
                 immsz = 0;
             }
-        } else {
-            if (enc == ENC_D) {
-                if (UNLIKELY(opc & FE_JMPL) && opc >> 56) goto next;
-                imm -= (int64_t) *buf + opc_size(opc, epfx) + immsz;
+        } else if (enc == ENC_D) {
+            imm -= (int64_t) *buf + opc_size(opc, epfx) + immsz;
+            bool has_alt = opc >> 56 != 0;
+            bool skip_to_alt = has_alt && UNLIKELY(opc & FE_JMPL);
+            if (skip_to_alt || !op_imm_n(imm, immsz)) {
+                if (!has_alt) goto fail;
+                // JMP/Jcc special case
+                immsz = 4;
+                if (opc & 0x80) { // JMP
+                    opc -= 2; // Convert opcode 0xeb to 0xe9
+                    imm -= 3; // 3 extra immediate bytes
+                } else { // Jcc
+                    opc += 0x10010; // Add 0f escape + 0x10 to opcode
+                    imm -= 4; // 0f escape + 3 extra immediate bytes
+                }
+                if (!op_imm_n(imm, immsz)) goto fail;
             }
+        } else {
             if (!op_imm_n(imm, immsz)) goto next;
         }
     }

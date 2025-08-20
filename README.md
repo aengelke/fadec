@@ -80,6 +80,7 @@ failed |= fe_enc64(&cur, FE_ADD64rr, FE_AX, FE_CX);
 failed |= fe_enc64(&cur, FE_SUB32ri, FE_CX, 1);
 // jnz loop_tgt
 failed |= fe_enc64(&cur, FE_JNZ, (intptr_t) loop_tgt);
+// (alternatively: fe_enc64(&cur, FE_Jcc|FE_CC_NZ, (intptr_t) loop_tgt).)
 // Update previous jump to jump here. Note that we _must_ specify FE_JMPL too.
 failed |= fe_enc64(&fwd_jmp, FE_JNZ|FE_JMPL, (intptr_t) cur);
 // ret
@@ -110,6 +111,7 @@ cur += fe64_ADD64rr(cur, 0, FE_AX, FE_CX);
 cur += fe64_SUB32ri(cur, 0, FE_CX, 1);
 // jnz loop_tgt
 cur += fe64_JNZ(cur, 0, loop_tgt);
+// (alternatively: fe64_Jcc(cur, FE_CC_NZ, loop_tgt).)
 // Update previous jump to jump here. Note that we _must_ specify FE_JMPL too.
 fe64_JNZ(fwd_jmp, FE_JMPL, cur);
 // ret
@@ -132,6 +134,7 @@ The API consists of one function to handle encode requests, as well as some macr
         - `FE_JMPL`: use longest possible offset encoding, useful when jump target is not known.
         - `FE_MASK(maskreg)`: specify non-zero mask register (1--7) for instructions that support masking (suffixed with `_mask` or `_maskz`) or require a mask (AVX-512 gather/scatter).
         - `FE_RC_RN/RD/RU/RZ`: set rounding mode for instructions with static rounding control (suffixed `_er`).
+        - `FE_CC_O/NO/E/NE/...`: set condition code for instructions with unspecified condition code (`Jcc`, `SETcc`, `CMOVcc`, `CMPccXADD`).
     - `operands...`: Up to 4 instruction operands. The operand kinds must match the requirements of the mnemonic.
         - For register operands (`r`=non-mask register, `k`=mask register), use the register: `FE_AX`, `FE_AH`, `FE_XMM12`.
         - For immediate operands (`i`=regular, `a`=absolute address), use the constant: `12`, `-0xbeef`.
@@ -151,6 +154,7 @@ The API consists of one function per instruction, as well as some macros. The AP
         - `FE_ADDR32`: override address size to 32-bit.
         - `FE_JMPL`: use longest possible offset encoding, useful when jump target is not known.
         - `FE_RC_RN/RD/RU/RZ`: set rounding mode for instructions with static rounding control (suffixed `_er`).
+        - `FE_CC_O/NO/E/NE/...`: set condition code for instructions with unspecified condition code (`Jcc`, `SETcc`, `CMOVcc`, `CMPccXADD`).
     - `FeRegMASK opmask` (instructions with opmask only): specify non-zero mask register (1--7) for instructions suffixed with `_mask`/`_maskz` and AVX-512 gather/scatter.
     - `operands...`: up to four instruction operands.
         - Registers have types `FeRegGP`/`FeRegXMM`/`FeRegMASK`/etc.; byte registers accepting high-byte operands also accept `FeRegGPH`.

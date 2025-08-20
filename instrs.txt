@@ -192,7 +192,7 @@
 6d                     NP   -   -   -   -   INS+wa              ENC_REP EFL=-t------
 6e                     NP   -   -   -   -   OUTS+was        SZ8 ENC_REP EFL=-t------
 6f                     NP   -   -   -   -   OUTS+was            ENC_REP EFL=-t------
-70                     D    Jbs -   -   -   JO              F64 EFL=t-------
+70                     D    Jbs -   -   -   JO              F64 EFL=t------- ENC_CC_BEGIN
 71                     D    Jbs -   -   -   JNO             F64 EFL=t-------
 72                     D    Jbs -   -   -   JC              F64 EFL=-------t
 73                     D    Jbs -   -   -   JNC             F64 EFL=-------t
@@ -493,7 +493,7 @@ NP.0f01d7              NP   -   -   -   -   ENCLU               F=SGX
 0f35                   NP   -   -   -   -   SYSEXIT             F=686 CPL0
 NP.0f37                NP   -   -   -   -   GETSEC              F=SMX EFL=MMMMMMMM
 # 0f38, 0f3a are escape opcodes
-0f40                   RM   Gv  Ev  -   -   CMOVO               F=CMOV EFL=t-------
+0f40                   RM   Gv  Ev  -   -   CMOVO               F=CMOV EFL=t------- ENC_CC_BEGIN
 0f41                   RM   Gv  Ev  -   -   CMOVNO              F=CMOV EFL=t-------
 0f42                   RM   Gv  Ev  -   -   CMOVC               F=CMOV EFL=-------t
 0f43                   RM   Gv  Ev  -   -   CMOVNC              F=CMOV EFL=-------t
@@ -509,7 +509,7 @@ NP.0f37                NP   -   -   -   -   GETSEC              F=SMX EFL=MMMMMM
 0f4d                   RM   Gv  Ev  -   -   CMOVGE              F=CMOV EFL=t--t----
 0f4e                   RM   Gv  Ev  -   -   CMOVLE              F=CMOV EFL=t--tt---
 0f4f                   RM   Gv  Ev  -   -   CMOVG               F=CMOV EFL=t--tt---
-0f80                   D    Jz  -   -   -   JO              F64 EFL=t-------
+0f80                   D    Jz  -   -   -   JO              F64 EFL=t------- ENC_CC_BEGIN
 0f81                   D    Jz  -   -   -   JNO             F64 EFL=t-------
 0f82                   D    Jz  -   -   -   JC              F64 EFL=-------t
 0f83                   D    Jz  -   -   -   JNC             F64 EFL=-------t
@@ -525,7 +525,7 @@ NP.0f37                NP   -   -   -   -   GETSEC              F=SMX EFL=MMMMMM
 0f8d                   D    Jz  -   -   -   JGE             F64 EFL=t--t----
 0f8e                   D    Jz  -   -   -   JLE             F64 EFL=t--tt---
 0f8f                   D    Jz  -   -   -   JG              F64 EFL=t--tt---
-0f90                   M    Eb  -   -   -   SETO            SZ8 EFL=t-------
+0f90                   M    Eb  -   -   -   SETO            SZ8 EFL=t------- ENC_CC_BEGIN
 0f91                   M    Eb  -   -   -   SETNO           SZ8 EFL=t-------
 0f92                   M    Eb  -   -   -   SETC            SZ8 EFL=-------t
 0f93                   M    Eb  -   -   -   SETNC           SZ8 EFL=-------t
@@ -1747,7 +1747,7 @@ F3.0f38fc/m            MR   My  Gy  -   -   AXOR                F=RAO-INT
 F2.0f38fc/m            MR   My  Gy  -   -   AOR                 F=RAO-INT
 
 # CMPCCXADD
-VEX.66.L0.0f38e0/m     MRV  My  Gy  By  -   CMPOXADD    O64     F=CMPCCXADD EFL=m--mmmmm
+VEX.66.L0.0f38e0/m     MRV  My  Gy  By  -   CMPOXADD    O64     F=CMPCCXADD EFL=m--mmmmm ENC_CC_BEGIN
 VEX.66.L0.0f38e1/m     MRV  My  Gy  By  -   CMPNOXADD   O64     F=CMPCCXADD EFL=m--mmmmm
 VEX.66.L0.0f38e2/m     MRV  My  Gy  By  -   CMPBXADD    O64     F=CMPCCXADD EFL=m--mmmmm
 VEX.66.L0.0f38e3/m     MRV  My  Gy  By  -   CMPNBXADD   O64     F=CMPCCXADD EFL=m--mmmmm

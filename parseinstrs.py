@@ -755,6 +755,7 @@ class EncodeVariant(NamedTuple):
     evexsae: int = 0 # 0 = no EVEX.b, 1 = EVEX.b, 2 = EVEX.b + L'L is rounding mode
     evexdisp8scale: int = 0 # EVEX disp8 shift
     downgrade: int = 0 # 0 = none, 1 = to VEX, 2 = to VEX flipping REXW
+    flexcc: bool = False # Flexible condition code
 
 def encode_mnems(entries):
     # mapping from (mnem, opsize, ots) -> (opcode, desc)
@@ -926,6 +927,11 @@ def encode_mnems(entries):
             }.get(name)
             if altname:
                 mnemonics[altname, opsize, ots].append(variant)
+            if "ENC_CC_BEGIN" in desc.flags:
+                # Replace last "O" with "cc"
+                ccname = "cc".join(name.rsplit("O", 1))
+                ccvariant = variant._replace(flexcc=True)
+                mnemonics[ccname, opsize, ots].append(ccvariant)
 
     for (mnem, opsize, ots), all_variants in mnemonics.items():
         dedup = OrderedDict()
@@ -995,6 +1001,15 @@ def encode_table(entries, args):
                     supports_high_regs.append(i)
 
         alt_indices = [i + len(alt_table) for i in range(len(variants) - 1)] + [0]
+
+        if variants[0][1].encoding == "D":
+            assert 1 <= len(variants) <= 2
+            # We handle jump (jmp/jcc) alternatives in code to support Jcc.
+            if len(variants) > 1:
+                assert variants[0][1].mnemonic[:1] == "J"
+                variants = variants[:1]
+                alt_indices = [0xff]
+
         enc_opcs = []
         for alt, variant in zip(alt_indices, variants):
             opcode, desc = variant.opcode, variant.desc
@@ -1118,7 +1133,8 @@ def encode2_gen_legacy(variant: EncodeVariant, opsize: int, supports_high_regs: 
             code += f"  buf[idx++] = 0x38;\n"
         elif opcode.escape == 3:
             code += f"  buf[idx++] = 0x3A;\n"
-    code += f"  buf[idx++] = {opcode.opc:#x};\n"
+    opcodestr = f"{opcode.opc:#x}" + ("|(flags>>16)" if variant.flexcc else "")
+    code += f"  buf[idx++] = {opcodestr};\n"
     if None not in opcode.modrm:
         opcext = 0xc0 | opcode.modrm[1] << 3 | opcode.modrm[2]
         code += f"  buf[idx++] = {opcext:#x};\n"
@@ -1168,6 +1184,8 @@ def encode2_gen_vex(variant: EncodeVariant, imm_expr: str, imm_size_expr: str, h
     helperopc |= 0x1000000 if variant.downgrade in (1, 2) else 0
     helperopc |= 0x2000000 if variant.downgrade == 2 else 0
     helperopc = f"{helperopc:#x}"
+    if variant.flexcc:
+        helperopc += "|(flags&FE_CC_MASK)"
     if variant.evexsae == 2:
         helperopc += "|(flags&FE_RC_MASK)"
     if variant.evexmask:
