@@ -49,6 +49,15 @@ enc_seg67(uint8_t* buf, unsigned flags) {
     return idx;
 }
 
+static unsigned
+enc_rex_mem(FeMem op0, uint64_t op1) {
+    // Essentially just an and+or due to struct layout.
+    uint32_t val = op1 | op0.flags | (op_mem_base(op0) << 8) | (op_mem_idx(op0) << 24);
+    // Combine REX.RXB using multiplication for branch-less code.
+    uint32_t masked = val & 0x08000808;
+    return masked ? (uint8_t) (masked * (1|(1<<15)|(1<<25)) >> 26) + 0x40 : 0;
+}
+
 static void
 enc_imm(uint8_t* buf, uint64_t imm, unsigned immsz) {
     for (unsigned i = 0; i < immsz; i++)

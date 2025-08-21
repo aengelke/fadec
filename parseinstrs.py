@@ -1098,13 +1098,15 @@ def encode2_gen_legacy(variant: EncodeVariant, opsize: int, supports_high_regs: 
     for i in supports_high_regs:
         rex_expr += f"|(op_reg_idx(op{i}) >= 4 && op_reg_idx(op{i}) <= 15?0x40:0)"
     if flags.modrm_idx:
+        has_modreg_rex = False
+        if flags.modreg_idx:
+            has_modreg_rex = desc.operands[flags.modreg_idx^3].kind in ("GP", "XMM", "CR", "DR")
         if opcode.modrm[0] == "m":
-            rex_expr += f"|(op_mem_base(op{flags.modrm_idx^3})&8?0x41:0)"
-            rex_expr += f"|(op_mem_idx(op{flags.modrm_idx^3})&8?0x42:0)"
+            rex_modreg_op = f"op_reg_idx(op{flags.modreg_idx^3})" if has_modreg_rex else "0"
+            rex_expr += f"|enc_rex_mem(op{flags.modrm_idx^3}, {rex_modreg_op})"
         elif desc.operands[flags.modrm_idx^3].kind in ("GP", "XMM"):
             rex_expr += f"|(op_reg_idx(op{flags.modrm_idx^3})&8?0x41:0)"
-        if flags.modreg_idx:
-            if desc.operands[flags.modreg_idx^3].kind in ("GP", "XMM", "CR", "DR"):
+            if has_modreg_rex:
                 rex_expr += f"|(op_reg_idx(op{flags.modreg_idx^3})&8?0x44:0)"
     elif flags.modreg_idx: # O encoding
         if desc.operands[flags.modreg_idx^3].kind in ("GP", "XMM"):
