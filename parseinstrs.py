@@ -1094,26 +1094,31 @@ def encode2_gen_legacy(variant: EncodeVariant, opsize: int, supports_high_regs: 
     flags = ENCODINGS[variant.desc.encoding]
     code = ""
 
-    rex_expr = "0" if opcode.rexw != "1" else "0x48"
+    rex_expr = [] if opcode.rexw != "1" else ["0x48"]
+    rex_values = set()
     for i in supports_high_regs:
-        rex_expr += f"|(op_reg_idx(op{i}) >= 4 && op_reg_idx(op{i}) <= 15?0x40:0)"
+        rex_expr.append(f"(op_reg_idx(op{i}) >= 4 && op_reg_idx(op{i}) <= 15?0x40:0)")
+        rex_values.add(0x40)
+    has_modreg_rex = False
+    if flags.modreg_idx:
+        has_modreg_rex = desc.operands[flags.modreg_idx^3].kind in ("GP", "XMM", "CR", "DR")
     if flags.modrm_idx:
-        has_modreg_rex = False
-        if flags.modreg_idx:
-            has_modreg_rex = desc.operands[flags.modreg_idx^3].kind in ("GP", "XMM", "CR", "DR")
         if opcode.modrm[0] == "m":
             rex_modreg_op = f"op_reg_idx(op{flags.modreg_idx^3})" if has_modreg_rex else "0"
-            rex_expr += f"|enc_rex_mem(op{flags.modrm_idx^3}, {rex_modreg_op})"
+            rex_expr.append(f"enc_rex_mem(op{flags.modrm_idx^3}, {rex_modreg_op})")
+            rex_values |= {0x41, 0x42, 0x44}
         elif desc.operands[flags.modrm_idx^3].kind in ("GP", "XMM"):
-            rex_expr += f"|(op_reg_idx(op{flags.modrm_idx^3})&8?0x41:0)"
+            rex_expr.append(f"(op_reg_idx(op{flags.modrm_idx^3})&8?0x1:0)")
+            rex_values.add(0x41)
             if has_modreg_rex:
-                rex_expr += f"|(op_reg_idx(op{flags.modreg_idx^3})&8?0x44:0)"
-    elif flags.modreg_idx: # O encoding
-        if desc.operands[flags.modreg_idx^3].kind in ("GP", "XMM"):
-            rex_expr += f"|(op_reg_idx(op{flags.modreg_idx^3})&8?0x41:0)"
+                rex_expr.append(f"(op_reg_idx(op{flags.modreg_idx^3})&8?0x4:0)")
+                rex_values.add(0x44)
+    elif has_modreg_rex: # O encoding
+        rex_expr.append(f"(op_reg_idx(op{flags.modreg_idx^3})&8?0x1:0)")
+        rex_values.add(0x41)
 
-    if rex_expr != "0":
-        code += f"  unsigned rex = {rex_expr};\n"
+    if rex_expr:
+        code += f"  unsigned rex = {'|'.join(rex_expr) or '0'};\n"
     for i in supports_high_regs:
         code += f"  if (rex && op_reg_gph(op{i})) return 0;\n"
 
@@ -1127,8 +1132,12 @@ def encode2_gen_legacy(variant: EncodeVariant, opsize: int, supports_high_regs: 
         code += f"  buf[idx++] = 0x{opcode.prefix};\n"
     if opcode.rexw == "1":
         code += f"  buf[idx++] = rex;\n"
-    elif rex_expr != "0":
-        code += f"  if (rex) buf[idx++] = rex;\n"
+    elif len(rex_values) == 1:
+        code += f"  buf[idx] = {next(iter(rex_values))};\n  idx += rex != 0;\n"
+    elif len(rex_values) == 2:
+        code += f"  buf[idx] = 0x40|rex;\n  idx += rex != 0;\n"
+    elif rex_expr: # memory, multiplication is expensive
+        code += f"  if (rex) buf[idx++] = 0x40|rex;\n"
     if opcode.escape:
         code += f"  buf[idx++] = 0x0F;\n"
         if opcode.escape == 2:
