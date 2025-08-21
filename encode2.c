@@ -60,6 +60,14 @@ enc_rex_mem(FeMem op0, uint64_t op1) {
 
 static void
 enc_imm(uint8_t* buf, uint64_t imm, unsigned immsz) {
+#ifdef __GNUC__
+    // Clang doesn't fold the loop into a single store.
+    // See: https://github.com/llvm/llvm-project/issues/154696
+    if (__builtin_constant_p(immsz)) {
+        __builtin_memcpy(buf, &imm, immsz);
+        return;
+    }
+#endif
     for (unsigned i = 0; i < immsz; i++)
         *buf++ = imm >> 8 * i;
 }
