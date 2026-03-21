@@ -196,7 +196,6 @@ fd_mnemonic(char buf[DECLARE_RESTRICTED_ARRAY_SIZE(48)], const FdInstr* instr) {
     unsigned mnemlen = mnemonic_lens[FD_TYPE(instr)];
 
     bool prefix_xacq_xrel = false;
-    bool prefix_segment = false;
 
     char sizesuffix[4] = {0};
     unsigned sizesuffixlen = 0;
@@ -278,8 +277,6 @@ fd_mnemonic(char buf[DECLARE_RESTRICTED_ARRAY_SIZE(48)], const FdInstr* instr) {
     case FDI_MOVS:
     case FDI_CMPS:
     case FDI_OUTS:
-        prefix_segment = true;
-        FALLTHROUGH();
     case FDI_STOS:
     case FDI_SCAS:
     case FDI_INS:
@@ -317,10 +314,52 @@ fd_mnemonic(char buf[DECLARE_RESTRICTED_ARRAY_SIZE(48)], const FdInstr* instr) {
     }
     if (UNLIKELY(FD_HAS_LOCK(instr)))
         buf = fd_strpcat(buf, fd_stre("lock "));
-    if (UNLIKELY(prefix_segment && FD_SEGMENT(instr) != FD_REG_NONE)) {
-        *buf++ = "ecsdfg\0"[FD_SEGMENT(instr) & 7];
-        *buf++ = 's';
-        *buf++ = ' ';
+    // FD_SEGMENT() ignores 3e in 64-bit mode.
+    if (UNLIKELY(instr->segment != FD_REG_NONE)) {
+        if (FD_HAS_3E(instr)) {
+            switch (FD_TYPE(instr)) {
+            case FDI_CALL:
+            case FDI_JMP:
+                if (FD_OP_TYPE(instr, 0) == FD_OT_REG ||
+                     FD_OP_TYPE(instr, 0) == FD_OT_MEM)
+                    buf = fd_strpcat(buf, fd_stre("notrack "));
+                break;
+            case FDI_JO:
+            case FDI_JNO:
+            case FDI_JC:
+            case FDI_JNC:
+            case FDI_JZ:
+            case FDI_JNZ:
+            case FDI_JBE:
+            case FDI_JA:
+            case FDI_JS:
+            case FDI_JNS:
+            case FDI_JP:
+            case FDI_JNP:
+            case FDI_JL:
+            case FDI_JGE:
+            case FDI_JLE:
+            case FDI_JG:
+                buf = fd_strpcat(buf, fd_stre("hint-taken "));
+                break;
+            default:
+                break;
+            }
+        }
+        if (FD_SEGMENT(instr) != FD_REG_NONE) {
+            switch (FD_TYPE(instr)) {
+            case FDI_LODS:
+            case FDI_MOVS:
+            case FDI_CMPS:
+            case FDI_OUTS:
+                *buf++ = "ecsdfg\0"[FD_SEGMENT(instr) & 7];
+                *buf++ = 's';
+                *buf++ = ' ';
+                break;
+            default:
+                break;
+            }
+        }
     }
 
     for (unsigned i = 0; i < 20; i++)

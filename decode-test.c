@@ -1720,6 +1720,44 @@ main(int argc, char** argv)
     TEST("\xdb\x28", "fld tbyte ptr [@ax]");
     TEST("\xd9\x20", "fldenv [@ax]");
 
+    // Branch prefix 3e (CET, branch-taken hint)
+    TEST("\x3e\xff\xe0", "notrack jmp @ax");
+    TEST("\x2e\x3e\xff\xe0", "notrack jmp @ax");
+    TEST("\x26\x2e\x3e\xff\xe0", "notrack jmp @ax");
+    TEST("\x26\x36\x2e\x3e\xff\xe0", "notrack jmp @ax");
+    TEST("\x3e\x64\xff\xe0", "jmp @ax");
+    TEST("\x3e\x65\xff\xe0", "jmp @ax");
+    TEST("\x3e\x64\x65\xff\xe0", "jmp @ax");
+    TEST3264("\x3e\x2e\xff\xe0", "jmp eax", "notrack jmp rax");
+    TEST3264("\x3e\x2e\x26\xff\xe0", "jmp eax", "notrack jmp rax");
+    TEST3264("\x26\x3e\x2e\xff\xe0", "jmp eax", "notrack jmp rax");
+    TEST3264("\x64\x3e\xff\xe0", "notrack jmp eax", "jmp rax");
+    TEST3264("\x64\x3e\xff\xe0", "notrack jmp eax", "jmp rax");
+    TEST("\x3e\xff\xd0", "notrack call @ax");
+    TEST("\x2e\x3e\xff\xd0", "notrack call @ax");
+    TEST("\x26\x2e\x3e\xff\xd0", "notrack call @ax");
+    TEST("\x26\x36\x2e\x3e\xff\xd0", "notrack call @ax");
+    TEST("\x3e\x64\xff\xd0", "call @ax");
+    TEST("\x3e\x65\xff\xd0", "call @ax");
+    TEST("\x3e\x64\x65\xff\xd0", "call @ax");
+    TEST3264("\x3e\x2e\xff\xd0", "call eax", "notrack call rax");
+    TEST3264("\x3e\x2e\x26\xff\xd0", "call eax", "notrack call rax");
+    TEST3264("\x26\x3e\x2e\xff\xd0", "call eax", "notrack call rax");
+    TEST3264("\x64\x3e\xff\xd0", "notrack call eax", "call rax");
+    TEST3264("\x64\x3e\xff\xd0", "notrack call eax", "call rax");
+    TEST("\x3e\x78\x00", "hint-taken js 0x3");
+    TEST("\x2e\x3e\x78\x00", "hint-taken js 0x4");
+    TEST("\x26\x2e\x3e\x78\x00", "hint-taken js 0x5");
+    TEST("\x26\x36\x2e\x3e\x78\x00", "hint-taken js 0x6");
+    TEST("\x3e\x64\x78\x00", "js 0x4");
+    TEST("\x3e\x65\x78\x00", "js 0x4");
+    TEST("\x3e\x64\x65\x78\x00", "js 0x5");
+    TEST3264("\x3e\x2e\x78\x00", "js 0x4", "hint-taken js 0x4");
+    TEST3264("\x3e\x2e\x26\x78\x00", "js 0x5", "hint-taken js 0x5");
+    TEST3264("\x26\x3e\x2e\x78\x00", "js 0x5", "hint-taken js 0x5");
+    TEST3264("\x64\x3e\x78\x00", "hint-taken js 0x4", "js 0x4");
+    TEST3264("\x64\x3e\x78\x00", "hint-taken js 0x4", "js 0x4");
+
     // MPX
 #if 0
     TEST("\x66\x0f\x1a\xc1", "bndmov bnd0, bnd1");

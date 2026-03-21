@@ -211,6 +211,9 @@ const char* fdi_name(FdInstrType ty);
 #define FD_HAS_REPNZ(instr) ((instr)->flags & FD_FLAG_REPNZ)
 /** Indicates whether the instruction was encoded with a LOCK prefix. **/
 #define FD_HAS_LOCK(instr) ((instr)->flags & FD_FLAG_LOCK)
+/** Indicates whether there is a meaningful 3E prefix used for indirect JMP
+ * (notrack prefix) and conditional branches (hint-taken prefix). **/
+#define FD_HAS_3E(instr) ((instr)->segment & 0x40)
 /** Do not use. **/
 #define FD_IS64(instr) ((instr)->flags & FD_FLAG_64)
 

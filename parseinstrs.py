@@ -662,18 +662,22 @@ def decode_table(entries, args):
     trie = Trie(root_count=len(modes))
     for i, mode in enumerate(modes):
         # Magic values must match PF_* enum in decode.c.
-        trie.add_prefix(0x66, 0xfffa, i)
-        trie.add_prefix(0x67, 0xfffb, i)
-        trie.add_prefix(0xf0, 0xfffc, i)
-        trie.add_prefix(0xf2, 0xfffd, i)
-        trie.add_prefix(0xf3, 0xfffd, i)
+        trie.add_prefix(0x66, 0xfffb, i)
+        trie.add_prefix(0x67, 0xfffc, i)
+        trie.add_prefix(0xf0, 0xfffd, i)
+        trie.add_prefix(0xf2, 0xfffe, i)
+        trie.add_prefix(0xf3, 0xfffe, i)
         trie.add_prefix(0x64, 0xfff9, i)
         trie.add_prefix(0x65, 0xfff9, i)
-        for seg in (0x26, 0x2e, 0x36, 0x3e):
-            trie.add_prefix(seg, 0xfff8 + (mode <= 32), i)
-        if mode > 32:
+        if mode <= 32:
+            for seg in (0x26, 0x2e, 0x36, 0x3e):
+                trie.add_prefix(seg, 0xfff9, i)
+        else:
+            for seg in (0x26, 0x2e, 0x36):
+                trie.add_prefix(seg, 0xfff8, i)
+            trie.add_prefix(0x3e, 0xfffa, i)
             for rex in range(0x40, 0x50):
-                trie.add_prefix(rex, 0xfffe, i)
+                trie.add_prefix(rex, 0xffff, i)
 
     # pause is hardcoded together with XCHG_NOP.
     mnems, descs, desc_map = {"PAUSE"}, [], {}

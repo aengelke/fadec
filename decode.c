@@ -141,13 +141,18 @@ fd_decode(const uint8_t* buffer, size_t len_sz, int mode_int, uintptr_t address,
 
     // Values must match prefixes in parseinstrs.py.
     enum {
+        // Null prefix. 64-bit: 26/2e/36
         PF_SEG1 = 0xfff8 - 0xfff8,
+        // Segment override. 32-bit: 26/2e/36/3e/64/65; 64-bit: 64/65
         PF_SEG2 = 0xfff9 - 0xfff8,
-        PF_66 = 0xfffa - 0xfff8,
-        PF_67 = 0xfffb - 0xfff8,
-        PF_LOCK = 0xfffc - 0xfff8,
-        PF_REP = 0xfffd - 0xfff8,
-        PF_REX = 0xfffe - 0xfff8,
+        // 3e prefix in 64-bit mode for notrack/bht.
+        PF_SEG3 = 0xfffa - 0xfff8,
+        PF_66 = 0xfffb - 0xfff8,
+        PF_67 = 0xfffc - 0xfff8,
+        PF_LOCK = 0xfffd - 0xfff8,
+        // Repeat prefix: f2/f3
+        PF_REP = 0xfffe - 0xfff8,
+        PF_REX = 0xffff - 0xfff8,
     };
 
     uint8_t prefixes[8] = {0};
@@ -164,11 +169,18 @@ fd_decode(const uint8_t* buffer, size_t len_sz, int mode_int, uintptr_t address,
         off++;
     }
     if (off) {
-        if (UNLIKELY(prefixes[PF_SEG2])) {
-            if (prefixes[PF_SEG2] & 0x02)
+        if (UNLIKELY(prefixes[PF_SEG2] || prefixes[PF_SEG3])) {
+            if (prefixes[PF_SEG2] & 0x02) {
+                ASSUME(mode == DECODE_32); // 26/2e/36/3e, 32-bit mode only.
                 instr->segment = prefixes[PF_SEG2] >> 3 & 3;
-            else
+                if (instr->segment == FD_REG_DS)
+                    instr->segment |= 0x40; // Set 3e bit.
+            } else if (prefixes[PF_SEG2]) {
                 instr->segment = prefixes[PF_SEG2] & 7;
+            } else {
+                ASSUME(mode == DECODE_64); // 3e, 64-bit mode only.
+                instr->segment = 0x40 | FD_REG_NONE; // Set 3e bit.
+            }
         }
         if (UNLIKELY(prefixes[PF_67]))
             addr_size--;

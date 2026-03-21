@@ -169,7 +169,6 @@ The API consists of one function per instruction, as well as some macros. The AP
     - VSIB-encoded instructions: no vector register may be used more than once
     - AMX instructions: no tile register may be used more than once
     - AVX-512 complex FP16 multiplication: destination must be not be equal to a source register
-- Prefixes for indirect jumps and calls are not properly decoded, e.g. `notrack`, `bnd`.
 - Low test coverage. (Help needed.)
 - No Python API.
 
