@@ -71,6 +71,10 @@ main(int argc, char** argv)
     int failed = 0;
 
     TEST("\x90", "nop");
+    TEST64("\xd6", "udb");
+    TEST("\x0f\xff\xc0", "ud0 eax, eax");
+    TEST("\x0f\xb9\xc0", "ud1 eax, eax");
+    TEST("\x0f\x0b", "ud2");
     TEST("\xac", "lodsb");
     TEST3264("\x26\xac", "es lodsb", "lodsb");
     TEST3264("\x2e\xac", "cs lodsb", "lodsb");

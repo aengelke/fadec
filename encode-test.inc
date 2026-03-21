@@ -1,4 +1,8 @@
 
+TEST("\xd6", UDB, 0);
+TEST("\x0f\xff\xc0", UD0_32rr, 0, FE_AX, FE_AX);
+TEST("\x0f\xb9\xc0", UD1_32rr, 0, FE_AX, FE_AX);
+TEST("\x0f\x0b", UD2, 0);
 TEST("\00\xe0", ADD8rr, 0, FE_AX, FE_AH);
 TEST("", ADD8rr, 0, FE_SI, FE_AH);
 TEST("\xeb\xfe", JMP, 0, FE_PTR(0));

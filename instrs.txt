@@ -363,6 +363,7 @@ d3/7                   MC   Ev  Rb  -   -   SAR                 EFL=m--mmumm
 d4                     I    Ib  -   -   -   AAM         I64 SZ8 EFL=u--mmumu
 d5                     I    Ib  -   -   -   AAD         I64 SZ8 EFL=u--mmumu
 d6                     NP   -   -   -   -   SALC        I64     UNDOC
+d6                     NP   -   -   -   -   UDB         O64
 d7                     NP   -   -   -   -   XLATB+as
 #d8-df FPU Escape
 e0                     D    Jbs -   -   -   LOOPNZ+a        F64 EFL=----t---
