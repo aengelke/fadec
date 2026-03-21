@@ -413,10 +413,6 @@ def verifyOpcodeDesc(opcode, desc):
         raise Exception(f"(E)VEX.LIG with dynamic vector size {opcode}, {desc}")
     if "VSIB" in desc.flags and opcode.modrm[0] != "m":
         raise Exception(f"VSIB for non-memory opcode {opcode}, {desc}")
-    if opcode.vex == 2 and flags.vexreg_idx:
-        # Checking this here allows to omit check for V' in decoder.
-        if desc.operands[flags.vexreg_idx ^ 3].kind != "XMM":
-            raise Exception(f"EVEX.vvvv must refer to XMM {opcode}, {desc}")
     if opcode.vex == 2 and flags.modreg_idx and flags.modreg_idx ^ 3 != 0:
         # EVEX.z=0 is only checked for mask operands in ModReg
         if desc.operands[flags.modreg_idx ^ 3].kind == "MASK":

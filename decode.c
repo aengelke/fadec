@@ -626,6 +626,8 @@ direct:
                 // In 64-bit mode: UD if FD_RT_MASK and vex_operand&8 != 0
                 if (reg_ty == 2 && vex_operand >= 8)
                     return FD_ERR_UD;
+                if (reg_ty == 1 && vex_operand >= 16)
+                    return FD_ERR_UD;
                 if (UNLIKELY(reg_ty == 3)) // TMM
                     operand->reg &= 0x7; // TODO: verify
                 operand->misc = (06710 >> (3 * reg_ty)) & 0x7;

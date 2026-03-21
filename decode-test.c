@@ -1845,6 +1845,14 @@ main(int argc, char** argv)
     TEST64("\xc4\xe2\x68\x6c\xc8", "tcmmrlfp16ps tmm1, tmm0, tmm2");
     TEST64("\xc4\xe2\x69\x6c\xc8", "tcmmimfp16ps tmm1, tmm0, tmm2");
 
+    // AMX-AVX512
+    TEST64("\x62\xf2\x7d\x48\x4a\xc0", "tilemovrow zmm0, tmm0, eax");
+    TEST64("\x62\x62\x05\x48\x4a\xf7", "tilemovrow zmm30, tmm7, r15d");
+    TEST64("\x62\xf3\x7d\x48\x07\xc0\x01", "tilemovrow zmm0, tmm0, 0x1");
+    TEST64("\x62\x63\x7d\x48\x07\xf7\x7f", "tilemovrow zmm30, tmm7, 0x7f");
+    TEST64("\x62\xf2\x7d\x40\x4a\xc0", "UD"); // EVEX.V' is UD (until APX)
+    TEST64("\x62\xf2\x7d\x48\x4a\x00", "UD"); // memory operand is UD
+
     // Complete test of VADDPS and all encoding options
     TEST("\x62", "PARTIAL");
     TEST("\x62\xf1", "PARTIAL");
