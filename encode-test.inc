@@ -1,2196 +1,2196 @@
 
-TEST("\xd6", UDB, 0);
-TEST("\x0f\xff\xc0", UD0_32rr, 0, FE_AX, FE_AX);
-TEST("\x0f\xb9\xc0", UD1_32rr, 0, FE_AX, FE_AX);
-TEST("\x0f\x0b", UD2, 0);
-TEST("\00\xe0", ADD8rr, 0, FE_AX, FE_AH);
-TEST("", ADD8rr, 0, FE_SI, FE_AH);
-TEST("\xeb\xfe", JMP, 0, FE_PTR(0));
-TEST("\xeb\x7f", JMP, 0, FE_PTR(129));
-TEST("\xe9\x7d\x00\x00\x00", JMP, 0, FE_PTR(130));
-TEST("\xeb\x80", JMP, 0, FE_PTR(-126));
-TEST("\xe9\x7c\xff\xff\xff", JMP, 0, FE_PTR(-127));
-TEST("\xe9\xfb\xff\xff\xff", JMP, FE_JMPL, FE_PTR(0));
-TEST("\xe9\x00\x00\x00\x00", JMP, FE_JMPL, FE_PTR(5));
-TEST("\x75\x00", JNZ, 0, FE_PTR(2));
-TEST("\x0f\x85\x00\x00\x00\x00", JNZ, FE_JMPL, FE_PTR(6));
-TEST("\x70\x7f", JO, 0, FE_PTR(129));
-TEST("\x0f\x80\x7c\x00\x00\x00", JO, 0, FE_PTR(130));
-TEST("\x70\x80", JO, 0, FE_PTR(-126));
-TEST("\x0f\x80\x7b\xff\xff\xff", JO, 0, FE_PTR(-127));
-TEST("\xe3\xfc", JCXZ, 0, FE_PTR(-2));
-TEST("\x67\xe3\xfb", JCXZ, FE_ADDR32, FE_PTR(-2));
-TEST("\xe3\xfc", JCXZ, FE_JMPL, FE_PTR(-2));
-TEST("\xac", LODS8, 0);
-TEST("\x67\xac", LODS8, FE_ADDR32);
-TEST("\x50", PUSHr, 0, FE_AX);
-TEST("\x66\x50", PUSH16r, 0, FE_AX);
-TEST("\x54", PUSHr, 0, FE_SP);
-TEST("\x41\x57", PUSHr, 0, FE_R15);
-TEST("\x41\x50", PUSHr, 0, FE_R8);
-TEST("", PUSH_SEGr, 0, FE_ES);
-TEST("", PUSH_SEG16r, 0, FE_ES);
-TEST("", PUSH_SEGr, 0, FE_CS);
-TEST("", PUSH_SEG16r, 0, FE_CS);
-TEST("", PUSH_SEGr, 0, FE_SS);
-TEST("", PUSH_SEG16r, 0, FE_SS);
-TEST("", PUSH_SEGr, 0, FE_DS);
-TEST("", PUSH_SEG16r, 0, FE_DS);
-TEST("\x0f\xa0", PUSH_SEGr, 0, FE_FS);
-TEST("\x66\x0f\xa0", PUSH_SEG16r, 0, FE_FS);
-TEST("\x0f\xa8", PUSH_SEGr, 0, FE_GS);
-TEST("\x66\x0f\xa8", PUSH_SEG16r, 0, FE_GS);
-TEST("\xff\x30", PUSHm, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0));
-TEST("\xff\x31", PUSHm, 0, FE_MEM(FE_CX, 0, FE_NOREG, 0));
-TEST("\x9c", PUSHF, 0);
-TEST("\x8c\xc0", MOV_S2Grr, 0, FE_AX, FE_ES);
-TEST("\x8c\xc8", MOV_S2Grr, 0, FE_AX, FE_CS);
-TEST("\x8c\xd0", MOV_S2Grr, 0, FE_AX, FE_SS);
-TEST("\x8c\xd8", MOV_S2Grr, 0, FE_AX, FE_DS);
-TEST("\x8c\xe0", MOV_S2Grr, 0, FE_AX, FE_FS);
-TEST("\x8c\xe8", MOV_S2Grr, 0, FE_AX, FE_GS);
-TEST("\x8e\xc0", MOV_G2Srr, 0, FE_ES, FE_AX);
-// TEST("", MOV_G2Srr, 0, FE_CS, FE_AX);
-TEST("\x8e\xd0", MOV_G2Srr, 0, FE_SS, FE_AX);
-TEST("\x8e\xd8", MOV_G2Srr, 0, FE_DS, FE_AX);
-TEST("\x8e\xe0", MOV_G2Srr, 0, FE_FS, FE_AX);
-TEST("\x8e\xe8", MOV_G2Srr, 0, FE_GS, FE_AX);
-TEST("\xd2\xe4", SHL8rr, 0, FE_AH, FE_CX);
-TEST("", SHL8rr, 0, FE_AH, FE_DX);
-TEST("\xd0\xe0", SHL8ri, 0, FE_AX, 1);
-TEST("\xc0\xe0\x02", SHL8ri, 0, FE_AX, 2);
-TEST("\xc1\xe0\x02", SHL32ri, 0, FE_AX, 2);
-TEST("\x48\xc1\xe0\x02", SHL64ri, 0, FE_AX, 2);
-TEST("\x48\xf7\x28", IMUL64m, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0));
-TEST("\xc2\x00\x00", RETi, 0, 0);
-TEST("\xff\xd0", CALLr, 0, FE_AX);
-TEST("\x83\xc0\x7f", ADD32ri, 0, FE_AX, 0x7f);
-TEST("\x05\x80\x00\x00\x00", ADD32ri, 0, FE_AX, 0x80);
-TEST("\x05\x00\x01\x00\x00", ADD32ri, 0, FE_AX, 0x100);
-TEST("\x66\x05\x00\x01", ADD16ri, 0, FE_AX, 0x100);
+TEST("\xd6", UDB, 0)
+TEST("\x0f\xff\xc0", UD0_32rr, 0, FE_AX, FE_AX)
+TEST("\x0f\xb9\xc0", UD1_32rr, 0, FE_AX, FE_AX)
+TEST("\x0f\x0b", UD2, 0)
+TEST("\00\xe0", ADD8rr, 0, FE_AX, FE_AH)
+TEST("", ADD8rr, 0, FE_SI, FE_AH)
+TEST("\xeb\xfe", JMP, 0, FE_PTR(0))
+TEST("\xeb\x7f", JMP, 0, FE_PTR(129))
+TEST("\xe9\x7d\x00\x00\x00", JMP, 0, FE_PTR(130))
+TEST("\xeb\x80", JMP, 0, FE_PTR(-126))
+TEST("\xe9\x7c\xff\xff\xff", JMP, 0, FE_PTR(-127))
+TEST("\xe9\xfb\xff\xff\xff", JMP, FE_JMPL, FE_PTR(0))
+TEST("\xe9\x00\x00\x00\x00", JMP, FE_JMPL, FE_PTR(5))
+TEST("\x75\x00", JNZ, 0, FE_PTR(2))
+TEST("\x0f\x85\x00\x00\x00\x00", JNZ, FE_JMPL, FE_PTR(6))
+TEST("\x70\x7f", JO, 0, FE_PTR(129))
+TEST("\x0f\x80\x7c\x00\x00\x00", JO, 0, FE_PTR(130))
+TEST("\x70\x80", JO, 0, FE_PTR(-126))
+TEST("\x0f\x80\x7b\xff\xff\xff", JO, 0, FE_PTR(-127))
+TEST("\xe3\xfc", JCXZ, 0, FE_PTR(-2))
+TEST("\x67\xe3\xfb", JCXZ, FE_ADDR32, FE_PTR(-2))
+TEST("\xe3\xfc", JCXZ, FE_JMPL, FE_PTR(-2))
+TEST("\xac", LODS8, 0)
+TEST("\x67\xac", LODS8, FE_ADDR32)
+TEST("\x50", PUSHr, 0, FE_AX)
+TEST("\x66\x50", PUSH16r, 0, FE_AX)
+TEST("\x54", PUSHr, 0, FE_SP)
+TEST("\x41\x57", PUSHr, 0, FE_R15)
+TEST("\x41\x50", PUSHr, 0, FE_R8)
+TEST("", PUSH_SEGr, 0, FE_ES)
+TEST("", PUSH_SEG16r, 0, FE_ES)
+TEST("", PUSH_SEGr, 0, FE_CS)
+TEST("", PUSH_SEG16r, 0, FE_CS)
+TEST("", PUSH_SEGr, 0, FE_SS)
+TEST("", PUSH_SEG16r, 0, FE_SS)
+TEST("", PUSH_SEGr, 0, FE_DS)
+TEST("", PUSH_SEG16r, 0, FE_DS)
+TEST("\x0f\xa0", PUSH_SEGr, 0, FE_FS)
+TEST("\x66\x0f\xa0", PUSH_SEG16r, 0, FE_FS)
+TEST("\x0f\xa8", PUSH_SEGr, 0, FE_GS)
+TEST("\x66\x0f\xa8", PUSH_SEG16r, 0, FE_GS)
+TEST("\xff\x30", PUSHm, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0))
+TEST("\xff\x31", PUSHm, 0, FE_MEM(FE_CX, 0, FE_NOREG, 0))
+TEST("\x9c", PUSHF, 0)
+TEST("\x8c\xc0", MOV_S2Grr, 0, FE_AX, FE_ES)
+TEST("\x8c\xc8", MOV_S2Grr, 0, FE_AX, FE_CS)
+TEST("\x8c\xd0", MOV_S2Grr, 0, FE_AX, FE_SS)
+TEST("\x8c\xd8", MOV_S2Grr, 0, FE_AX, FE_DS)
+TEST("\x8c\xe0", MOV_S2Grr, 0, FE_AX, FE_FS)
+TEST("\x8c\xe8", MOV_S2Grr, 0, FE_AX, FE_GS)
+TEST("\x8e\xc0", MOV_G2Srr, 0, FE_ES, FE_AX)
+// TEST("", MOV_G2Srr, 0, FE_CS, FE_AX)
+TEST("\x8e\xd0", MOV_G2Srr, 0, FE_SS, FE_AX)
+TEST("\x8e\xd8", MOV_G2Srr, 0, FE_DS, FE_AX)
+TEST("\x8e\xe0", MOV_G2Srr, 0, FE_FS, FE_AX)
+TEST("\x8e\xe8", MOV_G2Srr, 0, FE_GS, FE_AX)
+TEST("\xd2\xe4", SHL8rr, 0, FE_AH, FE_CX)
+TEST("", SHL8rr, 0, FE_AH, FE_DX)
+TEST("\xd0\xe0", SHL8ri, 0, FE_AX, 1)
+TEST("\xc0\xe0\x02", SHL8ri, 0, FE_AX, 2)
+TEST("\xc1\xe0\x02", SHL32ri, 0, FE_AX, 2)
+TEST("\x48\xc1\xe0\x02", SHL64ri, 0, FE_AX, 2)
+TEST("\x48\xf7\x28", IMUL64m, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0))
+TEST("\xc2\x00\x00", RETi, 0, 0)
+TEST("\xff\xd0", CALLr, 0, FE_AX)
+TEST("\x83\xc0\x7f", ADD32ri, 0, FE_AX, 0x7f)
+TEST("\x05\x80\x00\x00\x00", ADD32ri, 0, FE_AX, 0x80)
+TEST("\x05\x00\x01\x00\x00", ADD32ri, 0, FE_AX, 0x100)
+TEST("\x66\x05\x00\x01", ADD16ri, 0, FE_AX, 0x100)
 #ifndef ENC_TEST_TYPESAFE
-TEST("", ADD16ri, 0, FE_AX, 0x12345);
-TEST("\x66\x05\xff\xee", ADD16ri, 0, FE_AX, 0xffffffffffffeeff);
+TEST("", ADD16ri, 0, FE_AX, 0x12345)
+TEST("\x66\x05\xff\xee", ADD16ri, 0, FE_AX, 0xffffffffffffeeff)
 #endif
-TEST("\xb8\x05\x00\x01\x00", MOV32ri, 0, FE_AX, 0x10005);
-TEST("\xb8\xff\xff\xff\x7f", MOV32ri, 0, FE_AX, 0x7fffffff);
-TEST("\x48\xb8\x05\x00\x01\x00\xff\x00\x00\x00", MOV64ri, 0, FE_AX, 0xff00010005);
-TEST("\x48\xc7\xc0\x00\x00\x00\x00", MOV64ri, 0, FE_AX, 0x0);
-TEST("\x48\xc7\xc0\x00\x00\x00\x80", MOV64ri, 0, FE_AX, (int32_t) 0x80000000);
-TEST("\x48\xb8\x00\x00\x00\x00\x00\x00\x00\x80", MOV64ri, 0, FE_AX, INT64_MIN);
-TEST("\x48\xb8\x00\x00\x00\x80\x00\x00\x00\x00", MOV64ri, 0, FE_AX, 0x80000000);
-TEST("\xb0\xff", MOV8ri, 0, FE_AX, (int8_t) 0xff);
-TEST("\xb4\xff", MOV8ri, 0, FE_AH, -1);
-TEST("\xb7\x64", MOV8ri, 0, FE_BH, 0x64);
-TEST("\x40\xb6\x64", MOV8ri, 0, FE_SI, 0x64);
-TEST("\x41\xb6\x64", MOV8ri, 0, FE_R14, 0x64);
-TEST("\x66\x0f\xbe\xc2", MOVSXr16r8, 0, FE_AX, FE_DX);
-TEST("\x0f\xbe\xc2", MOVSXr32r8, 0, FE_AX, FE_DX);
-TEST("\x48\x0f\xbe\xc2", MOVSXr64r8, 0, FE_AX, FE_DX);
-TEST("\x66\x0f\xbe\xc6", MOVSXr16r8, 0, FE_AX, FE_DH);
-TEST("\x0f\xbe\xc6", MOVSXr32r8, 0, FE_AX, FE_DH);
-TEST("", MOVSXr64r8, 0, FE_AX, FE_DH);
-TEST("\x66\x0f\xbf\xc2", MOVSXr16r16, 0, FE_AX, FE_DX);
-TEST("\x0f\xbf\xc2", MOVSXr32r16, 0, FE_AX, FE_DX);
-TEST("\x48\x0f\xbf\xc2", MOVSXr64r16, 0, FE_AX, FE_DX);
-TEST("\x66\x63\xc2", MOVSXr16r32, 0, FE_AX, FE_DX);
-TEST("\x63\xc2", MOVSXr32r32, 0, FE_AX, FE_DX);
-TEST("\x48\x63\xc2", MOVSXr64r32, 0, FE_AX, FE_DX);
-TEST("\xc8\x33\x22\x11", ENTERi, 0, 0x112233);
-TEST("", ENTERi, 0, 0x1112233);
-TEST("\x0f\x05", SYSCALL, 0);
-TEST("\x0f\x90\xc4", SETO8r, 0, FE_AH);
-TEST("\x40\x0f\x90\xc4", SETO8r, 0, FE_SP);
-TEST("\x41\x0f\x90\xc4", SETO8r, 0, FE_R12);
-TEST("\xf3\x0f\xb8\xc2", POPCNT32rr, 0, FE_AX, FE_DX);
-TEST("\x66\xf3\x0f\xb8\xc2", POPCNT16rr, 0, FE_AX, FE_DX);
-TEST("\xf3\x48\x0f\xb8\xc2", POPCNT64rr, 0, FE_AX, FE_DX);
-TEST("\x0f\xbc\xc2", BSF32rr, 0, FE_AX, FE_DX);
-TEST("\x66\x0f\xbc\xc2", BSF16rr, 0, FE_AX, FE_DX);
-TEST("\x0f\x01\xd0", XGETBV, 0);
-TEST("\x41\x90", XCHG32rr, 0, FE_R8, FE_AX);
-TEST("\x91", XCHG32rr, 0, FE_CX, FE_AX);
-TEST("\x66\x90", XCHG16rr, 0, FE_AX, FE_AX);
-TEST("\x87\xc0", XCHG32rr, 0, FE_AX, FE_AX);
-TEST("\x48\x90", XCHG64rr, 0, FE_AX, FE_AX);
-TEST("\x87\x00", XCHG32mr, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0), FE_AX);
-TEST("\x87\x08", XCHG32mr, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0), FE_CX);
-TEST("\x90", NOP, 0);
-TEST("\xf3\x90", PAUSE, 0);
-TEST("\x0f\x1f\xc0", NOP32r, 0, FE_AX);
-TEST("\x26\x01\x00", ADD32mr, FE_SEG(FE_ES), FE_MEM(FE_AX, 0, FE_NOREG, 0), FE_AX);
-TEST("\x2e\x01\x00", ADD32mr, FE_SEG(FE_CS), FE_MEM(FE_AX, 0, FE_NOREG, 0), FE_AX);
-TEST("\x36\x01\x00", ADD32mr, FE_SEG(FE_SS), FE_MEM(FE_AX, 0, FE_NOREG, 0), FE_AX);
-TEST("\x3e\x01\x00", ADD32mr, FE_SEG(FE_DS), FE_MEM(FE_AX, 0, FE_NOREG, 0), FE_AX);
-TEST("\x64\x01\x00", ADD32mr, FE_SEG(FE_FS), FE_MEM(FE_AX, 0, FE_NOREG, 0), FE_AX);
-TEST("\x65\x01\x00", ADD32mr, FE_SEG(FE_GS), FE_MEM(FE_AX, 0, FE_NOREG, 0), FE_AX);
-TEST("\x8e\xc0", MOV_G2Srr, 0, FE_ES, FE_AX);
-TEST("\xae", SCAS8, 0);
-TEST("\xf2\xae", REPNZ_SCAS8, 0);
-TEST("\xf3\xae", REPZ_SCAS8, 0);
-TEST("\x66\xab", STOS16, 0);
-TEST("\x66\xf3\xab", REP_STOS16, 0);
-TEST("\xab", STOS32, 0);
-TEST("\xf3\xab", REP_STOS32, 0);
-TEST("\x48\xab", STOS64, 0);
-TEST("\xf3\x48\xab", REP_STOS64, 0);
-TEST("\x6c", INS8, 0);
-TEST("\x67\x6c", INS8, FE_ADDR32);
-TEST("\x66\x6d", INS16, 0);
-TEST("\x67\x66\x6d", INS16, FE_ADDR32);
-TEST("\x6d", INS32, 0);
-TEST("\x67\x6d", INS32, FE_ADDR32);
-TEST("\x0f\x38\xf0\x11", MOVBE32rm, 0, FE_DX, FE_MEM(FE_CX, 0, FE_NOREG, 0));
-TEST("\x66\x0f\x38\xf0\x11", MOVBE16rm, 0, FE_DX, FE_MEM(FE_CX, 0, FE_NOREG, 0));
-TEST("\x48\x0f\x38\xf0\x11", MOVBE64rm, 0, FE_DX, FE_MEM(FE_CX, 0, FE_NOREG, 0));
-TEST("\xf2\x0f\x38\xf0\xc1", CRC32_8rr, 0, FE_AX, FE_CX);
-TEST("\xf2\x0f\x38\xf0\xc5", CRC32_8rr, 0, FE_AX, FE_CH);
-TEST("\xf2\x0f\x38\xf1\xc1", CRC32_32rr, 0, FE_AX, FE_CX);
-TEST("\x66\xf2\x0f\x38\xf1\xc1", CRC32_16rr, 0, FE_AX, FE_CX);
-TEST("\x66\xf2\x41\x0f\x38\xf1\xc2", CRC32_16rr, 0, FE_AX, FE_R10);
-TEST("\x0f\xc7\xf7", RDRAND32r, 0, FE_DI);
-TEST("\x66\x0f\xc7\xf7", RDRAND16r, 0, FE_DI);
-TEST("\x48\x0f\xc7\xf7", RDRAND64r, 0, FE_DI);
-TEST("\x0f\xc7\xff", RDSEED32r, 0, FE_DI);
-TEST("\x66\x0f\xc7\xff", RDSEED16r, 0, FE_DI);
-TEST("\x48\x0f\xc7\xff", RDSEED64r, 0, FE_DI);
-TEST("\xf3\x0f\xc7\xff", RDPIDr, 0, FE_DI);
-TEST("\x66\x0f\x3a\x14\xc1\x02", SSE_PEXTRBrri, 0, FE_CX, FE_XMM0, 2);
-TEST("\x66\x0f\x3a\x20\xc1\x02", SSE_PINSRBrri, 0, FE_XMM0, FE_CX, 2);
+TEST("\xb8\x05\x00\x01\x00", MOV32ri, 0, FE_AX, 0x10005)
+TEST("\xb8\xff\xff\xff\x7f", MOV32ri, 0, FE_AX, 0x7fffffff)
+TEST("\x48\xb8\x05\x00\x01\x00\xff\x00\x00\x00", MOV64ri, 0, FE_AX, 0xff00010005)
+TEST("\x48\xc7\xc0\x00\x00\x00\x00", MOV64ri, 0, FE_AX, 0x0)
+TEST("\x48\xc7\xc0\x00\x00\x00\x80", MOV64ri, 0, FE_AX, (int32_t) 0x80000000)
+TEST("\x48\xb8\x00\x00\x00\x00\x00\x00\x00\x80", MOV64ri, 0, FE_AX, INT64_MIN)
+TEST("\x48\xb8\x00\x00\x00\x80\x00\x00\x00\x00", MOV64ri, 0, FE_AX, 0x80000000)
+TEST("\xb0\xff", MOV8ri, 0, FE_AX, (int8_t) 0xff)
+TEST("\xb4\xff", MOV8ri, 0, FE_AH, -1)
+TEST("\xb7\x64", MOV8ri, 0, FE_BH, 0x64)
+TEST("\x40\xb6\x64", MOV8ri, 0, FE_SI, 0x64)
+TEST("\x41\xb6\x64", MOV8ri, 0, FE_R14, 0x64)
+TEST("\x66\x0f\xbe\xc2", MOVSXr16r8, 0, FE_AX, FE_DX)
+TEST("\x0f\xbe\xc2", MOVSXr32r8, 0, FE_AX, FE_DX)
+TEST("\x48\x0f\xbe\xc2", MOVSXr64r8, 0, FE_AX, FE_DX)
+TEST("\x66\x0f\xbe\xc6", MOVSXr16r8, 0, FE_AX, FE_DH)
+TEST("\x0f\xbe\xc6", MOVSXr32r8, 0, FE_AX, FE_DH)
+TEST("", MOVSXr64r8, 0, FE_AX, FE_DH)
+TEST("\x66\x0f\xbf\xc2", MOVSXr16r16, 0, FE_AX, FE_DX)
+TEST("\x0f\xbf\xc2", MOVSXr32r16, 0, FE_AX, FE_DX)
+TEST("\x48\x0f\xbf\xc2", MOVSXr64r16, 0, FE_AX, FE_DX)
+TEST("\x66\x63\xc2", MOVSXr16r32, 0, FE_AX, FE_DX)
+TEST("\x63\xc2", MOVSXr32r32, 0, FE_AX, FE_DX)
+TEST("\x48\x63\xc2", MOVSXr64r32, 0, FE_AX, FE_DX)
+TEST("\xc8\x33\x22\x11", ENTERi, 0, 0x112233)
+TEST("", ENTERi, 0, 0x1112233)
+TEST("\x0f\x05", SYSCALL, 0)
+TEST("\x0f\x90\xc4", SETO8r, 0, FE_AH)
+TEST("\x40\x0f\x90\xc4", SETO8r, 0, FE_SP)
+TEST("\x41\x0f\x90\xc4", SETO8r, 0, FE_R12)
+TEST("\xf3\x0f\xb8\xc2", POPCNT32rr, 0, FE_AX, FE_DX)
+TEST("\x66\xf3\x0f\xb8\xc2", POPCNT16rr, 0, FE_AX, FE_DX)
+TEST("\xf3\x48\x0f\xb8\xc2", POPCNT64rr, 0, FE_AX, FE_DX)
+TEST("\x0f\xbc\xc2", BSF32rr, 0, FE_AX, FE_DX)
+TEST("\x66\x0f\xbc\xc2", BSF16rr, 0, FE_AX, FE_DX)
+TEST("\x0f\x01\xd0", XGETBV, 0)
+TEST("\x41\x90", XCHG32rr, 0, FE_R8, FE_AX)
+TEST("\x91", XCHG32rr, 0, FE_CX, FE_AX)
+TEST("\x66\x90", XCHG16rr, 0, FE_AX, FE_AX)
+TEST("\x87\xc0", XCHG32rr, 0, FE_AX, FE_AX)
+TEST("\x48\x90", XCHG64rr, 0, FE_AX, FE_AX)
+TEST("\x87\x00", XCHG32mr, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0), FE_AX)
+TEST("\x87\x08", XCHG32mr, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0), FE_CX)
+TEST("\x90", NOP, 0)
+TEST("\xf3\x90", PAUSE, 0)
+TEST("\x0f\x1f\xc0", NOP32r, 0, FE_AX)
+TEST("\x26\x01\x00", ADD32mr, FE_SEG(FE_ES), FE_MEM(FE_AX, 0, FE_NOREG, 0), FE_AX)
+TEST("\x2e\x01\x00", ADD32mr, FE_SEG(FE_CS), FE_MEM(FE_AX, 0, FE_NOREG, 0), FE_AX)
+TEST("\x36\x01\x00", ADD32mr, FE_SEG(FE_SS), FE_MEM(FE_AX, 0, FE_NOREG, 0), FE_AX)
+TEST("\x3e\x01\x00", ADD32mr, FE_SEG(FE_DS), FE_MEM(FE_AX, 0, FE_NOREG, 0), FE_AX)
+TEST("\x64\x01\x00", ADD32mr, FE_SEG(FE_FS), FE_MEM(FE_AX, 0, FE_NOREG, 0), FE_AX)
+TEST("\x65\x01\x00", ADD32mr, FE_SEG(FE_GS), FE_MEM(FE_AX, 0, FE_NOREG, 0), FE_AX)
+TEST("\x8e\xc0", MOV_G2Srr, 0, FE_ES, FE_AX)
+TEST("\xae", SCAS8, 0)
+TEST("\xf2\xae", REPNZ_SCAS8, 0)
+TEST("\xf3\xae", REPZ_SCAS8, 0)
+TEST("\x66\xab", STOS16, 0)
+TEST("\x66\xf3\xab", REP_STOS16, 0)
+TEST("\xab", STOS32, 0)
+TEST("\xf3\xab", REP_STOS32, 0)
+TEST("\x48\xab", STOS64, 0)
+TEST("\xf3\x48\xab", REP_STOS64, 0)
+TEST("\x6c", INS8, 0)
+TEST("\x67\x6c", INS8, FE_ADDR32)
+TEST("\x66\x6d", INS16, 0)
+TEST("\x67\x66\x6d", INS16, FE_ADDR32)
+TEST("\x6d", INS32, 0)
+TEST("\x67\x6d", INS32, FE_ADDR32)
+TEST("\x0f\x38\xf0\x11", MOVBE32rm, 0, FE_DX, FE_MEM(FE_CX, 0, FE_NOREG, 0))
+TEST("\x66\x0f\x38\xf0\x11", MOVBE16rm, 0, FE_DX, FE_MEM(FE_CX, 0, FE_NOREG, 0))
+TEST("\x48\x0f\x38\xf0\x11", MOVBE64rm, 0, FE_DX, FE_MEM(FE_CX, 0, FE_NOREG, 0))
+TEST("\xf2\x0f\x38\xf0\xc1", CRC32_8rr, 0, FE_AX, FE_CX)
+TEST("\xf2\x0f\x38\xf0\xc5", CRC32_8rr, 0, FE_AX, FE_CH)
+TEST("\xf2\x0f\x38\xf1\xc1", CRC32_32rr, 0, FE_AX, FE_CX)
+TEST("\x66\xf2\x0f\x38\xf1\xc1", CRC32_16rr, 0, FE_AX, FE_CX)
+TEST("\x66\xf2\x41\x0f\x38\xf1\xc2", CRC32_16rr, 0, FE_AX, FE_R10)
+TEST("\x0f\xc7\xf7", RDRAND32r, 0, FE_DI)
+TEST("\x66\x0f\xc7\xf7", RDRAND16r, 0, FE_DI)
+TEST("\x48\x0f\xc7\xf7", RDRAND64r, 0, FE_DI)
+TEST("\x0f\xc7\xff", RDSEED32r, 0, FE_DI)
+TEST("\x66\x0f\xc7\xff", RDSEED16r, 0, FE_DI)
+TEST("\x48\x0f\xc7\xff", RDSEED64r, 0, FE_DI)
+TEST("\xf3\x0f\xc7\xff", RDPIDr, 0, FE_DI)
+TEST("\x66\x0f\x3a\x14\xc1\x02", SSE_PEXTRBrri, 0, FE_CX, FE_XMM0, 2)
+TEST("\x66\x0f\x3a\x20\xc1\x02", SSE_PINSRBrri, 0, FE_XMM0, FE_CX, 2)
 #ifndef ENC_TEST_TYPESAFE
-TEST("", SSE_PEXTRBrri, 0, FE_CH, FE_XMM0, 2);
-TEST("", SSE_PINSRBrri, 0, FE_XMM0, FE_CH, 2);
+TEST("", SSE_PEXTRBrri, 0, FE_CH, FE_XMM0, 2)
+TEST("", SSE_PINSRBrri, 0, FE_XMM0, FE_CH, 2)
 #endif
-TEST("\x66\x0f\xf7\xc1", SSE_MASKMOVDQUrr, 0, FE_XMM0, FE_XMM1);
-TEST("\x67\x66\x0f\xf7\xc1", SSE_MASKMOVDQUrr, FE_ADDR32, FE_XMM0, FE_XMM1);
-TEST("\x66\x0f\x6e\xc1", SSE_MOVD_G2Xrr, 0, FE_XMM0, FE_CX);
-TEST("\x66\x41\x0f\x6e\xc1", SSE_MOVD_G2Xrr, 0, FE_XMM0, FE_R9);
-TEST("\x66\x44\x0f\x6e\xc1", SSE_MOVD_G2Xrr, 0, FE_XMM8, FE_CX);
-TEST("\x66\x45\x0f\x6e\xc1", SSE_MOVD_G2Xrr, 0, FE_XMM8, FE_R9);
-TEST("\x66\x48\x0f\x6e\xc1", SSE_MOVQ_G2Xrr, 0, FE_XMM0, FE_CX);
-TEST("\x66\x49\x0f\x6e\xc1", SSE_MOVQ_G2Xrr, 0, FE_XMM0, FE_R9);
-TEST("\x66\x4c\x0f\x6e\xc1", SSE_MOVQ_G2Xrr, 0, FE_XMM8, FE_CX);
-TEST("\x66\x4d\x0f\x6e\xc1", SSE_MOVQ_G2Xrr, 0, FE_XMM8, FE_R9);
-TEST("\x66\x0f\x7e\xc1", SSE_MOVD_X2Grr, 0, FE_CX, FE_XMM0);
-TEST("\x66\x41\x0f\x7e\xc1", SSE_MOVD_X2Grr, 0, FE_R9, FE_XMM0);
-TEST("\x66\x44\x0f\x7e\xc1", SSE_MOVD_X2Grr, 0, FE_CX, FE_XMM8);
-TEST("\x66\x45\x0f\x7e\xc1", SSE_MOVD_X2Grr, 0, FE_R9, FE_XMM8);
-TEST("\x66\x48\x0f\x7e\xc1", SSE_MOVQ_X2Grr, 0, FE_CX, FE_XMM0);
-TEST("\x66\x49\x0f\x7e\xc1", SSE_MOVQ_X2Grr, 0, FE_R9, FE_XMM0);
-TEST("\x66\x4c\x0f\x7e\xc1", SSE_MOVQ_X2Grr, 0, FE_CX, FE_XMM8);
-TEST("\x66\x4d\x0f\x7e\xc1", SSE_MOVQ_X2Grr, 0, FE_R9, FE_XMM8);
-TEST("\x0f\xae\xe8", LFENCE, 0);
-TEST("\x0f\xae\xf0", MFENCE, 0);
-TEST("\x0f\xae\xf8", SFENCE, 0);
-TEST("\x66\x98", C_EX16, 0);
-TEST("\x66\x98", CBW, 0);
-TEST("\x98", C_EX32, 0);
-TEST("\x98", CWDE, 0);
-TEST("\x48\x98", C_EX64, 0);
-TEST("\x48\x98", CDQE, 0);
-TEST("\x66\x99", C_SEP16, 0);
-TEST("\x66\x99", CWD, 0);
-TEST("\x99", C_SEP32, 0);
-TEST("\x99", CDQ, 0);
-TEST("\x48\x99", C_SEP64, 0);
-TEST("\x48\x99", CQO, 0);
-TEST("\x0f\xc7\x0f", CMPXCHGD32m, 0, FE_MEM(FE_DI, 0, FE_NOREG, 0));
-TEST("\x0f\xc7\x0f", CMPXCHG8Bm, 0, FE_MEM(FE_DI, 0, FE_NOREG, 0));
-TEST("\x48\x0f\xc7\x0f", CMPXCHGD64m, 0, FE_MEM(FE_DI, 0, FE_NOREG, 0));
-TEST("\x48\x0f\xc7\x0f", CMPXCHG16Bm, 0, FE_MEM(FE_DI, 0, FE_NOREG, 0));
+TEST("\x66\x0f\xf7\xc1", SSE_MASKMOVDQUrr, 0, FE_XMM0, FE_XMM1)
+TEST("\x67\x66\x0f\xf7\xc1", SSE_MASKMOVDQUrr, FE_ADDR32, FE_XMM0, FE_XMM1)
+TEST("\x66\x0f\x6e\xc1", SSE_MOVD_G2Xrr, 0, FE_XMM0, FE_CX)
+TEST("\x66\x41\x0f\x6e\xc1", SSE_MOVD_G2Xrr, 0, FE_XMM0, FE_R9)
+TEST("\x66\x44\x0f\x6e\xc1", SSE_MOVD_G2Xrr, 0, FE_XMM8, FE_CX)
+TEST("\x66\x45\x0f\x6e\xc1", SSE_MOVD_G2Xrr, 0, FE_XMM8, FE_R9)
+TEST("\x66\x48\x0f\x6e\xc1", SSE_MOVQ_G2Xrr, 0, FE_XMM0, FE_CX)
+TEST("\x66\x49\x0f\x6e\xc1", SSE_MOVQ_G2Xrr, 0, FE_XMM0, FE_R9)
+TEST("\x66\x4c\x0f\x6e\xc1", SSE_MOVQ_G2Xrr, 0, FE_XMM8, FE_CX)
+TEST("\x66\x4d\x0f\x6e\xc1", SSE_MOVQ_G2Xrr, 0, FE_XMM8, FE_R9)
+TEST("\x66\x0f\x7e\xc1", SSE_MOVD_X2Grr, 0, FE_CX, FE_XMM0)
+TEST("\x66\x41\x0f\x7e\xc1", SSE_MOVD_X2Grr, 0, FE_R9, FE_XMM0)
+TEST("\x66\x44\x0f\x7e\xc1", SSE_MOVD_X2Grr, 0, FE_CX, FE_XMM8)
+TEST("\x66\x45\x0f\x7e\xc1", SSE_MOVD_X2Grr, 0, FE_R9, FE_XMM8)
+TEST("\x66\x48\x0f\x7e\xc1", SSE_MOVQ_X2Grr, 0, FE_CX, FE_XMM0)
+TEST("\x66\x49\x0f\x7e\xc1", SSE_MOVQ_X2Grr, 0, FE_R9, FE_XMM0)
+TEST("\x66\x4c\x0f\x7e\xc1", SSE_MOVQ_X2Grr, 0, FE_CX, FE_XMM8)
+TEST("\x66\x4d\x0f\x7e\xc1", SSE_MOVQ_X2Grr, 0, FE_R9, FE_XMM8)
+TEST("\x0f\xae\xe8", LFENCE, 0)
+TEST("\x0f\xae\xf0", MFENCE, 0)
+TEST("\x0f\xae\xf8", SFENCE, 0)
+TEST("\x66\x98", C_EX16, 0)
+TEST("\x66\x98", CBW, 0)
+TEST("\x98", C_EX32, 0)
+TEST("\x98", CWDE, 0)
+TEST("\x48\x98", C_EX64, 0)
+TEST("\x48\x98", CDQE, 0)
+TEST("\x66\x99", C_SEP16, 0)
+TEST("\x66\x99", CWD, 0)
+TEST("\x99", C_SEP32, 0)
+TEST("\x99", CDQ, 0)
+TEST("\x48\x99", C_SEP64, 0)
+TEST("\x48\x99", CQO, 0)
+TEST("\x0f\xc7\x0f", CMPXCHGD32m, 0, FE_MEM(FE_DI, 0, FE_NOREG, 0))
+TEST("\x0f\xc7\x0f", CMPXCHG8Bm, 0, FE_MEM(FE_DI, 0, FE_NOREG, 0))
+TEST("\x48\x0f\xc7\x0f", CMPXCHGD64m, 0, FE_MEM(FE_DI, 0, FE_NOREG, 0))
+TEST("\x48\x0f\xc7\x0f", CMPXCHG16Bm, 0, FE_MEM(FE_DI, 0, FE_NOREG, 0))
 
 // Condition codes
-TEST("\x70\x00", JO, 0, FE_PTR(2));
-TEST("\x70\x00", Jcc, FE_CC_O, FE_PTR(2));
-TEST("\x0f\x80\x00\x00\x00\x00", JO, FE_JMPL, FE_PTR(6));
-TEST("\x0f\x80\x00\x00\x00\x00", Jcc, FE_CC_O|FE_JMPL, FE_PTR(6));
-TEST("\x0f\x80\x7c\x00\x00\x00", JO, 0, FE_PTR(130));
-TEST("\x0f\x80\x7c\x00\x00\x00", Jcc, FE_CC_O, FE_PTR(130));
-TEST("\x0f\x90\xc0", SETO8r, 0, FE_AX);
-TEST("\x0f\x90\xc0", SETcc8r, FE_CC_O, FE_AX);
-TEST("\x0f\x90\x00", SETO8m, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0));
-TEST("\x0f\x90\x00", SETcc8m, FE_CC_O, FE_MEM(FE_AX, 0, FE_NOREG, 0));
-TEST("\x67\x0f\x90\x00", SETO8m, FE_ADDR32, FE_MEM(FE_AX, 0, FE_NOREG, 0));
-TEST("\x67\x0f\x90\x00", SETcc8m, FE_CC_O|FE_ADDR32, FE_MEM(FE_AX, 0, FE_NOREG, 0));
-TEST("\x0f\x40\xc0", CMOVO32rr, 0, FE_AX, FE_AX);
-TEST("\x0f\x40\xc0", CMOVcc32rr, FE_CC_O, FE_AX, FE_AX);
-TEST("\x0f\x40\x00", CMOVO32rm, 0, FE_AX, FE_MEM(FE_AX, 0, FE_NOREG, 0));
-TEST("\x0f\x40\x00", CMOVcc32rm, FE_CC_O, FE_AX, FE_MEM(FE_AX, 0, FE_NOREG, 0));
-TEST("\x67\x0f\x40\x00", CMOVO32rm, FE_ADDR32, FE_AX, FE_MEM(FE_AX, 0, FE_NOREG, 0));
-TEST("\x67\x0f\x40\x00", CMOVcc32rm, FE_CC_O|FE_ADDR32, FE_AX, FE_MEM(FE_AX, 0, FE_NOREG, 0));
-TEST("\xc4\xe2\x61\xe0\x08", CMPOXADD32mrr, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0), FE_CX, FE_BX);
-TEST("\xc4\xe2\x61\xe0\x08", CMPccXADD32mrr, FE_CC_O, FE_MEM(FE_AX, 0, FE_NOREG, 0), FE_CX, FE_BX);
-TEST("\xc4\xe2\xe1\xe0\x08", CMPOXADD64mrr, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0), FE_CX, FE_BX);
-TEST("\xc4\xe2\xe1\xe0\x08", CMPccXADD64mrr, FE_CC_O, FE_MEM(FE_AX, 0, FE_NOREG, 0), FE_CX, FE_BX);
+TEST("\x70\x00", JO, 0, FE_PTR(2))
+TEST("\x70\x00", Jcc, FE_CC_O, FE_PTR(2))
+TEST("\x0f\x80\x00\x00\x00\x00", JO, FE_JMPL, FE_PTR(6))
+TEST("\x0f\x80\x00\x00\x00\x00", Jcc, FE_CC_O|FE_JMPL, FE_PTR(6))
+TEST("\x0f\x80\x7c\x00\x00\x00", JO, 0, FE_PTR(130))
+TEST("\x0f\x80\x7c\x00\x00\x00", Jcc, FE_CC_O, FE_PTR(130))
+TEST("\x0f\x90\xc0", SETO8r, 0, FE_AX)
+TEST("\x0f\x90\xc0", SETcc8r, FE_CC_O, FE_AX)
+TEST("\x0f\x90\x00", SETO8m, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0))
+TEST("\x0f\x90\x00", SETcc8m, FE_CC_O, FE_MEM(FE_AX, 0, FE_NOREG, 0))
+TEST("\x67\x0f\x90\x00", SETO8m, FE_ADDR32, FE_MEM(FE_AX, 0, FE_NOREG, 0))
+TEST("\x67\x0f\x90\x00", SETcc8m, FE_CC_O|FE_ADDR32, FE_MEM(FE_AX, 0, FE_NOREG, 0))
+TEST("\x0f\x40\xc0", CMOVO32rr, 0, FE_AX, FE_AX)
+TEST("\x0f\x40\xc0", CMOVcc32rr, FE_CC_O, FE_AX, FE_AX)
+TEST("\x0f\x40\x00", CMOVO32rm, 0, FE_AX, FE_MEM(FE_AX, 0, FE_NOREG, 0))
+TEST("\x0f\x40\x00", CMOVcc32rm, FE_CC_O, FE_AX, FE_MEM(FE_AX, 0, FE_NOREG, 0))
+TEST("\x67\x0f\x40\x00", CMOVO32rm, FE_ADDR32, FE_AX, FE_MEM(FE_AX, 0, FE_NOREG, 0))
+TEST("\x67\x0f\x40\x00", CMOVcc32rm, FE_CC_O|FE_ADDR32, FE_AX, FE_MEM(FE_AX, 0, FE_NOREG, 0))
+TEST("\xc4\xe2\x61\xe0\x08", CMPOXADD32mrr, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0), FE_CX, FE_BX)
+TEST("\xc4\xe2\x61\xe0\x08", CMPccXADD32mrr, FE_CC_O, FE_MEM(FE_AX, 0, FE_NOREG, 0), FE_CX, FE_BX)
+TEST("\xc4\xe2\xe1\xe0\x08", CMPOXADD64mrr, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0), FE_CX, FE_BX)
+TEST("\xc4\xe2\xe1\xe0\x08", CMPccXADD64mrr, FE_CC_O, FE_MEM(FE_AX, 0, FE_NOREG, 0), FE_CX, FE_BX)
 
-TEST("\x71\x00", JNO, 0, FE_PTR(2));
-TEST("\x71\x00", Jcc, FE_CC_NO, FE_PTR(2));
-TEST("\x0f\x81\x00\x00\x00\x00", JNO, FE_JMPL, FE_PTR(6));
-TEST("\x0f\x81\x00\x00\x00\x00", Jcc, FE_CC_NO|FE_JMPL, FE_PTR(6));
-TEST("\x0f\x81\x7c\x00\x00\x00", JNO, 0, FE_PTR(130));
-TEST("\x0f\x81\x7c\x00\x00\x00", Jcc, FE_CC_NO, FE_PTR(130));
-TEST("\x0f\x91\xc0", SETNO8r, 0, FE_AX);
-TEST("\x0f\x91\xc0", SETcc8r, FE_CC_NO, FE_AX);
-TEST("\x0f\x91\x00", SETNO8m, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0));
-TEST("\x0f\x91\x00", SETcc8m, FE_CC_NO, FE_MEM(FE_AX, 0, FE_NOREG, 0));
-TEST("\x67\x0f\x91\x00", SETNO8m, FE_ADDR32, FE_MEM(FE_AX, 0, FE_NOREG, 0));
-TEST("\x67\x0f\x91\x00", SETcc8m, FE_CC_NO|FE_ADDR32, FE_MEM(FE_AX, 0, FE_NOREG, 0));
-TEST("\x0f\x41\xc0", CMOVNO32rr, 0, FE_AX, FE_AX);
-TEST("\x0f\x41\xc0", CMOVcc32rr, FE_CC_NO, FE_AX, FE_AX);
-TEST("\x0f\x41\x00", CMOVNO32rm, 0, FE_AX, FE_MEM(FE_AX, 0, FE_NOREG, 0));
-TEST("\x0f\x41\x00", CMOVcc32rm, FE_CC_NO, FE_AX, FE_MEM(FE_AX, 0, FE_NOREG, 0));
-TEST("\x67\x0f\x41\x00", CMOVNO32rm, FE_ADDR32, FE_AX, FE_MEM(FE_AX, 0, FE_NOREG, 0));
-TEST("\x67\x0f\x41\x00", CMOVcc32rm, FE_CC_NO|FE_ADDR32, FE_AX, FE_MEM(FE_AX, 0, FE_NOREG, 0));
-TEST("\xc4\xe2\x61\xe1\x08", CMPNOXADD32mrr, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0), FE_CX, FE_BX);
-TEST("\xc4\xe2\x61\xe1\x08", CMPccXADD32mrr, FE_CC_NO, FE_MEM(FE_AX, 0, FE_NOREG, 0), FE_CX, FE_BX);
-TEST("\xc4\xe2\xe1\xe1\x08", CMPNOXADD64mrr, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0), FE_CX, FE_BX);
-TEST("\xc4\xe2\xe1\xe1\x08", CMPccXADD64mrr, FE_CC_NO, FE_MEM(FE_AX, 0, FE_NOREG, 0), FE_CX, FE_BX);
+TEST("\x71\x00", JNO, 0, FE_PTR(2))
+TEST("\x71\x00", Jcc, FE_CC_NO, FE_PTR(2))
+TEST("\x0f\x81\x00\x00\x00\x00", JNO, FE_JMPL, FE_PTR(6))
+TEST("\x0f\x81\x00\x00\x00\x00", Jcc, FE_CC_NO|FE_JMPL, FE_PTR(6))
+TEST("\x0f\x81\x7c\x00\x00\x00", JNO, 0, FE_PTR(130))
+TEST("\x0f\x81\x7c\x00\x00\x00", Jcc, FE_CC_NO, FE_PTR(130))
+TEST("\x0f\x91\xc0", SETNO8r, 0, FE_AX)
+TEST("\x0f\x91\xc0", SETcc8r, FE_CC_NO, FE_AX)
+TEST("\x0f\x91\x00", SETNO8m, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0))
+TEST("\x0f\x91\x00", SETcc8m, FE_CC_NO, FE_MEM(FE_AX, 0, FE_NOREG, 0))
+TEST("\x67\x0f\x91\x00", SETNO8m, FE_ADDR32, FE_MEM(FE_AX, 0, FE_NOREG, 0))
+TEST("\x67\x0f\x91\x00", SETcc8m, FE_CC_NO|FE_ADDR32, FE_MEM(FE_AX, 0, FE_NOREG, 0))
+TEST("\x0f\x41\xc0", CMOVNO32rr, 0, FE_AX, FE_AX)
+TEST("\x0f\x41\xc0", CMOVcc32rr, FE_CC_NO, FE_AX, FE_AX)
+TEST("\x0f\x41\x00", CMOVNO32rm, 0, FE_AX, FE_MEM(FE_AX, 0, FE_NOREG, 0))
+TEST("\x0f\x41\x00", CMOVcc32rm, FE_CC_NO, FE_AX, FE_MEM(FE_AX, 0, FE_NOREG, 0))
+TEST("\x67\x0f\x41\x00", CMOVNO32rm, FE_ADDR32, FE_AX, FE_MEM(FE_AX, 0, FE_NOREG, 0))
+TEST("\x67\x0f\x41\x00", CMOVcc32rm, FE_CC_NO|FE_ADDR32, FE_AX, FE_MEM(FE_AX, 0, FE_NOREG, 0))
+TEST("\xc4\xe2\x61\xe1\x08", CMPNOXADD32mrr, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0), FE_CX, FE_BX)
+TEST("\xc4\xe2\x61\xe1\x08", CMPccXADD32mrr, FE_CC_NO, FE_MEM(FE_AX, 0, FE_NOREG, 0), FE_CX, FE_BX)
+TEST("\xc4\xe2\xe1\xe1\x08", CMPNOXADD64mrr, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0), FE_CX, FE_BX)
+TEST("\xc4\xe2\xe1\xe1\x08", CMPccXADD64mrr, FE_CC_NO, FE_MEM(FE_AX, 0, FE_NOREG, 0), FE_CX, FE_BX)
 
-TEST("\x72\x00", JC, 0, FE_PTR(2));
-TEST("\x72\x00", Jcc, FE_CC_C, FE_PTR(2));
-TEST("\x0f\x82\x00\x00\x00\x00", JC, FE_JMPL, FE_PTR(6));
-TEST("\x0f\x82\x00\x00\x00\x00", Jcc, FE_CC_C|FE_JMPL, FE_PTR(6));
-TEST("\x0f\x82\x7c\x00\x00\x00", JC, 0, FE_PTR(130));
-TEST("\x0f\x82\x7c\x00\x00\x00", Jcc, FE_CC_C, FE_PTR(130));
-TEST("\x0f\x92\xc0", SETC8r, 0, FE_AX);
-TEST("\x0f\x92\xc0", SETcc8r, FE_CC_C, FE_AX);
-TEST("\x0f\x92\x00", SETC8m, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0));
-TEST("\x0f\x92\x00", SETcc8m, FE_CC_C, FE_MEM(FE_AX, 0, FE_NOREG, 0));
-TEST("\x67\x0f\x92\x00", SETC8m, FE_ADDR32, FE_MEM(FE_AX, 0, FE_NOREG, 0));
-TEST("\x67\x0f\x92\x00", SETcc8m, FE_CC_C|FE_ADDR32, FE_MEM(FE_AX, 0, FE_NOREG, 0));
-TEST("\x0f\x42\xc0", CMOVC32rr, 0, FE_AX, FE_AX);
-TEST("\x0f\x42\xc0", CMOVcc32rr, FE_CC_C, FE_AX, FE_AX);
-TEST("\x0f\x42\x00", CMOVC32rm, 0, FE_AX, FE_MEM(FE_AX, 0, FE_NOREG, 0));
-TEST("\x0f\x42\x00", CMOVcc32rm, FE_CC_C, FE_AX, FE_MEM(FE_AX, 0, FE_NOREG, 0));
-TEST("\x67\x0f\x42\x00", CMOVC32rm, FE_ADDR32, FE_AX, FE_MEM(FE_AX, 0, FE_NOREG, 0));
-TEST("\x67\x0f\x42\x00", CMOVcc32rm, FE_CC_C|FE_ADDR32, FE_AX, FE_MEM(FE_AX, 0, FE_NOREG, 0));
-TEST("\xc4\xe2\x61\xe2\x08", CMPBXADD32mrr, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0), FE_CX, FE_BX);
-TEST("\xc4\xe2\x61\xe2\x08", CMPccXADD32mrr, FE_CC_B, FE_MEM(FE_AX, 0, FE_NOREG, 0), FE_CX, FE_BX);
-TEST("\xc4\xe2\xe1\xe2\x08", CMPBXADD64mrr, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0), FE_CX, FE_BX);
-TEST("\xc4\xe2\xe1\xe2\x08", CMPccXADD64mrr, FE_CC_B, FE_MEM(FE_AX, 0, FE_NOREG, 0), FE_CX, FE_BX);
+TEST("\x72\x00", JC, 0, FE_PTR(2))
+TEST("\x72\x00", Jcc, FE_CC_C, FE_PTR(2))
+TEST("\x0f\x82\x00\x00\x00\x00", JC, FE_JMPL, FE_PTR(6))
+TEST("\x0f\x82\x00\x00\x00\x00", Jcc, FE_CC_C|FE_JMPL, FE_PTR(6))
+TEST("\x0f\x82\x7c\x00\x00\x00", JC, 0, FE_PTR(130))
+TEST("\x0f\x82\x7c\x00\x00\x00", Jcc, FE_CC_C, FE_PTR(130))
+TEST("\x0f\x92\xc0", SETC8r, 0, FE_AX)
+TEST("\x0f\x92\xc0", SETcc8r, FE_CC_C, FE_AX)
+TEST("\x0f\x92\x00", SETC8m, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0))
+TEST("\x0f\x92\x00", SETcc8m, FE_CC_C, FE_MEM(FE_AX, 0, FE_NOREG, 0))
+TEST("\x67\x0f\x92\x00", SETC8m, FE_ADDR32, FE_MEM(FE_AX, 0, FE_NOREG, 0))
+TEST("\x67\x0f\x92\x00", SETcc8m, FE_CC_C|FE_ADDR32, FE_MEM(FE_AX, 0, FE_NOREG, 0))
+TEST("\x0f\x42\xc0", CMOVC32rr, 0, FE_AX, FE_AX)
+TEST("\x0f\x42\xc0", CMOVcc32rr, FE_CC_C, FE_AX, FE_AX)
+TEST("\x0f\x42\x00", CMOVC32rm, 0, FE_AX, FE_MEM(FE_AX, 0, FE_NOREG, 0))
+TEST("\x0f\x42\x00", CMOVcc32rm, FE_CC_C, FE_AX, FE_MEM(FE_AX, 0, FE_NOREG, 0))
+TEST("\x67\x0f\x42\x00", CMOVC32rm, FE_ADDR32, FE_AX, FE_MEM(FE_AX, 0, FE_NOREG, 0))
+TEST("\x67\x0f\x42\x00", CMOVcc32rm, FE_CC_C|FE_ADDR32, FE_AX, FE_MEM(FE_AX, 0, FE_NOREG, 0))
+TEST("\xc4\xe2\x61\xe2\x08", CMPBXADD32mrr, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0), FE_CX, FE_BX)
+TEST("\xc4\xe2\x61\xe2\x08", CMPccXADD32mrr, FE_CC_B, FE_MEM(FE_AX, 0, FE_NOREG, 0), FE_CX, FE_BX)
+TEST("\xc4\xe2\xe1\xe2\x08", CMPBXADD64mrr, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0), FE_CX, FE_BX)
+TEST("\xc4\xe2\xe1\xe2\x08", CMPccXADD64mrr, FE_CC_B, FE_MEM(FE_AX, 0, FE_NOREG, 0), FE_CX, FE_BX)
 
-TEST("\x73\x00", JNC, 0, FE_PTR(2));
-TEST("\x73\x00", Jcc, FE_CC_NC, FE_PTR(2));
-TEST("\x0f\x83\x00\x00\x00\x00", JNC, FE_JMPL, FE_PTR(6));
-TEST("\x0f\x83\x00\x00\x00\x00", Jcc, FE_CC_NC|FE_JMPL, FE_PTR(6));
-TEST("\x0f\x83\x7c\x00\x00\x00", JNC, 0, FE_PTR(130));
-TEST("\x0f\x83\x7c\x00\x00\x00", Jcc, FE_CC_NC, FE_PTR(130));
-TEST("\x0f\x93\xc0", SETNC8r, 0, FE_AX);
-TEST("\x0f\x93\xc0", SETcc8r, FE_CC_NC, FE_AX);
-TEST("\x0f\x93\x00", SETNC8m, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0));
-TEST("\x0f\x93\x00", SETcc8m, FE_CC_NC, FE_MEM(FE_AX, 0, FE_NOREG, 0));
-TEST("\x67\x0f\x93\x00", SETNC8m, FE_ADDR32, FE_MEM(FE_AX, 0, FE_NOREG, 0));
-TEST("\x67\x0f\x93\x00", SETcc8m, FE_CC_NC|FE_ADDR32, FE_MEM(FE_AX, 0, FE_NOREG, 0));
-TEST("\x0f\x43\xc0", CMOVNC32rr, 0, FE_AX, FE_AX);
-TEST("\x0f\x43\xc0", CMOVcc32rr, FE_CC_NC, FE_AX, FE_AX);
-TEST("\x0f\x43\x00", CMOVNC32rm, 0, FE_AX, FE_MEM(FE_AX, 0, FE_NOREG, 0));
-TEST("\x0f\x43\x00", CMOVcc32rm, FE_CC_NC, FE_AX, FE_MEM(FE_AX, 0, FE_NOREG, 0));
-TEST("\x67\x0f\x43\x00", CMOVNC32rm, FE_ADDR32, FE_AX, FE_MEM(FE_AX, 0, FE_NOREG, 0));
-TEST("\x67\x0f\x43\x00", CMOVcc32rm, FE_CC_NC|FE_ADDR32, FE_AX, FE_MEM(FE_AX, 0, FE_NOREG, 0));
-TEST("\xc4\xe2\x61\xe3\x08", CMPNBXADD32mrr, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0), FE_CX, FE_BX);
-TEST("\xc4\xe2\x61\xe3\x08", CMPccXADD32mrr, FE_CC_NB, FE_MEM(FE_AX, 0, FE_NOREG, 0), FE_CX, FE_BX);
-TEST("\xc4\xe2\xe1\xe3\x08", CMPNBXADD64mrr, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0), FE_CX, FE_BX);
-TEST("\xc4\xe2\xe1\xe3\x08", CMPccXADD64mrr, FE_CC_NB, FE_MEM(FE_AX, 0, FE_NOREG, 0), FE_CX, FE_BX);
+TEST("\x73\x00", JNC, 0, FE_PTR(2))
+TEST("\x73\x00", Jcc, FE_CC_NC, FE_PTR(2))
+TEST("\x0f\x83\x00\x00\x00\x00", JNC, FE_JMPL, FE_PTR(6))
+TEST("\x0f\x83\x00\x00\x00\x00", Jcc, FE_CC_NC|FE_JMPL, FE_PTR(6))
+TEST("\x0f\x83\x7c\x00\x00\x00", JNC, 0, FE_PTR(130))
+TEST("\x0f\x83\x7c\x00\x00\x00", Jcc, FE_CC_NC, FE_PTR(130))
+TEST("\x0f\x93\xc0", SETNC8r, 0, FE_AX)
+TEST("\x0f\x93\xc0", SETcc8r, FE_CC_NC, FE_AX)
+TEST("\x0f\x93\x00", SETNC8m, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0))
+TEST("\x0f\x93\x00", SETcc8m, FE_CC_NC, FE_MEM(FE_AX, 0, FE_NOREG, 0))
+TEST("\x67\x0f\x93\x00", SETNC8m, FE_ADDR32, FE_MEM(FE_AX, 0, FE_NOREG, 0))
+TEST("\x67\x0f\x93\x00", SETcc8m, FE_CC_NC|FE_ADDR32, FE_MEM(FE_AX, 0, FE_NOREG, 0))
+TEST("\x0f\x43\xc0", CMOVNC32rr, 0, FE_AX, FE_AX)
+TEST("\x0f\x43\xc0", CMOVcc32rr, FE_CC_NC, FE_AX, FE_AX)
+TEST("\x0f\x43\x00", CMOVNC32rm, 0, FE_AX, FE_MEM(FE_AX, 0, FE_NOREG, 0))
+TEST("\x0f\x43\x00", CMOVcc32rm, FE_CC_NC, FE_AX, FE_MEM(FE_AX, 0, FE_NOREG, 0))
+TEST("\x67\x0f\x43\x00", CMOVNC32rm, FE_ADDR32, FE_AX, FE_MEM(FE_AX, 0, FE_NOREG, 0))
+TEST("\x67\x0f\x43\x00", CMOVcc32rm, FE_CC_NC|FE_ADDR32, FE_AX, FE_MEM(FE_AX, 0, FE_NOREG, 0))
+TEST("\xc4\xe2\x61\xe3\x08", CMPNBXADD32mrr, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0), FE_CX, FE_BX)
+TEST("\xc4\xe2\x61\xe3\x08", CMPccXADD32mrr, FE_CC_NB, FE_MEM(FE_AX, 0, FE_NOREG, 0), FE_CX, FE_BX)
+TEST("\xc4\xe2\xe1\xe3\x08", CMPNBXADD64mrr, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0), FE_CX, FE_BX)
+TEST("\xc4\xe2\xe1\xe3\x08", CMPccXADD64mrr, FE_CC_NB, FE_MEM(FE_AX, 0, FE_NOREG, 0), FE_CX, FE_BX)
 
-TEST("\x74\x00", JZ, 0, FE_PTR(2));
-TEST("\x74\x00", Jcc, FE_CC_Z, FE_PTR(2));
-TEST("\x0f\x84\x00\x00\x00\x00", JZ, FE_JMPL, FE_PTR(6));
-TEST("\x0f\x84\x00\x00\x00\x00", Jcc, FE_CC_Z|FE_JMPL, FE_PTR(6));
-TEST("\x0f\x84\x7c\x00\x00\x00", JZ, 0, FE_PTR(130));
-TEST("\x0f\x84\x7c\x00\x00\x00", Jcc, FE_CC_Z, FE_PTR(130));
-TEST("\x0f\x94\xc0", SETZ8r, 0, FE_AX);
-TEST("\x0f\x94\xc0", SETcc8r, FE_CC_Z, FE_AX);
-TEST("\x0f\x94\x00", SETZ8m, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0));
-TEST("\x0f\x94\x00", SETcc8m, FE_CC_Z, FE_MEM(FE_AX, 0, FE_NOREG, 0));
-TEST("\x67\x0f\x94\x00", SETZ8m, FE_ADDR32, FE_MEM(FE_AX, 0, FE_NOREG, 0));
-TEST("\x67\x0f\x94\x00", SETcc8m, FE_CC_Z|FE_ADDR32, FE_MEM(FE_AX, 0, FE_NOREG, 0));
-TEST("\x0f\x44\xc0", CMOVZ32rr, 0, FE_AX, FE_AX);
-TEST("\x0f\x44\xc0", CMOVcc32rr, FE_CC_Z, FE_AX, FE_AX);
-TEST("\x0f\x44\x00", CMOVZ32rm, 0, FE_AX, FE_MEM(FE_AX, 0, FE_NOREG, 0));
-TEST("\x0f\x44\x00", CMOVcc32rm, FE_CC_Z, FE_AX, FE_MEM(FE_AX, 0, FE_NOREG, 0));
-TEST("\x67\x0f\x44\x00", CMOVZ32rm, FE_ADDR32, FE_AX, FE_MEM(FE_AX, 0, FE_NOREG, 0));
-TEST("\x67\x0f\x44\x00", CMOVcc32rm, FE_CC_Z|FE_ADDR32, FE_AX, FE_MEM(FE_AX, 0, FE_NOREG, 0));
-TEST("\xc4\xe2\x61\xe4\x08", CMPZXADD32mrr, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0), FE_CX, FE_BX);
-TEST("\xc4\xe2\x61\xe4\x08", CMPccXADD32mrr, FE_CC_Z, FE_MEM(FE_AX, 0, FE_NOREG, 0), FE_CX, FE_BX);
-TEST("\xc4\xe2\xe1\xe4\x08", CMPZXADD64mrr, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0), FE_CX, FE_BX);
-TEST("\xc4\xe2\xe1\xe4\x08", CMPccXADD64mrr, FE_CC_Z, FE_MEM(FE_AX, 0, FE_NOREG, 0), FE_CX, FE_BX);
+TEST("\x74\x00", JZ, 0, FE_PTR(2))
+TEST("\x74\x00", Jcc, FE_CC_Z, FE_PTR(2))
+TEST("\x0f\x84\x00\x00\x00\x00", JZ, FE_JMPL, FE_PTR(6))
+TEST("\x0f\x84\x00\x00\x00\x00", Jcc, FE_CC_Z|FE_JMPL, FE_PTR(6))
+TEST("\x0f\x84\x7c\x00\x00\x00", JZ, 0, FE_PTR(130))
+TEST("\x0f\x84\x7c\x00\x00\x00", Jcc, FE_CC_Z, FE_PTR(130))
+TEST("\x0f\x94\xc0", SETZ8r, 0, FE_AX)
+TEST("\x0f\x94\xc0", SETcc8r, FE_CC_Z, FE_AX)
+TEST("\x0f\x94\x00", SETZ8m, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0))
+TEST("\x0f\x94\x00", SETcc8m, FE_CC_Z, FE_MEM(FE_AX, 0, FE_NOREG, 0))
+TEST("\x67\x0f\x94\x00", SETZ8m, FE_ADDR32, FE_MEM(FE_AX, 0, FE_NOREG, 0))
+TEST("\x67\x0f\x94\x00", SETcc8m, FE_CC_Z|FE_ADDR32, FE_MEM(FE_AX, 0, FE_NOREG, 0))
+TEST("\x0f\x44\xc0", CMOVZ32rr, 0, FE_AX, FE_AX)
+TEST("\x0f\x44\xc0", CMOVcc32rr, FE_CC_Z, FE_AX, FE_AX)
+TEST("\x0f\x44\x00", CMOVZ32rm, 0, FE_AX, FE_MEM(FE_AX, 0, FE_NOREG, 0))
+TEST("\x0f\x44\x00", CMOVcc32rm, FE_CC_Z, FE_AX, FE_MEM(FE_AX, 0, FE_NOREG, 0))
+TEST("\x67\x0f\x44\x00", CMOVZ32rm, FE_ADDR32, FE_AX, FE_MEM(FE_AX, 0, FE_NOREG, 0))
+TEST("\x67\x0f\x44\x00", CMOVcc32rm, FE_CC_Z|FE_ADDR32, FE_AX, FE_MEM(FE_AX, 0, FE_NOREG, 0))
+TEST("\xc4\xe2\x61\xe4\x08", CMPZXADD32mrr, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0), FE_CX, FE_BX)
+TEST("\xc4\xe2\x61\xe4\x08", CMPccXADD32mrr, FE_CC_Z, FE_MEM(FE_AX, 0, FE_NOREG, 0), FE_CX, FE_BX)
+TEST("\xc4\xe2\xe1\xe4\x08", CMPZXADD64mrr, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0), FE_CX, FE_BX)
+TEST("\xc4\xe2\xe1\xe4\x08", CMPccXADD64mrr, FE_CC_Z, FE_MEM(FE_AX, 0, FE_NOREG, 0), FE_CX, FE_BX)
 
-TEST("\x75\x00", JNZ, 0, FE_PTR(2));
-TEST("\x75\x00", Jcc, FE_CC_NZ, FE_PTR(2));
-TEST("\x0f\x85\x00\x00\x00\x00", JNZ, FE_JMPL, FE_PTR(6));
-TEST("\x0f\x85\x00\x00\x00\x00", Jcc, FE_CC_NZ|FE_JMPL, FE_PTR(6));
-TEST("\x0f\x85\x7c\x00\x00\x00", JNZ, 0, FE_PTR(130));
-TEST("\x0f\x85\x7c\x00\x00\x00", Jcc, FE_CC_NZ, FE_PTR(130));
-TEST("\x0f\x95\xc0", SETNZ8r, 0, FE_AX);
-TEST("\x0f\x95\xc0", SETcc8r, FE_CC_NZ, FE_AX);
-TEST("\x0f\x95\x00", SETNZ8m, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0));
-TEST("\x0f\x95\x00", SETcc8m, FE_CC_NZ, FE_MEM(FE_AX, 0, FE_NOREG, 0));
-TEST("\x67\x0f\x95\x00", SETNZ8m, FE_ADDR32, FE_MEM(FE_AX, 0, FE_NOREG, 0));
-TEST("\x67\x0f\x95\x00", SETcc8m, FE_CC_NZ|FE_ADDR32, FE_MEM(FE_AX, 0, FE_NOREG, 0));
-TEST("\x0f\x45\xc0", CMOVNZ32rr, 0, FE_AX, FE_AX);
-TEST("\x0f\x45\xc0", CMOVcc32rr, FE_CC_NZ, FE_AX, FE_AX);
-TEST("\x0f\x45\x00", CMOVNZ32rm, 0, FE_AX, FE_MEM(FE_AX, 0, FE_NOREG, 0));
-TEST("\x0f\x45\x00", CMOVcc32rm, FE_CC_NZ, FE_AX, FE_MEM(FE_AX, 0, FE_NOREG, 0));
-TEST("\x67\x0f\x45\x00", CMOVNZ32rm, FE_ADDR32, FE_AX, FE_MEM(FE_AX, 0, FE_NOREG, 0));
-TEST("\x67\x0f\x45\x00", CMOVcc32rm, FE_CC_NZ|FE_ADDR32, FE_AX, FE_MEM(FE_AX, 0, FE_NOREG, 0));
-TEST("\xc4\xe2\x61\xe5\x08", CMPNZXADD32mrr, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0), FE_CX, FE_BX);
-TEST("\xc4\xe2\x61\xe5\x08", CMPccXADD32mrr, FE_CC_NZ, FE_MEM(FE_AX, 0, FE_NOREG, 0), FE_CX, FE_BX);
-TEST("\xc4\xe2\xe1\xe5\x08", CMPNZXADD64mrr, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0), FE_CX, FE_BX);
-TEST("\xc4\xe2\xe1\xe5\x08", CMPccXADD64mrr, FE_CC_NZ, FE_MEM(FE_AX, 0, FE_NOREG, 0), FE_CX, FE_BX);
+TEST("\x75\x00", JNZ, 0, FE_PTR(2))
+TEST("\x75\x00", Jcc, FE_CC_NZ, FE_PTR(2))
+TEST("\x0f\x85\x00\x00\x00\x00", JNZ, FE_JMPL, FE_PTR(6))
+TEST("\x0f\x85\x00\x00\x00\x00", Jcc, FE_CC_NZ|FE_JMPL, FE_PTR(6))
+TEST("\x0f\x85\x7c\x00\x00\x00", JNZ, 0, FE_PTR(130))
+TEST("\x0f\x85\x7c\x00\x00\x00", Jcc, FE_CC_NZ, FE_PTR(130))
+TEST("\x0f\x95\xc0", SETNZ8r, 0, FE_AX)
+TEST("\x0f\x95\xc0", SETcc8r, FE_CC_NZ, FE_AX)
+TEST("\x0f\x95\x00", SETNZ8m, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0))
+TEST("\x0f\x95\x00", SETcc8m, FE_CC_NZ, FE_MEM(FE_AX, 0, FE_NOREG, 0))
+TEST("\x67\x0f\x95\x00", SETNZ8m, FE_ADDR32, FE_MEM(FE_AX, 0, FE_NOREG, 0))
+TEST("\x67\x0f\x95\x00", SETcc8m, FE_CC_NZ|FE_ADDR32, FE_MEM(FE_AX, 0, FE_NOREG, 0))
+TEST("\x0f\x45\xc0", CMOVNZ32rr, 0, FE_AX, FE_AX)
+TEST("\x0f\x45\xc0", CMOVcc32rr, FE_CC_NZ, FE_AX, FE_AX)
+TEST("\x0f\x45\x00", CMOVNZ32rm, 0, FE_AX, FE_MEM(FE_AX, 0, FE_NOREG, 0))
+TEST("\x0f\x45\x00", CMOVcc32rm, FE_CC_NZ, FE_AX, FE_MEM(FE_AX, 0, FE_NOREG, 0))
+TEST("\x67\x0f\x45\x00", CMOVNZ32rm, FE_ADDR32, FE_AX, FE_MEM(FE_AX, 0, FE_NOREG, 0))
+TEST("\x67\x0f\x45\x00", CMOVcc32rm, FE_CC_NZ|FE_ADDR32, FE_AX, FE_MEM(FE_AX, 0, FE_NOREG, 0))
+TEST("\xc4\xe2\x61\xe5\x08", CMPNZXADD32mrr, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0), FE_CX, FE_BX)
+TEST("\xc4\xe2\x61\xe5\x08", CMPccXADD32mrr, FE_CC_NZ, FE_MEM(FE_AX, 0, FE_NOREG, 0), FE_CX, FE_BX)
+TEST("\xc4\xe2\xe1\xe5\x08", CMPNZXADD64mrr, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0), FE_CX, FE_BX)
+TEST("\xc4\xe2\xe1\xe5\x08", CMPccXADD64mrr, FE_CC_NZ, FE_MEM(FE_AX, 0, FE_NOREG, 0), FE_CX, FE_BX)
 
-TEST("\x76\x00", JBE, 0, FE_PTR(2));
-TEST("\x76\x00", Jcc, FE_CC_BE, FE_PTR(2));
-TEST("\x0f\x86\x00\x00\x00\x00", JBE, FE_JMPL, FE_PTR(6));
-TEST("\x0f\x86\x00\x00\x00\x00", Jcc, FE_CC_BE|FE_JMPL, FE_PTR(6));
-TEST("\x0f\x86\x7c\x00\x00\x00", JBE, 0, FE_PTR(130));
-TEST("\x0f\x86\x7c\x00\x00\x00", Jcc, FE_CC_BE, FE_PTR(130));
-TEST("\x0f\x96\xc0", SETBE8r, 0, FE_AX);
-TEST("\x0f\x96\xc0", SETcc8r, FE_CC_BE, FE_AX);
-TEST("\x0f\x96\x00", SETBE8m, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0));
-TEST("\x0f\x96\x00", SETcc8m, FE_CC_BE, FE_MEM(FE_AX, 0, FE_NOREG, 0));
-TEST("\x67\x0f\x96\x00", SETBE8m, FE_ADDR32, FE_MEM(FE_AX, 0, FE_NOREG, 0));
-TEST("\x67\x0f\x96\x00", SETcc8m, FE_CC_BE|FE_ADDR32, FE_MEM(FE_AX, 0, FE_NOREG, 0));
-TEST("\x0f\x46\xc0", CMOVBE32rr, 0, FE_AX, FE_AX);
-TEST("\x0f\x46\xc0", CMOVcc32rr, FE_CC_BE, FE_AX, FE_AX);
-TEST("\x0f\x46\x00", CMOVBE32rm, 0, FE_AX, FE_MEM(FE_AX, 0, FE_NOREG, 0));
-TEST("\x0f\x46\x00", CMOVcc32rm, FE_CC_BE, FE_AX, FE_MEM(FE_AX, 0, FE_NOREG, 0));
-TEST("\x67\x0f\x46\x00", CMOVBE32rm, FE_ADDR32, FE_AX, FE_MEM(FE_AX, 0, FE_NOREG, 0));
-TEST("\x67\x0f\x46\x00", CMOVcc32rm, FE_CC_BE|FE_ADDR32, FE_AX, FE_MEM(FE_AX, 0, FE_NOREG, 0));
-TEST("\xc4\xe2\x61\xe6\x08", CMPBEXADD32mrr, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0), FE_CX, FE_BX);
-TEST("\xc4\xe2\x61\xe6\x08", CMPccXADD32mrr, FE_CC_BE, FE_MEM(FE_AX, 0, FE_NOREG, 0), FE_CX, FE_BX);
-TEST("\xc4\xe2\xe1\xe6\x08", CMPBEXADD64mrr, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0), FE_CX, FE_BX);
-TEST("\xc4\xe2\xe1\xe6\x08", CMPccXADD64mrr, FE_CC_BE, FE_MEM(FE_AX, 0, FE_NOREG, 0), FE_CX, FE_BX);
+TEST("\x76\x00", JBE, 0, FE_PTR(2))
+TEST("\x76\x00", Jcc, FE_CC_BE, FE_PTR(2))
+TEST("\x0f\x86\x00\x00\x00\x00", JBE, FE_JMPL, FE_PTR(6))
+TEST("\x0f\x86\x00\x00\x00\x00", Jcc, FE_CC_BE|FE_JMPL, FE_PTR(6))
+TEST("\x0f\x86\x7c\x00\x00\x00", JBE, 0, FE_PTR(130))
+TEST("\x0f\x86\x7c\x00\x00\x00", Jcc, FE_CC_BE, FE_PTR(130))
+TEST("\x0f\x96\xc0", SETBE8r, 0, FE_AX)
+TEST("\x0f\x96\xc0", SETcc8r, FE_CC_BE, FE_AX)
+TEST("\x0f\x96\x00", SETBE8m, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0))
+TEST("\x0f\x96\x00", SETcc8m, FE_CC_BE, FE_MEM(FE_AX, 0, FE_NOREG, 0))
+TEST("\x67\x0f\x96\x00", SETBE8m, FE_ADDR32, FE_MEM(FE_AX, 0, FE_NOREG, 0))
+TEST("\x67\x0f\x96\x00", SETcc8m, FE_CC_BE|FE_ADDR32, FE_MEM(FE_AX, 0, FE_NOREG, 0))
+TEST("\x0f\x46\xc0", CMOVBE32rr, 0, FE_AX, FE_AX)
+TEST("\x0f\x46\xc0", CMOVcc32rr, FE_CC_BE, FE_AX, FE_AX)
+TEST("\x0f\x46\x00", CMOVBE32rm, 0, FE_AX, FE_MEM(FE_AX, 0, FE_NOREG, 0))
+TEST("\x0f\x46\x00", CMOVcc32rm, FE_CC_BE, FE_AX, FE_MEM(FE_AX, 0, FE_NOREG, 0))
+TEST("\x67\x0f\x46\x00", CMOVBE32rm, FE_ADDR32, FE_AX, FE_MEM(FE_AX, 0, FE_NOREG, 0))
+TEST("\x67\x0f\x46\x00", CMOVcc32rm, FE_CC_BE|FE_ADDR32, FE_AX, FE_MEM(FE_AX, 0, FE_NOREG, 0))
+TEST("\xc4\xe2\x61\xe6\x08", CMPBEXADD32mrr, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0), FE_CX, FE_BX)
+TEST("\xc4\xe2\x61\xe6\x08", CMPccXADD32mrr, FE_CC_BE, FE_MEM(FE_AX, 0, FE_NOREG, 0), FE_CX, FE_BX)
+TEST("\xc4\xe2\xe1\xe6\x08", CMPBEXADD64mrr, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0), FE_CX, FE_BX)
+TEST("\xc4\xe2\xe1\xe6\x08", CMPccXADD64mrr, FE_CC_BE, FE_MEM(FE_AX, 0, FE_NOREG, 0), FE_CX, FE_BX)
 
-TEST("\x77\x00", JA, 0, FE_PTR(2));
-TEST("\x77\x00", Jcc, FE_CC_A, FE_PTR(2));
-TEST("\x0f\x87\x00\x00\x00\x00", JA, FE_JMPL, FE_PTR(6));
-TEST("\x0f\x87\x00\x00\x00\x00", Jcc, FE_CC_A|FE_JMPL, FE_PTR(6));
-TEST("\x0f\x87\x7c\x00\x00\x00", JA, 0, FE_PTR(130));
-TEST("\x0f\x87\x7c\x00\x00\x00", Jcc, FE_CC_A, FE_PTR(130));
-TEST("\x0f\x97\xc0", SETA8r, 0, FE_AX);
-TEST("\x0f\x97\xc0", SETcc8r, FE_CC_A, FE_AX);
-TEST("\x0f\x97\x00", SETA8m, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0));
-TEST("\x0f\x97\x00", SETcc8m, FE_CC_A, FE_MEM(FE_AX, 0, FE_NOREG, 0));
-TEST("\x67\x0f\x97\x00", SETA8m, FE_ADDR32, FE_MEM(FE_AX, 0, FE_NOREG, 0));
-TEST("\x67\x0f\x97\x00", SETcc8m, FE_CC_A|FE_ADDR32, FE_MEM(FE_AX, 0, FE_NOREG, 0));
-TEST("\x0f\x47\xc0", CMOVA32rr, 0, FE_AX, FE_AX);
-TEST("\x0f\x47\xc0", CMOVcc32rr, FE_CC_A, FE_AX, FE_AX);
-TEST("\x0f\x47\x00", CMOVA32rm, 0, FE_AX, FE_MEM(FE_AX, 0, FE_NOREG, 0));
-TEST("\x0f\x47\x00", CMOVcc32rm, FE_CC_A, FE_AX, FE_MEM(FE_AX, 0, FE_NOREG, 0));
-TEST("\x67\x0f\x47\x00", CMOVA32rm, FE_ADDR32, FE_AX, FE_MEM(FE_AX, 0, FE_NOREG, 0));
-TEST("\x67\x0f\x47\x00", CMOVcc32rm, FE_CC_A|FE_ADDR32, FE_AX, FE_MEM(FE_AX, 0, FE_NOREG, 0));
-TEST("\xc4\xe2\x61\xe7\x08", CMPNBEXADD32mrr, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0), FE_CX, FE_BX);
-TEST("\xc4\xe2\x61\xe7\x08", CMPccXADD32mrr, FE_CC_NBE, FE_MEM(FE_AX, 0, FE_NOREG, 0), FE_CX, FE_BX);
-TEST("\xc4\xe2\xe1\xe7\x08", CMPNBEXADD64mrr, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0), FE_CX, FE_BX);
-TEST("\xc4\xe2\xe1\xe7\x08", CMPccXADD64mrr, FE_CC_NBE, FE_MEM(FE_AX, 0, FE_NOREG, 0), FE_CX, FE_BX);
+TEST("\x77\x00", JA, 0, FE_PTR(2))
+TEST("\x77\x00", Jcc, FE_CC_A, FE_PTR(2))
+TEST("\x0f\x87\x00\x00\x00\x00", JA, FE_JMPL, FE_PTR(6))
+TEST("\x0f\x87\x00\x00\x00\x00", Jcc, FE_CC_A|FE_JMPL, FE_PTR(6))
+TEST("\x0f\x87\x7c\x00\x00\x00", JA, 0, FE_PTR(130))
+TEST("\x0f\x87\x7c\x00\x00\x00", Jcc, FE_CC_A, FE_PTR(130))
+TEST("\x0f\x97\xc0", SETA8r, 0, FE_AX)
+TEST("\x0f\x97\xc0", SETcc8r, FE_CC_A, FE_AX)
+TEST("\x0f\x97\x00", SETA8m, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0))
+TEST("\x0f\x97\x00", SETcc8m, FE_CC_A, FE_MEM(FE_AX, 0, FE_NOREG, 0))
+TEST("\x67\x0f\x97\x00", SETA8m, FE_ADDR32, FE_MEM(FE_AX, 0, FE_NOREG, 0))
+TEST("\x67\x0f\x97\x00", SETcc8m, FE_CC_A|FE_ADDR32, FE_MEM(FE_AX, 0, FE_NOREG, 0))
+TEST("\x0f\x47\xc0", CMOVA32rr, 0, FE_AX, FE_AX)
+TEST("\x0f\x47\xc0", CMOVcc32rr, FE_CC_A, FE_AX, FE_AX)
+TEST("\x0f\x47\x00", CMOVA32rm, 0, FE_AX, FE_MEM(FE_AX, 0, FE_NOREG, 0))
+TEST("\x0f\x47\x00", CMOVcc32rm, FE_CC_A, FE_AX, FE_MEM(FE_AX, 0, FE_NOREG, 0))
+TEST("\x67\x0f\x47\x00", CMOVA32rm, FE_ADDR32, FE_AX, FE_MEM(FE_AX, 0, FE_NOREG, 0))
+TEST("\x67\x0f\x47\x00", CMOVcc32rm, FE_CC_A|FE_ADDR32, FE_AX, FE_MEM(FE_AX, 0, FE_NOREG, 0))
+TEST("\xc4\xe2\x61\xe7\x08", CMPNBEXADD32mrr, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0), FE_CX, FE_BX)
+TEST("\xc4\xe2\x61\xe7\x08", CMPccXADD32mrr, FE_CC_NBE, FE_MEM(FE_AX, 0, FE_NOREG, 0), FE_CX, FE_BX)
+TEST("\xc4\xe2\xe1\xe7\x08", CMPNBEXADD64mrr, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0), FE_CX, FE_BX)
+TEST("\xc4\xe2\xe1\xe7\x08", CMPccXADD64mrr, FE_CC_NBE, FE_MEM(FE_AX, 0, FE_NOREG, 0), FE_CX, FE_BX)
 
-TEST("\x78\x00", JS, 0, FE_PTR(2));
-TEST("\x78\x00", Jcc, FE_CC_S, FE_PTR(2));
-TEST("\x0f\x88\x00\x00\x00\x00", JS, FE_JMPL, FE_PTR(6));
-TEST("\x0f\x88\x00\x00\x00\x00", Jcc, FE_CC_S|FE_JMPL, FE_PTR(6));
-TEST("\x0f\x88\x7c\x00\x00\x00", JS, 0, FE_PTR(130));
-TEST("\x0f\x88\x7c\x00\x00\x00", Jcc, FE_CC_S, FE_PTR(130));
-TEST("\x0f\x98\xc0", SETS8r, 0, FE_AX);
-TEST("\x0f\x98\xc0", SETcc8r, FE_CC_S, FE_AX);
-TEST("\x0f\x98\x00", SETS8m, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0));
-TEST("\x0f\x98\x00", SETcc8m, FE_CC_S, FE_MEM(FE_AX, 0, FE_NOREG, 0));
-TEST("\x67\x0f\x98\x00", SETS8m, FE_ADDR32, FE_MEM(FE_AX, 0, FE_NOREG, 0));
-TEST("\x67\x0f\x98\x00", SETcc8m, FE_CC_S|FE_ADDR32, FE_MEM(FE_AX, 0, FE_NOREG, 0));
-TEST("\x0f\x48\xc0", CMOVS32rr, 0, FE_AX, FE_AX);
-TEST("\x0f\x48\xc0", CMOVcc32rr, FE_CC_S, FE_AX, FE_AX);
-TEST("\x0f\x48\x00", CMOVS32rm, 0, FE_AX, FE_MEM(FE_AX, 0, FE_NOREG, 0));
-TEST("\x0f\x48\x00", CMOVcc32rm, FE_CC_S, FE_AX, FE_MEM(FE_AX, 0, FE_NOREG, 0));
-TEST("\x67\x0f\x48\x00", CMOVS32rm, FE_ADDR32, FE_AX, FE_MEM(FE_AX, 0, FE_NOREG, 0));
-TEST("\x67\x0f\x48\x00", CMOVcc32rm, FE_CC_S|FE_ADDR32, FE_AX, FE_MEM(FE_AX, 0, FE_NOREG, 0));
-TEST("\xc4\xe2\x61\xe8\x08", CMPSXADD32mrr, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0), FE_CX, FE_BX);
-TEST("\xc4\xe2\x61\xe8\x08", CMPccXADD32mrr, FE_CC_S, FE_MEM(FE_AX, 0, FE_NOREG, 0), FE_CX, FE_BX);
-TEST("\xc4\xe2\xe1\xe8\x08", CMPSXADD64mrr, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0), FE_CX, FE_BX);
-TEST("\xc4\xe2\xe1\xe8\x08", CMPccXADD64mrr, FE_CC_S, FE_MEM(FE_AX, 0, FE_NOREG, 0), FE_CX, FE_BX);
+TEST("\x78\x00", JS, 0, FE_PTR(2))
+TEST("\x78\x00", Jcc, FE_CC_S, FE_PTR(2))
+TEST("\x0f\x88\x00\x00\x00\x00", JS, FE_JMPL, FE_PTR(6))
+TEST("\x0f\x88\x00\x00\x00\x00", Jcc, FE_CC_S|FE_JMPL, FE_PTR(6))
+TEST("\x0f\x88\x7c\x00\x00\x00", JS, 0, FE_PTR(130))
+TEST("\x0f\x88\x7c\x00\x00\x00", Jcc, FE_CC_S, FE_PTR(130))
+TEST("\x0f\x98\xc0", SETS8r, 0, FE_AX)
+TEST("\x0f\x98\xc0", SETcc8r, FE_CC_S, FE_AX)
+TEST("\x0f\x98\x00", SETS8m, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0))
+TEST("\x0f\x98\x00", SETcc8m, FE_CC_S, FE_MEM(FE_AX, 0, FE_NOREG, 0))
+TEST("\x67\x0f\x98\x00", SETS8m, FE_ADDR32, FE_MEM(FE_AX, 0, FE_NOREG, 0))
+TEST("\x67\x0f\x98\x00", SETcc8m, FE_CC_S|FE_ADDR32, FE_MEM(FE_AX, 0, FE_NOREG, 0))
+TEST("\x0f\x48\xc0", CMOVS32rr, 0, FE_AX, FE_AX)
+TEST("\x0f\x48\xc0", CMOVcc32rr, FE_CC_S, FE_AX, FE_AX)
+TEST("\x0f\x48\x00", CMOVS32rm, 0, FE_AX, FE_MEM(FE_AX, 0, FE_NOREG, 0))
+TEST("\x0f\x48\x00", CMOVcc32rm, FE_CC_S, FE_AX, FE_MEM(FE_AX, 0, FE_NOREG, 0))
+TEST("\x67\x0f\x48\x00", CMOVS32rm, FE_ADDR32, FE_AX, FE_MEM(FE_AX, 0, FE_NOREG, 0))
+TEST("\x67\x0f\x48\x00", CMOVcc32rm, FE_CC_S|FE_ADDR32, FE_AX, FE_MEM(FE_AX, 0, FE_NOREG, 0))
+TEST("\xc4\xe2\x61\xe8\x08", CMPSXADD32mrr, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0), FE_CX, FE_BX)
+TEST("\xc4\xe2\x61\xe8\x08", CMPccXADD32mrr, FE_CC_S, FE_MEM(FE_AX, 0, FE_NOREG, 0), FE_CX, FE_BX)
+TEST("\xc4\xe2\xe1\xe8\x08", CMPSXADD64mrr, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0), FE_CX, FE_BX)
+TEST("\xc4\xe2\xe1\xe8\x08", CMPccXADD64mrr, FE_CC_S, FE_MEM(FE_AX, 0, FE_NOREG, 0), FE_CX, FE_BX)
 
-TEST("\x79\x00", JNS, 0, FE_PTR(2));
-TEST("\x79\x00", Jcc, FE_CC_NS, FE_PTR(2));
-TEST("\x0f\x89\x00\x00\x00\x00", JNS, FE_JMPL, FE_PTR(6));
-TEST("\x0f\x89\x00\x00\x00\x00", Jcc, FE_CC_NS|FE_JMPL, FE_PTR(6));
-TEST("\x0f\x89\x7c\x00\x00\x00", JNS, 0, FE_PTR(130));
-TEST("\x0f\x89\x7c\x00\x00\x00", Jcc, FE_CC_NS, FE_PTR(130));
-TEST("\x0f\x99\xc0", SETNS8r, 0, FE_AX);
-TEST("\x0f\x99\xc0", SETcc8r, FE_CC_NS, FE_AX);
-TEST("\x0f\x99\x00", SETNS8m, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0));
-TEST("\x0f\x99\x00", SETcc8m, FE_CC_NS, FE_MEM(FE_AX, 0, FE_NOREG, 0));
-TEST("\x67\x0f\x99\x00", SETNS8m, FE_ADDR32, FE_MEM(FE_AX, 0, FE_NOREG, 0));
-TEST("\x67\x0f\x99\x00", SETcc8m, FE_CC_NS|FE_ADDR32, FE_MEM(FE_AX, 0, FE_NOREG, 0));
-TEST("\x0f\x49\xc0", CMOVNS32rr, 0, FE_AX, FE_AX);
-TEST("\x0f\x49\xc0", CMOVcc32rr, FE_CC_NS, FE_AX, FE_AX);
-TEST("\x0f\x49\x00", CMOVNS32rm, 0, FE_AX, FE_MEM(FE_AX, 0, FE_NOREG, 0));
-TEST("\x0f\x49\x00", CMOVcc32rm, FE_CC_NS, FE_AX, FE_MEM(FE_AX, 0, FE_NOREG, 0));
-TEST("\x67\x0f\x49\x00", CMOVNS32rm, FE_ADDR32, FE_AX, FE_MEM(FE_AX, 0, FE_NOREG, 0));
-TEST("\x67\x0f\x49\x00", CMOVcc32rm, FE_CC_NS|FE_ADDR32, FE_AX, FE_MEM(FE_AX, 0, FE_NOREG, 0));
-TEST("\xc4\xe2\x61\xe9\x08", CMPNSXADD32mrr, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0), FE_CX, FE_BX);
-TEST("\xc4\xe2\x61\xe9\x08", CMPccXADD32mrr, FE_CC_NS, FE_MEM(FE_AX, 0, FE_NOREG, 0), FE_CX, FE_BX);
-TEST("\xc4\xe2\xe1\xe9\x08", CMPNSXADD64mrr, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0), FE_CX, FE_BX);
-TEST("\xc4\xe2\xe1\xe9\x08", CMPccXADD64mrr, FE_CC_NS, FE_MEM(FE_AX, 0, FE_NOREG, 0), FE_CX, FE_BX);
+TEST("\x79\x00", JNS, 0, FE_PTR(2))
+TEST("\x79\x00", Jcc, FE_CC_NS, FE_PTR(2))
+TEST("\x0f\x89\x00\x00\x00\x00", JNS, FE_JMPL, FE_PTR(6))
+TEST("\x0f\x89\x00\x00\x00\x00", Jcc, FE_CC_NS|FE_JMPL, FE_PTR(6))
+TEST("\x0f\x89\x7c\x00\x00\x00", JNS, 0, FE_PTR(130))
+TEST("\x0f\x89\x7c\x00\x00\x00", Jcc, FE_CC_NS, FE_PTR(130))
+TEST("\x0f\x99\xc0", SETNS8r, 0, FE_AX)
+TEST("\x0f\x99\xc0", SETcc8r, FE_CC_NS, FE_AX)
+TEST("\x0f\x99\x00", SETNS8m, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0))
+TEST("\x0f\x99\x00", SETcc8m, FE_CC_NS, FE_MEM(FE_AX, 0, FE_NOREG, 0))
+TEST("\x67\x0f\x99\x00", SETNS8m, FE_ADDR32, FE_MEM(FE_AX, 0, FE_NOREG, 0))
+TEST("\x67\x0f\x99\x00", SETcc8m, FE_CC_NS|FE_ADDR32, FE_MEM(FE_AX, 0, FE_NOREG, 0))
+TEST("\x0f\x49\xc0", CMOVNS32rr, 0, FE_AX, FE_AX)
+TEST("\x0f\x49\xc0", CMOVcc32rr, FE_CC_NS, FE_AX, FE_AX)
+TEST("\x0f\x49\x00", CMOVNS32rm, 0, FE_AX, FE_MEM(FE_AX, 0, FE_NOREG, 0))
+TEST("\x0f\x49\x00", CMOVcc32rm, FE_CC_NS, FE_AX, FE_MEM(FE_AX, 0, FE_NOREG, 0))
+TEST("\x67\x0f\x49\x00", CMOVNS32rm, FE_ADDR32, FE_AX, FE_MEM(FE_AX, 0, FE_NOREG, 0))
+TEST("\x67\x0f\x49\x00", CMOVcc32rm, FE_CC_NS|FE_ADDR32, FE_AX, FE_MEM(FE_AX, 0, FE_NOREG, 0))
+TEST("\xc4\xe2\x61\xe9\x08", CMPNSXADD32mrr, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0), FE_CX, FE_BX)
+TEST("\xc4\xe2\x61\xe9\x08", CMPccXADD32mrr, FE_CC_NS, FE_MEM(FE_AX, 0, FE_NOREG, 0), FE_CX, FE_BX)
+TEST("\xc4\xe2\xe1\xe9\x08", CMPNSXADD64mrr, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0), FE_CX, FE_BX)
+TEST("\xc4\xe2\xe1\xe9\x08", CMPccXADD64mrr, FE_CC_NS, FE_MEM(FE_AX, 0, FE_NOREG, 0), FE_CX, FE_BX)
 
-TEST("\x7a\x00", JP, 0, FE_PTR(2));
-TEST("\x7a\x00", Jcc, FE_CC_P, FE_PTR(2));
-TEST("\x0f\x8a\x00\x00\x00\x00", JP, FE_JMPL, FE_PTR(6));
-TEST("\x0f\x8a\x00\x00\x00\x00", Jcc, FE_CC_P|FE_JMPL, FE_PTR(6));
-TEST("\x0f\x8a\x7c\x00\x00\x00", JP, 0, FE_PTR(130));
-TEST("\x0f\x8a\x7c\x00\x00\x00", Jcc, FE_CC_P, FE_PTR(130));
-TEST("\x0f\x9a\xc0", SETP8r, 0, FE_AX);
-TEST("\x0f\x9a\xc0", SETcc8r, FE_CC_P, FE_AX);
-TEST("\x0f\x9a\x00", SETP8m, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0));
-TEST("\x0f\x9a\x00", SETcc8m, FE_CC_P, FE_MEM(FE_AX, 0, FE_NOREG, 0));
-TEST("\x67\x0f\x9a\x00", SETP8m, FE_ADDR32, FE_MEM(FE_AX, 0, FE_NOREG, 0));
-TEST("\x67\x0f\x9a\x00", SETcc8m, FE_CC_P|FE_ADDR32, FE_MEM(FE_AX, 0, FE_NOREG, 0));
-TEST("\x0f\x4a\xc0", CMOVP32rr, 0, FE_AX, FE_AX);
-TEST("\x0f\x4a\xc0", CMOVcc32rr, FE_CC_P, FE_AX, FE_AX);
-TEST("\x0f\x4a\x00", CMOVP32rm, 0, FE_AX, FE_MEM(FE_AX, 0, FE_NOREG, 0));
-TEST("\x0f\x4a\x00", CMOVcc32rm, FE_CC_P, FE_AX, FE_MEM(FE_AX, 0, FE_NOREG, 0));
-TEST("\x67\x0f\x4a\x00", CMOVP32rm, FE_ADDR32, FE_AX, FE_MEM(FE_AX, 0, FE_NOREG, 0));
-TEST("\x67\x0f\x4a\x00", CMOVcc32rm, FE_CC_P|FE_ADDR32, FE_AX, FE_MEM(FE_AX, 0, FE_NOREG, 0));
-TEST("\xc4\xe2\x61\xea\x08", CMPPXADD32mrr, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0), FE_CX, FE_BX);
-TEST("\xc4\xe2\x61\xea\x08", CMPccXADD32mrr, FE_CC_P, FE_MEM(FE_AX, 0, FE_NOREG, 0), FE_CX, FE_BX);
-TEST("\xc4\xe2\xe1\xea\x08", CMPPXADD64mrr, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0), FE_CX, FE_BX);
-TEST("\xc4\xe2\xe1\xea\x08", CMPccXADD64mrr, FE_CC_P, FE_MEM(FE_AX, 0, FE_NOREG, 0), FE_CX, FE_BX);
+TEST("\x7a\x00", JP, 0, FE_PTR(2))
+TEST("\x7a\x00", Jcc, FE_CC_P, FE_PTR(2))
+TEST("\x0f\x8a\x00\x00\x00\x00", JP, FE_JMPL, FE_PTR(6))
+TEST("\x0f\x8a\x00\x00\x00\x00", Jcc, FE_CC_P|FE_JMPL, FE_PTR(6))
+TEST("\x0f\x8a\x7c\x00\x00\x00", JP, 0, FE_PTR(130))
+TEST("\x0f\x8a\x7c\x00\x00\x00", Jcc, FE_CC_P, FE_PTR(130))
+TEST("\x0f\x9a\xc0", SETP8r, 0, FE_AX)
+TEST("\x0f\x9a\xc0", SETcc8r, FE_CC_P, FE_AX)
+TEST("\x0f\x9a\x00", SETP8m, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0))
+TEST("\x0f\x9a\x00", SETcc8m, FE_CC_P, FE_MEM(FE_AX, 0, FE_NOREG, 0))
+TEST("\x67\x0f\x9a\x00", SETP8m, FE_ADDR32, FE_MEM(FE_AX, 0, FE_NOREG, 0))
+TEST("\x67\x0f\x9a\x00", SETcc8m, FE_CC_P|FE_ADDR32, FE_MEM(FE_AX, 0, FE_NOREG, 0))
+TEST("\x0f\x4a\xc0", CMOVP32rr, 0, FE_AX, FE_AX)
+TEST("\x0f\x4a\xc0", CMOVcc32rr, FE_CC_P, FE_AX, FE_AX)
+TEST("\x0f\x4a\x00", CMOVP32rm, 0, FE_AX, FE_MEM(FE_AX, 0, FE_NOREG, 0))
+TEST("\x0f\x4a\x00", CMOVcc32rm, FE_CC_P, FE_AX, FE_MEM(FE_AX, 0, FE_NOREG, 0))
+TEST("\x67\x0f\x4a\x00", CMOVP32rm, FE_ADDR32, FE_AX, FE_MEM(FE_AX, 0, FE_NOREG, 0))
+TEST("\x67\x0f\x4a\x00", CMOVcc32rm, FE_CC_P|FE_ADDR32, FE_AX, FE_MEM(FE_AX, 0, FE_NOREG, 0))
+TEST("\xc4\xe2\x61\xea\x08", CMPPXADD32mrr, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0), FE_CX, FE_BX)
+TEST("\xc4\xe2\x61\xea\x08", CMPccXADD32mrr, FE_CC_P, FE_MEM(FE_AX, 0, FE_NOREG, 0), FE_CX, FE_BX)
+TEST("\xc4\xe2\xe1\xea\x08", CMPPXADD64mrr, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0), FE_CX, FE_BX)
+TEST("\xc4\xe2\xe1\xea\x08", CMPccXADD64mrr, FE_CC_P, FE_MEM(FE_AX, 0, FE_NOREG, 0), FE_CX, FE_BX)
 
-TEST("\x7b\x00", JNP, 0, FE_PTR(2));
-TEST("\x7b\x00", Jcc, FE_CC_NP, FE_PTR(2));
-TEST("\x0f\x8b\x00\x00\x00\x00", JNP, FE_JMPL, FE_PTR(6));
-TEST("\x0f\x8b\x00\x00\x00\x00", Jcc, FE_CC_NP|FE_JMPL, FE_PTR(6));
-TEST("\x0f\x8b\x7c\x00\x00\x00", JNP, 0, FE_PTR(130));
-TEST("\x0f\x8b\x7c\x00\x00\x00", Jcc, FE_CC_NP, FE_PTR(130));
-TEST("\x0f\x9b\xc0", SETNP8r, 0, FE_AX);
-TEST("\x0f\x9b\xc0", SETcc8r, FE_CC_NP, FE_AX);
-TEST("\x0f\x9b\x00", SETNP8m, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0));
-TEST("\x0f\x9b\x00", SETcc8m, FE_CC_NP, FE_MEM(FE_AX, 0, FE_NOREG, 0));
-TEST("\x67\x0f\x9b\x00", SETNP8m, FE_ADDR32, FE_MEM(FE_AX, 0, FE_NOREG, 0));
-TEST("\x67\x0f\x9b\x00", SETcc8m, FE_CC_NP|FE_ADDR32, FE_MEM(FE_AX, 0, FE_NOREG, 0));
-TEST("\x0f\x4b\xc0", CMOVNP32rr, 0, FE_AX, FE_AX);
-TEST("\x0f\x4b\xc0", CMOVcc32rr, FE_CC_NP, FE_AX, FE_AX);
-TEST("\x0f\x4b\x00", CMOVNP32rm, 0, FE_AX, FE_MEM(FE_AX, 0, FE_NOREG, 0));
-TEST("\x0f\x4b\x00", CMOVcc32rm, FE_CC_NP, FE_AX, FE_MEM(FE_AX, 0, FE_NOREG, 0));
-TEST("\x67\x0f\x4b\x00", CMOVNP32rm, FE_ADDR32, FE_AX, FE_MEM(FE_AX, 0, FE_NOREG, 0));
-TEST("\x67\x0f\x4b\x00", CMOVcc32rm, FE_CC_NP|FE_ADDR32, FE_AX, FE_MEM(FE_AX, 0, FE_NOREG, 0));
-TEST("\xc4\xe2\x61\xeb\x08", CMPNPXADD32mrr, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0), FE_CX, FE_BX);
-TEST("\xc4\xe2\x61\xeb\x08", CMPccXADD32mrr, FE_CC_NP, FE_MEM(FE_AX, 0, FE_NOREG, 0), FE_CX, FE_BX);
-TEST("\xc4\xe2\xe1\xeb\x08", CMPNPXADD64mrr, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0), FE_CX, FE_BX);
-TEST("\xc4\xe2\xe1\xeb\x08", CMPccXADD64mrr, FE_CC_NP, FE_MEM(FE_AX, 0, FE_NOREG, 0), FE_CX, FE_BX);
+TEST("\x7b\x00", JNP, 0, FE_PTR(2))
+TEST("\x7b\x00", Jcc, FE_CC_NP, FE_PTR(2))
+TEST("\x0f\x8b\x00\x00\x00\x00", JNP, FE_JMPL, FE_PTR(6))
+TEST("\x0f\x8b\x00\x00\x00\x00", Jcc, FE_CC_NP|FE_JMPL, FE_PTR(6))
+TEST("\x0f\x8b\x7c\x00\x00\x00", JNP, 0, FE_PTR(130))
+TEST("\x0f\x8b\x7c\x00\x00\x00", Jcc, FE_CC_NP, FE_PTR(130))
+TEST("\x0f\x9b\xc0", SETNP8r, 0, FE_AX)
+TEST("\x0f\x9b\xc0", SETcc8r, FE_CC_NP, FE_AX)
+TEST("\x0f\x9b\x00", SETNP8m, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0))
+TEST("\x0f\x9b\x00", SETcc8m, FE_CC_NP, FE_MEM(FE_AX, 0, FE_NOREG, 0))
+TEST("\x67\x0f\x9b\x00", SETNP8m, FE_ADDR32, FE_MEM(FE_AX, 0, FE_NOREG, 0))
+TEST("\x67\x0f\x9b\x00", SETcc8m, FE_CC_NP|FE_ADDR32, FE_MEM(FE_AX, 0, FE_NOREG, 0))
+TEST("\x0f\x4b\xc0", CMOVNP32rr, 0, FE_AX, FE_AX)
+TEST("\x0f\x4b\xc0", CMOVcc32rr, FE_CC_NP, FE_AX, FE_AX)
+TEST("\x0f\x4b\x00", CMOVNP32rm, 0, FE_AX, FE_MEM(FE_AX, 0, FE_NOREG, 0))
+TEST("\x0f\x4b\x00", CMOVcc32rm, FE_CC_NP, FE_AX, FE_MEM(FE_AX, 0, FE_NOREG, 0))
+TEST("\x67\x0f\x4b\x00", CMOVNP32rm, FE_ADDR32, FE_AX, FE_MEM(FE_AX, 0, FE_NOREG, 0))
+TEST("\x67\x0f\x4b\x00", CMOVcc32rm, FE_CC_NP|FE_ADDR32, FE_AX, FE_MEM(FE_AX, 0, FE_NOREG, 0))
+TEST("\xc4\xe2\x61\xeb\x08", CMPNPXADD32mrr, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0), FE_CX, FE_BX)
+TEST("\xc4\xe2\x61\xeb\x08", CMPccXADD32mrr, FE_CC_NP, FE_MEM(FE_AX, 0, FE_NOREG, 0), FE_CX, FE_BX)
+TEST("\xc4\xe2\xe1\xeb\x08", CMPNPXADD64mrr, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0), FE_CX, FE_BX)
+TEST("\xc4\xe2\xe1\xeb\x08", CMPccXADD64mrr, FE_CC_NP, FE_MEM(FE_AX, 0, FE_NOREG, 0), FE_CX, FE_BX)
 
-TEST("\x7c\x00", JL, 0, FE_PTR(2));
-TEST("\x7c\x00", Jcc, FE_CC_L, FE_PTR(2));
-TEST("\x0f\x8c\x00\x00\x00\x00", JL, FE_JMPL, FE_PTR(6));
-TEST("\x0f\x8c\x00\x00\x00\x00", Jcc, FE_CC_L|FE_JMPL, FE_PTR(6));
-TEST("\x0f\x8c\x7c\x00\x00\x00", JL, 0, FE_PTR(130));
-TEST("\x0f\x8c\x7c\x00\x00\x00", Jcc, FE_CC_L, FE_PTR(130));
-TEST("\x0f\x9c\xc0", SETL8r, 0, FE_AX);
-TEST("\x0f\x9c\xc0", SETcc8r, FE_CC_L, FE_AX);
-TEST("\x0f\x9c\x00", SETL8m, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0));
-TEST("\x0f\x9c\x00", SETcc8m, FE_CC_L, FE_MEM(FE_AX, 0, FE_NOREG, 0));
-TEST("\x67\x0f\x9c\x00", SETL8m, FE_ADDR32, FE_MEM(FE_AX, 0, FE_NOREG, 0));
-TEST("\x67\x0f\x9c\x00", SETcc8m, FE_CC_L|FE_ADDR32, FE_MEM(FE_AX, 0, FE_NOREG, 0));
-TEST("\x0f\x4c\xc0", CMOVL32rr, 0, FE_AX, FE_AX);
-TEST("\x0f\x4c\xc0", CMOVcc32rr, FE_CC_L, FE_AX, FE_AX);
-TEST("\x0f\x4c\x00", CMOVL32rm, 0, FE_AX, FE_MEM(FE_AX, 0, FE_NOREG, 0));
-TEST("\x0f\x4c\x00", CMOVcc32rm, FE_CC_L, FE_AX, FE_MEM(FE_AX, 0, FE_NOREG, 0));
-TEST("\x67\x0f\x4c\x00", CMOVL32rm, FE_ADDR32, FE_AX, FE_MEM(FE_AX, 0, FE_NOREG, 0));
-TEST("\x67\x0f\x4c\x00", CMOVcc32rm, FE_CC_L|FE_ADDR32, FE_AX, FE_MEM(FE_AX, 0, FE_NOREG, 0));
-TEST("\xc4\xe2\x61\xec\x08", CMPLXADD32mrr, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0), FE_CX, FE_BX);
-TEST("\xc4\xe2\x61\xec\x08", CMPccXADD32mrr, FE_CC_L, FE_MEM(FE_AX, 0, FE_NOREG, 0), FE_CX, FE_BX);
-TEST("\xc4\xe2\xe1\xec\x08", CMPLXADD64mrr, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0), FE_CX, FE_BX);
-TEST("\xc4\xe2\xe1\xec\x08", CMPccXADD64mrr, FE_CC_L, FE_MEM(FE_AX, 0, FE_NOREG, 0), FE_CX, FE_BX);
+TEST("\x7c\x00", JL, 0, FE_PTR(2))
+TEST("\x7c\x00", Jcc, FE_CC_L, FE_PTR(2))
+TEST("\x0f\x8c\x00\x00\x00\x00", JL, FE_JMPL, FE_PTR(6))
+TEST("\x0f\x8c\x00\x00\x00\x00", Jcc, FE_CC_L|FE_JMPL, FE_PTR(6))
+TEST("\x0f\x8c\x7c\x00\x00\x00", JL, 0, FE_PTR(130))
+TEST("\x0f\x8c\x7c\x00\x00\x00", Jcc, FE_CC_L, FE_PTR(130))
+TEST("\x0f\x9c\xc0", SETL8r, 0, FE_AX)
+TEST("\x0f\x9c\xc0", SETcc8r, FE_CC_L, FE_AX)
+TEST("\x0f\x9c\x00", SETL8m, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0))
+TEST("\x0f\x9c\x00", SETcc8m, FE_CC_L, FE_MEM(FE_AX, 0, FE_NOREG, 0))
+TEST("\x67\x0f\x9c\x00", SETL8m, FE_ADDR32, FE_MEM(FE_AX, 0, FE_NOREG, 0))
+TEST("\x67\x0f\x9c\x00", SETcc8m, FE_CC_L|FE_ADDR32, FE_MEM(FE_AX, 0, FE_NOREG, 0))
+TEST("\x0f\x4c\xc0", CMOVL32rr, 0, FE_AX, FE_AX)
+TEST("\x0f\x4c\xc0", CMOVcc32rr, FE_CC_L, FE_AX, FE_AX)
+TEST("\x0f\x4c\x00", CMOVL32rm, 0, FE_AX, FE_MEM(FE_AX, 0, FE_NOREG, 0))
+TEST("\x0f\x4c\x00", CMOVcc32rm, FE_CC_L, FE_AX, FE_MEM(FE_AX, 0, FE_NOREG, 0))
+TEST("\x67\x0f\x4c\x00", CMOVL32rm, FE_ADDR32, FE_AX, FE_MEM(FE_AX, 0, FE_NOREG, 0))
+TEST("\x67\x0f\x4c\x00", CMOVcc32rm, FE_CC_L|FE_ADDR32, FE_AX, FE_MEM(FE_AX, 0, FE_NOREG, 0))
+TEST("\xc4\xe2\x61\xec\x08", CMPLXADD32mrr, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0), FE_CX, FE_BX)
+TEST("\xc4\xe2\x61\xec\x08", CMPccXADD32mrr, FE_CC_L, FE_MEM(FE_AX, 0, FE_NOREG, 0), FE_CX, FE_BX)
+TEST("\xc4\xe2\xe1\xec\x08", CMPLXADD64mrr, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0), FE_CX, FE_BX)
+TEST("\xc4\xe2\xe1\xec\x08", CMPccXADD64mrr, FE_CC_L, FE_MEM(FE_AX, 0, FE_NOREG, 0), FE_CX, FE_BX)
 
-TEST("\x7d\x00", JGE, 0, FE_PTR(2));
-TEST("\x7d\x00", Jcc, FE_CC_GE, FE_PTR(2));
-TEST("\x0f\x8d\x00\x00\x00\x00", JGE, FE_JMPL, FE_PTR(6));
-TEST("\x0f\x8d\x00\x00\x00\x00", Jcc, FE_CC_GE|FE_JMPL, FE_PTR(6));
-TEST("\x0f\x8d\x7c\x00\x00\x00", JGE, 0, FE_PTR(130));
-TEST("\x0f\x8d\x7c\x00\x00\x00", Jcc, FE_CC_GE, FE_PTR(130));
-TEST("\x0f\x9d\xc0", SETGE8r, 0, FE_AX);
-TEST("\x0f\x9d\xc0", SETcc8r, FE_CC_GE, FE_AX);
-TEST("\x0f\x9d\x00", SETGE8m, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0));
-TEST("\x0f\x9d\x00", SETcc8m, FE_CC_GE, FE_MEM(FE_AX, 0, FE_NOREG, 0));
-TEST("\x67\x0f\x9d\x00", SETGE8m, FE_ADDR32, FE_MEM(FE_AX, 0, FE_NOREG, 0));
-TEST("\x67\x0f\x9d\x00", SETcc8m, FE_CC_GE|FE_ADDR32, FE_MEM(FE_AX, 0, FE_NOREG, 0));
-TEST("\x0f\x4d\xc0", CMOVGE32rr, 0, FE_AX, FE_AX);
-TEST("\x0f\x4d\xc0", CMOVcc32rr, FE_CC_GE, FE_AX, FE_AX);
-TEST("\x0f\x4d\x00", CMOVGE32rm, 0, FE_AX, FE_MEM(FE_AX, 0, FE_NOREG, 0));
-TEST("\x0f\x4d\x00", CMOVcc32rm, FE_CC_GE, FE_AX, FE_MEM(FE_AX, 0, FE_NOREG, 0));
-TEST("\x67\x0f\x4d\x00", CMOVGE32rm, FE_ADDR32, FE_AX, FE_MEM(FE_AX, 0, FE_NOREG, 0));
-TEST("\x67\x0f\x4d\x00", CMOVcc32rm, FE_CC_GE|FE_ADDR32, FE_AX, FE_MEM(FE_AX, 0, FE_NOREG, 0));
-TEST("\xc4\xe2\x61\xed\x08", CMPNLXADD32mrr, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0), FE_CX, FE_BX);
-TEST("\xc4\xe2\x61\xed\x08", CMPccXADD32mrr, FE_CC_NL, FE_MEM(FE_AX, 0, FE_NOREG, 0), FE_CX, FE_BX);
-TEST("\xc4\xe2\xe1\xed\x08", CMPNLXADD64mrr, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0), FE_CX, FE_BX);
-TEST("\xc4\xe2\xe1\xed\x08", CMPccXADD64mrr, FE_CC_NL, FE_MEM(FE_AX, 0, FE_NOREG, 0), FE_CX, FE_BX);
+TEST("\x7d\x00", JGE, 0, FE_PTR(2))
+TEST("\x7d\x00", Jcc, FE_CC_GE, FE_PTR(2))
+TEST("\x0f\x8d\x00\x00\x00\x00", JGE, FE_JMPL, FE_PTR(6))
+TEST("\x0f\x8d\x00\x00\x00\x00", Jcc, FE_CC_GE|FE_JMPL, FE_PTR(6))
+TEST("\x0f\x8d\x7c\x00\x00\x00", JGE, 0, FE_PTR(130))
+TEST("\x0f\x8d\x7c\x00\x00\x00", Jcc, FE_CC_GE, FE_PTR(130))
+TEST("\x0f\x9d\xc0", SETGE8r, 0, FE_AX)
+TEST("\x0f\x9d\xc0", SETcc8r, FE_CC_GE, FE_AX)
+TEST("\x0f\x9d\x00", SETGE8m, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0))
+TEST("\x0f\x9d\x00", SETcc8m, FE_CC_GE, FE_MEM(FE_AX, 0, FE_NOREG, 0))
+TEST("\x67\x0f\x9d\x00", SETGE8m, FE_ADDR32, FE_MEM(FE_AX, 0, FE_NOREG, 0))
+TEST("\x67\x0f\x9d\x00", SETcc8m, FE_CC_GE|FE_ADDR32, FE_MEM(FE_AX, 0, FE_NOREG, 0))
+TEST("\x0f\x4d\xc0", CMOVGE32rr, 0, FE_AX, FE_AX)
+TEST("\x0f\x4d\xc0", CMOVcc32rr, FE_CC_GE, FE_AX, FE_AX)
+TEST("\x0f\x4d\x00", CMOVGE32rm, 0, FE_AX, FE_MEM(FE_AX, 0, FE_NOREG, 0))
+TEST("\x0f\x4d\x00", CMOVcc32rm, FE_CC_GE, FE_AX, FE_MEM(FE_AX, 0, FE_NOREG, 0))
+TEST("\x67\x0f\x4d\x00", CMOVGE32rm, FE_ADDR32, FE_AX, FE_MEM(FE_AX, 0, FE_NOREG, 0))
+TEST("\x67\x0f\x4d\x00", CMOVcc32rm, FE_CC_GE|FE_ADDR32, FE_AX, FE_MEM(FE_AX, 0, FE_NOREG, 0))
+TEST("\xc4\xe2\x61\xed\x08", CMPNLXADD32mrr, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0), FE_CX, FE_BX)
+TEST("\xc4\xe2\x61\xed\x08", CMPccXADD32mrr, FE_CC_NL, FE_MEM(FE_AX, 0, FE_NOREG, 0), FE_CX, FE_BX)
+TEST("\xc4\xe2\xe1\xed\x08", CMPNLXADD64mrr, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0), FE_CX, FE_BX)
+TEST("\xc4\xe2\xe1\xed\x08", CMPccXADD64mrr, FE_CC_NL, FE_MEM(FE_AX, 0, FE_NOREG, 0), FE_CX, FE_BX)
 
-TEST("\x7e\x00", JLE, 0, FE_PTR(2));
-TEST("\x7e\x00", Jcc, FE_CC_LE, FE_PTR(2));
-TEST("\x0f\x8e\x00\x00\x00\x00", JLE, FE_JMPL, FE_PTR(6));
-TEST("\x0f\x8e\x00\x00\x00\x00", Jcc, FE_CC_LE|FE_JMPL, FE_PTR(6));
-TEST("\x0f\x8e\x7c\x00\x00\x00", JLE, 0, FE_PTR(130));
-TEST("\x0f\x8e\x7c\x00\x00\x00", Jcc, FE_CC_LE, FE_PTR(130));
-TEST("\x0f\x9e\xc0", SETLE8r, 0, FE_AX);
-TEST("\x0f\x9e\xc0", SETcc8r, FE_CC_LE, FE_AX);
-TEST("\x0f\x9e\x00", SETLE8m, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0));
-TEST("\x0f\x9e\x00", SETcc8m, FE_CC_LE, FE_MEM(FE_AX, 0, FE_NOREG, 0));
-TEST("\x67\x0f\x9e\x00", SETLE8m, FE_ADDR32, FE_MEM(FE_AX, 0, FE_NOREG, 0));
-TEST("\x67\x0f\x9e\x00", SETcc8m, FE_CC_LE|FE_ADDR32, FE_MEM(FE_AX, 0, FE_NOREG, 0));
-TEST("\x0f\x4e\xc0", CMOVLE32rr, 0, FE_AX, FE_AX);
-TEST("\x0f\x4e\xc0", CMOVcc32rr, FE_CC_LE, FE_AX, FE_AX);
-TEST("\x0f\x4e\x00", CMOVLE32rm, 0, FE_AX, FE_MEM(FE_AX, 0, FE_NOREG, 0));
-TEST("\x0f\x4e\x00", CMOVcc32rm, FE_CC_LE, FE_AX, FE_MEM(FE_AX, 0, FE_NOREG, 0));
-TEST("\x67\x0f\x4e\x00", CMOVLE32rm, FE_ADDR32, FE_AX, FE_MEM(FE_AX, 0, FE_NOREG, 0));
-TEST("\x67\x0f\x4e\x00", CMOVcc32rm, FE_CC_LE|FE_ADDR32, FE_AX, FE_MEM(FE_AX, 0, FE_NOREG, 0));
-TEST("\xc4\xe2\x61\xee\x08", CMPLEXADD32mrr, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0), FE_CX, FE_BX);
-TEST("\xc4\xe2\x61\xee\x08", CMPccXADD32mrr, FE_CC_LE, FE_MEM(FE_AX, 0, FE_NOREG, 0), FE_CX, FE_BX);
-TEST("\xc4\xe2\xe1\xee\x08", CMPLEXADD64mrr, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0), FE_CX, FE_BX);
-TEST("\xc4\xe2\xe1\xee\x08", CMPccXADD64mrr, FE_CC_LE, FE_MEM(FE_AX, 0, FE_NOREG, 0), FE_CX, FE_BX);
+TEST("\x7e\x00", JLE, 0, FE_PTR(2))
+TEST("\x7e\x00", Jcc, FE_CC_LE, FE_PTR(2))
+TEST("\x0f\x8e\x00\x00\x00\x00", JLE, FE_JMPL, FE_PTR(6))
+TEST("\x0f\x8e\x00\x00\x00\x00", Jcc, FE_CC_LE|FE_JMPL, FE_PTR(6))
+TEST("\x0f\x8e\x7c\x00\x00\x00", JLE, 0, FE_PTR(130))
+TEST("\x0f\x8e\x7c\x00\x00\x00", Jcc, FE_CC_LE, FE_PTR(130))
+TEST("\x0f\x9e\xc0", SETLE8r, 0, FE_AX)
+TEST("\x0f\x9e\xc0", SETcc8r, FE_CC_LE, FE_AX)
+TEST("\x0f\x9e\x00", SETLE8m, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0))
+TEST("\x0f\x9e\x00", SETcc8m, FE_CC_LE, FE_MEM(FE_AX, 0, FE_NOREG, 0))
+TEST("\x67\x0f\x9e\x00", SETLE8m, FE_ADDR32, FE_MEM(FE_AX, 0, FE_NOREG, 0))
+TEST("\x67\x0f\x9e\x00", SETcc8m, FE_CC_LE|FE_ADDR32, FE_MEM(FE_AX, 0, FE_NOREG, 0))
+TEST("\x0f\x4e\xc0", CMOVLE32rr, 0, FE_AX, FE_AX)
+TEST("\x0f\x4e\xc0", CMOVcc32rr, FE_CC_LE, FE_AX, FE_AX)
+TEST("\x0f\x4e\x00", CMOVLE32rm, 0, FE_AX, FE_MEM(FE_AX, 0, FE_NOREG, 0))
+TEST("\x0f\x4e\x00", CMOVcc32rm, FE_CC_LE, FE_AX, FE_MEM(FE_AX, 0, FE_NOREG, 0))
+TEST("\x67\x0f\x4e\x00", CMOVLE32rm, FE_ADDR32, FE_AX, FE_MEM(FE_AX, 0, FE_NOREG, 0))
+TEST("\x67\x0f\x4e\x00", CMOVcc32rm, FE_CC_LE|FE_ADDR32, FE_AX, FE_MEM(FE_AX, 0, FE_NOREG, 0))
+TEST("\xc4\xe2\x61\xee\x08", CMPLEXADD32mrr, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0), FE_CX, FE_BX)
+TEST("\xc4\xe2\x61\xee\x08", CMPccXADD32mrr, FE_CC_LE, FE_MEM(FE_AX, 0, FE_NOREG, 0), FE_CX, FE_BX)
+TEST("\xc4\xe2\xe1\xee\x08", CMPLEXADD64mrr, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0), FE_CX, FE_BX)
+TEST("\xc4\xe2\xe1\xee\x08", CMPccXADD64mrr, FE_CC_LE, FE_MEM(FE_AX, 0, FE_NOREG, 0), FE_CX, FE_BX)
 
-TEST("\x7f\x00", JG, 0, FE_PTR(2));
-TEST("\x7f\x00", Jcc, FE_CC_G, FE_PTR(2));
-TEST("\x0f\x8f\x00\x00\x00\x00", JG, FE_JMPL, FE_PTR(6));
-TEST("\x0f\x8f\x00\x00\x00\x00", Jcc, FE_CC_G|FE_JMPL, FE_PTR(6));
-TEST("\x0f\x8f\x7c\x00\x00\x00", JG, 0, FE_PTR(130));
-TEST("\x0f\x8f\x7c\x00\x00\x00", Jcc, FE_CC_G, FE_PTR(130));
-TEST("\x0f\x9f\xc0", SETG8r, 0, FE_AX);
-TEST("\x0f\x9f\xc0", SETcc8r, FE_CC_G, FE_AX);
-TEST("\x0f\x9f\x00", SETG8m, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0));
-TEST("\x0f\x9f\x00", SETcc8m, FE_CC_G, FE_MEM(FE_AX, 0, FE_NOREG, 0));
-TEST("\x67\x0f\x9f\x00", SETG8m, FE_ADDR32, FE_MEM(FE_AX, 0, FE_NOREG, 0));
-TEST("\x67\x0f\x9f\x00", SETcc8m, FE_CC_G|FE_ADDR32, FE_MEM(FE_AX, 0, FE_NOREG, 0));
-TEST("\x0f\x4f\xc0", CMOVG32rr, 0, FE_AX, FE_AX);
-TEST("\x0f\x4f\xc0", CMOVcc32rr, FE_CC_G, FE_AX, FE_AX);
-TEST("\x0f\x4f\x00", CMOVG32rm, 0, FE_AX, FE_MEM(FE_AX, 0, FE_NOREG, 0));
-TEST("\x0f\x4f\x00", CMOVcc32rm, FE_CC_G, FE_AX, FE_MEM(FE_AX, 0, FE_NOREG, 0));
-TEST("\x67\x0f\x4f\x00", CMOVG32rm, FE_ADDR32, FE_AX, FE_MEM(FE_AX, 0, FE_NOREG, 0));
-TEST("\x67\x0f\x4f\x00", CMOVcc32rm, FE_CC_G|FE_ADDR32, FE_AX, FE_MEM(FE_AX, 0, FE_NOREG, 0));
-TEST("\xc4\xe2\x61\xef\x08", CMPNLEXADD32mrr, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0), FE_CX, FE_BX);
-TEST("\xc4\xe2\x61\xef\x08", CMPccXADD32mrr, FE_CC_NLE, FE_MEM(FE_AX, 0, FE_NOREG, 0), FE_CX, FE_BX);
-TEST("\xc4\xe2\xe1\xef\x08", CMPNLEXADD64mrr, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0), FE_CX, FE_BX);
-TEST("\xc4\xe2\xe1\xef\x08", CMPccXADD64mrr, FE_CC_NLE, FE_MEM(FE_AX, 0, FE_NOREG, 0), FE_CX, FE_BX);
+TEST("\x7f\x00", JG, 0, FE_PTR(2))
+TEST("\x7f\x00", Jcc, FE_CC_G, FE_PTR(2))
+TEST("\x0f\x8f\x00\x00\x00\x00", JG, FE_JMPL, FE_PTR(6))
+TEST("\x0f\x8f\x00\x00\x00\x00", Jcc, FE_CC_G|FE_JMPL, FE_PTR(6))
+TEST("\x0f\x8f\x7c\x00\x00\x00", JG, 0, FE_PTR(130))
+TEST("\x0f\x8f\x7c\x00\x00\x00", Jcc, FE_CC_G, FE_PTR(130))
+TEST("\x0f\x9f\xc0", SETG8r, 0, FE_AX)
+TEST("\x0f\x9f\xc0", SETcc8r, FE_CC_G, FE_AX)
+TEST("\x0f\x9f\x00", SETG8m, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0))
+TEST("\x0f\x9f\x00", SETcc8m, FE_CC_G, FE_MEM(FE_AX, 0, FE_NOREG, 0))
+TEST("\x67\x0f\x9f\x00", SETG8m, FE_ADDR32, FE_MEM(FE_AX, 0, FE_NOREG, 0))
+TEST("\x67\x0f\x9f\x00", SETcc8m, FE_CC_G|FE_ADDR32, FE_MEM(FE_AX, 0, FE_NOREG, 0))
+TEST("\x0f\x4f\xc0", CMOVG32rr, 0, FE_AX, FE_AX)
+TEST("\x0f\x4f\xc0", CMOVcc32rr, FE_CC_G, FE_AX, FE_AX)
+TEST("\x0f\x4f\x00", CMOVG32rm, 0, FE_AX, FE_MEM(FE_AX, 0, FE_NOREG, 0))
+TEST("\x0f\x4f\x00", CMOVcc32rm, FE_CC_G, FE_AX, FE_MEM(FE_AX, 0, FE_NOREG, 0))
+TEST("\x67\x0f\x4f\x00", CMOVG32rm, FE_ADDR32, FE_AX, FE_MEM(FE_AX, 0, FE_NOREG, 0))
+TEST("\x67\x0f\x4f\x00", CMOVcc32rm, FE_CC_G|FE_ADDR32, FE_AX, FE_MEM(FE_AX, 0, FE_NOREG, 0))
+TEST("\xc4\xe2\x61\xef\x08", CMPNLEXADD32mrr, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0), FE_CX, FE_BX)
+TEST("\xc4\xe2\x61\xef\x08", CMPccXADD32mrr, FE_CC_NLE, FE_MEM(FE_AX, 0, FE_NOREG, 0), FE_CX, FE_BX)
+TEST("\xc4\xe2\xe1\xef\x08", CMPNLEXADD64mrr, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0), FE_CX, FE_BX)
+TEST("\xc4\xe2\xe1\xef\x08", CMPccXADD64mrr, FE_CC_NLE, FE_MEM(FE_AX, 0, FE_NOREG, 0), FE_CX, FE_BX)
 
 // Test FD/TD encodings
-TEST("\xa0\x00\x00\x00\x00\x00\x00\x00\x00", MOV8ra, 0, FE_AX, 0);
-TEST("\x67\xa0\x00\x00\x00\x00", MOV8ra, FE_ADDR32, FE_AX, 0);
-TEST("\x66\xa1\x00\x00\x00\x00\x00\x00\x00\x00", MOV16ra, 0, FE_AX, 0);
-TEST("\x67\x66\xa1\x00\x00\x00\x00", MOV16ra, FE_ADDR32, FE_AX, 0);
-TEST("\x66\xa1\x10\x32\x54\x76\x98\xba\xdc\xfe", MOV16ra, 0, FE_AX, 0xfedcba9876543210);
-TEST("\x67\x66\xa1\x98\xba\xdc\xfe", MOV16ra, FE_ADDR32, FE_AX, 0xfedcba98);
-TEST("\xa1\x10\x32\x54\x76\x98\xba\xdc\xfe", MOV32ra, 0, FE_AX, 0xfedcba9876543210);
-TEST("\x67\xa1\x98\xba\xdc\xfe", MOV32ra, FE_ADDR32, FE_AX, 0xfedcba98);
-TEST("\x48\xa1\x10\x32\x54\x76\x98\xba\xdc\xfe", MOV64ra, 0, FE_AX, 0xfedcba9876543210);
-TEST("\x67\x48\xa1\x98\xba\xdc\xfe", MOV64ra, FE_ADDR32, FE_AX, 0xfedcba98);
-TEST("\xa2\x00\x00\x00\x00\x00\x00\x00\x00", MOV8ar, 0, 0, FE_AX);
-TEST("\x67\xa2\x00\x00\x00\x00", MOV8ar, FE_ADDR32, 0, FE_AX);
-TEST("\x66\xa3\x00\x00\x00\x00\x00\x00\x00\x00", MOV16ar, 0, 0, FE_AX);
-TEST("\x67\x66\xa3\x00\x00\x00\x00", MOV16ar, FE_ADDR32, 0, FE_AX);
-TEST("\x66\xa3\x10\x32\x54\x76\x98\xba\xdc\xfe", MOV16ar, 0, 0xfedcba9876543210, FE_AX);
-TEST("\x67\x66\xa3\x98\xba\xdc\xfe", MOV16ar, FE_ADDR32, 0xfedcba98, FE_AX);
-TEST("\xa3\x10\x32\x54\x76\x98\xba\xdc\xfe", MOV32ar, 0, 0xfedcba9876543210, FE_AX);
-TEST("\x67\xa3\x98\xba\xdc\xfe", MOV32ar, FE_ADDR32, 0xfedcba98, FE_AX);
-TEST("\x48\xa3\x10\x32\x54\x76\x98\xba\xdc\xfe", MOV64ar, 0, 0xfedcba9876543210, FE_AX);
-TEST("\x67\x48\xa3\x98\xba\xdc\xfe", MOV64ar, FE_ADDR32, 0xfedcba98, FE_AX);
-TEST("", MOV8ra, 0, FE_CX, 0);
-TEST("", MOV8ra, FE_ADDR32, FE_CX, 0);
-TEST("", MOV16ra, 0, FE_CX, 0);
-TEST("", MOV16ra, FE_ADDR32, FE_CX, 0);
-TEST("", MOV16ra, 0, FE_CX, 0xfedcba9876543210);
-TEST("", MOV16ra, FE_ADDR32, FE_CX, 0xfedcba98);
-TEST("", MOV32ra, 0, FE_CX, 0xfedcba9876543210);
-TEST("", MOV32ra, FE_ADDR32, FE_CX, 0xfedcba98);
-TEST("", MOV64ra, 0, FE_CX, 0xfedcba9876543210);
-TEST("", MOV64ra, FE_ADDR32, FE_CX, 0xfedcba98);
-TEST("", MOV8ar, 0, 0, FE_CX);
-TEST("", MOV8ar, FE_ADDR32, 0, FE_CX);
-TEST("", MOV16ar, 0, 0, FE_CX);
-TEST("", MOV16ar, FE_ADDR32, 0, FE_CX);
-TEST("", MOV16ar, 0, 0xfedcba9876543210, FE_CX);
-TEST("", MOV16ar, FE_ADDR32, 0xfedcba98, FE_CX);
-TEST("", MOV32ar, 0, 0xfedcba9876543210, FE_CX);
-TEST("", MOV32ar, FE_ADDR32, 0xfedcba98, FE_CX);
-TEST("", MOV64ar, 0, 0xfedcba9876543210, FE_CX);
-TEST("", MOV64ar, FE_ADDR32, 0xfedcba98, FE_CX);
+TEST("\xa0\x00\x00\x00\x00\x00\x00\x00\x00", MOV8ra, 0, FE_AX, 0)
+TEST("\x67\xa0\x00\x00\x00\x00", MOV8ra, FE_ADDR32, FE_AX, 0)
+TEST("\x66\xa1\x00\x00\x00\x00\x00\x00\x00\x00", MOV16ra, 0, FE_AX, 0)
+TEST("\x67\x66\xa1\x00\x00\x00\x00", MOV16ra, FE_ADDR32, FE_AX, 0)
+TEST("\x66\xa1\x10\x32\x54\x76\x98\xba\xdc\xfe", MOV16ra, 0, FE_AX, 0xfedcba9876543210)
+TEST("\x67\x66\xa1\x98\xba\xdc\xfe", MOV16ra, FE_ADDR32, FE_AX, 0xfedcba98)
+TEST("\xa1\x10\x32\x54\x76\x98\xba\xdc\xfe", MOV32ra, 0, FE_AX, 0xfedcba9876543210)
+TEST("\x67\xa1\x98\xba\xdc\xfe", MOV32ra, FE_ADDR32, FE_AX, 0xfedcba98)
+TEST("\x48\xa1\x10\x32\x54\x76\x98\xba\xdc\xfe", MOV64ra, 0, FE_AX, 0xfedcba9876543210)
+TEST("\x67\x48\xa1\x98\xba\xdc\xfe", MOV64ra, FE_ADDR32, FE_AX, 0xfedcba98)
+TEST("\xa2\x00\x00\x00\x00\x00\x00\x00\x00", MOV8ar, 0, 0, FE_AX)
+TEST("\x67\xa2\x00\x00\x00\x00", MOV8ar, FE_ADDR32, 0, FE_AX)
+TEST("\x66\xa3\x00\x00\x00\x00\x00\x00\x00\x00", MOV16ar, 0, 0, FE_AX)
+TEST("\x67\x66\xa3\x00\x00\x00\x00", MOV16ar, FE_ADDR32, 0, FE_AX)
+TEST("\x66\xa3\x10\x32\x54\x76\x98\xba\xdc\xfe", MOV16ar, 0, 0xfedcba9876543210, FE_AX)
+TEST("\x67\x66\xa3\x98\xba\xdc\xfe", MOV16ar, FE_ADDR32, 0xfedcba98, FE_AX)
+TEST("\xa3\x10\x32\x54\x76\x98\xba\xdc\xfe", MOV32ar, 0, 0xfedcba9876543210, FE_AX)
+TEST("\x67\xa3\x98\xba\xdc\xfe", MOV32ar, FE_ADDR32, 0xfedcba98, FE_AX)
+TEST("\x48\xa3\x10\x32\x54\x76\x98\xba\xdc\xfe", MOV64ar, 0, 0xfedcba9876543210, FE_AX)
+TEST("\x67\x48\xa3\x98\xba\xdc\xfe", MOV64ar, FE_ADDR32, 0xfedcba98, FE_AX)
+TEST("", MOV8ra, 0, FE_CX, 0)
+TEST("", MOV8ra, FE_ADDR32, FE_CX, 0)
+TEST("", MOV16ra, 0, FE_CX, 0)
+TEST("", MOV16ra, FE_ADDR32, FE_CX, 0)
+TEST("", MOV16ra, 0, FE_CX, 0xfedcba9876543210)
+TEST("", MOV16ra, FE_ADDR32, FE_CX, 0xfedcba98)
+TEST("", MOV32ra, 0, FE_CX, 0xfedcba9876543210)
+TEST("", MOV32ra, FE_ADDR32, FE_CX, 0xfedcba98)
+TEST("", MOV64ra, 0, FE_CX, 0xfedcba9876543210)
+TEST("", MOV64ra, FE_ADDR32, FE_CX, 0xfedcba98)
+TEST("", MOV8ar, 0, 0, FE_CX)
+TEST("", MOV8ar, FE_ADDR32, 0, FE_CX)
+TEST("", MOV16ar, 0, 0, FE_CX)
+TEST("", MOV16ar, FE_ADDR32, 0, FE_CX)
+TEST("", MOV16ar, 0, 0xfedcba9876543210, FE_CX)
+TEST("", MOV16ar, FE_ADDR32, 0xfedcba98, FE_CX)
+TEST("", MOV32ar, 0, 0xfedcba9876543210, FE_CX)
+TEST("", MOV32ar, FE_ADDR32, 0xfedcba98, FE_CX)
+TEST("", MOV64ar, 0, 0xfedcba9876543210, FE_CX)
+TEST("", MOV64ar, FE_ADDR32, 0xfedcba98, FE_CX)
 
-TEST("\xc7\xf8\x02\x00\x00\x00", XBEGIN, 0, FE_PTR(8));
+TEST("\xc7\xf8\x02\x00\x00\x00", XBEGIN, 0, FE_PTR(8))
 
 // BMI1
-TEST("\xf3\x0f\xbc\xc2", TZCNT32rr, 0, FE_AX, FE_DX);
-TEST("\x66\xf3\x0f\xbc\xc2", TZCNT16rr, 0, FE_AX, FE_DX);
-TEST("\xf3\x48\x0f\xbc\xc2", TZCNT64rr, 0, FE_AX, FE_DX);
-TEST("\xf3\x0f\xbd\xc2", LZCNT32rr, 0, FE_AX, FE_DX);
-TEST("\x66\xf3\x0f\xbd\xc2", LZCNT16rr, 0, FE_AX, FE_DX);
-TEST("\xf3\x48\x0f\xbd\xc2", LZCNT64rr, 0, FE_AX, FE_DX);
-TEST("\xc4\xc2\x18\xf2\xc7", ANDN32rrr, 0, FE_AX, FE_R12, FE_R15);
-TEST("\xc4\xc2\x98\xf2\xc7", ANDN64rrr, 0, FE_AX, FE_R12, FE_R15);
-TEST("\xc4\x42\x18\xf2\xc7", ANDN32rrr, 0, FE_R8, FE_R12, FE_R15);
-TEST("\xc4\x42\x98\xf2\xc7", ANDN64rrr, 0, FE_R8, FE_R12, FE_R15);
-TEST("\xc4\xe2\x78\xf3\xca", BLSR32rr, 0, FE_AX, FE_DX);
-TEST("\xc4\xe2\x78\xf3\x08", BLSR32rm, 0, FE_AX, FE_MEM(FE_AX, 0, FE_NOREG, 0));
-TEST("\xc4\xe2\xf8\xf3\xca", BLSR64rr, 0, FE_AX, FE_DX);
-TEST("\xc4\xe2\xf8\xf3\x08", BLSR64rm, 0, FE_AX, FE_MEM(FE_AX, 0, FE_NOREG, 0));
-TEST("\xc4\xc2\x38\xf3\xc9", BLSR32rr, 0, FE_R8, FE_R9);
-TEST("\xc4\xc2\xb8\xf3\xc9", BLSR64rr, 0, FE_R8, FE_R9);
-TEST("\xc4\xe2\x38\xf3\xc9", BLSR32rr, 0, FE_R8, FE_CX);
-TEST("\xc4\xe2\xb8\xf3\xc9", BLSR64rr, 0, FE_R8, FE_CX);
-TEST("\xc4\xc2\x78\xf3\xc9", BLSR32rr, 0, FE_AX, FE_R9);
-TEST("\xc4\xc2\xf8\xf3\xc9", BLSR64rr, 0, FE_AX, FE_R9);
-TEST("\xc4\xe2\x78\xf3\xd2", BLSMSK32rr, 0, FE_AX, FE_DX);
-TEST("\xc4\xe2\x78\xf3\x10", BLSMSK32rm, 0, FE_AX, FE_MEM(FE_AX, 0, FE_NOREG, 0));
-TEST("\xc4\xe2\xf8\xf3\xd2", BLSMSK64rr, 0, FE_AX, FE_DX);
-TEST("\xc4\xe2\xf8\xf3\x10", BLSMSK64rm, 0, FE_AX, FE_MEM(FE_AX, 0, FE_NOREG, 0));
-TEST("\xc4\xe2\x78\xf3\xda", BLSI32rr, 0, FE_AX, FE_DX);
-TEST("\xc4\xe2\x78\xf3\x18", BLSI32rm, 0, FE_AX, FE_MEM(FE_AX, 0, FE_NOREG, 0));
-TEST("\xc4\xe2\xf8\xf3\xda", BLSI64rr, 0, FE_AX, FE_DX);
-TEST("\xc4\xe2\xf8\xf3\x18", BLSI64rm, 0, FE_AX, FE_MEM(FE_AX, 0, FE_NOREG, 0));
-TEST("\xc4\xc2\x18\xf7\xc7", BEXTR32rrr, 0, FE_AX, FE_R15, FE_R12);
-TEST("\xc4\xc2\x98\xf7\xc7", BEXTR64rrr, 0, FE_AX, FE_R15, FE_R12);
-TEST("\xc4\x42\x18\xf7\xc7", BEXTR32rrr, 0, FE_R8, FE_R15, FE_R12);
-TEST("\xc4\x42\x98\xf7\xc7", BEXTR64rrr, 0, FE_R8, FE_R15, FE_R12);
+TEST("\xf3\x0f\xbc\xc2", TZCNT32rr, 0, FE_AX, FE_DX)
+TEST("\x66\xf3\x0f\xbc\xc2", TZCNT16rr, 0, FE_AX, FE_DX)
+TEST("\xf3\x48\x0f\xbc\xc2", TZCNT64rr, 0, FE_AX, FE_DX)
+TEST("\xf3\x0f\xbd\xc2", LZCNT32rr, 0, FE_AX, FE_DX)
+TEST("\x66\xf3\x0f\xbd\xc2", LZCNT16rr, 0, FE_AX, FE_DX)
+TEST("\xf3\x48\x0f\xbd\xc2", LZCNT64rr, 0, FE_AX, FE_DX)
+TEST("\xc4\xc2\x18\xf2\xc7", ANDN32rrr, 0, FE_AX, FE_R12, FE_R15)
+TEST("\xc4\xc2\x98\xf2\xc7", ANDN64rrr, 0, FE_AX, FE_R12, FE_R15)
+TEST("\xc4\x42\x18\xf2\xc7", ANDN32rrr, 0, FE_R8, FE_R12, FE_R15)
+TEST("\xc4\x42\x98\xf2\xc7", ANDN64rrr, 0, FE_R8, FE_R12, FE_R15)
+TEST("\xc4\xe2\x78\xf3\xca", BLSR32rr, 0, FE_AX, FE_DX)
+TEST("\xc4\xe2\x78\xf3\x08", BLSR32rm, 0, FE_AX, FE_MEM(FE_AX, 0, FE_NOREG, 0))
+TEST("\xc4\xe2\xf8\xf3\xca", BLSR64rr, 0, FE_AX, FE_DX)
+TEST("\xc4\xe2\xf8\xf3\x08", BLSR64rm, 0, FE_AX, FE_MEM(FE_AX, 0, FE_NOREG, 0))
+TEST("\xc4\xc2\x38\xf3\xc9", BLSR32rr, 0, FE_R8, FE_R9)
+TEST("\xc4\xc2\xb8\xf3\xc9", BLSR64rr, 0, FE_R8, FE_R9)
+TEST("\xc4\xe2\x38\xf3\xc9", BLSR32rr, 0, FE_R8, FE_CX)
+TEST("\xc4\xe2\xb8\xf3\xc9", BLSR64rr, 0, FE_R8, FE_CX)
+TEST("\xc4\xc2\x78\xf3\xc9", BLSR32rr, 0, FE_AX, FE_R9)
+TEST("\xc4\xc2\xf8\xf3\xc9", BLSR64rr, 0, FE_AX, FE_R9)
+TEST("\xc4\xe2\x78\xf3\xd2", BLSMSK32rr, 0, FE_AX, FE_DX)
+TEST("\xc4\xe2\x78\xf3\x10", BLSMSK32rm, 0, FE_AX, FE_MEM(FE_AX, 0, FE_NOREG, 0))
+TEST("\xc4\xe2\xf8\xf3\xd2", BLSMSK64rr, 0, FE_AX, FE_DX)
+TEST("\xc4\xe2\xf8\xf3\x10", BLSMSK64rm, 0, FE_AX, FE_MEM(FE_AX, 0, FE_NOREG, 0))
+TEST("\xc4\xe2\x78\xf3\xda", BLSI32rr, 0, FE_AX, FE_DX)
+TEST("\xc4\xe2\x78\xf3\x18", BLSI32rm, 0, FE_AX, FE_MEM(FE_AX, 0, FE_NOREG, 0))
+TEST("\xc4\xe2\xf8\xf3\xda", BLSI64rr, 0, FE_AX, FE_DX)
+TEST("\xc4\xe2\xf8\xf3\x18", BLSI64rm, 0, FE_AX, FE_MEM(FE_AX, 0, FE_NOREG, 0))
+TEST("\xc4\xc2\x18\xf7\xc7", BEXTR32rrr, 0, FE_AX, FE_R15, FE_R12)
+TEST("\xc4\xc2\x98\xf7\xc7", BEXTR64rrr, 0, FE_AX, FE_R15, FE_R12)
+TEST("\xc4\x42\x18\xf7\xc7", BEXTR32rrr, 0, FE_R8, FE_R15, FE_R12)
+TEST("\xc4\x42\x98\xf7\xc7", BEXTR64rrr, 0, FE_R8, FE_R15, FE_R12)
 
-TEST("\x0f\x30", WRMSR, 0);
-TEST("\x0f\x32", RDMSR, 0);
-TEST("\x0f\x01\xc6", WRMSRNS, 0);
-TEST("\xf2\x0f\x01\xc6", RDMSRLIST, 0);
-TEST("\xf3\x0f\x01\xc6", WRMSRLIST, 0);
-TEST("\xc4\xe7\x7b\xf6\xc1\x10\x20\x30\x40", RDMSRri, 0, FE_CX, 0x40302010);
-TEST("\xc4\xe7\x7a\xf6\xc1\x10\x20\x30\x40", WRMSRNSir, 0, 0x40302010, FE_CX);
-TEST("\xf2\x0f\x38\xf8\xc1", URDMSRrr, 0, FE_CX, FE_AX);
-TEST("\xf3\x0f\x38\xf8\xc1", UWRMSRrr, 0, FE_CX, FE_AX);
-TEST("\xc4\xe7\x7b\xf8\xc1\x10\x20\x30\x40", URDMSRri, 0, FE_CX, 0x40302010);
-TEST("\xc4\xe7\x7a\xf8\xc1\x10\x20\x30\x40", UWRMSRir, 0, 0x40302010, FE_CX);
+TEST("\x0f\x30", WRMSR, 0)
+TEST("\x0f\x32", RDMSR, 0)
+TEST("\x0f\x01\xc6", WRMSRNS, 0)
+TEST("\xf2\x0f\x01\xc6", RDMSRLIST, 0)
+TEST("\xf3\x0f\x01\xc6", WRMSRLIST, 0)
+TEST("\xc4\xe7\x7b\xf6\xc1\x10\x20\x30\x40", RDMSRri, 0, FE_CX, 0x40302010)
+TEST("\xc4\xe7\x7a\xf6\xc1\x10\x20\x30\x40", WRMSRNSir, 0, 0x40302010, FE_CX)
+TEST("\xf2\x0f\x38\xf8\xc1", URDMSRrr, 0, FE_CX, FE_AX)
+TEST("\xf3\x0f\x38\xf8\xc1", UWRMSRrr, 0, FE_CX, FE_AX)
+TEST("\xc4\xe7\x7b\xf8\xc1\x10\x20\x30\x40", URDMSRri, 0, FE_CX, 0x40302010)
+TEST("\xc4\xe7\x7a\xf8\xc1\x10\x20\x30\x40", UWRMSRir, 0, 0x40302010, FE_CX)
 
-TEST("\x0f\x38\xfc\x01", AADD32mr, 0, FE_MEM(FE_CX, 0, FE_NOREG, 0), FE_AX);
-TEST("\x48\x0f\x38\xfc\x01", AADD64mr, 0, FE_MEM(FE_CX, 0, FE_NOREG, 0), FE_AX);
-TEST("\x66\x0f\x38\xfc\x01", AAND32mr, 0, FE_MEM(FE_CX, 0, FE_NOREG, 0), FE_AX);
-TEST("\x66\x48\x0f\x38\xfc\x01", AAND64mr, 0, FE_MEM(FE_CX, 0, FE_NOREG, 0), FE_AX);
-TEST("\xf3\x0f\x38\xfc\x01", AXOR32mr, 0, FE_MEM(FE_CX, 0, FE_NOREG, 0), FE_AX);
-TEST("\xf3\x48\x0f\x38\xfc\x01", AXOR64mr, 0, FE_MEM(FE_CX, 0, FE_NOREG, 0), FE_AX);
-TEST("\xf2\x0f\x38\xfc\x01", AOR32mr, 0, FE_MEM(FE_CX, 0, FE_NOREG, 0), FE_AX);
-TEST("\xf2\x48\x0f\x38\xfc\x01", AOR64mr, 0, FE_MEM(FE_CX, 0, FE_NOREG, 0), FE_AX);
+TEST("\x0f\x38\xfc\x01", AADD32mr, 0, FE_MEM(FE_CX, 0, FE_NOREG, 0), FE_AX)
+TEST("\x48\x0f\x38\xfc\x01", AADD64mr, 0, FE_MEM(FE_CX, 0, FE_NOREG, 0), FE_AX)
+TEST("\x66\x0f\x38\xfc\x01", AAND32mr, 0, FE_MEM(FE_CX, 0, FE_NOREG, 0), FE_AX)
+TEST("\x66\x48\x0f\x38\xfc\x01", AAND64mr, 0, FE_MEM(FE_CX, 0, FE_NOREG, 0), FE_AX)
+TEST("\xf3\x0f\x38\xfc\x01", AXOR32mr, 0, FE_MEM(FE_CX, 0, FE_NOREG, 0), FE_AX)
+TEST("\xf3\x48\x0f\x38\xfc\x01", AXOR64mr, 0, FE_MEM(FE_CX, 0, FE_NOREG, 0), FE_AX)
+TEST("\xf2\x0f\x38\xfc\x01", AOR32mr, 0, FE_MEM(FE_CX, 0, FE_NOREG, 0), FE_AX)
+TEST("\xf2\x48\x0f\x38\xfc\x01", AOR64mr, 0, FE_MEM(FE_CX, 0, FE_NOREG, 0), FE_AX)
 
 // Test FPU instructions
-TEST("\xd8\x00", FADDm32, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0));
-TEST("\xdc\x00", FADDm64, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0));
-TEST("\xd8\xc0", FADDrr, 0, FE_ST0, FE_ST0);
-TEST("\xd8\xc1", FADDrr, 0, FE_ST0, FE_ST1);
-TEST("\xdc\xc1", FADDrr, 0, FE_ST1, FE_ST0);
-TEST("", FADDrr, 0, FE_ST1, FE_ST1);
-TEST("\xde\xc1", FADDPrr, 0, FE_ST1, FE_ST0);
-TEST("\xda\x00", FIADDm32, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0));
-TEST("\xde\x00", FIADDm16, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0));
-TEST("\xd9\x00", FLDm32, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0));
-TEST("\xdd\x00", FLDm64, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0));
-TEST("\xdb\x28", FLDm80, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0));
-TEST("\xdf\x00", FILDm16, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0));
-TEST("\xdb\x00", FILDm32, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0));
-TEST("\xdf\x28", FILDm64, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0));
-TEST("\xd9\xc1", FLDr, 0, FE_ST1);
-TEST("\xd9\xe8", FLD1, 0);
-TEST("\xdf\xe0", FSTSWr, 0, FE_AX);
-TEST("", FSTSWr, 0, FE_CX);
+TEST("\xd8\x00", FADDm32, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0))
+TEST("\xdc\x00", FADDm64, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0))
+TEST("\xd8\xc0", FADDrr, 0, FE_ST0, FE_ST0)
+TEST("\xd8\xc1", FADDrr, 0, FE_ST0, FE_ST1)
+TEST("\xdc\xc1", FADDrr, 0, FE_ST1, FE_ST0)
+TEST("", FADDrr, 0, FE_ST1, FE_ST1)
+TEST("\xde\xc1", FADDPrr, 0, FE_ST1, FE_ST0)
+TEST("\xda\x00", FIADDm32, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0))
+TEST("\xde\x00", FIADDm16, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0))
+TEST("\xd9\x00", FLDm32, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0))
+TEST("\xdd\x00", FLDm64, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0))
+TEST("\xdb\x28", FLDm80, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0))
+TEST("\xdf\x00", FILDm16, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0))
+TEST("\xdb\x00", FILDm32, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0))
+TEST("\xdf\x28", FILDm64, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0))
+TEST("\xd9\xc1", FLDr, 0, FE_ST1)
+TEST("\xd9\xe8", FLD1, 0)
+TEST("\xdf\xe0", FSTSWr, 0, FE_AX)
+TEST("", FSTSWr, 0, FE_CX)
 
 // Test VEX encoding
-TEST("\xc5\xfc\x77", VZEROALL, 0);
-TEST("\xc5\xf8\x77", VZEROUPPER, 0);
-TEST("\xc5\xf2\x58\xc2", VADDSSrrr, 0, FE_XMM0, FE_XMM1, FE_XMM2);
-TEST("\xc5\xf0\x58\xc2", VADDPS128rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2);
-TEST("\xc5\xf4\x58\xc2", VADDPS256rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2);
-TEST("\xc4\xc1\x74\x58\xc0", VADDPS256rrr, 0, FE_XMM0, FE_XMM1, FE_XMM8);
-TEST("\xc4\x62\x7d\x19\xc2", VBROADCASTSD256rr, 0, FE_XMM8, FE_XMM2);
-TEST("\xc4\x62\x7d\x1a\xc2", VBROADCASTF128_256rr, 0, FE_XMM8, FE_XMM2);
-TEST("\xc4\xe2\x71\x9d\xc2", VFNMADD132SSrrr, 0, FE_XMM0, FE_XMM1, FE_XMM2);
-TEST("\xc4\xe2\xf1\x9d\xc2", VFNMADD132SDrrr, 0, FE_XMM0, FE_XMM1, FE_XMM2);
-TEST("\xc4\xe2\x71\x2e\x17", VMASKMOVPS128mrr, 0, FE_MEM(FE_DI, 0, FE_NOREG, 0), FE_XMM1, FE_XMM2);
-TEST("\xc4\xe2\x75\x2e\x17", VMASKMOVPS256mrr, 0, FE_MEM(FE_DI, 0, FE_NOREG, 0), FE_XMM1, FE_XMM2);
-TEST("\xc5\xf1\x71\xd7\x02", VPSRLW128rri, 0, FE_XMM1, FE_XMM7, 0x2);
-TEST("\xc5\xf5\x71\xd7\x02", VPSRLW256rri, 0, FE_XMM1, FE_XMM7, 0x2);
-TEST("\xc4\xc3\xfd\x00\xc9\x12", VPERMQ256rri, 0, FE_XMM1, FE_XMM9, 0x12);
-TEST("\xc4\xe3\xfd\x01\xcf\x12", VPERMPD256rri, 0, FE_XMM1, FE_XMM7, 0x12);
-TEST("\xc5\xf9\xc5\xc0\x00", VPEXTRWrri, 0, FE_AX, FE_XMM0, 0x0);
+TEST("\xc5\xfc\x77", VZEROALL, 0)
+TEST("\xc5\xf8\x77", VZEROUPPER, 0)
+TEST("\xc5\xf2\x58\xc2", VADDSSrrr, 0, FE_XMM0, FE_XMM1, FE_XMM2)
+TEST("\xc5\xf0\x58\xc2", VADDPS128rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2)
+TEST("\xc5\xf4\x58\xc2", VADDPS256rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2)
+TEST("\xc4\xc1\x74\x58\xc0", VADDPS256rrr, 0, FE_XMM0, FE_XMM1, FE_XMM8)
+TEST("\xc4\x62\x7d\x19\xc2", VBROADCASTSD256rr, 0, FE_XMM8, FE_XMM2)
+TEST("\xc4\x62\x7d\x1a\xc2", VBROADCASTF128_256rr, 0, FE_XMM8, FE_XMM2)
+TEST("\xc4\xe2\x71\x9d\xc2", VFNMADD132SSrrr, 0, FE_XMM0, FE_XMM1, FE_XMM2)
+TEST("\xc4\xe2\xf1\x9d\xc2", VFNMADD132SDrrr, 0, FE_XMM0, FE_XMM1, FE_XMM2)
+TEST("\xc4\xe2\x71\x2e\x17", VMASKMOVPS128mrr, 0, FE_MEM(FE_DI, 0, FE_NOREG, 0), FE_XMM1, FE_XMM2)
+TEST("\xc4\xe2\x75\x2e\x17", VMASKMOVPS256mrr, 0, FE_MEM(FE_DI, 0, FE_NOREG, 0), FE_XMM1, FE_XMM2)
+TEST("\xc5\xf1\x71\xd7\x02", VPSRLW128rri, 0, FE_XMM1, FE_XMM7, 0x2)
+TEST("\xc5\xf5\x71\xd7\x02", VPSRLW256rri, 0, FE_XMM1, FE_XMM7, 0x2)
+TEST("\xc4\xc3\xfd\x00\xc9\x12", VPERMQ256rri, 0, FE_XMM1, FE_XMM9, 0x12)
+TEST("\xc4\xe3\xfd\x01\xcf\x12", VPERMPD256rri, 0, FE_XMM1, FE_XMM7, 0x12)
+TEST("\xc5\xf9\xc5\xc0\x00", VPEXTRWrri, 0, FE_AX, FE_XMM0, 0x0)
 // VMASKMOVDQU is the only VEX instruction which supports addrsize/segment
 // overrides without a memory operand.
-TEST("\xc5\xf9\xf7\xc1", VMASKMOVDQU128rr, 0, FE_XMM0, FE_XMM1);
-TEST("\x64\xc5\xf9\xf7\xc1", VMASKMOVDQU128rr, FE_SEG(FE_FS), FE_XMM0, FE_XMM1);
-TEST("\x67\xc5\xf9\xf7\xc1", VMASKMOVDQU128rr, FE_ADDR32, FE_XMM0, FE_XMM1);
-TEST("\x64\x67\xc5\xf9\xf7\xc1", VMASKMOVDQU128rr, FE_ADDR32|FE_SEG(FE_FS), FE_XMM0, FE_XMM1);
+TEST("\xc5\xf9\xf7\xc1", VMASKMOVDQU128rr, 0, FE_XMM0, FE_XMM1)
+TEST("\x64\xc5\xf9\xf7\xc1", VMASKMOVDQU128rr, FE_SEG(FE_FS), FE_XMM0, FE_XMM1)
+TEST("\x67\xc5\xf9\xf7\xc1", VMASKMOVDQU128rr, FE_ADDR32, FE_XMM0, FE_XMM1)
+TEST("\x64\x67\xc5\xf9\xf7\xc1", VMASKMOVDQU128rr, FE_ADDR32|FE_SEG(FE_FS), FE_XMM0, FE_XMM1)
 
 // Test VEX.RXBv
-TEST("\xc5\xf4\x58\xc2", VADDPS256rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2);
-TEST("\xc5\x74\x58\xc2", VADDPS256rrr, 0, FE_XMM8, FE_XMM1, FE_XMM2);
-TEST("\xc5\xb4\x58\xc2", VADDPS256rrr, 0, FE_XMM0, FE_XMM9, FE_XMM2);
-TEST("\xc5\x34\x58\xc2", VADDPS256rrr, 0, FE_XMM8, FE_XMM9, FE_XMM2);
-TEST("\xc4\xc1\x74\x58\xc2", VADDPS256rrr, 0, FE_XMM0, FE_XMM1, FE_XMM10);
-TEST("\xc4\x41\x74\x58\xc2", VADDPS256rrr, 0, FE_XMM8, FE_XMM1, FE_XMM10);
-TEST("\xc4\xc1\x34\x58\xc2", VADDPS256rrr, 0, FE_XMM0, FE_XMM9, FE_XMM10);
-TEST("\xc4\x41\x34\x58\xc2", VADDPS256rrr, 0, FE_XMM8, FE_XMM9, FE_XMM10);
+TEST("\xc5\xf4\x58\xc2", VADDPS256rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2)
+TEST("\xc5\x74\x58\xc2", VADDPS256rrr, 0, FE_XMM8, FE_XMM1, FE_XMM2)
+TEST("\xc5\xb4\x58\xc2", VADDPS256rrr, 0, FE_XMM0, FE_XMM9, FE_XMM2)
+TEST("\xc5\x34\x58\xc2", VADDPS256rrr, 0, FE_XMM8, FE_XMM9, FE_XMM2)
+TEST("\xc4\xc1\x74\x58\xc2", VADDPS256rrr, 0, FE_XMM0, FE_XMM1, FE_XMM10)
+TEST("\xc4\x41\x74\x58\xc2", VADDPS256rrr, 0, FE_XMM8, FE_XMM1, FE_XMM10)
+TEST("\xc4\xc1\x34\x58\xc2", VADDPS256rrr, 0, FE_XMM0, FE_XMM9, FE_XMM10)
+TEST("\xc4\x41\x34\x58\xc2", VADDPS256rrr, 0, FE_XMM8, FE_XMM9, FE_XMM10)
 
-TEST("\xc5\xf4\x58\x04\x1a", VADDPS256rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 1, FE_BX, 0));
-TEST("\xc5\x74\x58\x04\x1a", VADDPS256rrm, 0, FE_XMM8, FE_XMM1, FE_MEM(FE_DX, 1, FE_BX, 0));
-TEST("\xc4\xa1\x74\x58\x04\x1a", VADDPS256rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 1, FE_R11, 0));
-TEST("\xc4\x21\x74\x58\x04\x1a", VADDPS256rrm, 0, FE_XMM8, FE_XMM1, FE_MEM(FE_DX, 1, FE_R11, 0));
-TEST("\xc5\xb4\x58\x04\x1a", VADDPS256rrm, 0, FE_XMM0, FE_XMM9, FE_MEM(FE_DX, 1, FE_BX, 0));
-TEST("\xc5\x34\x58\x04\x1a", VADDPS256rrm, 0, FE_XMM8, FE_XMM9, FE_MEM(FE_DX, 1, FE_BX, 0));
-TEST("\xc4\xa1\x34\x58\x04\x1a", VADDPS256rrm, 0, FE_XMM0, FE_XMM9, FE_MEM(FE_DX, 1, FE_R11, 0));
-TEST("\xc4\x21\x34\x58\x04\x1a", VADDPS256rrm, 0, FE_XMM8, FE_XMM9, FE_MEM(FE_DX, 1, FE_R11, 0));
-TEST("\xc4\xc1\x74\x58\x04\x1a", VADDPS256rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_R10, 1, FE_BX, 0));
-TEST("\xc4\x41\x74\x58\x04\x1a", VADDPS256rrm, 0, FE_XMM8, FE_XMM1, FE_MEM(FE_R10, 1, FE_BX, 0));
-TEST("\xc4\x81\x74\x58\x04\x1a", VADDPS256rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_R10, 1, FE_R11, 0));
-TEST("\xc4\x01\x74\x58\x04\x1a", VADDPS256rrm, 0, FE_XMM8, FE_XMM1, FE_MEM(FE_R10, 1, FE_R11, 0));
-TEST("\xc4\xc1\x34\x58\x04\x1a", VADDPS256rrm, 0, FE_XMM0, FE_XMM9, FE_MEM(FE_R10, 1, FE_BX, 0));
-TEST("\xc4\x41\x34\x58\x04\x1a", VADDPS256rrm, 0, FE_XMM8, FE_XMM9, FE_MEM(FE_R10, 1, FE_BX, 0));
-TEST("\xc4\x81\x34\x58\x04\x1a", VADDPS256rrm, 0, FE_XMM0, FE_XMM9, FE_MEM(FE_R10, 1, FE_R11, 0));
-TEST("\xc4\x01\x34\x58\x04\x1a", VADDPS256rrm, 0, FE_XMM8, FE_XMM9, FE_MEM(FE_R10, 1, FE_R11, 0));
+TEST("\xc5\xf4\x58\x04\x1a", VADDPS256rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 1, FE_BX, 0))
+TEST("\xc5\x74\x58\x04\x1a", VADDPS256rrm, 0, FE_XMM8, FE_XMM1, FE_MEM(FE_DX, 1, FE_BX, 0))
+TEST("\xc4\xa1\x74\x58\x04\x1a", VADDPS256rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 1, FE_R11, 0))
+TEST("\xc4\x21\x74\x58\x04\x1a", VADDPS256rrm, 0, FE_XMM8, FE_XMM1, FE_MEM(FE_DX, 1, FE_R11, 0))
+TEST("\xc5\xb4\x58\x04\x1a", VADDPS256rrm, 0, FE_XMM0, FE_XMM9, FE_MEM(FE_DX, 1, FE_BX, 0))
+TEST("\xc5\x34\x58\x04\x1a", VADDPS256rrm, 0, FE_XMM8, FE_XMM9, FE_MEM(FE_DX, 1, FE_BX, 0))
+TEST("\xc4\xa1\x34\x58\x04\x1a", VADDPS256rrm, 0, FE_XMM0, FE_XMM9, FE_MEM(FE_DX, 1, FE_R11, 0))
+TEST("\xc4\x21\x34\x58\x04\x1a", VADDPS256rrm, 0, FE_XMM8, FE_XMM9, FE_MEM(FE_DX, 1, FE_R11, 0))
+TEST("\xc4\xc1\x74\x58\x04\x1a", VADDPS256rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_R10, 1, FE_BX, 0))
+TEST("\xc4\x41\x74\x58\x04\x1a", VADDPS256rrm, 0, FE_XMM8, FE_XMM1, FE_MEM(FE_R10, 1, FE_BX, 0))
+TEST("\xc4\x81\x74\x58\x04\x1a", VADDPS256rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_R10, 1, FE_R11, 0))
+TEST("\xc4\x01\x74\x58\x04\x1a", VADDPS256rrm, 0, FE_XMM8, FE_XMM1, FE_MEM(FE_R10, 1, FE_R11, 0))
+TEST("\xc4\xc1\x34\x58\x04\x1a", VADDPS256rrm, 0, FE_XMM0, FE_XMM9, FE_MEM(FE_R10, 1, FE_BX, 0))
+TEST("\xc4\x41\x34\x58\x04\x1a", VADDPS256rrm, 0, FE_XMM8, FE_XMM9, FE_MEM(FE_R10, 1, FE_BX, 0))
+TEST("\xc4\x81\x34\x58\x04\x1a", VADDPS256rrm, 0, FE_XMM0, FE_XMM9, FE_MEM(FE_R10, 1, FE_R11, 0))
+TEST("\xc4\x01\x34\x58\x04\x1a", VADDPS256rrm, 0, FE_XMM8, FE_XMM9, FE_MEM(FE_R10, 1, FE_R11, 0))
 
 // Test RVMR encoding
-TEST("\xc4\xe3\x71\x4a\xc2\x30", VBLENDVPS128rrrr, 0, FE_XMM0, FE_XMM1, FE_XMM2, FE_XMM3);
-TEST("\xc4\xe3\x75\x4a\xc2\x30", VBLENDVPS256rrrr, 0, FE_XMM0, FE_XMM1, FE_XMM2, FE_XMM3);
-TEST("\xc4\xe3\x71\x4a\x05\x00\x00\x00\x00\x20", VBLENDVPS128rrmr, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_IP, 0, FE_NOREG, 10), FE_XMM2);
-TEST("\xc4\xe3\x75\x4a\x05\x00\x00\x00\x00\x20", VBLENDVPS256rrmr, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_IP, 0, FE_NOREG, 10), FE_XMM2);
+TEST("\xc4\xe3\x71\x4a\xc2\x30", VBLENDVPS128rrrr, 0, FE_XMM0, FE_XMM1, FE_XMM2, FE_XMM3)
+TEST("\xc4\xe3\x75\x4a\xc2\x30", VBLENDVPS256rrrr, 0, FE_XMM0, FE_XMM1, FE_XMM2, FE_XMM3)
+TEST("\xc4\xe3\x71\x4a\x05\x00\x00\x00\x00\x20", VBLENDVPS128rrmr, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_IP, 0, FE_NOREG, 10), FE_XMM2)
+TEST("\xc4\xe3\x75\x4a\x05\x00\x00\x00\x00\x20", VBLENDVPS256rrmr, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_IP, 0, FE_NOREG, 10), FE_XMM2)
 
 // Make sure that high registers fail with VEX-only instructions
-TEST("", VBLENDVPS128rrrr, 0, FE_XMM16, FE_XMM1, FE_XMM2, FE_XMM3);
-TEST("", VBLENDVPS128rrrr, 0, FE_XMM0, FE_XMM17, FE_XMM2, FE_XMM3);
-TEST("", VBLENDVPS128rrrr, 0, FE_XMM0, FE_XMM1, FE_XMM18, FE_XMM3);
-TEST("", VBLENDVPS128rrrr, 0, FE_XMM0, FE_XMM1, FE_XMM2, FE_XMM19);
-TEST("", VGATHERDPS128rmr, 0, FE_XMM16, FE_MEMV(FE_DI, 8, FE_XMM7, 0), FE_XMM1);
-TEST("", VGATHERDPS128rmr, 0, FE_XMM0, FE_MEMV(FE_DI, 8, FE_XMM17, 0), FE_XMM1);
-TEST("", VGATHERDPS128rmr, 0, FE_XMM0, FE_MEMV(FE_DI, 8, FE_XMM7, 0), FE_XMM18);
+TEST("", VBLENDVPS128rrrr, 0, FE_XMM16, FE_XMM1, FE_XMM2, FE_XMM3)
+TEST("", VBLENDVPS128rrrr, 0, FE_XMM0, FE_XMM17, FE_XMM2, FE_XMM3)
+TEST("", VBLENDVPS128rrrr, 0, FE_XMM0, FE_XMM1, FE_XMM18, FE_XMM3)
+TEST("", VBLENDVPS128rrrr, 0, FE_XMM0, FE_XMM1, FE_XMM2, FE_XMM19)
+TEST("", VGATHERDPS128rmr, 0, FE_XMM16, FE_MEMV(FE_DI, 8, FE_XMM7, 0), FE_XMM1)
+TEST("", VGATHERDPS128rmr, 0, FE_XMM0, FE_MEMV(FE_DI, 8, FE_XMM17, 0), FE_XMM1)
+TEST("", VGATHERDPS128rmr, 0, FE_XMM0, FE_MEMV(FE_DI, 8, FE_XMM7, 0), FE_XMM18)
 
-TEST("\xc4\xe2\x71\x96\xc2", VFMADDSUB132PS128rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2);
-TEST("\xc4\xe2\x71\x96\x06", VFMADDSUB132PS128rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_SI, 0, FE_NOREG, 0));
-TEST("\xc4\xe2\x75\x96\xc2", VFMADDSUB132PS256rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2);
-TEST("\xc4\xe2\x75\x96\x06", VFMADDSUB132PS256rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_SI, 0, FE_NOREG, 0));
-TEST("\xc4\xe2\xf1\x96\xc2", VFMADDSUB132PD128rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2);
-TEST("\xc4\xe2\xf1\x96\x06", VFMADDSUB132PD128rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_SI, 0, FE_NOREG, 0));
-TEST("\xc4\xe2\xf5\x96\xc2", VFMADDSUB132PD256rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2);
-TEST("\xc4\xe2\xf5\x96\x06", VFMADDSUB132PD256rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_SI, 0, FE_NOREG, 0));
-TEST("\xc4\xe2\x71\x97\xc2", VFMSUBADD132PS128rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2);
-TEST("\xc4\xe2\x71\x97\x06", VFMSUBADD132PS128rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_SI, 0, FE_NOREG, 0));
-TEST("\xc4\xe2\x75\x97\xc2", VFMSUBADD132PS256rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2);
-TEST("\xc4\xe2\x75\x97\x06", VFMSUBADD132PS256rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_SI, 0, FE_NOREG, 0));
-TEST("\xc4\xe2\xf1\x97\xc2", VFMSUBADD132PD128rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2);
-TEST("\xc4\xe2\xf1\x97\x06", VFMSUBADD132PD128rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_SI, 0, FE_NOREG, 0));
-TEST("\xc4\xe2\xf5\x97\xc2", VFMSUBADD132PD256rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2);
-TEST("\xc4\xe2\xf5\x97\x06", VFMSUBADD132PD256rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_SI, 0, FE_NOREG, 0));
-TEST("\xc4\xe2\x71\x98\xc2", VFMADD132PS128rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2);
-TEST("\xc4\xe2\x71\x98\x06", VFMADD132PS128rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_SI, 0, FE_NOREG, 0));
-TEST("\xc4\xe2\x75\x98\xc2", VFMADD132PS256rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2);
-TEST("\xc4\xe2\x75\x98\x06", VFMADD132PS256rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_SI, 0, FE_NOREG, 0));
-TEST("\xc4\xe2\xf1\x98\xc2", VFMADD132PD128rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2);
-TEST("\xc4\xe2\xf1\x98\x06", VFMADD132PD128rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_SI, 0, FE_NOREG, 0));
-TEST("\xc4\xe2\xf5\x98\xc2", VFMADD132PD256rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2);
-TEST("\xc4\xe2\xf5\x98\x06", VFMADD132PD256rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_SI, 0, FE_NOREG, 0));
-TEST("\xc4\xe2\x71\x99\xc2", VFMADD132SSrrr, 0, FE_XMM0, FE_XMM1, FE_XMM2);
-TEST("\xc4\xe2\x71\x99\x06", VFMADD132SSrrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_SI, 0, FE_NOREG, 0));
-TEST("\xc4\xe2\xf1\x99\xc2", VFMADD132SDrrr, 0, FE_XMM0, FE_XMM1, FE_XMM2);
-TEST("\xc4\xe2\xf1\x99\x06", VFMADD132SDrrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_SI, 0, FE_NOREG, 0));
-TEST("\xc4\xe2\x71\x9a\xc2", VFMSUB132PS128rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2);
-TEST("\xc4\xe2\x71\x9a\x06", VFMSUB132PS128rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_SI, 0, FE_NOREG, 0));
-TEST("\xc4\xe2\x75\x9a\xc2", VFMSUB132PS256rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2);
-TEST("\xc4\xe2\x75\x9a\x06", VFMSUB132PS256rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_SI, 0, FE_NOREG, 0));
-TEST("\xc4\xe2\xf1\x9a\xc2", VFMSUB132PD128rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2);
-TEST("\xc4\xe2\xf1\x9a\x06", VFMSUB132PD128rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_SI, 0, FE_NOREG, 0));
-TEST("\xc4\xe2\xf5\x9a\xc2", VFMSUB132PD256rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2);
-TEST("\xc4\xe2\xf5\x9a\x06", VFMSUB132PD256rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_SI, 0, FE_NOREG, 0));
-TEST("\xc4\xe2\x71\x9b\xc2", VFMSUB132SSrrr, 0, FE_XMM0, FE_XMM1, FE_XMM2);
-TEST("\xc4\xe2\x71\x9b\x06", VFMSUB132SSrrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_SI, 0, FE_NOREG, 0));
-TEST("\xc4\xe2\xf1\x9b\xc2", VFMSUB132SDrrr, 0, FE_XMM0, FE_XMM1, FE_XMM2);
-TEST("\xc4\xe2\xf1\x9b\x06", VFMSUB132SDrrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_SI, 0, FE_NOREG, 0));
-TEST("\xc4\xe2\x71\x9c\xc2", VFNMADD132PS128rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2);
-TEST("\xc4\xe2\x71\x9c\x06", VFNMADD132PS128rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_SI, 0, FE_NOREG, 0));
-TEST("\xc4\xe2\x75\x9c\xc2", VFNMADD132PS256rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2);
-TEST("\xc4\xe2\x75\x9c\x06", VFNMADD132PS256rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_SI, 0, FE_NOREG, 0));
-TEST("\xc4\xe2\xf1\x9c\xc2", VFNMADD132PD128rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2);
-TEST("\xc4\xe2\xf1\x9c\x06", VFNMADD132PD128rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_SI, 0, FE_NOREG, 0));
-TEST("\xc4\xe2\xf5\x9c\xc2", VFNMADD132PD256rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2);
-TEST("\xc4\xe2\xf5\x9c\x06", VFNMADD132PD256rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_SI, 0, FE_NOREG, 0));
-TEST("\xc4\xe2\x71\x9d\xc2", VFNMADD132SSrrr, 0, FE_XMM0, FE_XMM1, FE_XMM2);
-TEST("\xc4\xe2\x71\x9d\x06", VFNMADD132SSrrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_SI, 0, FE_NOREG, 0));
-TEST("\xc4\xe2\xf1\x9d\xc2", VFNMADD132SDrrr, 0, FE_XMM0, FE_XMM1, FE_XMM2);
-TEST("\xc4\xe2\xf1\x9d\x06", VFNMADD132SDrrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_SI, 0, FE_NOREG, 0));
-TEST("\xc4\xe2\x71\x9e\xc2", VFNMSUB132PS128rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2);
-TEST("\xc4\xe2\x71\x9e\x06", VFNMSUB132PS128rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_SI, 0, FE_NOREG, 0));
-TEST("\xc4\xe2\x75\x9e\xc2", VFNMSUB132PS256rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2);
-TEST("\xc4\xe2\x75\x9e\x06", VFNMSUB132PS256rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_SI, 0, FE_NOREG, 0));
-TEST("\xc4\xe2\xf1\x9e\xc2", VFNMSUB132PD128rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2);
-TEST("\xc4\xe2\xf1\x9e\x06", VFNMSUB132PD128rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_SI, 0, FE_NOREG, 0));
-TEST("\xc4\xe2\xf5\x9e\xc2", VFNMSUB132PD256rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2);
-TEST("\xc4\xe2\xf5\x9e\x06", VFNMSUB132PD256rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_SI, 0, FE_NOREG, 0));
-TEST("\xc4\xe2\x71\x9f\xc2", VFNMSUB132SSrrr, 0, FE_XMM0, FE_XMM1, FE_XMM2);
-TEST("\xc4\xe2\x71\x9f\x06", VFNMSUB132SSrrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_SI, 0, FE_NOREG, 0));
-TEST("\xc4\xe2\xf1\x9f\xc2", VFNMSUB132SDrrr, 0, FE_XMM0, FE_XMM1, FE_XMM2);
-TEST("\xc4\xe2\xf1\x9f\x06", VFNMSUB132SDrrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_SI, 0, FE_NOREG, 0));
-TEST("\xc4\xe2\x71\xa6\xc2", VFMADDSUB213PS128rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2);
-TEST("\xc4\xe2\x71\xa6\x06", VFMADDSUB213PS128rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_SI, 0, FE_NOREG, 0));
-TEST("\xc4\xe2\x75\xa6\xc2", VFMADDSUB213PS256rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2);
-TEST("\xc4\xe2\x75\xa6\x06", VFMADDSUB213PS256rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_SI, 0, FE_NOREG, 0));
-TEST("\xc4\xe2\xf1\xa6\xc2", VFMADDSUB213PD128rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2);
-TEST("\xc4\xe2\xf1\xa6\x06", VFMADDSUB213PD128rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_SI, 0, FE_NOREG, 0));
-TEST("\xc4\xe2\xf5\xa6\xc2", VFMADDSUB213PD256rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2);
-TEST("\xc4\xe2\xf5\xa6\x06", VFMADDSUB213PD256rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_SI, 0, FE_NOREG, 0));
-TEST("\xc4\xe2\x71\xa7\xc2", VFMSUBADD213PS128rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2);
-TEST("\xc4\xe2\x71\xa7\x06", VFMSUBADD213PS128rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_SI, 0, FE_NOREG, 0));
-TEST("\xc4\xe2\x75\xa7\xc2", VFMSUBADD213PS256rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2);
-TEST("\xc4\xe2\x75\xa7\x06", VFMSUBADD213PS256rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_SI, 0, FE_NOREG, 0));
-TEST("\xc4\xe2\xf1\xa7\xc2", VFMSUBADD213PD128rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2);
-TEST("\xc4\xe2\xf1\xa7\x06", VFMSUBADD213PD128rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_SI, 0, FE_NOREG, 0));
-TEST("\xc4\xe2\xf5\xa7\xc2", VFMSUBADD213PD256rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2);
-TEST("\xc4\xe2\xf5\xa7\x06", VFMSUBADD213PD256rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_SI, 0, FE_NOREG, 0));
-TEST("\xc4\xe2\x71\xa8\xc2", VFMADD213PS128rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2);
-TEST("\xc4\xe2\x71\xa8\x06", VFMADD213PS128rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_SI, 0, FE_NOREG, 0));
-TEST("\xc4\xe2\x75\xa8\xc2", VFMADD213PS256rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2);
-TEST("\xc4\xe2\x75\xa8\x06", VFMADD213PS256rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_SI, 0, FE_NOREG, 0));
-TEST("\xc4\xe2\xf1\xa8\xc2", VFMADD213PD128rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2);
-TEST("\xc4\xe2\xf1\xa8\x06", VFMADD213PD128rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_SI, 0, FE_NOREG, 0));
-TEST("\xc4\xe2\xf5\xa8\xc2", VFMADD213PD256rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2);
-TEST("\xc4\xe2\xf5\xa8\x06", VFMADD213PD256rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_SI, 0, FE_NOREG, 0));
-TEST("\xc4\xe2\x71\xa9\xc2", VFMADD213SSrrr, 0, FE_XMM0, FE_XMM1, FE_XMM2);
-TEST("\xc4\xe2\x71\xa9\x06", VFMADD213SSrrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_SI, 0, FE_NOREG, 0));
-TEST("\xc4\xe2\xf1\xa9\xc2", VFMADD213SDrrr, 0, FE_XMM0, FE_XMM1, FE_XMM2);
-TEST("\xc4\xe2\xf1\xa9\x06", VFMADD213SDrrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_SI, 0, FE_NOREG, 0));
-TEST("\xc4\xe2\x71\xaa\xc2", VFMSUB213PS128rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2);
-TEST("\xc4\xe2\x71\xaa\x06", VFMSUB213PS128rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_SI, 0, FE_NOREG, 0));
-TEST("\xc4\xe2\x75\xaa\xc2", VFMSUB213PS256rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2);
-TEST("\xc4\xe2\x75\xaa\x06", VFMSUB213PS256rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_SI, 0, FE_NOREG, 0));
-TEST("\xc4\xe2\xf1\xaa\xc2", VFMSUB213PD128rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2);
-TEST("\xc4\xe2\xf1\xaa\x06", VFMSUB213PD128rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_SI, 0, FE_NOREG, 0));
-TEST("\xc4\xe2\xf5\xaa\xc2", VFMSUB213PD256rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2);
-TEST("\xc4\xe2\xf5\xaa\x06", VFMSUB213PD256rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_SI, 0, FE_NOREG, 0));
-TEST("\xc4\xe2\x71\xab\xc2", VFMSUB213SSrrr, 0, FE_XMM0, FE_XMM1, FE_XMM2);
-TEST("\xc4\xe2\x71\xab\x06", VFMSUB213SSrrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_SI, 0, FE_NOREG, 0));
-TEST("\xc4\xe2\xf1\xab\xc2", VFMSUB213SDrrr, 0, FE_XMM0, FE_XMM1, FE_XMM2);
-TEST("\xc4\xe2\xf1\xab\x06", VFMSUB213SDrrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_SI, 0, FE_NOREG, 0));
-TEST("\xc4\xe2\x71\xac\xc2", VFNMADD213PS128rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2);
-TEST("\xc4\xe2\x71\xac\x06", VFNMADD213PS128rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_SI, 0, FE_NOREG, 0));
-TEST("\xc4\xe2\x75\xac\xc2", VFNMADD213PS256rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2);
-TEST("\xc4\xe2\x75\xac\x06", VFNMADD213PS256rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_SI, 0, FE_NOREG, 0));
-TEST("\xc4\xe2\xf1\xac\xc2", VFNMADD213PD128rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2);
-TEST("\xc4\xe2\xf1\xac\x06", VFNMADD213PD128rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_SI, 0, FE_NOREG, 0));
-TEST("\xc4\xe2\xf5\xac\xc2", VFNMADD213PD256rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2);
-TEST("\xc4\xe2\xf5\xac\x06", VFNMADD213PD256rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_SI, 0, FE_NOREG, 0));
-TEST("\xc4\xe2\x71\xad\xc2", VFNMADD213SSrrr, 0, FE_XMM0, FE_XMM1, FE_XMM2);
-TEST("\xc4\xe2\x71\xad\x06", VFNMADD213SSrrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_SI, 0, FE_NOREG, 0));
-TEST("\xc4\xe2\xf1\xad\xc2", VFNMADD213SDrrr, 0, FE_XMM0, FE_XMM1, FE_XMM2);
-TEST("\xc4\xe2\xf1\xad\x06", VFNMADD213SDrrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_SI, 0, FE_NOREG, 0));
-TEST("\xc4\xe2\x71\xae\xc2", VFNMSUB213PS128rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2);
-TEST("\xc4\xe2\x71\xae\x06", VFNMSUB213PS128rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_SI, 0, FE_NOREG, 0));
-TEST("\xc4\xe2\x75\xae\xc2", VFNMSUB213PS256rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2);
-TEST("\xc4\xe2\x75\xae\x06", VFNMSUB213PS256rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_SI, 0, FE_NOREG, 0));
-TEST("\xc4\xe2\xf1\xae\xc2", VFNMSUB213PD128rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2);
-TEST("\xc4\xe2\xf1\xae\x06", VFNMSUB213PD128rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_SI, 0, FE_NOREG, 0));
-TEST("\xc4\xe2\xf5\xae\xc2", VFNMSUB213PD256rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2);
-TEST("\xc4\xe2\xf5\xae\x06", VFNMSUB213PD256rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_SI, 0, FE_NOREG, 0));
-TEST("\xc4\xe2\x71\xaf\xc2", VFNMSUB213SSrrr, 0, FE_XMM0, FE_XMM1, FE_XMM2);
-TEST("\xc4\xe2\x71\xaf\x06", VFNMSUB213SSrrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_SI, 0, FE_NOREG, 0));
-TEST("\xc4\xe2\xf1\xaf\xc2", VFNMSUB213SDrrr, 0, FE_XMM0, FE_XMM1, FE_XMM2);
-TEST("\xc4\xe2\xf1\xaf\x06", VFNMSUB213SDrrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_SI, 0, FE_NOREG, 0));
-TEST("\xc4\xe2\x71\xb6\xc2", VFMADDSUB231PS128rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2);
-TEST("\xc4\xe2\x71\xb6\x06", VFMADDSUB231PS128rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_SI, 0, FE_NOREG, 0));
-TEST("\xc4\xe2\x75\xb6\xc2", VFMADDSUB231PS256rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2);
-TEST("\xc4\xe2\x75\xb6\x06", VFMADDSUB231PS256rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_SI, 0, FE_NOREG, 0));
-TEST("\xc4\xe2\xf1\xb6\xc2", VFMADDSUB231PD128rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2);
-TEST("\xc4\xe2\xf1\xb6\x06", VFMADDSUB231PD128rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_SI, 0, FE_NOREG, 0));
-TEST("\xc4\xe2\xf5\xb6\xc2", VFMADDSUB231PD256rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2);
-TEST("\xc4\xe2\xf5\xb6\x06", VFMADDSUB231PD256rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_SI, 0, FE_NOREG, 0));
-TEST("\xc4\xe2\x71\xb7\xc2", VFMSUBADD231PS128rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2);
-TEST("\xc4\xe2\x71\xb7\x06", VFMSUBADD231PS128rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_SI, 0, FE_NOREG, 0));
-TEST("\xc4\xe2\x75\xb7\xc2", VFMSUBADD231PS256rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2);
-TEST("\xc4\xe2\x75\xb7\x06", VFMSUBADD231PS256rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_SI, 0, FE_NOREG, 0));
-TEST("\xc4\xe2\xf1\xb7\xc2", VFMSUBADD231PD128rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2);
-TEST("\xc4\xe2\xf1\xb7\x06", VFMSUBADD231PD128rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_SI, 0, FE_NOREG, 0));
-TEST("\xc4\xe2\xf5\xb7\xc2", VFMSUBADD231PD256rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2);
-TEST("\xc4\xe2\xf5\xb7\x06", VFMSUBADD231PD256rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_SI, 0, FE_NOREG, 0));
-TEST("\xc4\xe2\x71\xb8\xc2", VFMADD231PS128rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2);
-TEST("\xc4\xe2\x71\xb8\x06", VFMADD231PS128rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_SI, 0, FE_NOREG, 0));
-TEST("\xc4\xe2\x75\xb8\xc2", VFMADD231PS256rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2);
-TEST("\xc4\xe2\x75\xb8\x06", VFMADD231PS256rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_SI, 0, FE_NOREG, 0));
-TEST("\xc4\xe2\xf1\xb8\xc2", VFMADD231PD128rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2);
-TEST("\xc4\xe2\xf1\xb8\x06", VFMADD231PD128rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_SI, 0, FE_NOREG, 0));
-TEST("\xc4\xe2\xf5\xb8\xc2", VFMADD231PD256rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2);
-TEST("\xc4\xe2\xf5\xb8\x06", VFMADD231PD256rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_SI, 0, FE_NOREG, 0));
-TEST("\xc4\xe2\x71\xb9\xc2", VFMADD231SSrrr, 0, FE_XMM0, FE_XMM1, FE_XMM2);
-TEST("\xc4\xe2\x71\xb9\x06", VFMADD231SSrrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_SI, 0, FE_NOREG, 0));
-TEST("\xc4\xe2\xf1\xb9\xc2", VFMADD231SDrrr, 0, FE_XMM0, FE_XMM1, FE_XMM2);
-TEST("\xc4\xe2\xf1\xb9\x06", VFMADD231SDrrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_SI, 0, FE_NOREG, 0));
-TEST("\xc4\xe2\x71\xba\xc2", VFMSUB231PS128rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2);
-TEST("\xc4\xe2\x71\xba\x06", VFMSUB231PS128rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_SI, 0, FE_NOREG, 0));
-TEST("\xc4\xe2\x75\xba\xc2", VFMSUB231PS256rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2);
-TEST("\xc4\xe2\x75\xba\x06", VFMSUB231PS256rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_SI, 0, FE_NOREG, 0));
-TEST("\xc4\xe2\xf1\xba\xc2", VFMSUB231PD128rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2);
-TEST("\xc4\xe2\xf1\xba\x06", VFMSUB231PD128rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_SI, 0, FE_NOREG, 0));
-TEST("\xc4\xe2\xf5\xba\xc2", VFMSUB231PD256rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2);
-TEST("\xc4\xe2\xf5\xba\x06", VFMSUB231PD256rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_SI, 0, FE_NOREG, 0));
-TEST("\xc4\xe2\x71\xbb\xc2", VFMSUB231SSrrr, 0, FE_XMM0, FE_XMM1, FE_XMM2);
-TEST("\xc4\xe2\x71\xbb\x06", VFMSUB231SSrrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_SI, 0, FE_NOREG, 0));
-TEST("\xc4\xe2\xf1\xbb\xc2", VFMSUB231SDrrr, 0, FE_XMM0, FE_XMM1, FE_XMM2);
-TEST("\xc4\xe2\xf1\xbb\x06", VFMSUB231SDrrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_SI, 0, FE_NOREG, 0));
-TEST("\xc4\xe2\x71\xbc\xc2", VFNMADD231PS128rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2);
-TEST("\xc4\xe2\x71\xbc\x06", VFNMADD231PS128rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_SI, 0, FE_NOREG, 0));
-TEST("\xc4\xe2\x75\xbc\xc2", VFNMADD231PS256rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2);
-TEST("\xc4\xe2\x75\xbc\x06", VFNMADD231PS256rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_SI, 0, FE_NOREG, 0));
-TEST("\xc4\xe2\xf1\xbc\xc2", VFNMADD231PD128rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2);
-TEST("\xc4\xe2\xf1\xbc\x06", VFNMADD231PD128rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_SI, 0, FE_NOREG, 0));
-TEST("\xc4\xe2\xf5\xbc\xc2", VFNMADD231PD256rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2);
-TEST("\xc4\xe2\xf5\xbc\x06", VFNMADD231PD256rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_SI, 0, FE_NOREG, 0));
-TEST("\xc4\xe2\x71\xbd\xc2", VFNMADD231SSrrr, 0, FE_XMM0, FE_XMM1, FE_XMM2);
-TEST("\xc4\xe2\x71\xbd\x06", VFNMADD231SSrrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_SI, 0, FE_NOREG, 0));
-TEST("\xc4\xe2\xf1\xbd\xc2", VFNMADD231SDrrr, 0, FE_XMM0, FE_XMM1, FE_XMM2);
-TEST("\xc4\xe2\xf1\xbd\x06", VFNMADD231SDrrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_SI, 0, FE_NOREG, 0));
-TEST("\xc4\xe2\x71\xbe\xc2", VFNMSUB231PS128rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2);
-TEST("\xc4\xe2\x71\xbe\x06", VFNMSUB231PS128rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_SI, 0, FE_NOREG, 0));
-TEST("\xc4\xe2\x75\xbe\xc2", VFNMSUB231PS256rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2);
-TEST("\xc4\xe2\x75\xbe\x06", VFNMSUB231PS256rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_SI, 0, FE_NOREG, 0));
-TEST("\xc4\xe2\xf1\xbe\xc2", VFNMSUB231PD128rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2);
-TEST("\xc4\xe2\xf1\xbe\x06", VFNMSUB231PD128rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_SI, 0, FE_NOREG, 0));
-TEST("\xc4\xe2\xf5\xbe\xc2", VFNMSUB231PD256rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2);
-TEST("\xc4\xe2\xf5\xbe\x06", VFNMSUB231PD256rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_SI, 0, FE_NOREG, 0));
-TEST("\xc4\xe2\x71\xbf\xc2", VFNMSUB231SSrrr, 0, FE_XMM0, FE_XMM1, FE_XMM2);
-TEST("\xc4\xe2\x71\xbf\x06", VFNMSUB231SSrrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_SI, 0, FE_NOREG, 0));
-TEST("\xc4\xe2\xf1\xbf\xc2", VFNMSUB231SDrrr, 0, FE_XMM0, FE_XMM1, FE_XMM2);
-TEST("\xc4\xe2\xf1\xbf\x06", VFNMSUB231SDrrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_SI, 0, FE_NOREG, 0));
+TEST("\xc4\xe2\x71\x96\xc2", VFMADDSUB132PS128rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2)
+TEST("\xc4\xe2\x71\x96\x06", VFMADDSUB132PS128rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_SI, 0, FE_NOREG, 0))
+TEST("\xc4\xe2\x75\x96\xc2", VFMADDSUB132PS256rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2)
+TEST("\xc4\xe2\x75\x96\x06", VFMADDSUB132PS256rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_SI, 0, FE_NOREG, 0))
+TEST("\xc4\xe2\xf1\x96\xc2", VFMADDSUB132PD128rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2)
+TEST("\xc4\xe2\xf1\x96\x06", VFMADDSUB132PD128rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_SI, 0, FE_NOREG, 0))
+TEST("\xc4\xe2\xf5\x96\xc2", VFMADDSUB132PD256rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2)
+TEST("\xc4\xe2\xf5\x96\x06", VFMADDSUB132PD256rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_SI, 0, FE_NOREG, 0))
+TEST("\xc4\xe2\x71\x97\xc2", VFMSUBADD132PS128rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2)
+TEST("\xc4\xe2\x71\x97\x06", VFMSUBADD132PS128rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_SI, 0, FE_NOREG, 0))
+TEST("\xc4\xe2\x75\x97\xc2", VFMSUBADD132PS256rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2)
+TEST("\xc4\xe2\x75\x97\x06", VFMSUBADD132PS256rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_SI, 0, FE_NOREG, 0))
+TEST("\xc4\xe2\xf1\x97\xc2", VFMSUBADD132PD128rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2)
+TEST("\xc4\xe2\xf1\x97\x06", VFMSUBADD132PD128rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_SI, 0, FE_NOREG, 0))
+TEST("\xc4\xe2\xf5\x97\xc2", VFMSUBADD132PD256rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2)
+TEST("\xc4\xe2\xf5\x97\x06", VFMSUBADD132PD256rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_SI, 0, FE_NOREG, 0))
+TEST("\xc4\xe2\x71\x98\xc2", VFMADD132PS128rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2)
+TEST("\xc4\xe2\x71\x98\x06", VFMADD132PS128rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_SI, 0, FE_NOREG, 0))
+TEST("\xc4\xe2\x75\x98\xc2", VFMADD132PS256rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2)
+TEST("\xc4\xe2\x75\x98\x06", VFMADD132PS256rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_SI, 0, FE_NOREG, 0))
+TEST("\xc4\xe2\xf1\x98\xc2", VFMADD132PD128rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2)
+TEST("\xc4\xe2\xf1\x98\x06", VFMADD132PD128rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_SI, 0, FE_NOREG, 0))
+TEST("\xc4\xe2\xf5\x98\xc2", VFMADD132PD256rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2)
+TEST("\xc4\xe2\xf5\x98\x06", VFMADD132PD256rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_SI, 0, FE_NOREG, 0))
+TEST("\xc4\xe2\x71\x99\xc2", VFMADD132SSrrr, 0, FE_XMM0, FE_XMM1, FE_XMM2)
+TEST("\xc4\xe2\x71\x99\x06", VFMADD132SSrrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_SI, 0, FE_NOREG, 0))
+TEST("\xc4\xe2\xf1\x99\xc2", VFMADD132SDrrr, 0, FE_XMM0, FE_XMM1, FE_XMM2)
+TEST("\xc4\xe2\xf1\x99\x06", VFMADD132SDrrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_SI, 0, FE_NOREG, 0))
+TEST("\xc4\xe2\x71\x9a\xc2", VFMSUB132PS128rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2)
+TEST("\xc4\xe2\x71\x9a\x06", VFMSUB132PS128rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_SI, 0, FE_NOREG, 0))
+TEST("\xc4\xe2\x75\x9a\xc2", VFMSUB132PS256rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2)
+TEST("\xc4\xe2\x75\x9a\x06", VFMSUB132PS256rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_SI, 0, FE_NOREG, 0))
+TEST("\xc4\xe2\xf1\x9a\xc2", VFMSUB132PD128rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2)
+TEST("\xc4\xe2\xf1\x9a\x06", VFMSUB132PD128rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_SI, 0, FE_NOREG, 0))
+TEST("\xc4\xe2\xf5\x9a\xc2", VFMSUB132PD256rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2)
+TEST("\xc4\xe2\xf5\x9a\x06", VFMSUB132PD256rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_SI, 0, FE_NOREG, 0))
+TEST("\xc4\xe2\x71\x9b\xc2", VFMSUB132SSrrr, 0, FE_XMM0, FE_XMM1, FE_XMM2)
+TEST("\xc4\xe2\x71\x9b\x06", VFMSUB132SSrrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_SI, 0, FE_NOREG, 0))
+TEST("\xc4\xe2\xf1\x9b\xc2", VFMSUB132SDrrr, 0, FE_XMM0, FE_XMM1, FE_XMM2)
+TEST("\xc4\xe2\xf1\x9b\x06", VFMSUB132SDrrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_SI, 0, FE_NOREG, 0))
+TEST("\xc4\xe2\x71\x9c\xc2", VFNMADD132PS128rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2)
+TEST("\xc4\xe2\x71\x9c\x06", VFNMADD132PS128rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_SI, 0, FE_NOREG, 0))
+TEST("\xc4\xe2\x75\x9c\xc2", VFNMADD132PS256rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2)
+TEST("\xc4\xe2\x75\x9c\x06", VFNMADD132PS256rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_SI, 0, FE_NOREG, 0))
+TEST("\xc4\xe2\xf1\x9c\xc2", VFNMADD132PD128rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2)
+TEST("\xc4\xe2\xf1\x9c\x06", VFNMADD132PD128rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_SI, 0, FE_NOREG, 0))
+TEST("\xc4\xe2\xf5\x9c\xc2", VFNMADD132PD256rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2)
+TEST("\xc4\xe2\xf5\x9c\x06", VFNMADD132PD256rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_SI, 0, FE_NOREG, 0))
+TEST("\xc4\xe2\x71\x9d\xc2", VFNMADD132SSrrr, 0, FE_XMM0, FE_XMM1, FE_XMM2)
+TEST("\xc4\xe2\x71\x9d\x06", VFNMADD132SSrrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_SI, 0, FE_NOREG, 0))
+TEST("\xc4\xe2\xf1\x9d\xc2", VFNMADD132SDrrr, 0, FE_XMM0, FE_XMM1, FE_XMM2)
+TEST("\xc4\xe2\xf1\x9d\x06", VFNMADD132SDrrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_SI, 0, FE_NOREG, 0))
+TEST("\xc4\xe2\x71\x9e\xc2", VFNMSUB132PS128rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2)
+TEST("\xc4\xe2\x71\x9e\x06", VFNMSUB132PS128rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_SI, 0, FE_NOREG, 0))
+TEST("\xc4\xe2\x75\x9e\xc2", VFNMSUB132PS256rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2)
+TEST("\xc4\xe2\x75\x9e\x06", VFNMSUB132PS256rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_SI, 0, FE_NOREG, 0))
+TEST("\xc4\xe2\xf1\x9e\xc2", VFNMSUB132PD128rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2)
+TEST("\xc4\xe2\xf1\x9e\x06", VFNMSUB132PD128rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_SI, 0, FE_NOREG, 0))
+TEST("\xc4\xe2\xf5\x9e\xc2", VFNMSUB132PD256rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2)
+TEST("\xc4\xe2\xf5\x9e\x06", VFNMSUB132PD256rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_SI, 0, FE_NOREG, 0))
+TEST("\xc4\xe2\x71\x9f\xc2", VFNMSUB132SSrrr, 0, FE_XMM0, FE_XMM1, FE_XMM2)
+TEST("\xc4\xe2\x71\x9f\x06", VFNMSUB132SSrrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_SI, 0, FE_NOREG, 0))
+TEST("\xc4\xe2\xf1\x9f\xc2", VFNMSUB132SDrrr, 0, FE_XMM0, FE_XMM1, FE_XMM2)
+TEST("\xc4\xe2\xf1\x9f\x06", VFNMSUB132SDrrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_SI, 0, FE_NOREG, 0))
+TEST("\xc4\xe2\x71\xa6\xc2", VFMADDSUB213PS128rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2)
+TEST("\xc4\xe2\x71\xa6\x06", VFMADDSUB213PS128rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_SI, 0, FE_NOREG, 0))
+TEST("\xc4\xe2\x75\xa6\xc2", VFMADDSUB213PS256rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2)
+TEST("\xc4\xe2\x75\xa6\x06", VFMADDSUB213PS256rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_SI, 0, FE_NOREG, 0))
+TEST("\xc4\xe2\xf1\xa6\xc2", VFMADDSUB213PD128rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2)
+TEST("\xc4\xe2\xf1\xa6\x06", VFMADDSUB213PD128rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_SI, 0, FE_NOREG, 0))
+TEST("\xc4\xe2\xf5\xa6\xc2", VFMADDSUB213PD256rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2)
+TEST("\xc4\xe2\xf5\xa6\x06", VFMADDSUB213PD256rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_SI, 0, FE_NOREG, 0))
+TEST("\xc4\xe2\x71\xa7\xc2", VFMSUBADD213PS128rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2)
+TEST("\xc4\xe2\x71\xa7\x06", VFMSUBADD213PS128rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_SI, 0, FE_NOREG, 0))
+TEST("\xc4\xe2\x75\xa7\xc2", VFMSUBADD213PS256rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2)
+TEST("\xc4\xe2\x75\xa7\x06", VFMSUBADD213PS256rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_SI, 0, FE_NOREG, 0))
+TEST("\xc4\xe2\xf1\xa7\xc2", VFMSUBADD213PD128rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2)
+TEST("\xc4\xe2\xf1\xa7\x06", VFMSUBADD213PD128rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_SI, 0, FE_NOREG, 0))
+TEST("\xc4\xe2\xf5\xa7\xc2", VFMSUBADD213PD256rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2)
+TEST("\xc4\xe2\xf5\xa7\x06", VFMSUBADD213PD256rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_SI, 0, FE_NOREG, 0))
+TEST("\xc4\xe2\x71\xa8\xc2", VFMADD213PS128rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2)
+TEST("\xc4\xe2\x71\xa8\x06", VFMADD213PS128rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_SI, 0, FE_NOREG, 0))
+TEST("\xc4\xe2\x75\xa8\xc2", VFMADD213PS256rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2)
+TEST("\xc4\xe2\x75\xa8\x06", VFMADD213PS256rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_SI, 0, FE_NOREG, 0))
+TEST("\xc4\xe2\xf1\xa8\xc2", VFMADD213PD128rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2)
+TEST("\xc4\xe2\xf1\xa8\x06", VFMADD213PD128rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_SI, 0, FE_NOREG, 0))
+TEST("\xc4\xe2\xf5\xa8\xc2", VFMADD213PD256rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2)
+TEST("\xc4\xe2\xf5\xa8\x06", VFMADD213PD256rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_SI, 0, FE_NOREG, 0))
+TEST("\xc4\xe2\x71\xa9\xc2", VFMADD213SSrrr, 0, FE_XMM0, FE_XMM1, FE_XMM2)
+TEST("\xc4\xe2\x71\xa9\x06", VFMADD213SSrrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_SI, 0, FE_NOREG, 0))
+TEST("\xc4\xe2\xf1\xa9\xc2", VFMADD213SDrrr, 0, FE_XMM0, FE_XMM1, FE_XMM2)
+TEST("\xc4\xe2\xf1\xa9\x06", VFMADD213SDrrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_SI, 0, FE_NOREG, 0))
+TEST("\xc4\xe2\x71\xaa\xc2", VFMSUB213PS128rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2)
+TEST("\xc4\xe2\x71\xaa\x06", VFMSUB213PS128rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_SI, 0, FE_NOREG, 0))
+TEST("\xc4\xe2\x75\xaa\xc2", VFMSUB213PS256rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2)
+TEST("\xc4\xe2\x75\xaa\x06", VFMSUB213PS256rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_SI, 0, FE_NOREG, 0))
+TEST("\xc4\xe2\xf1\xaa\xc2", VFMSUB213PD128rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2)
+TEST("\xc4\xe2\xf1\xaa\x06", VFMSUB213PD128rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_SI, 0, FE_NOREG, 0))
+TEST("\xc4\xe2\xf5\xaa\xc2", VFMSUB213PD256rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2)
+TEST("\xc4\xe2\xf5\xaa\x06", VFMSUB213PD256rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_SI, 0, FE_NOREG, 0))
+TEST("\xc4\xe2\x71\xab\xc2", VFMSUB213SSrrr, 0, FE_XMM0, FE_XMM1, FE_XMM2)
+TEST("\xc4\xe2\x71\xab\x06", VFMSUB213SSrrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_SI, 0, FE_NOREG, 0))
+TEST("\xc4\xe2\xf1\xab\xc2", VFMSUB213SDrrr, 0, FE_XMM0, FE_XMM1, FE_XMM2)
+TEST("\xc4\xe2\xf1\xab\x06", VFMSUB213SDrrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_SI, 0, FE_NOREG, 0))
+TEST("\xc4\xe2\x71\xac\xc2", VFNMADD213PS128rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2)
+TEST("\xc4\xe2\x71\xac\x06", VFNMADD213PS128rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_SI, 0, FE_NOREG, 0))
+TEST("\xc4\xe2\x75\xac\xc2", VFNMADD213PS256rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2)
+TEST("\xc4\xe2\x75\xac\x06", VFNMADD213PS256rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_SI, 0, FE_NOREG, 0))
+TEST("\xc4\xe2\xf1\xac\xc2", VFNMADD213PD128rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2)
+TEST("\xc4\xe2\xf1\xac\x06", VFNMADD213PD128rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_SI, 0, FE_NOREG, 0))
+TEST("\xc4\xe2\xf5\xac\xc2", VFNMADD213PD256rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2)
+TEST("\xc4\xe2\xf5\xac\x06", VFNMADD213PD256rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_SI, 0, FE_NOREG, 0))
+TEST("\xc4\xe2\x71\xad\xc2", VFNMADD213SSrrr, 0, FE_XMM0, FE_XMM1, FE_XMM2)
+TEST("\xc4\xe2\x71\xad\x06", VFNMADD213SSrrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_SI, 0, FE_NOREG, 0))
+TEST("\xc4\xe2\xf1\xad\xc2", VFNMADD213SDrrr, 0, FE_XMM0, FE_XMM1, FE_XMM2)
+TEST("\xc4\xe2\xf1\xad\x06", VFNMADD213SDrrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_SI, 0, FE_NOREG, 0))
+TEST("\xc4\xe2\x71\xae\xc2", VFNMSUB213PS128rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2)
+TEST("\xc4\xe2\x71\xae\x06", VFNMSUB213PS128rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_SI, 0, FE_NOREG, 0))
+TEST("\xc4\xe2\x75\xae\xc2", VFNMSUB213PS256rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2)
+TEST("\xc4\xe2\x75\xae\x06", VFNMSUB213PS256rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_SI, 0, FE_NOREG, 0))
+TEST("\xc4\xe2\xf1\xae\xc2", VFNMSUB213PD128rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2)
+TEST("\xc4\xe2\xf1\xae\x06", VFNMSUB213PD128rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_SI, 0, FE_NOREG, 0))
+TEST("\xc4\xe2\xf5\xae\xc2", VFNMSUB213PD256rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2)
+TEST("\xc4\xe2\xf5\xae\x06", VFNMSUB213PD256rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_SI, 0, FE_NOREG, 0))
+TEST("\xc4\xe2\x71\xaf\xc2", VFNMSUB213SSrrr, 0, FE_XMM0, FE_XMM1, FE_XMM2)
+TEST("\xc4\xe2\x71\xaf\x06", VFNMSUB213SSrrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_SI, 0, FE_NOREG, 0))
+TEST("\xc4\xe2\xf1\xaf\xc2", VFNMSUB213SDrrr, 0, FE_XMM0, FE_XMM1, FE_XMM2)
+TEST("\xc4\xe2\xf1\xaf\x06", VFNMSUB213SDrrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_SI, 0, FE_NOREG, 0))
+TEST("\xc4\xe2\x71\xb6\xc2", VFMADDSUB231PS128rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2)
+TEST("\xc4\xe2\x71\xb6\x06", VFMADDSUB231PS128rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_SI, 0, FE_NOREG, 0))
+TEST("\xc4\xe2\x75\xb6\xc2", VFMADDSUB231PS256rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2)
+TEST("\xc4\xe2\x75\xb6\x06", VFMADDSUB231PS256rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_SI, 0, FE_NOREG, 0))
+TEST("\xc4\xe2\xf1\xb6\xc2", VFMADDSUB231PD128rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2)
+TEST("\xc4\xe2\xf1\xb6\x06", VFMADDSUB231PD128rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_SI, 0, FE_NOREG, 0))
+TEST("\xc4\xe2\xf5\xb6\xc2", VFMADDSUB231PD256rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2)
+TEST("\xc4\xe2\xf5\xb6\x06", VFMADDSUB231PD256rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_SI, 0, FE_NOREG, 0))
+TEST("\xc4\xe2\x71\xb7\xc2", VFMSUBADD231PS128rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2)
+TEST("\xc4\xe2\x71\xb7\x06", VFMSUBADD231PS128rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_SI, 0, FE_NOREG, 0))
+TEST("\xc4\xe2\x75\xb7\xc2", VFMSUBADD231PS256rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2)
+TEST("\xc4\xe2\x75\xb7\x06", VFMSUBADD231PS256rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_SI, 0, FE_NOREG, 0))
+TEST("\xc4\xe2\xf1\xb7\xc2", VFMSUBADD231PD128rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2)
+TEST("\xc4\xe2\xf1\xb7\x06", VFMSUBADD231PD128rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_SI, 0, FE_NOREG, 0))
+TEST("\xc4\xe2\xf5\xb7\xc2", VFMSUBADD231PD256rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2)
+TEST("\xc4\xe2\xf5\xb7\x06", VFMSUBADD231PD256rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_SI, 0, FE_NOREG, 0))
+TEST("\xc4\xe2\x71\xb8\xc2", VFMADD231PS128rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2)
+TEST("\xc4\xe2\x71\xb8\x06", VFMADD231PS128rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_SI, 0, FE_NOREG, 0))
+TEST("\xc4\xe2\x75\xb8\xc2", VFMADD231PS256rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2)
+TEST("\xc4\xe2\x75\xb8\x06", VFMADD231PS256rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_SI, 0, FE_NOREG, 0))
+TEST("\xc4\xe2\xf1\xb8\xc2", VFMADD231PD128rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2)
+TEST("\xc4\xe2\xf1\xb8\x06", VFMADD231PD128rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_SI, 0, FE_NOREG, 0))
+TEST("\xc4\xe2\xf5\xb8\xc2", VFMADD231PD256rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2)
+TEST("\xc4\xe2\xf5\xb8\x06", VFMADD231PD256rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_SI, 0, FE_NOREG, 0))
+TEST("\xc4\xe2\x71\xb9\xc2", VFMADD231SSrrr, 0, FE_XMM0, FE_XMM1, FE_XMM2)
+TEST("\xc4\xe2\x71\xb9\x06", VFMADD231SSrrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_SI, 0, FE_NOREG, 0))
+TEST("\xc4\xe2\xf1\xb9\xc2", VFMADD231SDrrr, 0, FE_XMM0, FE_XMM1, FE_XMM2)
+TEST("\xc4\xe2\xf1\xb9\x06", VFMADD231SDrrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_SI, 0, FE_NOREG, 0))
+TEST("\xc4\xe2\x71\xba\xc2", VFMSUB231PS128rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2)
+TEST("\xc4\xe2\x71\xba\x06", VFMSUB231PS128rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_SI, 0, FE_NOREG, 0))
+TEST("\xc4\xe2\x75\xba\xc2", VFMSUB231PS256rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2)
+TEST("\xc4\xe2\x75\xba\x06", VFMSUB231PS256rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_SI, 0, FE_NOREG, 0))
+TEST("\xc4\xe2\xf1\xba\xc2", VFMSUB231PD128rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2)
+TEST("\xc4\xe2\xf1\xba\x06", VFMSUB231PD128rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_SI, 0, FE_NOREG, 0))
+TEST("\xc4\xe2\xf5\xba\xc2", VFMSUB231PD256rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2)
+TEST("\xc4\xe2\xf5\xba\x06", VFMSUB231PD256rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_SI, 0, FE_NOREG, 0))
+TEST("\xc4\xe2\x71\xbb\xc2", VFMSUB231SSrrr, 0, FE_XMM0, FE_XMM1, FE_XMM2)
+TEST("\xc4\xe2\x71\xbb\x06", VFMSUB231SSrrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_SI, 0, FE_NOREG, 0))
+TEST("\xc4\xe2\xf1\xbb\xc2", VFMSUB231SDrrr, 0, FE_XMM0, FE_XMM1, FE_XMM2)
+TEST("\xc4\xe2\xf1\xbb\x06", VFMSUB231SDrrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_SI, 0, FE_NOREG, 0))
+TEST("\xc4\xe2\x71\xbc\xc2", VFNMADD231PS128rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2)
+TEST("\xc4\xe2\x71\xbc\x06", VFNMADD231PS128rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_SI, 0, FE_NOREG, 0))
+TEST("\xc4\xe2\x75\xbc\xc2", VFNMADD231PS256rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2)
+TEST("\xc4\xe2\x75\xbc\x06", VFNMADD231PS256rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_SI, 0, FE_NOREG, 0))
+TEST("\xc4\xe2\xf1\xbc\xc2", VFNMADD231PD128rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2)
+TEST("\xc4\xe2\xf1\xbc\x06", VFNMADD231PD128rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_SI, 0, FE_NOREG, 0))
+TEST("\xc4\xe2\xf5\xbc\xc2", VFNMADD231PD256rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2)
+TEST("\xc4\xe2\xf5\xbc\x06", VFNMADD231PD256rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_SI, 0, FE_NOREG, 0))
+TEST("\xc4\xe2\x71\xbd\xc2", VFNMADD231SSrrr, 0, FE_XMM0, FE_XMM1, FE_XMM2)
+TEST("\xc4\xe2\x71\xbd\x06", VFNMADD231SSrrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_SI, 0, FE_NOREG, 0))
+TEST("\xc4\xe2\xf1\xbd\xc2", VFNMADD231SDrrr, 0, FE_XMM0, FE_XMM1, FE_XMM2)
+TEST("\xc4\xe2\xf1\xbd\x06", VFNMADD231SDrrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_SI, 0, FE_NOREG, 0))
+TEST("\xc4\xe2\x71\xbe\xc2", VFNMSUB231PS128rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2)
+TEST("\xc4\xe2\x71\xbe\x06", VFNMSUB231PS128rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_SI, 0, FE_NOREG, 0))
+TEST("\xc4\xe2\x75\xbe\xc2", VFNMSUB231PS256rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2)
+TEST("\xc4\xe2\x75\xbe\x06", VFNMSUB231PS256rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_SI, 0, FE_NOREG, 0))
+TEST("\xc4\xe2\xf1\xbe\xc2", VFNMSUB231PD128rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2)
+TEST("\xc4\xe2\xf1\xbe\x06", VFNMSUB231PD128rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_SI, 0, FE_NOREG, 0))
+TEST("\xc4\xe2\xf5\xbe\xc2", VFNMSUB231PD256rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2)
+TEST("\xc4\xe2\xf5\xbe\x06", VFNMSUB231PD256rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_SI, 0, FE_NOREG, 0))
+TEST("\xc4\xe2\x71\xbf\xc2", VFNMSUB231SSrrr, 0, FE_XMM0, FE_XMM1, FE_XMM2)
+TEST("\xc4\xe2\x71\xbf\x06", VFNMSUB231SSrrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_SI, 0, FE_NOREG, 0))
+TEST("\xc4\xe2\xf1\xbf\xc2", VFNMSUB231SDrrr, 0, FE_XMM0, FE_XMM1, FE_XMM2)
+TEST("\xc4\xe2\xf1\xbf\x06", VFNMSUB231SDrrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_SI, 0, FE_NOREG, 0))
 
 // VSIB encodings
 #ifndef ENC_TEST_TYPESAFE
-TEST("", VGATHERDPS128rmr, 0, FE_XMM0, FE_MEM(FE_DI, 8, FE_NOREG, 0), FE_XMM1); // must have SIB
-TEST("", VGATHERDPS128rmr, 0, FE_XMM0, FE_MEM(FE_IP, 0, FE_NOREG, 0), FE_XMM1); // must have SIB
-TEST("", VGATHERDPS128rmr, 0, FE_XMM0, FE_MEM(FE_DI, 0, FE_AX, 0), FE_XMM1); // must have XMM index
+TEST("", VGATHERDPS128rmr, 0, FE_XMM0, FE_MEM(FE_DI, 8, FE_NOREG, 0), FE_XMM1) // must have SIB
+TEST("", VGATHERDPS128rmr, 0, FE_XMM0, FE_MEM(FE_IP, 0, FE_NOREG, 0), FE_XMM1) // must have SIB
+TEST("", VGATHERDPS128rmr, 0, FE_XMM0, FE_MEM(FE_DI, 0, FE_AX, 0), FE_XMM1) // must have XMM index
 #endif
-TEST("\xc4\xe2\x71\x92\x04\xff", VGATHERDPS128rmr, 0, FE_XMM0, FE_MEMV(FE_DI, 8, FE_XMM7, 0), FE_XMM1);
-TEST("\xc4\xe2\x71\x92\x04\xe7", VGATHERDPS128rmr, 0, FE_XMM0, FE_MEMV(FE_DI, 8, FE_XMM4, 0), FE_XMM1);
-TEST("\xc4\xe2\x75\x92\x04\xff", VGATHERDPS256rmr, 0, FE_XMM0, FE_MEMV(FE_DI, 8, FE_XMM7, 0), FE_XMM1);
-TEST("\xc4\xe2\x75\x92\x04\xe7", VGATHERDPS256rmr, 0, FE_XMM0, FE_MEMV(FE_DI, 8, FE_XMM4, 0), FE_XMM1);
-TEST("\xc4\xe2\x71\x93\x04\xff", VGATHERQPS128rmr, 0, FE_XMM0, FE_MEMV(FE_DI, 8, FE_XMM7, 0), FE_XMM1);
-TEST("\xc4\xe2\x71\x93\x04\xe7", VGATHERQPS128rmr, 0, FE_XMM0, FE_MEMV(FE_DI, 8, FE_XMM4, 0), FE_XMM1);
-TEST("\xc4\xe2\x75\x93\x04\xff", VGATHERQPS256rmr, 0, FE_XMM0, FE_MEMV(FE_DI, 8, FE_XMM7, 0), FE_XMM1);
-TEST("\xc4\xe2\x75\x93\x04\xe7", VGATHERQPS256rmr, 0, FE_XMM0, FE_MEMV(FE_DI, 8, FE_XMM4, 0), FE_XMM1);
-TEST("\xc4\xe2\xf1\x92\x04\xff", VGATHERDPD128rmr, 0, FE_XMM0, FE_MEMV(FE_DI, 8, FE_XMM7, 0), FE_XMM1);
-TEST("\xc4\xe2\xf1\x92\x04\xe7", VGATHERDPD128rmr, 0, FE_XMM0, FE_MEMV(FE_DI, 8, FE_XMM4, 0), FE_XMM1);
-TEST("\xc4\xe2\xf5\x92\x04\xff", VGATHERDPD256rmr, 0, FE_XMM0, FE_MEMV(FE_DI, 8, FE_XMM7, 0), FE_XMM1);
-TEST("\xc4\xe2\xf5\x92\x04\xe7", VGATHERDPD256rmr, 0, FE_XMM0, FE_MEMV(FE_DI, 8, FE_XMM4, 0), FE_XMM1);
-TEST("\xc4\xe2\xf1\x93\x04\xff", VGATHERQPD128rmr, 0, FE_XMM0, FE_MEMV(FE_DI, 8, FE_XMM7, 0), FE_XMM1);
-TEST("\xc4\xe2\xf1\x93\x04\xe7", VGATHERQPD128rmr, 0, FE_XMM0, FE_MEMV(FE_DI, 8, FE_XMM4, 0), FE_XMM1);
-TEST("\xc4\xe2\xf5\x93\x04\xff", VGATHERQPD256rmr, 0, FE_XMM0, FE_MEMV(FE_DI, 8, FE_XMM7, 0), FE_XMM1);
-TEST("\xc4\xe2\xf5\x93\x04\xe7", VGATHERQPD256rmr, 0, FE_XMM0, FE_MEMV(FE_DI, 8, FE_XMM4, 0), FE_XMM1);
-TEST("\xc4\xe2\x71\x90\x04\xff", VPGATHERDD128rmr, 0, FE_XMM0, FE_MEMV(FE_DI, 8, FE_XMM7, 0), FE_XMM1);
-TEST("\xc4\xe2\x71\x90\x04\xe7", VPGATHERDD128rmr, 0, FE_XMM0, FE_MEMV(FE_DI, 8, FE_XMM4, 0), FE_XMM1);
-TEST("\xc4\xe2\x75\x90\x04\xff", VPGATHERDD256rmr, 0, FE_XMM0, FE_MEMV(FE_DI, 8, FE_XMM7, 0), FE_XMM1);
-TEST("\xc4\xe2\x75\x90\x04\xe7", VPGATHERDD256rmr, 0, FE_XMM0, FE_MEMV(FE_DI, 8, FE_XMM4, 0), FE_XMM1);
-TEST("\xc4\xe2\x71\x91\x04\xff", VPGATHERQD128rmr, 0, FE_XMM0, FE_MEMV(FE_DI, 8, FE_XMM7, 0), FE_XMM1);
-TEST("\xc4\xe2\x71\x91\x04\xe7", VPGATHERQD128rmr, 0, FE_XMM0, FE_MEMV(FE_DI, 8, FE_XMM4, 0), FE_XMM1);
-TEST("\xc4\xe2\x75\x91\x04\xff", VPGATHERQD256rmr, 0, FE_XMM0, FE_MEMV(FE_DI, 8, FE_XMM7, 0), FE_XMM1);
-TEST("\xc4\xe2\x75\x91\x04\xe7", VPGATHERQD256rmr, 0, FE_XMM0, FE_MEMV(FE_DI, 8, FE_XMM4, 0), FE_XMM1);
-TEST("\xc4\xe2\xf1\x90\x04\xff", VPGATHERDQ128rmr, 0, FE_XMM0, FE_MEMV(FE_DI, 8, FE_XMM7, 0), FE_XMM1);
-TEST("\xc4\xe2\xf1\x90\x04\xe7", VPGATHERDQ128rmr, 0, FE_XMM0, FE_MEMV(FE_DI, 8, FE_XMM4, 0), FE_XMM1);
-TEST("\xc4\xe2\xf5\x90\x04\xff", VPGATHERDQ256rmr, 0, FE_XMM0, FE_MEMV(FE_DI, 8, FE_XMM7, 0), FE_XMM1);
-TEST("\xc4\xe2\xf5\x90\x04\xe7", VPGATHERDQ256rmr, 0, FE_XMM0, FE_MEMV(FE_DI, 8, FE_XMM4, 0), FE_XMM1);
-TEST("\xc4\xe2\xf1\x91\x04\xff", VPGATHERQQ128rmr, 0, FE_XMM0, FE_MEMV(FE_DI, 8, FE_XMM7, 0), FE_XMM1);
-TEST("\xc4\xe2\xf1\x91\x04\xe7", VPGATHERQQ128rmr, 0, FE_XMM0, FE_MEMV(FE_DI, 8, FE_XMM4, 0), FE_XMM1);
-TEST("\xc4\xe2\xf5\x91\x04\xff", VPGATHERQQ256rmr, 0, FE_XMM0, FE_MEMV(FE_DI, 8, FE_XMM7, 0), FE_XMM1);
-TEST("\xc4\xe2\xf5\x91\x04\xe7", VPGATHERQQ256rmr, 0, FE_XMM0, FE_MEMV(FE_DI, 8, FE_XMM4, 0), FE_XMM1);
+TEST("\xc4\xe2\x71\x92\x04\xff", VGATHERDPS128rmr, 0, FE_XMM0, FE_MEMV(FE_DI, 8, FE_XMM7, 0), FE_XMM1)
+TEST("\xc4\xe2\x71\x92\x04\xe7", VGATHERDPS128rmr, 0, FE_XMM0, FE_MEMV(FE_DI, 8, FE_XMM4, 0), FE_XMM1)
+TEST("\xc4\xe2\x75\x92\x04\xff", VGATHERDPS256rmr, 0, FE_XMM0, FE_MEMV(FE_DI, 8, FE_XMM7, 0), FE_XMM1)
+TEST("\xc4\xe2\x75\x92\x04\xe7", VGATHERDPS256rmr, 0, FE_XMM0, FE_MEMV(FE_DI, 8, FE_XMM4, 0), FE_XMM1)
+TEST("\xc4\xe2\x71\x93\x04\xff", VGATHERQPS128rmr, 0, FE_XMM0, FE_MEMV(FE_DI, 8, FE_XMM7, 0), FE_XMM1)
+TEST("\xc4\xe2\x71\x93\x04\xe7", VGATHERQPS128rmr, 0, FE_XMM0, FE_MEMV(FE_DI, 8, FE_XMM4, 0), FE_XMM1)
+TEST("\xc4\xe2\x75\x93\x04\xff", VGATHERQPS256rmr, 0, FE_XMM0, FE_MEMV(FE_DI, 8, FE_XMM7, 0), FE_XMM1)
+TEST("\xc4\xe2\x75\x93\x04\xe7", VGATHERQPS256rmr, 0, FE_XMM0, FE_MEMV(FE_DI, 8, FE_XMM4, 0), FE_XMM1)
+TEST("\xc4\xe2\xf1\x92\x04\xff", VGATHERDPD128rmr, 0, FE_XMM0, FE_MEMV(FE_DI, 8, FE_XMM7, 0), FE_XMM1)
+TEST("\xc4\xe2\xf1\x92\x04\xe7", VGATHERDPD128rmr, 0, FE_XMM0, FE_MEMV(FE_DI, 8, FE_XMM4, 0), FE_XMM1)
+TEST("\xc4\xe2\xf5\x92\x04\xff", VGATHERDPD256rmr, 0, FE_XMM0, FE_MEMV(FE_DI, 8, FE_XMM7, 0), FE_XMM1)
+TEST("\xc4\xe2\xf5\x92\x04\xe7", VGATHERDPD256rmr, 0, FE_XMM0, FE_MEMV(FE_DI, 8, FE_XMM4, 0), FE_XMM1)
+TEST("\xc4\xe2\xf1\x93\x04\xff", VGATHERQPD128rmr, 0, FE_XMM0, FE_MEMV(FE_DI, 8, FE_XMM7, 0), FE_XMM1)
+TEST("\xc4\xe2\xf1\x93\x04\xe7", VGATHERQPD128rmr, 0, FE_XMM0, FE_MEMV(FE_DI, 8, FE_XMM4, 0), FE_XMM1)
+TEST("\xc4\xe2\xf5\x93\x04\xff", VGATHERQPD256rmr, 0, FE_XMM0, FE_MEMV(FE_DI, 8, FE_XMM7, 0), FE_XMM1)
+TEST("\xc4\xe2\xf5\x93\x04\xe7", VGATHERQPD256rmr, 0, FE_XMM0, FE_MEMV(FE_DI, 8, FE_XMM4, 0), FE_XMM1)
+TEST("\xc4\xe2\x71\x90\x04\xff", VPGATHERDD128rmr, 0, FE_XMM0, FE_MEMV(FE_DI, 8, FE_XMM7, 0), FE_XMM1)
+TEST("\xc4\xe2\x71\x90\x04\xe7", VPGATHERDD128rmr, 0, FE_XMM0, FE_MEMV(FE_DI, 8, FE_XMM4, 0), FE_XMM1)
+TEST("\xc4\xe2\x75\x90\x04\xff", VPGATHERDD256rmr, 0, FE_XMM0, FE_MEMV(FE_DI, 8, FE_XMM7, 0), FE_XMM1)
+TEST("\xc4\xe2\x75\x90\x04\xe7", VPGATHERDD256rmr, 0, FE_XMM0, FE_MEMV(FE_DI, 8, FE_XMM4, 0), FE_XMM1)
+TEST("\xc4\xe2\x71\x91\x04\xff", VPGATHERQD128rmr, 0, FE_XMM0, FE_MEMV(FE_DI, 8, FE_XMM7, 0), FE_XMM1)
+TEST("\xc4\xe2\x71\x91\x04\xe7", VPGATHERQD128rmr, 0, FE_XMM0, FE_MEMV(FE_DI, 8, FE_XMM4, 0), FE_XMM1)
+TEST("\xc4\xe2\x75\x91\x04\xff", VPGATHERQD256rmr, 0, FE_XMM0, FE_MEMV(FE_DI, 8, FE_XMM7, 0), FE_XMM1)
+TEST("\xc4\xe2\x75\x91\x04\xe7", VPGATHERQD256rmr, 0, FE_XMM0, FE_MEMV(FE_DI, 8, FE_XMM4, 0), FE_XMM1)
+TEST("\xc4\xe2\xf1\x90\x04\xff", VPGATHERDQ128rmr, 0, FE_XMM0, FE_MEMV(FE_DI, 8, FE_XMM7, 0), FE_XMM1)
+TEST("\xc4\xe2\xf1\x90\x04\xe7", VPGATHERDQ128rmr, 0, FE_XMM0, FE_MEMV(FE_DI, 8, FE_XMM4, 0), FE_XMM1)
+TEST("\xc4\xe2\xf5\x90\x04\xff", VPGATHERDQ256rmr, 0, FE_XMM0, FE_MEMV(FE_DI, 8, FE_XMM7, 0), FE_XMM1)
+TEST("\xc4\xe2\xf5\x90\x04\xe7", VPGATHERDQ256rmr, 0, FE_XMM0, FE_MEMV(FE_DI, 8, FE_XMM4, 0), FE_XMM1)
+TEST("\xc4\xe2\xf1\x91\x04\xff", VPGATHERQQ128rmr, 0, FE_XMM0, FE_MEMV(FE_DI, 8, FE_XMM7, 0), FE_XMM1)
+TEST("\xc4\xe2\xf1\x91\x04\xe7", VPGATHERQQ128rmr, 0, FE_XMM0, FE_MEMV(FE_DI, 8, FE_XMM4, 0), FE_XMM1)
+TEST("\xc4\xe2\xf5\x91\x04\xff", VPGATHERQQ256rmr, 0, FE_XMM0, FE_MEMV(FE_DI, 8, FE_XMM7, 0), FE_XMM1)
+TEST("\xc4\xe2\xf5\x91\x04\xe7", VPGATHERQQ256rmr, 0, FE_XMM0, FE_MEMV(FE_DI, 8, FE_XMM4, 0), FE_XMM1)
 
-TEST("\xc4\xe2\x79\xdb\xc1", VAESIMCrr, 0, FE_XMM0, FE_XMM1);
-TEST("\xc4\xe3\x79\xdf\xc1\xae", VAESKEYGENASSISTrri, 0, FE_XMM0, FE_XMM1, (int8_t) 0xae);
-TEST("\xc4\xe2\x71\xdc\xc2", VAESENC128rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2);
-TEST("\xc4\xe2\x75\xdc\xc2", VAESENC256rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2);
-TEST("\xc4\xe2\x71\xdd\xc2", VAESENCLAST128rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2);
-TEST("\xc4\xe2\x75\xdd\xc2", VAESENCLAST256rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2);
-TEST("\xc4\xe2\x71\xde\xc2", VAESDEC128rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2);
-TEST("\xc4\xe2\x75\xde\xc2", VAESDEC256rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2);
-TEST("\xc4\xe2\x71\xdf\xc2", VAESDECLAST128rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2);
-TEST("\xc4\xe2\x75\xdf\xc2", VAESDECLAST256rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2);
+TEST("\xc4\xe2\x79\xdb\xc1", VAESIMCrr, 0, FE_XMM0, FE_XMM1)
+TEST("\xc4\xe3\x79\xdf\xc1\xae", VAESKEYGENASSISTrri, 0, FE_XMM0, FE_XMM1, (int8_t) 0xae)
+TEST("\xc4\xe2\x71\xdc\xc2", VAESENC128rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2)
+TEST("\xc4\xe2\x75\xdc\xc2", VAESENC256rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2)
+TEST("\xc4\xe2\x71\xdd\xc2", VAESENCLAST128rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2)
+TEST("\xc4\xe2\x75\xdd\xc2", VAESENCLAST256rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2)
+TEST("\xc4\xe2\x71\xde\xc2", VAESDEC128rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2)
+TEST("\xc4\xe2\x75\xde\xc2", VAESDEC256rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2)
+TEST("\xc4\xe2\x71\xdf\xc2", VAESDECLAST128rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2)
+TEST("\xc4\xe2\x75\xdf\xc2", VAESDECLAST256rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2)
 
-TEST("\xc4\xe2\x70\x50\xc2", VPDPBUUD128rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2);
-TEST("\xc4\xe2\x74\x50\xc2", VPDPBUUD256rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2);
-TEST("\xc4\xe2\x71\x50\xc2", VPDPBUSD128rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2);
-TEST("\xc4\xe2\x75\x50\xc2", VPDPBUSD256rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2);
-TEST("\xc4\xe2\x72\x50\xc2", VPDPBSUD128rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2);
-TEST("\xc4\xe2\x76\x50\xc2", VPDPBSUD256rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2);
-TEST("\xc4\xe2\x73\x50\xc2", VPDPBSSD128rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2);
-TEST("\xc4\xe2\x77\x50\xc2", VPDPBSSD256rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2);
-TEST("\xc4\xe2\x70\x51\xc2", VPDPBUUDS128rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2);
-TEST("\xc4\xe2\x74\x51\xc2", VPDPBUUDS256rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2);
-TEST("\xc4\xe2\x71\x51\xc2", VPDPBUSDS128rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2);
-TEST("\xc4\xe2\x75\x51\xc2", VPDPBUSDS256rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2);
-TEST("\xc4\xe2\x72\x51\xc2", VPDPBSUDS128rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2);
-TEST("\xc4\xe2\x76\x51\xc2", VPDPBSUDS256rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2);
-TEST("\xc4\xe2\x73\x51\xc2", VPDPBSSDS128rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2);
-TEST("\xc4\xe2\x77\x51\xc2", VPDPBSSDS256rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2);
-TEST("\xc4\xe2\x71\x52\xc2", VPDPWSSD128rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2);
-TEST("\xc4\xe2\x75\x52\xc2", VPDPWSSD256rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2);
-TEST("\xc4\xe2\x71\x53\xc2", VPDPWSSDS128rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2);
-TEST("\xc4\xe2\x75\x53\xc2", VPDPWSSDS256rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2);
+TEST("\xc4\xe2\x70\x50\xc2", VPDPBUUD128rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2)
+TEST("\xc4\xe2\x74\x50\xc2", VPDPBUUD256rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2)
+TEST("\xc4\xe2\x71\x50\xc2", VPDPBUSD128rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2)
+TEST("\xc4\xe2\x75\x50\xc2", VPDPBUSD256rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2)
+TEST("\xc4\xe2\x72\x50\xc2", VPDPBSUD128rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2)
+TEST("\xc4\xe2\x76\x50\xc2", VPDPBSUD256rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2)
+TEST("\xc4\xe2\x73\x50\xc2", VPDPBSSD128rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2)
+TEST("\xc4\xe2\x77\x50\xc2", VPDPBSSD256rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2)
+TEST("\xc4\xe2\x70\x51\xc2", VPDPBUUDS128rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2)
+TEST("\xc4\xe2\x74\x51\xc2", VPDPBUUDS256rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2)
+TEST("\xc4\xe2\x71\x51\xc2", VPDPBUSDS128rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2)
+TEST("\xc4\xe2\x75\x51\xc2", VPDPBUSDS256rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2)
+TEST("\xc4\xe2\x72\x51\xc2", VPDPBSUDS128rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2)
+TEST("\xc4\xe2\x76\x51\xc2", VPDPBSUDS256rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2)
+TEST("\xc4\xe2\x73\x51\xc2", VPDPBSSDS128rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2)
+TEST("\xc4\xe2\x77\x51\xc2", VPDPBSSDS256rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2)
+TEST("\xc4\xe2\x71\x52\xc2", VPDPWSSD128rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2)
+TEST("\xc4\xe2\x75\x52\xc2", VPDPWSSD256rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2)
+TEST("\xc4\xe2\x71\x53\xc2", VPDPWSSDS128rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2)
+TEST("\xc4\xe2\x75\x53\xc2", VPDPWSSDS256rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2)
 
-TEST("\xc4\xe2\x78\xb0\x08", VCVTNEOPH2PS128rm, 0, FE_XMM1, FE_MEM(FE_AX, 0, FE_NOREG, 0));
-TEST("\xc4\xe2\x7c\xb0\x08", VCVTNEOPH2PS256rm, 0, FE_XMM1, FE_MEM(FE_AX, 0, FE_NOREG, 0));
-TEST("\xc4\xe2\x79\xb0\x08", VCVTNEEPH2PS128rm, 0, FE_XMM1, FE_MEM(FE_AX, 0, FE_NOREG, 0));
-TEST("\xc4\xe2\x7d\xb0\x08", VCVTNEEPH2PS256rm, 0, FE_XMM1, FE_MEM(FE_AX, 0, FE_NOREG, 0));
-TEST("\xc4\xe2\x7a\xb0\x08", VCVTNEEBF162PS128rm, 0, FE_XMM1, FE_MEM(FE_AX, 0, FE_NOREG, 0));
-TEST("\xc4\xe2\x7e\xb0\x08", VCVTNEEBF162PS256rm, 0, FE_XMM1, FE_MEM(FE_AX, 0, FE_NOREG, 0));
-TEST("\xc4\xe2\x7b\xb0\x08", VCVTNEOBF162PS128rm, 0, FE_XMM1, FE_MEM(FE_AX, 0, FE_NOREG, 0));
-TEST("\xc4\xe2\x7f\xb0\x08", VCVTNEOBF162PS256rm, 0, FE_XMM1, FE_MEM(FE_AX, 0, FE_NOREG, 0));
-TEST("\xc4\xe2\x79\xb1\x08", VBCSTNESH2PS128rm, 0, FE_XMM1, FE_MEM(FE_AX, 0, FE_NOREG, 0));
-TEST("\xc4\xe2\x7d\xb1\x08", VBCSTNESH2PS256rm, 0, FE_XMM1, FE_MEM(FE_AX, 0, FE_NOREG, 0));
-TEST("\xc4\xe2\x7a\xb1\x08", VBCSTNEBF162PS128rm, 0, FE_XMM1, FE_MEM(FE_AX, 0, FE_NOREG, 0));
-TEST("\xc4\xe2\x7e\xb1\x08", VBCSTNEBF162PS256rm, 0, FE_XMM1, FE_MEM(FE_AX, 0, FE_NOREG, 0));
-TEST("\xc4\xe2\x7a\x72\xc1", VCVTNEPS2BF16_128rr, 0, FE_XMM0, FE_XMM1);
-TEST("\xc4\xe2\x7e\x72\xc1", VCVTNEPS2BF16_256rr, 0, FE_XMM0, FE_XMM1);
+TEST("\xc4\xe2\x78\xb0\x08", VCVTNEOPH2PS128rm, 0, FE_XMM1, FE_MEM(FE_AX, 0, FE_NOREG, 0))
+TEST("\xc4\xe2\x7c\xb0\x08", VCVTNEOPH2PS256rm, 0, FE_XMM1, FE_MEM(FE_AX, 0, FE_NOREG, 0))
+TEST("\xc4\xe2\x79\xb0\x08", VCVTNEEPH2PS128rm, 0, FE_XMM1, FE_MEM(FE_AX, 0, FE_NOREG, 0))
+TEST("\xc4\xe2\x7d\xb0\x08", VCVTNEEPH2PS256rm, 0, FE_XMM1, FE_MEM(FE_AX, 0, FE_NOREG, 0))
+TEST("\xc4\xe2\x7a\xb0\x08", VCVTNEEBF162PS128rm, 0, FE_XMM1, FE_MEM(FE_AX, 0, FE_NOREG, 0))
+TEST("\xc4\xe2\x7e\xb0\x08", VCVTNEEBF162PS256rm, 0, FE_XMM1, FE_MEM(FE_AX, 0, FE_NOREG, 0))
+TEST("\xc4\xe2\x7b\xb0\x08", VCVTNEOBF162PS128rm, 0, FE_XMM1, FE_MEM(FE_AX, 0, FE_NOREG, 0))
+TEST("\xc4\xe2\x7f\xb0\x08", VCVTNEOBF162PS256rm, 0, FE_XMM1, FE_MEM(FE_AX, 0, FE_NOREG, 0))
+TEST("\xc4\xe2\x79\xb1\x08", VBCSTNESH2PS128rm, 0, FE_XMM1, FE_MEM(FE_AX, 0, FE_NOREG, 0))
+TEST("\xc4\xe2\x7d\xb1\x08", VBCSTNESH2PS256rm, 0, FE_XMM1, FE_MEM(FE_AX, 0, FE_NOREG, 0))
+TEST("\xc4\xe2\x7a\xb1\x08", VBCSTNEBF162PS128rm, 0, FE_XMM1, FE_MEM(FE_AX, 0, FE_NOREG, 0))
+TEST("\xc4\xe2\x7e\xb1\x08", VBCSTNEBF162PS256rm, 0, FE_XMM1, FE_MEM(FE_AX, 0, FE_NOREG, 0))
+TEST("\xc4\xe2\x7a\x72\xc1", VCVTNEPS2BF16_128rr, 0, FE_XMM0, FE_XMM1)
+TEST("\xc4\xe2\x7e\x72\xc1", VCVTNEPS2BF16_256rr, 0, FE_XMM0, FE_XMM1)
 
-TEST("\xc4\xe2\xf1\xb4\xc2", VPMADD52LUQ128rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2);
-TEST("\xc4\xe2\xf5\xb4\xc2", VPMADD52LUQ256rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2);
-TEST("\xc4\xe2\xf1\xb5\xc2", VPMADD52HUQ128rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2);
-TEST("\xc4\xe2\xf5\xb5\xc2", VPMADD52HUQ256rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2);
+TEST("\xc4\xe2\xf1\xb4\xc2", VPMADD52LUQ128rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2)
+TEST("\xc4\xe2\xf5\xb4\xc2", VPMADD52LUQ256rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2)
+TEST("\xc4\xe2\xf1\xb5\xc2", VPMADD52HUQ128rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2)
+TEST("\xc4\xe2\xf5\xb5\xc2", VPMADD52HUQ256rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2)
 
 // AVX-512
 // NB: VEX instructions are here to test automatic downgrading from EVEX to VEX.
 
 // EVEX functionality; VEX-downgrade occasionally prevented with mask
 // Part 1: register extension bits for rrr/rri
-TEST("\xc5\xf0\x58\xc2", VADDPS128rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2);
-TEST("\x62\xf1\x74\x09\x58\xc2", VADDPS128rrr_mask, FLAGMASK(0, FE_K1), FE_XMM0, FE_XMM1, FE_XMM2);
-TEST("\xc5\x70\x58\xc2", VADDPS128rrr, 0, FE_XMM8, FE_XMM1, FE_XMM2);
-TEST("\x62\x71\x74\x09\x58\xc2", VADDPS128rrr_mask, FLAGMASK(0, FE_K1), FE_XMM8, FE_XMM1, FE_XMM2);
-TEST("\x62\xe1\x74\x08\x58\xc2", VADDPS128rrr, 0, FE_XMM16, FE_XMM1, FE_XMM2);
-TEST("\x62\x61\x74\x08\x58\xc2", VADDPS128rrr, 0, FE_XMM24, FE_XMM1, FE_XMM2);
-TEST("\xc5\xb0\x58\xc2", VADDPS128rrr, 0, FE_XMM0, FE_XMM9, FE_XMM2);
-TEST("\x62\xf1\x34\x09\x58\xc2", VADDPS128rrr_mask, FLAGMASK(0, FE_K1), FE_XMM0, FE_XMM9, FE_XMM2);
-TEST("\xc5\x30\x58\xc2", VADDPS128rrr, 0, FE_XMM8, FE_XMM9, FE_XMM2);
-TEST("\x62\x71\x34\x09\x58\xc2", VADDPS128rrr_mask, FLAGMASK(0, FE_K1), FE_XMM8, FE_XMM9, FE_XMM2);
-TEST("\x62\xe1\x34\x08\x58\xc2", VADDPS128rrr, 0, FE_XMM16, FE_XMM9, FE_XMM2);
-TEST("\x62\x61\x34\x08\x58\xc2", VADDPS128rrr, 0, FE_XMM24, FE_XMM9, FE_XMM2);
-TEST("\x62\xf1\x74\x00\x58\xc2", VADDPS128rrr, 0, FE_XMM0, FE_XMM17, FE_XMM2);
-TEST("\x62\x71\x74\x00\x58\xc2", VADDPS128rrr, 0, FE_XMM8, FE_XMM17, FE_XMM2);
-TEST("\x62\xe1\x74\x00\x58\xc2", VADDPS128rrr, 0, FE_XMM16, FE_XMM17, FE_XMM2);
-TEST("\x62\x61\x74\x00\x58\xc2", VADDPS128rrr, 0, FE_XMM24, FE_XMM17, FE_XMM2);
-TEST("\x62\xf1\x34\x00\x58\xc2", VADDPS128rrr, 0, FE_XMM0, FE_XMM25, FE_XMM2);
-TEST("\x62\x71\x34\x00\x58\xc2", VADDPS128rrr, 0, FE_XMM8, FE_XMM25, FE_XMM2);
-TEST("\x62\xe1\x34\x00\x58\xc2", VADDPS128rrr, 0, FE_XMM16, FE_XMM25, FE_XMM2);
-TEST("\x62\x61\x34\x00\x58\xc2", VADDPS128rrr, 0, FE_XMM24, FE_XMM25, FE_XMM2);
-TEST("\xc4\xc1\x70\x58\xc2", VADDPS128rrr, 0, FE_XMM0, FE_XMM1, FE_XMM10);
-TEST("\xc4\x41\x70\x58\xc2", VADDPS128rrr, 0, FE_XMM8, FE_XMM1, FE_XMM10);
-TEST("\x62\xc1\x74\x08\x58\xc2", VADDPS128rrr, 0, FE_XMM16, FE_XMM1, FE_XMM10);
-TEST("\x62\x41\x74\x08\x58\xc2", VADDPS128rrr, 0, FE_XMM24, FE_XMM1, FE_XMM10);
-TEST("\xc4\xc1\x30\x58\xc2", VADDPS128rrr, 0, FE_XMM0, FE_XMM9, FE_XMM10);
-TEST("\xc4\x41\x30\x58\xc2", VADDPS128rrr, 0, FE_XMM8, FE_XMM9, FE_XMM10);
-TEST("\x62\xc1\x34\x08\x58\xc2", VADDPS128rrr, 0, FE_XMM16, FE_XMM9, FE_XMM10);
-TEST("\x62\x41\x34\x08\x58\xc2", VADDPS128rrr, 0, FE_XMM24, FE_XMM9, FE_XMM10);
-TEST("\x62\xd1\x74\x00\x58\xc2", VADDPS128rrr, 0, FE_XMM0, FE_XMM17, FE_XMM10);
-TEST("\x62\x51\x74\x00\x58\xc2", VADDPS128rrr, 0, FE_XMM8, FE_XMM17, FE_XMM10);
-TEST("\x62\xc1\x74\x00\x58\xc2", VADDPS128rrr, 0, FE_XMM16, FE_XMM17, FE_XMM10);
-TEST("\x62\x41\x74\x00\x58\xc2", VADDPS128rrr, 0, FE_XMM24, FE_XMM17, FE_XMM10);
-TEST("\x62\xd1\x34\x00\x58\xc2", VADDPS128rrr, 0, FE_XMM0, FE_XMM25, FE_XMM10);
-TEST("\x62\x51\x34\x00\x58\xc2", VADDPS128rrr, 0, FE_XMM8, FE_XMM25, FE_XMM10);
-TEST("\x62\xc1\x34\x00\x58\xc2", VADDPS128rrr, 0, FE_XMM16, FE_XMM25, FE_XMM10);
-TEST("\x62\x41\x34\x00\x58\xc2", VADDPS128rrr, 0, FE_XMM24, FE_XMM25, FE_XMM10);
-TEST("\x62\xb1\x74\x08\x58\xc2", VADDPS128rrr, 0, FE_XMM0, FE_XMM1, FE_XMM18);
-TEST("\x62\x31\x74\x08\x58\xc2", VADDPS128rrr, 0, FE_XMM8, FE_XMM1, FE_XMM18);
-TEST("\x62\xa1\x74\x08\x58\xc2", VADDPS128rrr, 0, FE_XMM16, FE_XMM1, FE_XMM18);
-TEST("\x62\x21\x74\x08\x58\xc2", VADDPS128rrr, 0, FE_XMM24, FE_XMM1, FE_XMM18);
-TEST("\x62\xb1\x34\x08\x58\xc2", VADDPS128rrr, 0, FE_XMM0, FE_XMM9, FE_XMM18);
-TEST("\x62\x31\x34\x08\x58\xc2", VADDPS128rrr, 0, FE_XMM8, FE_XMM9, FE_XMM18);
-TEST("\x62\xa1\x34\x08\x58\xc2", VADDPS128rrr, 0, FE_XMM16, FE_XMM9, FE_XMM18);
-TEST("\x62\x21\x34\x08\x58\xc2", VADDPS128rrr, 0, FE_XMM24, FE_XMM9, FE_XMM18);
-TEST("\x62\xb1\x74\x00\x58\xc2", VADDPS128rrr, 0, FE_XMM0, FE_XMM17, FE_XMM18);
-TEST("\x62\x31\x74\x00\x58\xc2", VADDPS128rrr, 0, FE_XMM8, FE_XMM17, FE_XMM18);
-TEST("\x62\xa1\x74\x00\x58\xc2", VADDPS128rrr, 0, FE_XMM16, FE_XMM17, FE_XMM18);
-TEST("\x62\x21\x74\x00\x58\xc2", VADDPS128rrr, 0, FE_XMM24, FE_XMM17, FE_XMM18);
-TEST("\x62\xb1\x34\x00\x58\xc2", VADDPS128rrr, 0, FE_XMM0, FE_XMM25, FE_XMM18);
-TEST("\x62\x31\x34\x00\x58\xc2", VADDPS128rrr, 0, FE_XMM8, FE_XMM25, FE_XMM18);
-TEST("\x62\xa1\x34\x00\x58\xc2", VADDPS128rrr, 0, FE_XMM16, FE_XMM25, FE_XMM18);
-TEST("\x62\x21\x34\x00\x58\xc2", VADDPS128rrr, 0, FE_XMM24, FE_XMM25, FE_XMM18);
-TEST("\x62\x91\x74\x08\x58\xc2", VADDPS128rrr, 0, FE_XMM0, FE_XMM1, FE_XMM26);
-TEST("\x62\x11\x74\x08\x58\xc2", VADDPS128rrr, 0, FE_XMM8, FE_XMM1, FE_XMM26);
-TEST("\x62\x81\x74\x08\x58\xc2", VADDPS128rrr, 0, FE_XMM16, FE_XMM1, FE_XMM26);
-TEST("\x62\x01\x74\x08\x58\xc2", VADDPS128rrr, 0, FE_XMM24, FE_XMM1, FE_XMM26);
-TEST("\x62\x91\x34\x08\x58\xc2", VADDPS128rrr, 0, FE_XMM0, FE_XMM9, FE_XMM26);
-TEST("\x62\x11\x34\x08\x58\xc2", VADDPS128rrr, 0, FE_XMM8, FE_XMM9, FE_XMM26);
-TEST("\x62\x81\x34\x08\x58\xc2", VADDPS128rrr, 0, FE_XMM16, FE_XMM9, FE_XMM26);
-TEST("\x62\x01\x34\x08\x58\xc2", VADDPS128rrr, 0, FE_XMM24, FE_XMM9, FE_XMM26);
-TEST("\x62\x91\x74\x00\x58\xc2", VADDPS128rrr, 0, FE_XMM0, FE_XMM17, FE_XMM26);
-TEST("\x62\x11\x74\x00\x58\xc2", VADDPS128rrr, 0, FE_XMM8, FE_XMM17, FE_XMM26);
-TEST("\x62\x81\x74\x00\x58\xc2", VADDPS128rrr, 0, FE_XMM16, FE_XMM17, FE_XMM26);
-TEST("\x62\x01\x74\x00\x58\xc2", VADDPS128rrr, 0, FE_XMM24, FE_XMM17, FE_XMM26);
-TEST("\x62\x91\x34\x00\x58\xc2", VADDPS128rrr, 0, FE_XMM0, FE_XMM25, FE_XMM26);
-TEST("\x62\x11\x34\x00\x58\xc2", VADDPS128rrr, 0, FE_XMM8, FE_XMM25, FE_XMM26);
-TEST("\x62\x81\x34\x00\x58\xc2", VADDPS128rrr, 0, FE_XMM16, FE_XMM25, FE_XMM26);
-TEST("\x62\x01\x34\x00\x58\xc2", VADDPS128rrr, 0, FE_XMM24, FE_XMM25, FE_XMM26);
-TEST("\xc5\xf9\x71\xd1\x01", VPSRLW128rri, 0, FE_XMM0, FE_XMM1, 1);
-TEST("\xc5\xb9\x71\xd1\x01", VPSRLW128rri, 0, FE_XMM8, FE_XMM1, 1);
-TEST("\x62\xf1\x7d\x00\x71\xd1\x01", VPSRLW128rri, 0, FE_XMM16, FE_XMM1, 1);
-TEST("\x62\xf1\x3d\x00\x71\xd1\x01", VPSRLW128rri, 0, FE_XMM24, FE_XMM1, 1);
-TEST("\xc4\xc1\x79\x71\xd1\x01", VPSRLW128rri, 0, FE_XMM0, FE_XMM9, 1);
-TEST("\xc4\xc1\x39\x71\xd1\x01", VPSRLW128rri, 0, FE_XMM8, FE_XMM9, 1);
-TEST("\x62\xd1\x7d\x00\x71\xd1\x01", VPSRLW128rri, 0, FE_XMM16, FE_XMM9, 1);
-TEST("\x62\xd1\x3d\x00\x71\xd1\x01", VPSRLW128rri, 0, FE_XMM24, FE_XMM9, 1);
-TEST("\x62\xb1\x7d\x08\x71\xd1\x01", VPSRLW128rri, 0, FE_XMM0, FE_XMM17, 1);
-TEST("\x62\xb1\x3d\x08\x71\xd1\x01", VPSRLW128rri, 0, FE_XMM8, FE_XMM17, 1);
-TEST("\x62\xb1\x7d\x00\x71\xd1\x01", VPSRLW128rri, 0, FE_XMM16, FE_XMM17, 1);
-TEST("\x62\xb1\x3d\x00\x71\xd1\x01", VPSRLW128rri, 0, FE_XMM24, FE_XMM17, 1);
-TEST("\x62\x91\x7d\x08\x71\xd1\x01", VPSRLW128rri, 0, FE_XMM0, FE_XMM25, 1);
-TEST("\x62\x91\x3d\x08\x71\xd1\x01", VPSRLW128rri, 0, FE_XMM8, FE_XMM25, 1);
-TEST("\x62\x91\x7d\x00\x71\xd1\x01", VPSRLW128rri, 0, FE_XMM16, FE_XMM25, 1);
-TEST("\x62\x91\x3d\x00\x71\xd1\x01", VPSRLW128rri, 0, FE_XMM24, FE_XMM25, 1);
-TEST("\xc5\xfd\x71\xd1\x01", VPSRLW256rri, 0, FE_XMM0, FE_XMM1, 1);
-TEST("\xc5\xbd\x71\xd1\x01", VPSRLW256rri, 0, FE_XMM8, FE_XMM1, 1);
-TEST("\x62\xf1\x7d\x20\x71\xd1\x01", VPSRLW256rri, 0, FE_XMM16, FE_XMM1, 1);
-TEST("\x62\xf1\x3d\x20\x71\xd1\x01", VPSRLW256rri, 0, FE_XMM24, FE_XMM1, 1);
-TEST("\xc4\xc1\x7d\x71\xd1\x01", VPSRLW256rri, 0, FE_XMM0, FE_XMM9, 1);
-TEST("\xc4\xc1\x3d\x71\xd1\x01", VPSRLW256rri, 0, FE_XMM8, FE_XMM9, 1);
-TEST("\x62\xd1\x7d\x20\x71\xd1\x01", VPSRLW256rri, 0, FE_XMM16, FE_XMM9, 1);
-TEST("\x62\xd1\x3d\x20\x71\xd1\x01", VPSRLW256rri, 0, FE_XMM24, FE_XMM9, 1);
-TEST("\x62\xb1\x7d\x28\x71\xd1\x01", VPSRLW256rri, 0, FE_XMM0, FE_XMM17, 1);
-TEST("\x62\xb1\x3d\x28\x71\xd1\x01", VPSRLW256rri, 0, FE_XMM8, FE_XMM17, 1);
-TEST("\x62\xb1\x7d\x20\x71\xd1\x01", VPSRLW256rri, 0, FE_XMM16, FE_XMM17, 1);
-TEST("\x62\xb1\x3d\x20\x71\xd1\x01", VPSRLW256rri, 0, FE_XMM24, FE_XMM17, 1);
-TEST("\x62\x91\x7d\x28\x71\xd1\x01", VPSRLW256rri, 0, FE_XMM0, FE_XMM25, 1);
-TEST("\x62\x91\x3d\x28\x71\xd1\x01", VPSRLW256rri, 0, FE_XMM8, FE_XMM25, 1);
-TEST("\x62\x91\x7d\x20\x71\xd1\x01", VPSRLW256rri, 0, FE_XMM16, FE_XMM25, 1);
-TEST("\x62\x91\x3d\x20\x71\xd1\x01", VPSRLW256rri, 0, FE_XMM24, FE_XMM25, 1);
-TEST("\x62\xf1\x7d\x48\x71\xd1\x01", VPSRLW512rri, 0, FE_XMM0, FE_XMM1, 1);
-TEST("\x62\xf1\x3d\x48\x71\xd1\x01", VPSRLW512rri, 0, FE_XMM8, FE_XMM1, 1);
-TEST("\x62\xf1\x7d\x40\x71\xd1\x01", VPSRLW512rri, 0, FE_XMM16, FE_XMM1, 1);
-TEST("\x62\xf1\x3d\x40\x71\xd1\x01", VPSRLW512rri, 0, FE_XMM24, FE_XMM1, 1);
-TEST("\x62\xd1\x7d\x48\x71\xd1\x01", VPSRLW512rri, 0, FE_XMM0, FE_XMM9, 1);
-TEST("\x62\xd1\x3d\x48\x71\xd1\x01", VPSRLW512rri, 0, FE_XMM8, FE_XMM9, 1);
-TEST("\x62\xd1\x7d\x40\x71\xd1\x01", VPSRLW512rri, 0, FE_XMM16, FE_XMM9, 1);
-TEST("\x62\xd1\x3d\x40\x71\xd1\x01", VPSRLW512rri, 0, FE_XMM24, FE_XMM9, 1);
-TEST("\x62\xb1\x7d\x48\x71\xd1\x01", VPSRLW512rri, 0, FE_XMM0, FE_XMM17, 1);
-TEST("\x62\xb1\x3d\x48\x71\xd1\x01", VPSRLW512rri, 0, FE_XMM8, FE_XMM17, 1);
-TEST("\x62\xb1\x7d\x40\x71\xd1\x01", VPSRLW512rri, 0, FE_XMM16, FE_XMM17, 1);
-TEST("\x62\xb1\x3d\x40\x71\xd1\x01", VPSRLW512rri, 0, FE_XMM24, FE_XMM17, 1);
-TEST("\x62\x91\x7d\x48\x71\xd1\x01", VPSRLW512rri, 0, FE_XMM0, FE_XMM25, 1);
-TEST("\x62\x91\x3d\x48\x71\xd1\x01", VPSRLW512rri, 0, FE_XMM8, FE_XMM25, 1);
-TEST("\x62\x91\x7d\x40\x71\xd1\x01", VPSRLW512rri, 0, FE_XMM16, FE_XMM25, 1);
-TEST("\x62\x91\x3d\x40\x71\xd1\x01", VPSRLW512rri, 0, FE_XMM24, FE_XMM25, 1);
+TEST("\xc5\xf0\x58\xc2", VADDPS128rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2)
+TEST("\x62\xf1\x74\x09\x58\xc2", VADDPS128rrr_mask, FLAGMASK(0, FE_K1), FE_XMM0, FE_XMM1, FE_XMM2)
+TEST("\xc5\x70\x58\xc2", VADDPS128rrr, 0, FE_XMM8, FE_XMM1, FE_XMM2)
+TEST("\x62\x71\x74\x09\x58\xc2", VADDPS128rrr_mask, FLAGMASK(0, FE_K1), FE_XMM8, FE_XMM1, FE_XMM2)
+TEST("\x62\xe1\x74\x08\x58\xc2", VADDPS128rrr, 0, FE_XMM16, FE_XMM1, FE_XMM2)
+TEST("\x62\x61\x74\x08\x58\xc2", VADDPS128rrr, 0, FE_XMM24, FE_XMM1, FE_XMM2)
+TEST("\xc5\xb0\x58\xc2", VADDPS128rrr, 0, FE_XMM0, FE_XMM9, FE_XMM2)
+TEST("\x62\xf1\x34\x09\x58\xc2", VADDPS128rrr_mask, FLAGMASK(0, FE_K1), FE_XMM0, FE_XMM9, FE_XMM2)
+TEST("\xc5\x30\x58\xc2", VADDPS128rrr, 0, FE_XMM8, FE_XMM9, FE_XMM2)
+TEST("\x62\x71\x34\x09\x58\xc2", VADDPS128rrr_mask, FLAGMASK(0, FE_K1), FE_XMM8, FE_XMM9, FE_XMM2)
+TEST("\x62\xe1\x34\x08\x58\xc2", VADDPS128rrr, 0, FE_XMM16, FE_XMM9, FE_XMM2)
+TEST("\x62\x61\x34\x08\x58\xc2", VADDPS128rrr, 0, FE_XMM24, FE_XMM9, FE_XMM2)
+TEST("\x62\xf1\x74\x00\x58\xc2", VADDPS128rrr, 0, FE_XMM0, FE_XMM17, FE_XMM2)
+TEST("\x62\x71\x74\x00\x58\xc2", VADDPS128rrr, 0, FE_XMM8, FE_XMM17, FE_XMM2)
+TEST("\x62\xe1\x74\x00\x58\xc2", VADDPS128rrr, 0, FE_XMM16, FE_XMM17, FE_XMM2)
+TEST("\x62\x61\x74\x00\x58\xc2", VADDPS128rrr, 0, FE_XMM24, FE_XMM17, FE_XMM2)
+TEST("\x62\xf1\x34\x00\x58\xc2", VADDPS128rrr, 0, FE_XMM0, FE_XMM25, FE_XMM2)
+TEST("\x62\x71\x34\x00\x58\xc2", VADDPS128rrr, 0, FE_XMM8, FE_XMM25, FE_XMM2)
+TEST("\x62\xe1\x34\x00\x58\xc2", VADDPS128rrr, 0, FE_XMM16, FE_XMM25, FE_XMM2)
+TEST("\x62\x61\x34\x00\x58\xc2", VADDPS128rrr, 0, FE_XMM24, FE_XMM25, FE_XMM2)
+TEST("\xc4\xc1\x70\x58\xc2", VADDPS128rrr, 0, FE_XMM0, FE_XMM1, FE_XMM10)
+TEST("\xc4\x41\x70\x58\xc2", VADDPS128rrr, 0, FE_XMM8, FE_XMM1, FE_XMM10)
+TEST("\x62\xc1\x74\x08\x58\xc2", VADDPS128rrr, 0, FE_XMM16, FE_XMM1, FE_XMM10)
+TEST("\x62\x41\x74\x08\x58\xc2", VADDPS128rrr, 0, FE_XMM24, FE_XMM1, FE_XMM10)
+TEST("\xc4\xc1\x30\x58\xc2", VADDPS128rrr, 0, FE_XMM0, FE_XMM9, FE_XMM10)
+TEST("\xc4\x41\x30\x58\xc2", VADDPS128rrr, 0, FE_XMM8, FE_XMM9, FE_XMM10)
+TEST("\x62\xc1\x34\x08\x58\xc2", VADDPS128rrr, 0, FE_XMM16, FE_XMM9, FE_XMM10)
+TEST("\x62\x41\x34\x08\x58\xc2", VADDPS128rrr, 0, FE_XMM24, FE_XMM9, FE_XMM10)
+TEST("\x62\xd1\x74\x00\x58\xc2", VADDPS128rrr, 0, FE_XMM0, FE_XMM17, FE_XMM10)
+TEST("\x62\x51\x74\x00\x58\xc2", VADDPS128rrr, 0, FE_XMM8, FE_XMM17, FE_XMM10)
+TEST("\x62\xc1\x74\x00\x58\xc2", VADDPS128rrr, 0, FE_XMM16, FE_XMM17, FE_XMM10)
+TEST("\x62\x41\x74\x00\x58\xc2", VADDPS128rrr, 0, FE_XMM24, FE_XMM17, FE_XMM10)
+TEST("\x62\xd1\x34\x00\x58\xc2", VADDPS128rrr, 0, FE_XMM0, FE_XMM25, FE_XMM10)
+TEST("\x62\x51\x34\x00\x58\xc2", VADDPS128rrr, 0, FE_XMM8, FE_XMM25, FE_XMM10)
+TEST("\x62\xc1\x34\x00\x58\xc2", VADDPS128rrr, 0, FE_XMM16, FE_XMM25, FE_XMM10)
+TEST("\x62\x41\x34\x00\x58\xc2", VADDPS128rrr, 0, FE_XMM24, FE_XMM25, FE_XMM10)
+TEST("\x62\xb1\x74\x08\x58\xc2", VADDPS128rrr, 0, FE_XMM0, FE_XMM1, FE_XMM18)
+TEST("\x62\x31\x74\x08\x58\xc2", VADDPS128rrr, 0, FE_XMM8, FE_XMM1, FE_XMM18)
+TEST("\x62\xa1\x74\x08\x58\xc2", VADDPS128rrr, 0, FE_XMM16, FE_XMM1, FE_XMM18)
+TEST("\x62\x21\x74\x08\x58\xc2", VADDPS128rrr, 0, FE_XMM24, FE_XMM1, FE_XMM18)
+TEST("\x62\xb1\x34\x08\x58\xc2", VADDPS128rrr, 0, FE_XMM0, FE_XMM9, FE_XMM18)
+TEST("\x62\x31\x34\x08\x58\xc2", VADDPS128rrr, 0, FE_XMM8, FE_XMM9, FE_XMM18)
+TEST("\x62\xa1\x34\x08\x58\xc2", VADDPS128rrr, 0, FE_XMM16, FE_XMM9, FE_XMM18)
+TEST("\x62\x21\x34\x08\x58\xc2", VADDPS128rrr, 0, FE_XMM24, FE_XMM9, FE_XMM18)
+TEST("\x62\xb1\x74\x00\x58\xc2", VADDPS128rrr, 0, FE_XMM0, FE_XMM17, FE_XMM18)
+TEST("\x62\x31\x74\x00\x58\xc2", VADDPS128rrr, 0, FE_XMM8, FE_XMM17, FE_XMM18)
+TEST("\x62\xa1\x74\x00\x58\xc2", VADDPS128rrr, 0, FE_XMM16, FE_XMM17, FE_XMM18)
+TEST("\x62\x21\x74\x00\x58\xc2", VADDPS128rrr, 0, FE_XMM24, FE_XMM17, FE_XMM18)
+TEST("\x62\xb1\x34\x00\x58\xc2", VADDPS128rrr, 0, FE_XMM0, FE_XMM25, FE_XMM18)
+TEST("\x62\x31\x34\x00\x58\xc2", VADDPS128rrr, 0, FE_XMM8, FE_XMM25, FE_XMM18)
+TEST("\x62\xa1\x34\x00\x58\xc2", VADDPS128rrr, 0, FE_XMM16, FE_XMM25, FE_XMM18)
+TEST("\x62\x21\x34\x00\x58\xc2", VADDPS128rrr, 0, FE_XMM24, FE_XMM25, FE_XMM18)
+TEST("\x62\x91\x74\x08\x58\xc2", VADDPS128rrr, 0, FE_XMM0, FE_XMM1, FE_XMM26)
+TEST("\x62\x11\x74\x08\x58\xc2", VADDPS128rrr, 0, FE_XMM8, FE_XMM1, FE_XMM26)
+TEST("\x62\x81\x74\x08\x58\xc2", VADDPS128rrr, 0, FE_XMM16, FE_XMM1, FE_XMM26)
+TEST("\x62\x01\x74\x08\x58\xc2", VADDPS128rrr, 0, FE_XMM24, FE_XMM1, FE_XMM26)
+TEST("\x62\x91\x34\x08\x58\xc2", VADDPS128rrr, 0, FE_XMM0, FE_XMM9, FE_XMM26)
+TEST("\x62\x11\x34\x08\x58\xc2", VADDPS128rrr, 0, FE_XMM8, FE_XMM9, FE_XMM26)
+TEST("\x62\x81\x34\x08\x58\xc2", VADDPS128rrr, 0, FE_XMM16, FE_XMM9, FE_XMM26)
+TEST("\x62\x01\x34\x08\x58\xc2", VADDPS128rrr, 0, FE_XMM24, FE_XMM9, FE_XMM26)
+TEST("\x62\x91\x74\x00\x58\xc2", VADDPS128rrr, 0, FE_XMM0, FE_XMM17, FE_XMM26)
+TEST("\x62\x11\x74\x00\x58\xc2", VADDPS128rrr, 0, FE_XMM8, FE_XMM17, FE_XMM26)
+TEST("\x62\x81\x74\x00\x58\xc2", VADDPS128rrr, 0, FE_XMM16, FE_XMM17, FE_XMM26)
+TEST("\x62\x01\x74\x00\x58\xc2", VADDPS128rrr, 0, FE_XMM24, FE_XMM17, FE_XMM26)
+TEST("\x62\x91\x34\x00\x58\xc2", VADDPS128rrr, 0, FE_XMM0, FE_XMM25, FE_XMM26)
+TEST("\x62\x11\x34\x00\x58\xc2", VADDPS128rrr, 0, FE_XMM8, FE_XMM25, FE_XMM26)
+TEST("\x62\x81\x34\x00\x58\xc2", VADDPS128rrr, 0, FE_XMM16, FE_XMM25, FE_XMM26)
+TEST("\x62\x01\x34\x00\x58\xc2", VADDPS128rrr, 0, FE_XMM24, FE_XMM25, FE_XMM26)
+TEST("\xc5\xf9\x71\xd1\x01", VPSRLW128rri, 0, FE_XMM0, FE_XMM1, 1)
+TEST("\xc5\xb9\x71\xd1\x01", VPSRLW128rri, 0, FE_XMM8, FE_XMM1, 1)
+TEST("\x62\xf1\x7d\x00\x71\xd1\x01", VPSRLW128rri, 0, FE_XMM16, FE_XMM1, 1)
+TEST("\x62\xf1\x3d\x00\x71\xd1\x01", VPSRLW128rri, 0, FE_XMM24, FE_XMM1, 1)
+TEST("\xc4\xc1\x79\x71\xd1\x01", VPSRLW128rri, 0, FE_XMM0, FE_XMM9, 1)
+TEST("\xc4\xc1\x39\x71\xd1\x01", VPSRLW128rri, 0, FE_XMM8, FE_XMM9, 1)
+TEST("\x62\xd1\x7d\x00\x71\xd1\x01", VPSRLW128rri, 0, FE_XMM16, FE_XMM9, 1)
+TEST("\x62\xd1\x3d\x00\x71\xd1\x01", VPSRLW128rri, 0, FE_XMM24, FE_XMM9, 1)
+TEST("\x62\xb1\x7d\x08\x71\xd1\x01", VPSRLW128rri, 0, FE_XMM0, FE_XMM17, 1)
+TEST("\x62\xb1\x3d\x08\x71\xd1\x01", VPSRLW128rri, 0, FE_XMM8, FE_XMM17, 1)
+TEST("\x62\xb1\x7d\x00\x71\xd1\x01", VPSRLW128rri, 0, FE_XMM16, FE_XMM17, 1)
+TEST("\x62\xb1\x3d\x00\x71\xd1\x01", VPSRLW128rri, 0, FE_XMM24, FE_XMM17, 1)
+TEST("\x62\x91\x7d\x08\x71\xd1\x01", VPSRLW128rri, 0, FE_XMM0, FE_XMM25, 1)
+TEST("\x62\x91\x3d\x08\x71\xd1\x01", VPSRLW128rri, 0, FE_XMM8, FE_XMM25, 1)
+TEST("\x62\x91\x7d\x00\x71\xd1\x01", VPSRLW128rri, 0, FE_XMM16, FE_XMM25, 1)
+TEST("\x62\x91\x3d\x00\x71\xd1\x01", VPSRLW128rri, 0, FE_XMM24, FE_XMM25, 1)
+TEST("\xc5\xfd\x71\xd1\x01", VPSRLW256rri, 0, FE_XMM0, FE_XMM1, 1)
+TEST("\xc5\xbd\x71\xd1\x01", VPSRLW256rri, 0, FE_XMM8, FE_XMM1, 1)
+TEST("\x62\xf1\x7d\x20\x71\xd1\x01", VPSRLW256rri, 0, FE_XMM16, FE_XMM1, 1)
+TEST("\x62\xf1\x3d\x20\x71\xd1\x01", VPSRLW256rri, 0, FE_XMM24, FE_XMM1, 1)
+TEST("\xc4\xc1\x7d\x71\xd1\x01", VPSRLW256rri, 0, FE_XMM0, FE_XMM9, 1)
+TEST("\xc4\xc1\x3d\x71\xd1\x01", VPSRLW256rri, 0, FE_XMM8, FE_XMM9, 1)
+TEST("\x62\xd1\x7d\x20\x71\xd1\x01", VPSRLW256rri, 0, FE_XMM16, FE_XMM9, 1)
+TEST("\x62\xd1\x3d\x20\x71\xd1\x01", VPSRLW256rri, 0, FE_XMM24, FE_XMM9, 1)
+TEST("\x62\xb1\x7d\x28\x71\xd1\x01", VPSRLW256rri, 0, FE_XMM0, FE_XMM17, 1)
+TEST("\x62\xb1\x3d\x28\x71\xd1\x01", VPSRLW256rri, 0, FE_XMM8, FE_XMM17, 1)
+TEST("\x62\xb1\x7d\x20\x71\xd1\x01", VPSRLW256rri, 0, FE_XMM16, FE_XMM17, 1)
+TEST("\x62\xb1\x3d\x20\x71\xd1\x01", VPSRLW256rri, 0, FE_XMM24, FE_XMM17, 1)
+TEST("\x62\x91\x7d\x28\x71\xd1\x01", VPSRLW256rri, 0, FE_XMM0, FE_XMM25, 1)
+TEST("\x62\x91\x3d\x28\x71\xd1\x01", VPSRLW256rri, 0, FE_XMM8, FE_XMM25, 1)
+TEST("\x62\x91\x7d\x20\x71\xd1\x01", VPSRLW256rri, 0, FE_XMM16, FE_XMM25, 1)
+TEST("\x62\x91\x3d\x20\x71\xd1\x01", VPSRLW256rri, 0, FE_XMM24, FE_XMM25, 1)
+TEST("\x62\xf1\x7d\x48\x71\xd1\x01", VPSRLW512rri, 0, FE_XMM0, FE_XMM1, 1)
+TEST("\x62\xf1\x3d\x48\x71\xd1\x01", VPSRLW512rri, 0, FE_XMM8, FE_XMM1, 1)
+TEST("\x62\xf1\x7d\x40\x71\xd1\x01", VPSRLW512rri, 0, FE_XMM16, FE_XMM1, 1)
+TEST("\x62\xf1\x3d\x40\x71\xd1\x01", VPSRLW512rri, 0, FE_XMM24, FE_XMM1, 1)
+TEST("\x62\xd1\x7d\x48\x71\xd1\x01", VPSRLW512rri, 0, FE_XMM0, FE_XMM9, 1)
+TEST("\x62\xd1\x3d\x48\x71\xd1\x01", VPSRLW512rri, 0, FE_XMM8, FE_XMM9, 1)
+TEST("\x62\xd1\x7d\x40\x71\xd1\x01", VPSRLW512rri, 0, FE_XMM16, FE_XMM9, 1)
+TEST("\x62\xd1\x3d\x40\x71\xd1\x01", VPSRLW512rri, 0, FE_XMM24, FE_XMM9, 1)
+TEST("\x62\xb1\x7d\x48\x71\xd1\x01", VPSRLW512rri, 0, FE_XMM0, FE_XMM17, 1)
+TEST("\x62\xb1\x3d\x48\x71\xd1\x01", VPSRLW512rri, 0, FE_XMM8, FE_XMM17, 1)
+TEST("\x62\xb1\x7d\x40\x71\xd1\x01", VPSRLW512rri, 0, FE_XMM16, FE_XMM17, 1)
+TEST("\x62\xb1\x3d\x40\x71\xd1\x01", VPSRLW512rri, 0, FE_XMM24, FE_XMM17, 1)
+TEST("\x62\x91\x7d\x48\x71\xd1\x01", VPSRLW512rri, 0, FE_XMM0, FE_XMM25, 1)
+TEST("\x62\x91\x3d\x48\x71\xd1\x01", VPSRLW512rri, 0, FE_XMM8, FE_XMM25, 1)
+TEST("\x62\x91\x7d\x40\x71\xd1\x01", VPSRLW512rri, 0, FE_XMM16, FE_XMM25, 1)
+TEST("\x62\x91\x3d\x40\x71\xd1\x01", VPSRLW512rri, 0, FE_XMM24, FE_XMM25, 1)
 // Part 2: register extension bits with rrm
-TEST("\xc5\xf0\x58\x44\x1a\x40", VADDPS128rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 1, FE_BX, 0x40));
-TEST("\x62\xf1\x74\x09\x58\x44\x1a\x04", VADDPS128rrm_mask, FLAGMASK(0, FE_K1), FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 1, FE_BX, 0x40));
-TEST("\xc5\x70\x58\x44\x1a\x40", VADDPS128rrm, 0, FE_XMM8, FE_XMM1, FE_MEM(FE_DX, 1, FE_BX, 0x40));
-TEST("\x62\x71\x74\x09\x58\x44\x1a\x04", VADDPS128rrm_mask, FLAGMASK(0, FE_K1), FE_XMM8, FE_XMM1, FE_MEM(FE_DX, 1, FE_BX, 0x40));
-TEST("\x62\xe1\x74\x08\x58\x44\x1a\x04", VADDPS128rrm, 0, FE_XMM16, FE_XMM1, FE_MEM(FE_DX, 1, FE_BX, 0x40));
-TEST("\x62\x61\x74\x08\x58\x44\x1a\x04", VADDPS128rrm, 0, FE_XMM24, FE_XMM1, FE_MEM(FE_DX, 1, FE_BX, 0x40));
-TEST("\xc5\xb0\x58\x44\x1a\x40", VADDPS128rrm, 0, FE_XMM0, FE_XMM9, FE_MEM(FE_DX, 1, FE_BX, 0x40));
-TEST("\x62\xf1\x34\x09\x58\x44\x1a\x04", VADDPS128rrm_mask, FLAGMASK(0, FE_K1), FE_XMM0, FE_XMM9, FE_MEM(FE_DX, 1, FE_BX, 0x40));
-TEST("\xc5\x30\x58\x44\x1a\x40", VADDPS128rrm, 0, FE_XMM8, FE_XMM9, FE_MEM(FE_DX, 1, FE_BX, 0x40));
-TEST("\x62\x71\x34\x09\x58\x44\x1a\x04", VADDPS128rrm_mask, FLAGMASK(0, FE_K1), FE_XMM8, FE_XMM9, FE_MEM(FE_DX, 1, FE_BX, 0x40));
-TEST("\x62\xe1\x34\x08\x58\x44\x1a\x04", VADDPS128rrm, 0, FE_XMM16, FE_XMM9, FE_MEM(FE_DX, 1, FE_BX, 0x40));
-TEST("\x62\x61\x34\x08\x58\x44\x1a\x04", VADDPS128rrm, 0, FE_XMM24, FE_XMM9, FE_MEM(FE_DX, 1, FE_BX, 0x40));
-TEST("\x62\xf1\x74\x00\x58\x44\x1a\x04", VADDPS128rrm, 0, FE_XMM0, FE_XMM17, FE_MEM(FE_DX, 1, FE_BX, 0x40));
-TEST("\x62\xf1\x74\x01\x58\x44\x1a\x04", VADDPS128rrm_mask, FLAGMASK(0, FE_K1), FE_XMM0, FE_XMM17, FE_MEM(FE_DX, 1, FE_BX, 0x40));
-TEST("\x62\x71\x74\x00\x58\x44\x1a\x04", VADDPS128rrm, 0, FE_XMM8, FE_XMM17, FE_MEM(FE_DX, 1, FE_BX, 0x40));
-TEST("\x62\x71\x74\x01\x58\x44\x1a\x04", VADDPS128rrm_mask, FLAGMASK(0, FE_K1), FE_XMM8, FE_XMM17, FE_MEM(FE_DX, 1, FE_BX, 0x40));
-TEST("\x62\xe1\x74\x00\x58\x44\x1a\x04", VADDPS128rrm, 0, FE_XMM16, FE_XMM17, FE_MEM(FE_DX, 1, FE_BX, 0x40));
-TEST("\x62\x61\x74\x00\x58\x44\x1a\x04", VADDPS128rrm, 0, FE_XMM24, FE_XMM17, FE_MEM(FE_DX, 1, FE_BX, 0x40));
-TEST("\x62\xf1\x34\x00\x58\x44\x1a\x04", VADDPS128rrm, 0, FE_XMM0, FE_XMM25, FE_MEM(FE_DX, 1, FE_BX, 0x40));
-TEST("\x62\x71\x34\x00\x58\x44\x1a\x04", VADDPS128rrm, 0, FE_XMM8, FE_XMM25, FE_MEM(FE_DX, 1, FE_BX, 0x40));
-TEST("\x62\xe1\x34\x00\x58\x44\x1a\x04", VADDPS128rrm, 0, FE_XMM16, FE_XMM25, FE_MEM(FE_DX, 1, FE_BX, 0x40));
-TEST("\x62\x61\x34\x00\x58\x44\x1a\x04", VADDPS128rrm, 0, FE_XMM24, FE_XMM25, FE_MEM(FE_DX, 1, FE_BX, 0x40));
-TEST("\xc4\xa1\x70\x58\x44\x1a\x40", VADDPS128rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 1, FE_R11, 0x40));
-TEST("\x62\xb1\x74\x09\x58\x44\x1a\x04", VADDPS128rrm_mask, FLAGMASK(0, FE_K1), FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 1, FE_R11, 0x40));
-TEST("\xc4\x21\x70\x58\x44\x1a\x40", VADDPS128rrm, 0, FE_XMM8, FE_XMM1, FE_MEM(FE_DX, 1, FE_R11, 0x40));
-TEST("\x62\x31\x74\x09\x58\x44\x1a\x04", VADDPS128rrm_mask, FLAGMASK(0, FE_K1), FE_XMM8, FE_XMM1, FE_MEM(FE_DX, 1, FE_R11, 0x40));
-TEST("\x62\xa1\x74\x08\x58\x44\x1a\x04", VADDPS128rrm, 0, FE_XMM16, FE_XMM1, FE_MEM(FE_DX, 1, FE_R11, 0x40));
-TEST("\x62\x21\x74\x08\x58\x44\x1a\x04", VADDPS128rrm, 0, FE_XMM24, FE_XMM1, FE_MEM(FE_DX, 1, FE_R11, 0x40));
-TEST("\xc4\xa1\x30\x58\x44\x1a\x40", VADDPS128rrm, 0, FE_XMM0, FE_XMM9, FE_MEM(FE_DX, 1, FE_R11, 0x40));
-TEST("\x62\xb1\x34\x09\x58\x44\x1a\x04", VADDPS128rrm_mask, FLAGMASK(0, FE_K1), FE_XMM0, FE_XMM9, FE_MEM(FE_DX, 1, FE_R11, 0x40));
-TEST("\xc4\x21\x30\x58\x44\x1a\x40", VADDPS128rrm, 0, FE_XMM8, FE_XMM9, FE_MEM(FE_DX, 1, FE_R11, 0x40));
-TEST("\x62\x31\x34\x09\x58\x44\x1a\x04", VADDPS128rrm_mask, FLAGMASK(0, FE_K1), FE_XMM8, FE_XMM9, FE_MEM(FE_DX, 1, FE_R11, 0x40));
-TEST("\x62\xa1\x34\x08\x58\x44\x1a\x04", VADDPS128rrm, 0, FE_XMM16, FE_XMM9, FE_MEM(FE_DX, 1, FE_R11, 0x40));
-TEST("\x62\x21\x34\x08\x58\x44\x1a\x04", VADDPS128rrm, 0, FE_XMM24, FE_XMM9, FE_MEM(FE_DX, 1, FE_R11, 0x40));
-TEST("\x62\xb1\x74\x00\x58\x44\x1a\x04", VADDPS128rrm, 0, FE_XMM0, FE_XMM17, FE_MEM(FE_DX, 1, FE_R11, 0x40));
-TEST("\x62\xb1\x74\x01\x58\x44\x1a\x04", VADDPS128rrm_mask, FLAGMASK(0, FE_K1), FE_XMM0, FE_XMM17, FE_MEM(FE_DX, 1, FE_R11, 0x40));
-TEST("\x62\x31\x74\x00\x58\x44\x1a\x04", VADDPS128rrm, 0, FE_XMM8, FE_XMM17, FE_MEM(FE_DX, 1, FE_R11, 0x40));
-TEST("\x62\x31\x74\x01\x58\x44\x1a\x04", VADDPS128rrm_mask, FLAGMASK(0, FE_K1), FE_XMM8, FE_XMM17, FE_MEM(FE_DX, 1, FE_R11, 0x40));
-TEST("\x62\xa1\x74\x00\x58\x44\x1a\x04", VADDPS128rrm, 0, FE_XMM16, FE_XMM17, FE_MEM(FE_DX, 1, FE_R11, 0x40));
-TEST("\x62\x21\x74\x00\x58\x44\x1a\x04", VADDPS128rrm, 0, FE_XMM24, FE_XMM17, FE_MEM(FE_DX, 1, FE_R11, 0x40));
-TEST("\x62\xb1\x34\x00\x58\x44\x1a\x04", VADDPS128rrm, 0, FE_XMM0, FE_XMM25, FE_MEM(FE_DX, 1, FE_R11, 0x40));
-TEST("\x62\x31\x34\x00\x58\x44\x1a\x04", VADDPS128rrm, 0, FE_XMM8, FE_XMM25, FE_MEM(FE_DX, 1, FE_R11, 0x40));
-TEST("\x62\xa1\x34\x00\x58\x44\x1a\x04", VADDPS128rrm, 0, FE_XMM16, FE_XMM25, FE_MEM(FE_DX, 1, FE_R11, 0x40));
-TEST("\x62\x21\x34\x00\x58\x44\x1a\x04", VADDPS128rrm, 0, FE_XMM24, FE_XMM25, FE_MEM(FE_DX, 1, FE_R11, 0x40));
-TEST("\xc4\xc1\x70\x58\x44\x1a\x40", VADDPS128rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_R10, 1, FE_BX, 0x40));
-TEST("\x62\xd1\x74\x09\x58\x44\x1a\x04", VADDPS128rrm_mask, FLAGMASK(0, FE_K1), FE_XMM0, FE_XMM1, FE_MEM(FE_R10, 1, FE_BX, 0x40));
-TEST("\xc4\x41\x70\x58\x44\x1a\x40", VADDPS128rrm, 0, FE_XMM8, FE_XMM1, FE_MEM(FE_R10, 1, FE_BX, 0x40));
-TEST("\x62\x51\x74\x09\x58\x44\x1a\x04", VADDPS128rrm_mask, FLAGMASK(0, FE_K1), FE_XMM8, FE_XMM1, FE_MEM(FE_R10, 1, FE_BX, 0x40));
-TEST("\x62\xc1\x74\x08\x58\x44\x1a\x04", VADDPS128rrm, 0, FE_XMM16, FE_XMM1, FE_MEM(FE_R10, 1, FE_BX, 0x40));
-TEST("\x62\x41\x74\x08\x58\x44\x1a\x04", VADDPS128rrm, 0, FE_XMM24, FE_XMM1, FE_MEM(FE_R10, 1, FE_BX, 0x40));
-TEST("\xc4\xc1\x30\x58\x44\x1a\x40", VADDPS128rrm, 0, FE_XMM0, FE_XMM9, FE_MEM(FE_R10, 1, FE_BX, 0x40));
-TEST("\x62\xd1\x34\x09\x58\x44\x1a\x04", VADDPS128rrm_mask, FLAGMASK(0, FE_K1), FE_XMM0, FE_XMM9, FE_MEM(FE_R10, 1, FE_BX, 0x40));
-TEST("\xc4\x41\x30\x58\x44\x1a\x40", VADDPS128rrm, 0, FE_XMM8, FE_XMM9, FE_MEM(FE_R10, 1, FE_BX, 0x40));
-TEST("\x62\x51\x34\x09\x58\x44\x1a\x04", VADDPS128rrm_mask, FLAGMASK(0, FE_K1), FE_XMM8, FE_XMM9, FE_MEM(FE_R10, 1, FE_BX, 0x40));
-TEST("\x62\xc1\x34\x08\x58\x44\x1a\x04", VADDPS128rrm, 0, FE_XMM16, FE_XMM9, FE_MEM(FE_R10, 1, FE_BX, 0x40));
-TEST("\x62\x41\x34\x08\x58\x44\x1a\x04", VADDPS128rrm, 0, FE_XMM24, FE_XMM9, FE_MEM(FE_R10, 1, FE_BX, 0x40));
-TEST("\x62\xd1\x74\x00\x58\x44\x1a\x04", VADDPS128rrm, 0, FE_XMM0, FE_XMM17, FE_MEM(FE_R10, 1, FE_BX, 0x40));
-TEST("\x62\xd1\x74\x01\x58\x44\x1a\x04", VADDPS128rrm_mask, FLAGMASK(0, FE_K1), FE_XMM0, FE_XMM17, FE_MEM(FE_R10, 1, FE_BX, 0x40));
-TEST("\x62\x51\x74\x00\x58\x44\x1a\x04", VADDPS128rrm, 0, FE_XMM8, FE_XMM17, FE_MEM(FE_R10, 1, FE_BX, 0x40));
-TEST("\x62\x51\x74\x01\x58\x44\x1a\x04", VADDPS128rrm_mask, FLAGMASK(0, FE_K1), FE_XMM8, FE_XMM17, FE_MEM(FE_R10, 1, FE_BX, 0x40));
-TEST("\x62\xc1\x74\x00\x58\x44\x1a\x04", VADDPS128rrm, 0, FE_XMM16, FE_XMM17, FE_MEM(FE_R10, 1, FE_BX, 0x40));
-TEST("\x62\x41\x74\x00\x58\x44\x1a\x04", VADDPS128rrm, 0, FE_XMM24, FE_XMM17, FE_MEM(FE_R10, 1, FE_BX, 0x40));
-TEST("\x62\xd1\x34\x00\x58\x44\x1a\x04", VADDPS128rrm, 0, FE_XMM0, FE_XMM25, FE_MEM(FE_R10, 1, FE_BX, 0x40));
-TEST("\x62\x51\x34\x00\x58\x44\x1a\x04", VADDPS128rrm, 0, FE_XMM8, FE_XMM25, FE_MEM(FE_R10, 1, FE_BX, 0x40));
-TEST("\x62\xc1\x34\x00\x58\x44\x1a\x04", VADDPS128rrm, 0, FE_XMM16, FE_XMM25, FE_MEM(FE_R10, 1, FE_BX, 0x40));
-TEST("\x62\x41\x34\x00\x58\x44\x1a\x04", VADDPS128rrm, 0, FE_XMM24, FE_XMM25, FE_MEM(FE_R10, 1, FE_BX, 0x40));
-TEST("\xc4\x81\x70\x58\x44\x1a\x40", VADDPS128rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_R10, 1, FE_R11, 0x40));
-TEST("\x62\x91\x74\x09\x58\x44\x1a\x04", VADDPS128rrm_mask, FLAGMASK(0, FE_K1), FE_XMM0, FE_XMM1, FE_MEM(FE_R10, 1, FE_R11, 0x40));
-TEST("\xc4\x01\x70\x58\x44\x1a\x40", VADDPS128rrm, 0, FE_XMM8, FE_XMM1, FE_MEM(FE_R10, 1, FE_R11, 0x40));
-TEST("\x62\x11\x74\x09\x58\x44\x1a\x04", VADDPS128rrm_mask, FLAGMASK(0, FE_K1), FE_XMM8, FE_XMM1, FE_MEM(FE_R10, 1, FE_R11, 0x40));
-TEST("\x62\x81\x74\x08\x58\x44\x1a\x04", VADDPS128rrm, 0, FE_XMM16, FE_XMM1, FE_MEM(FE_R10, 1, FE_R11, 0x40));
-TEST("\x62\x01\x74\x08\x58\x44\x1a\x04", VADDPS128rrm, 0, FE_XMM24, FE_XMM1, FE_MEM(FE_R10, 1, FE_R11, 0x40));
-TEST("\xc4\x81\x30\x58\x44\x1a\x40", VADDPS128rrm, 0, FE_XMM0, FE_XMM9, FE_MEM(FE_R10, 1, FE_R11, 0x40));
-TEST("\x62\x91\x34\x09\x58\x44\x1a\x04", VADDPS128rrm_mask, FLAGMASK(0, FE_K1), FE_XMM0, FE_XMM9, FE_MEM(FE_R10, 1, FE_R11, 0x40));
-TEST("\xc4\x01\x30\x58\x44\x1a\x40", VADDPS128rrm, 0, FE_XMM8, FE_XMM9, FE_MEM(FE_R10, 1, FE_R11, 0x40));
-TEST("\x62\x11\x34\x09\x58\x44\x1a\x04", VADDPS128rrm_mask, FLAGMASK(0, FE_K1), FE_XMM8, FE_XMM9, FE_MEM(FE_R10, 1, FE_R11, 0x40));
-TEST("\x62\x81\x34\x08\x58\x44\x1a\x04", VADDPS128rrm, 0, FE_XMM16, FE_XMM9, FE_MEM(FE_R10, 1, FE_R11, 0x40));
-TEST("\x62\x01\x34\x08\x58\x44\x1a\x04", VADDPS128rrm, 0, FE_XMM24, FE_XMM9, FE_MEM(FE_R10, 1, FE_R11, 0x40));
-TEST("\x62\x91\x74\x00\x58\x44\x1a\x04", VADDPS128rrm, 0, FE_XMM0, FE_XMM17, FE_MEM(FE_R10, 1, FE_R11, 0x40));
-TEST("\x62\x91\x74\x01\x58\x44\x1a\x04", VADDPS128rrm_mask, FLAGMASK(0, FE_K1), FE_XMM0, FE_XMM17, FE_MEM(FE_R10, 1, FE_R11, 0x40));
-TEST("\x62\x11\x74\x00\x58\x44\x1a\x04", VADDPS128rrm, 0, FE_XMM8, FE_XMM17, FE_MEM(FE_R10, 1, FE_R11, 0x40));
-TEST("\x62\x11\x74\x01\x58\x44\x1a\x04", VADDPS128rrm_mask, FLAGMASK(0, FE_K1), FE_XMM8, FE_XMM17, FE_MEM(FE_R10, 1, FE_R11, 0x40));
-TEST("\x62\x81\x74\x00\x58\x44\x1a\x04", VADDPS128rrm, 0, FE_XMM16, FE_XMM17, FE_MEM(FE_R10, 1, FE_R11, 0x40));
-TEST("\x62\x01\x74\x00\x58\x44\x1a\x04", VADDPS128rrm, 0, FE_XMM24, FE_XMM17, FE_MEM(FE_R10, 1, FE_R11, 0x40));
-TEST("\x62\x91\x34\x00\x58\x44\x1a\x04", VADDPS128rrm, 0, FE_XMM0, FE_XMM25, FE_MEM(FE_R10, 1, FE_R11, 0x40));
-TEST("\x62\x11\x34\x00\x58\x44\x1a\x04", VADDPS128rrm, 0, FE_XMM8, FE_XMM25, FE_MEM(FE_R10, 1, FE_R11, 0x40));
-TEST("\x62\x81\x34\x00\x58\x44\x1a\x04", VADDPS128rrm, 0, FE_XMM16, FE_XMM25, FE_MEM(FE_R10, 1, FE_R11, 0x40));
-TEST("\x62\x01\x34\x00\x58\x44\x1a\x04", VADDPS128rrm, 0, FE_XMM24, FE_XMM25, FE_MEM(FE_R10, 1, FE_R11, 0x40));
+TEST("\xc5\xf0\x58\x44\x1a\x40", VADDPS128rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 1, FE_BX, 0x40))
+TEST("\x62\xf1\x74\x09\x58\x44\x1a\x04", VADDPS128rrm_mask, FLAGMASK(0, FE_K1), FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 1, FE_BX, 0x40))
+TEST("\xc5\x70\x58\x44\x1a\x40", VADDPS128rrm, 0, FE_XMM8, FE_XMM1, FE_MEM(FE_DX, 1, FE_BX, 0x40))
+TEST("\x62\x71\x74\x09\x58\x44\x1a\x04", VADDPS128rrm_mask, FLAGMASK(0, FE_K1), FE_XMM8, FE_XMM1, FE_MEM(FE_DX, 1, FE_BX, 0x40))
+TEST("\x62\xe1\x74\x08\x58\x44\x1a\x04", VADDPS128rrm, 0, FE_XMM16, FE_XMM1, FE_MEM(FE_DX, 1, FE_BX, 0x40))
+TEST("\x62\x61\x74\x08\x58\x44\x1a\x04", VADDPS128rrm, 0, FE_XMM24, FE_XMM1, FE_MEM(FE_DX, 1, FE_BX, 0x40))
+TEST("\xc5\xb0\x58\x44\x1a\x40", VADDPS128rrm, 0, FE_XMM0, FE_XMM9, FE_MEM(FE_DX, 1, FE_BX, 0x40))
+TEST("\x62\xf1\x34\x09\x58\x44\x1a\x04", VADDPS128rrm_mask, FLAGMASK(0, FE_K1), FE_XMM0, FE_XMM9, FE_MEM(FE_DX, 1, FE_BX, 0x40))
+TEST("\xc5\x30\x58\x44\x1a\x40", VADDPS128rrm, 0, FE_XMM8, FE_XMM9, FE_MEM(FE_DX, 1, FE_BX, 0x40))
+TEST("\x62\x71\x34\x09\x58\x44\x1a\x04", VADDPS128rrm_mask, FLAGMASK(0, FE_K1), FE_XMM8, FE_XMM9, FE_MEM(FE_DX, 1, FE_BX, 0x40))
+TEST("\x62\xe1\x34\x08\x58\x44\x1a\x04", VADDPS128rrm, 0, FE_XMM16, FE_XMM9, FE_MEM(FE_DX, 1, FE_BX, 0x40))
+TEST("\x62\x61\x34\x08\x58\x44\x1a\x04", VADDPS128rrm, 0, FE_XMM24, FE_XMM9, FE_MEM(FE_DX, 1, FE_BX, 0x40))
+TEST("\x62\xf1\x74\x00\x58\x44\x1a\x04", VADDPS128rrm, 0, FE_XMM0, FE_XMM17, FE_MEM(FE_DX, 1, FE_BX, 0x40))
+TEST("\x62\xf1\x74\x01\x58\x44\x1a\x04", VADDPS128rrm_mask, FLAGMASK(0, FE_K1), FE_XMM0, FE_XMM17, FE_MEM(FE_DX, 1, FE_BX, 0x40))
+TEST("\x62\x71\x74\x00\x58\x44\x1a\x04", VADDPS128rrm, 0, FE_XMM8, FE_XMM17, FE_MEM(FE_DX, 1, FE_BX, 0x40))
+TEST("\x62\x71\x74\x01\x58\x44\x1a\x04", VADDPS128rrm_mask, FLAGMASK(0, FE_K1), FE_XMM8, FE_XMM17, FE_MEM(FE_DX, 1, FE_BX, 0x40))
+TEST("\x62\xe1\x74\x00\x58\x44\x1a\x04", VADDPS128rrm, 0, FE_XMM16, FE_XMM17, FE_MEM(FE_DX, 1, FE_BX, 0x40))
+TEST("\x62\x61\x74\x00\x58\x44\x1a\x04", VADDPS128rrm, 0, FE_XMM24, FE_XMM17, FE_MEM(FE_DX, 1, FE_BX, 0x40))
+TEST("\x62\xf1\x34\x00\x58\x44\x1a\x04", VADDPS128rrm, 0, FE_XMM0, FE_XMM25, FE_MEM(FE_DX, 1, FE_BX, 0x40))
+TEST("\x62\x71\x34\x00\x58\x44\x1a\x04", VADDPS128rrm, 0, FE_XMM8, FE_XMM25, FE_MEM(FE_DX, 1, FE_BX, 0x40))
+TEST("\x62\xe1\x34\x00\x58\x44\x1a\x04", VADDPS128rrm, 0, FE_XMM16, FE_XMM25, FE_MEM(FE_DX, 1, FE_BX, 0x40))
+TEST("\x62\x61\x34\x00\x58\x44\x1a\x04", VADDPS128rrm, 0, FE_XMM24, FE_XMM25, FE_MEM(FE_DX, 1, FE_BX, 0x40))
+TEST("\xc4\xa1\x70\x58\x44\x1a\x40", VADDPS128rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 1, FE_R11, 0x40))
+TEST("\x62\xb1\x74\x09\x58\x44\x1a\x04", VADDPS128rrm_mask, FLAGMASK(0, FE_K1), FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 1, FE_R11, 0x40))
+TEST("\xc4\x21\x70\x58\x44\x1a\x40", VADDPS128rrm, 0, FE_XMM8, FE_XMM1, FE_MEM(FE_DX, 1, FE_R11, 0x40))
+TEST("\x62\x31\x74\x09\x58\x44\x1a\x04", VADDPS128rrm_mask, FLAGMASK(0, FE_K1), FE_XMM8, FE_XMM1, FE_MEM(FE_DX, 1, FE_R11, 0x40))
+TEST("\x62\xa1\x74\x08\x58\x44\x1a\x04", VADDPS128rrm, 0, FE_XMM16, FE_XMM1, FE_MEM(FE_DX, 1, FE_R11, 0x40))
+TEST("\x62\x21\x74\x08\x58\x44\x1a\x04", VADDPS128rrm, 0, FE_XMM24, FE_XMM1, FE_MEM(FE_DX, 1, FE_R11, 0x40))
+TEST("\xc4\xa1\x30\x58\x44\x1a\x40", VADDPS128rrm, 0, FE_XMM0, FE_XMM9, FE_MEM(FE_DX, 1, FE_R11, 0x40))
+TEST("\x62\xb1\x34\x09\x58\x44\x1a\x04", VADDPS128rrm_mask, FLAGMASK(0, FE_K1), FE_XMM0, FE_XMM9, FE_MEM(FE_DX, 1, FE_R11, 0x40))
+TEST("\xc4\x21\x30\x58\x44\x1a\x40", VADDPS128rrm, 0, FE_XMM8, FE_XMM9, FE_MEM(FE_DX, 1, FE_R11, 0x40))
+TEST("\x62\x31\x34\x09\x58\x44\x1a\x04", VADDPS128rrm_mask, FLAGMASK(0, FE_K1), FE_XMM8, FE_XMM9, FE_MEM(FE_DX, 1, FE_R11, 0x40))
+TEST("\x62\xa1\x34\x08\x58\x44\x1a\x04", VADDPS128rrm, 0, FE_XMM16, FE_XMM9, FE_MEM(FE_DX, 1, FE_R11, 0x40))
+TEST("\x62\x21\x34\x08\x58\x44\x1a\x04", VADDPS128rrm, 0, FE_XMM24, FE_XMM9, FE_MEM(FE_DX, 1, FE_R11, 0x40))
+TEST("\x62\xb1\x74\x00\x58\x44\x1a\x04", VADDPS128rrm, 0, FE_XMM0, FE_XMM17, FE_MEM(FE_DX, 1, FE_R11, 0x40))
+TEST("\x62\xb1\x74\x01\x58\x44\x1a\x04", VADDPS128rrm_mask, FLAGMASK(0, FE_K1), FE_XMM0, FE_XMM17, FE_MEM(FE_DX, 1, FE_R11, 0x40))
+TEST("\x62\x31\x74\x00\x58\x44\x1a\x04", VADDPS128rrm, 0, FE_XMM8, FE_XMM17, FE_MEM(FE_DX, 1, FE_R11, 0x40))
+TEST("\x62\x31\x74\x01\x58\x44\x1a\x04", VADDPS128rrm_mask, FLAGMASK(0, FE_K1), FE_XMM8, FE_XMM17, FE_MEM(FE_DX, 1, FE_R11, 0x40))
+TEST("\x62\xa1\x74\x00\x58\x44\x1a\x04", VADDPS128rrm, 0, FE_XMM16, FE_XMM17, FE_MEM(FE_DX, 1, FE_R11, 0x40))
+TEST("\x62\x21\x74\x00\x58\x44\x1a\x04", VADDPS128rrm, 0, FE_XMM24, FE_XMM17, FE_MEM(FE_DX, 1, FE_R11, 0x40))
+TEST("\x62\xb1\x34\x00\x58\x44\x1a\x04", VADDPS128rrm, 0, FE_XMM0, FE_XMM25, FE_MEM(FE_DX, 1, FE_R11, 0x40))
+TEST("\x62\x31\x34\x00\x58\x44\x1a\x04", VADDPS128rrm, 0, FE_XMM8, FE_XMM25, FE_MEM(FE_DX, 1, FE_R11, 0x40))
+TEST("\x62\xa1\x34\x00\x58\x44\x1a\x04", VADDPS128rrm, 0, FE_XMM16, FE_XMM25, FE_MEM(FE_DX, 1, FE_R11, 0x40))
+TEST("\x62\x21\x34\x00\x58\x44\x1a\x04", VADDPS128rrm, 0, FE_XMM24, FE_XMM25, FE_MEM(FE_DX, 1, FE_R11, 0x40))
+TEST("\xc4\xc1\x70\x58\x44\x1a\x40", VADDPS128rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_R10, 1, FE_BX, 0x40))
+TEST("\x62\xd1\x74\x09\x58\x44\x1a\x04", VADDPS128rrm_mask, FLAGMASK(0, FE_K1), FE_XMM0, FE_XMM1, FE_MEM(FE_R10, 1, FE_BX, 0x40))
+TEST("\xc4\x41\x70\x58\x44\x1a\x40", VADDPS128rrm, 0, FE_XMM8, FE_XMM1, FE_MEM(FE_R10, 1, FE_BX, 0x40))
+TEST("\x62\x51\x74\x09\x58\x44\x1a\x04", VADDPS128rrm_mask, FLAGMASK(0, FE_K1), FE_XMM8, FE_XMM1, FE_MEM(FE_R10, 1, FE_BX, 0x40))
+TEST("\x62\xc1\x74\x08\x58\x44\x1a\x04", VADDPS128rrm, 0, FE_XMM16, FE_XMM1, FE_MEM(FE_R10, 1, FE_BX, 0x40))
+TEST("\x62\x41\x74\x08\x58\x44\x1a\x04", VADDPS128rrm, 0, FE_XMM24, FE_XMM1, FE_MEM(FE_R10, 1, FE_BX, 0x40))
+TEST("\xc4\xc1\x30\x58\x44\x1a\x40", VADDPS128rrm, 0, FE_XMM0, FE_XMM9, FE_MEM(FE_R10, 1, FE_BX, 0x40))
+TEST("\x62\xd1\x34\x09\x58\x44\x1a\x04", VADDPS128rrm_mask, FLAGMASK(0, FE_K1), FE_XMM0, FE_XMM9, FE_MEM(FE_R10, 1, FE_BX, 0x40))
+TEST("\xc4\x41\x30\x58\x44\x1a\x40", VADDPS128rrm, 0, FE_XMM8, FE_XMM9, FE_MEM(FE_R10, 1, FE_BX, 0x40))
+TEST("\x62\x51\x34\x09\x58\x44\x1a\x04", VADDPS128rrm_mask, FLAGMASK(0, FE_K1), FE_XMM8, FE_XMM9, FE_MEM(FE_R10, 1, FE_BX, 0x40))
+TEST("\x62\xc1\x34\x08\x58\x44\x1a\x04", VADDPS128rrm, 0, FE_XMM16, FE_XMM9, FE_MEM(FE_R10, 1, FE_BX, 0x40))
+TEST("\x62\x41\x34\x08\x58\x44\x1a\x04", VADDPS128rrm, 0, FE_XMM24, FE_XMM9, FE_MEM(FE_R10, 1, FE_BX, 0x40))
+TEST("\x62\xd1\x74\x00\x58\x44\x1a\x04", VADDPS128rrm, 0, FE_XMM0, FE_XMM17, FE_MEM(FE_R10, 1, FE_BX, 0x40))
+TEST("\x62\xd1\x74\x01\x58\x44\x1a\x04", VADDPS128rrm_mask, FLAGMASK(0, FE_K1), FE_XMM0, FE_XMM17, FE_MEM(FE_R10, 1, FE_BX, 0x40))
+TEST("\x62\x51\x74\x00\x58\x44\x1a\x04", VADDPS128rrm, 0, FE_XMM8, FE_XMM17, FE_MEM(FE_R10, 1, FE_BX, 0x40))
+TEST("\x62\x51\x74\x01\x58\x44\x1a\x04", VADDPS128rrm_mask, FLAGMASK(0, FE_K1), FE_XMM8, FE_XMM17, FE_MEM(FE_R10, 1, FE_BX, 0x40))
+TEST("\x62\xc1\x74\x00\x58\x44\x1a\x04", VADDPS128rrm, 0, FE_XMM16, FE_XMM17, FE_MEM(FE_R10, 1, FE_BX, 0x40))
+TEST("\x62\x41\x74\x00\x58\x44\x1a\x04", VADDPS128rrm, 0, FE_XMM24, FE_XMM17, FE_MEM(FE_R10, 1, FE_BX, 0x40))
+TEST("\x62\xd1\x34\x00\x58\x44\x1a\x04", VADDPS128rrm, 0, FE_XMM0, FE_XMM25, FE_MEM(FE_R10, 1, FE_BX, 0x40))
+TEST("\x62\x51\x34\x00\x58\x44\x1a\x04", VADDPS128rrm, 0, FE_XMM8, FE_XMM25, FE_MEM(FE_R10, 1, FE_BX, 0x40))
+TEST("\x62\xc1\x34\x00\x58\x44\x1a\x04", VADDPS128rrm, 0, FE_XMM16, FE_XMM25, FE_MEM(FE_R10, 1, FE_BX, 0x40))
+TEST("\x62\x41\x34\x00\x58\x44\x1a\x04", VADDPS128rrm, 0, FE_XMM24, FE_XMM25, FE_MEM(FE_R10, 1, FE_BX, 0x40))
+TEST("\xc4\x81\x70\x58\x44\x1a\x40", VADDPS128rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_R10, 1, FE_R11, 0x40))
+TEST("\x62\x91\x74\x09\x58\x44\x1a\x04", VADDPS128rrm_mask, FLAGMASK(0, FE_K1), FE_XMM0, FE_XMM1, FE_MEM(FE_R10, 1, FE_R11, 0x40))
+TEST("\xc4\x01\x70\x58\x44\x1a\x40", VADDPS128rrm, 0, FE_XMM8, FE_XMM1, FE_MEM(FE_R10, 1, FE_R11, 0x40))
+TEST("\x62\x11\x74\x09\x58\x44\x1a\x04", VADDPS128rrm_mask, FLAGMASK(0, FE_K1), FE_XMM8, FE_XMM1, FE_MEM(FE_R10, 1, FE_R11, 0x40))
+TEST("\x62\x81\x74\x08\x58\x44\x1a\x04", VADDPS128rrm, 0, FE_XMM16, FE_XMM1, FE_MEM(FE_R10, 1, FE_R11, 0x40))
+TEST("\x62\x01\x74\x08\x58\x44\x1a\x04", VADDPS128rrm, 0, FE_XMM24, FE_XMM1, FE_MEM(FE_R10, 1, FE_R11, 0x40))
+TEST("\xc4\x81\x30\x58\x44\x1a\x40", VADDPS128rrm, 0, FE_XMM0, FE_XMM9, FE_MEM(FE_R10, 1, FE_R11, 0x40))
+TEST("\x62\x91\x34\x09\x58\x44\x1a\x04", VADDPS128rrm_mask, FLAGMASK(0, FE_K1), FE_XMM0, FE_XMM9, FE_MEM(FE_R10, 1, FE_R11, 0x40))
+TEST("\xc4\x01\x30\x58\x44\x1a\x40", VADDPS128rrm, 0, FE_XMM8, FE_XMM9, FE_MEM(FE_R10, 1, FE_R11, 0x40))
+TEST("\x62\x11\x34\x09\x58\x44\x1a\x04", VADDPS128rrm_mask, FLAGMASK(0, FE_K1), FE_XMM8, FE_XMM9, FE_MEM(FE_R10, 1, FE_R11, 0x40))
+TEST("\x62\x81\x34\x08\x58\x44\x1a\x04", VADDPS128rrm, 0, FE_XMM16, FE_XMM9, FE_MEM(FE_R10, 1, FE_R11, 0x40))
+TEST("\x62\x01\x34\x08\x58\x44\x1a\x04", VADDPS128rrm, 0, FE_XMM24, FE_XMM9, FE_MEM(FE_R10, 1, FE_R11, 0x40))
+TEST("\x62\x91\x74\x00\x58\x44\x1a\x04", VADDPS128rrm, 0, FE_XMM0, FE_XMM17, FE_MEM(FE_R10, 1, FE_R11, 0x40))
+TEST("\x62\x91\x74\x01\x58\x44\x1a\x04", VADDPS128rrm_mask, FLAGMASK(0, FE_K1), FE_XMM0, FE_XMM17, FE_MEM(FE_R10, 1, FE_R11, 0x40))
+TEST("\x62\x11\x74\x00\x58\x44\x1a\x04", VADDPS128rrm, 0, FE_XMM8, FE_XMM17, FE_MEM(FE_R10, 1, FE_R11, 0x40))
+TEST("\x62\x11\x74\x01\x58\x44\x1a\x04", VADDPS128rrm_mask, FLAGMASK(0, FE_K1), FE_XMM8, FE_XMM17, FE_MEM(FE_R10, 1, FE_R11, 0x40))
+TEST("\x62\x81\x74\x00\x58\x44\x1a\x04", VADDPS128rrm, 0, FE_XMM16, FE_XMM17, FE_MEM(FE_R10, 1, FE_R11, 0x40))
+TEST("\x62\x01\x74\x00\x58\x44\x1a\x04", VADDPS128rrm, 0, FE_XMM24, FE_XMM17, FE_MEM(FE_R10, 1, FE_R11, 0x40))
+TEST("\x62\x91\x34\x00\x58\x44\x1a\x04", VADDPS128rrm, 0, FE_XMM0, FE_XMM25, FE_MEM(FE_R10, 1, FE_R11, 0x40))
+TEST("\x62\x11\x34\x00\x58\x44\x1a\x04", VADDPS128rrm, 0, FE_XMM8, FE_XMM25, FE_MEM(FE_R10, 1, FE_R11, 0x40))
+TEST("\x62\x81\x34\x00\x58\x44\x1a\x04", VADDPS128rrm, 0, FE_XMM16, FE_XMM25, FE_MEM(FE_R10, 1, FE_R11, 0x40))
+TEST("\x62\x01\x34\x00\x58\x44\x1a\x04", VADDPS128rrm, 0, FE_XMM24, FE_XMM25, FE_MEM(FE_R10, 1, FE_R11, 0x40))
 // Part 3: register extension bits with general-purpose register
-TEST("\xc4\xe3\x71\x20\xc2\x01", VPINSRBrrri, 0, FE_XMM0, FE_XMM1, FE_DX, 1);
-TEST("\xc4\xc3\x71\x20\xc2\x01", VPINSRBrrri, 0, FE_XMM0, FE_XMM1, FE_R10, 1);
-TEST("\xc4\x63\x71\x20\xc2\x01", VPINSRBrrri, 0, FE_XMM8, FE_XMM1, FE_DX, 1);
-TEST("\xc4\x43\x71\x20\xc2\x01", VPINSRBrrri, 0, FE_XMM8, FE_XMM1, FE_R10, 1);
-TEST("\x62\xe3\x75\x08\x20\xc2\x01", VPINSRBrrri, 0, FE_XMM16, FE_XMM1, FE_DX, 1);
-TEST("\x62\xc3\x75\x08\x20\xc2\x01", VPINSRBrrri, 0, FE_XMM16, FE_XMM1, FE_R10, 1);
-TEST("\x62\x63\x75\x08\x20\xc2\x01", VPINSRBrrri, 0, FE_XMM24, FE_XMM1, FE_DX, 1);
-TEST("\x62\x43\x75\x08\x20\xc2\x01", VPINSRBrrri, 0, FE_XMM24, FE_XMM1, FE_R10, 1);
-TEST("\xc4\xe3\x31\x20\xc2\x01", VPINSRBrrri, 0, FE_XMM0, FE_XMM9, FE_DX, 1);
-TEST("\xc4\xc3\x31\x20\xc2\x01", VPINSRBrrri, 0, FE_XMM0, FE_XMM9, FE_R10, 1);
-TEST("\xc4\x63\x31\x20\xc2\x01", VPINSRBrrri, 0, FE_XMM8, FE_XMM9, FE_DX, 1);
-TEST("\xc4\x43\x31\x20\xc2\x01", VPINSRBrrri, 0, FE_XMM8, FE_XMM9, FE_R10, 1);
-TEST("\x62\xe3\x35\x08\x20\xc2\x01", VPINSRBrrri, 0, FE_XMM16, FE_XMM9, FE_DX, 1);
-TEST("\x62\xc3\x35\x08\x20\xc2\x01", VPINSRBrrri, 0, FE_XMM16, FE_XMM9, FE_R10, 1);
-TEST("\x62\x63\x35\x08\x20\xc2\x01", VPINSRBrrri, 0, FE_XMM24, FE_XMM9, FE_DX, 1);
-TEST("\x62\x43\x35\x08\x20\xc2\x01", VPINSRBrrri, 0, FE_XMM24, FE_XMM9, FE_R10, 1);
-TEST("\x62\xf3\x75\x00\x20\xc2\x01", VPINSRBrrri, 0, FE_XMM0, FE_XMM17, FE_DX, 1);
-TEST("\x62\xd3\x75\x00\x20\xc2\x01", VPINSRBrrri, 0, FE_XMM0, FE_XMM17, FE_R10, 1);
-TEST("\x62\x73\x75\x00\x20\xc2\x01", VPINSRBrrri, 0, FE_XMM8, FE_XMM17, FE_DX, 1);
-TEST("\x62\x53\x75\x00\x20\xc2\x01", VPINSRBrrri, 0, FE_XMM8, FE_XMM17, FE_R10, 1);
-TEST("\x62\xe3\x75\x00\x20\xc2\x01", VPINSRBrrri, 0, FE_XMM16, FE_XMM17, FE_DX, 1);
-TEST("\x62\xc3\x75\x00\x20\xc2\x01", VPINSRBrrri, 0, FE_XMM16, FE_XMM17, FE_R10, 1);
-TEST("\x62\x63\x75\x00\x20\xc2\x01", VPINSRBrrri, 0, FE_XMM24, FE_XMM17, FE_DX, 1);
-TEST("\x62\x43\x75\x00\x20\xc2\x01", VPINSRBrrri, 0, FE_XMM24, FE_XMM17, FE_R10, 1);
-TEST("\x62\xf3\x35\x00\x20\xc2\x01", VPINSRBrrri, 0, FE_XMM0, FE_XMM25, FE_DX, 1);
-TEST("\x62\xd3\x35\x00\x20\xc2\x01", VPINSRBrrri, 0, FE_XMM0, FE_XMM25, FE_R10, 1);
-TEST("\x62\x73\x35\x00\x20\xc2\x01", VPINSRBrrri, 0, FE_XMM8, FE_XMM25, FE_DX, 1);
-TEST("\x62\x53\x35\x00\x20\xc2\x01", VPINSRBrrri, 0, FE_XMM8, FE_XMM25, FE_R10, 1);
-TEST("\x62\xe3\x35\x00\x20\xc2\x01", VPINSRBrrri, 0, FE_XMM16, FE_XMM25, FE_DX, 1);
-TEST("\x62\xc3\x35\x00\x20\xc2\x01", VPINSRBrrri, 0, FE_XMM16, FE_XMM25, FE_R10, 1);
-TEST("\x62\x63\x35\x00\x20\xc2\x01", VPINSRBrrri, 0, FE_XMM24, FE_XMM25, FE_DX, 1);
-TEST("\x62\x43\x35\x00\x20\xc2\x01", VPINSRBrrri, 0, FE_XMM24, FE_XMM25, FE_R10, 1);
+TEST("\xc4\xe3\x71\x20\xc2\x01", VPINSRBrrri, 0, FE_XMM0, FE_XMM1, FE_DX, 1)
+TEST("\xc4\xc3\x71\x20\xc2\x01", VPINSRBrrri, 0, FE_XMM0, FE_XMM1, FE_R10, 1)
+TEST("\xc4\x63\x71\x20\xc2\x01", VPINSRBrrri, 0, FE_XMM8, FE_XMM1, FE_DX, 1)
+TEST("\xc4\x43\x71\x20\xc2\x01", VPINSRBrrri, 0, FE_XMM8, FE_XMM1, FE_R10, 1)
+TEST("\x62\xe3\x75\x08\x20\xc2\x01", VPINSRBrrri, 0, FE_XMM16, FE_XMM1, FE_DX, 1)
+TEST("\x62\xc3\x75\x08\x20\xc2\x01", VPINSRBrrri, 0, FE_XMM16, FE_XMM1, FE_R10, 1)
+TEST("\x62\x63\x75\x08\x20\xc2\x01", VPINSRBrrri, 0, FE_XMM24, FE_XMM1, FE_DX, 1)
+TEST("\x62\x43\x75\x08\x20\xc2\x01", VPINSRBrrri, 0, FE_XMM24, FE_XMM1, FE_R10, 1)
+TEST("\xc4\xe3\x31\x20\xc2\x01", VPINSRBrrri, 0, FE_XMM0, FE_XMM9, FE_DX, 1)
+TEST("\xc4\xc3\x31\x20\xc2\x01", VPINSRBrrri, 0, FE_XMM0, FE_XMM9, FE_R10, 1)
+TEST("\xc4\x63\x31\x20\xc2\x01", VPINSRBrrri, 0, FE_XMM8, FE_XMM9, FE_DX, 1)
+TEST("\xc4\x43\x31\x20\xc2\x01", VPINSRBrrri, 0, FE_XMM8, FE_XMM9, FE_R10, 1)
+TEST("\x62\xe3\x35\x08\x20\xc2\x01", VPINSRBrrri, 0, FE_XMM16, FE_XMM9, FE_DX, 1)
+TEST("\x62\xc3\x35\x08\x20\xc2\x01", VPINSRBrrri, 0, FE_XMM16, FE_XMM9, FE_R10, 1)
+TEST("\x62\x63\x35\x08\x20\xc2\x01", VPINSRBrrri, 0, FE_XMM24, FE_XMM9, FE_DX, 1)
+TEST("\x62\x43\x35\x08\x20\xc2\x01", VPINSRBrrri, 0, FE_XMM24, FE_XMM9, FE_R10, 1)
+TEST("\x62\xf3\x75\x00\x20\xc2\x01", VPINSRBrrri, 0, FE_XMM0, FE_XMM17, FE_DX, 1)
+TEST("\x62\xd3\x75\x00\x20\xc2\x01", VPINSRBrrri, 0, FE_XMM0, FE_XMM17, FE_R10, 1)
+TEST("\x62\x73\x75\x00\x20\xc2\x01", VPINSRBrrri, 0, FE_XMM8, FE_XMM17, FE_DX, 1)
+TEST("\x62\x53\x75\x00\x20\xc2\x01", VPINSRBrrri, 0, FE_XMM8, FE_XMM17, FE_R10, 1)
+TEST("\x62\xe3\x75\x00\x20\xc2\x01", VPINSRBrrri, 0, FE_XMM16, FE_XMM17, FE_DX, 1)
+TEST("\x62\xc3\x75\x00\x20\xc2\x01", VPINSRBrrri, 0, FE_XMM16, FE_XMM17, FE_R10, 1)
+TEST("\x62\x63\x75\x00\x20\xc2\x01", VPINSRBrrri, 0, FE_XMM24, FE_XMM17, FE_DX, 1)
+TEST("\x62\x43\x75\x00\x20\xc2\x01", VPINSRBrrri, 0, FE_XMM24, FE_XMM17, FE_R10, 1)
+TEST("\x62\xf3\x35\x00\x20\xc2\x01", VPINSRBrrri, 0, FE_XMM0, FE_XMM25, FE_DX, 1)
+TEST("\x62\xd3\x35\x00\x20\xc2\x01", VPINSRBrrri, 0, FE_XMM0, FE_XMM25, FE_R10, 1)
+TEST("\x62\x73\x35\x00\x20\xc2\x01", VPINSRBrrri, 0, FE_XMM8, FE_XMM25, FE_DX, 1)
+TEST("\x62\x53\x35\x00\x20\xc2\x01", VPINSRBrrri, 0, FE_XMM8, FE_XMM25, FE_R10, 1)
+TEST("\x62\xe3\x35\x00\x20\xc2\x01", VPINSRBrrri, 0, FE_XMM16, FE_XMM25, FE_DX, 1)
+TEST("\x62\xc3\x35\x00\x20\xc2\x01", VPINSRBrrri, 0, FE_XMM16, FE_XMM25, FE_R10, 1)
+TEST("\x62\x63\x35\x00\x20\xc2\x01", VPINSRBrrri, 0, FE_XMM24, FE_XMM25, FE_DX, 1)
+TEST("\x62\x43\x35\x00\x20\xc2\x01", VPINSRBrrri, 0, FE_XMM24, FE_XMM25, FE_R10, 1)
 // Part 4: register extensions with unusual VEX fallbacks
-TEST("\xc5\xfa\x7e\xc1", VMOVQrr, 0, FE_XMM0, FE_XMM1);
-TEST("\x62\xb1\xfe\x08\x7e\xc1", VMOVQrr, 0, FE_XMM0, FE_XMM17);
-TEST("\xc5\xf9\x7e\xc8", VMOVD_X2Grr, 0, FE_AX, FE_XMM1);
-TEST("\x62\xe1\x7d\x08\x7e\xc8", VMOVD_X2Grr, 0, FE_AX, FE_XMM17);
-TEST("\xc5\xf9\x7e\x08", VMOVDmr, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0), FE_XMM1);
-TEST("\x62\xe1\x7d\x08\x7e\x08", VMOVDmr, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0), FE_XMM17);
-TEST("\xc5\xf9\x6e\xc8", VMOVD_G2Xrr, 0, FE_XMM1, FE_AX);
-TEST("\x62\xe1\x7d\x08\x6e\xc8", VMOVD_G2Xrr, 0, FE_XMM17, FE_AX);
-TEST("\xc5\xf9\x6e\x08", VMOVDrm, 0, FE_XMM1, FE_MEM(FE_AX, 0, FE_NOREG, 0));
-TEST("\x62\xe1\x7d\x08\x6e\x08", VMOVDrm, 0, FE_XMM17, FE_MEM(FE_AX, 0, FE_NOREG, 0));
-TEST("\xc4\xe1\xf9\x7e\xc8", VMOVQ_X2Grr, 0, FE_AX, FE_XMM1);
-TEST("\x62\xe1\xfd\x08\x7e\xc8", VMOVQ_X2Grr, 0, FE_AX, FE_XMM17);
-TEST("\xc5\xf9\xd6\x08", VMOVQmr, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0), FE_XMM1);
-TEST("\x62\xe1\xfd\x08\xd6\x08", VMOVQmr, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0), FE_XMM17);
-TEST("\xc4\xe1\xf9\x6e\xc8", VMOVQ_G2Xrr, 0, FE_XMM1, FE_AX);
-TEST("\x62\xe1\xfd\x08\x6e\xc8", VMOVQ_G2Xrr, 0, FE_XMM17, FE_AX);
-TEST("\xc5\xfa\x7e\x08", VMOVQrm, 0, FE_XMM1, FE_MEM(FE_AX, 0, FE_NOREG, 0));
-TEST("\x62\xe1\xfe\x08\x7e\x08", VMOVQrm, 0, FE_XMM17, FE_MEM(FE_AX, 0, FE_NOREG, 0));
-TEST("\xc4\xe3\x71\x20\xc2\x01", VPINSRBrrri, 0, FE_XMM0, FE_XMM1, FE_DX, 1);
-TEST("\x62\xf3\x75\x00\x20\xc2\x01", VPINSRBrrri, 0, FE_XMM0, FE_XMM17, FE_DX, 1);
-TEST("\xc4\xe3\x71\x20\x42\x20\x01", VPINSRBrrmi, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, 0x20), 1);
-TEST("\x62\xf3\x75\x00\x20\x42\x20\x01", VPINSRBrrmi, 0, FE_XMM0, FE_XMM17, FE_MEM(FE_DX, 0, FE_NOREG, 0x20), 1);
-TEST("\xc5\xf1\xc4\xc2\x01", VPINSRWrrri, 0, FE_XMM0, FE_XMM1, FE_DX, 1);
-TEST("\x62\xf1\x75\x00\xc4\xc2\x01", VPINSRWrrri, 0, FE_XMM0, FE_XMM17, FE_DX, 1);
-TEST("\xc5\xf1\xc4\x42\x20\x01", VPINSRWrrmi, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, 0x20), 1);
-TEST("\x62\xf1\x75\x00\xc4\x42\x10\x01", VPINSRWrrmi, 0, FE_XMM0, FE_XMM17, FE_MEM(FE_DX, 0, FE_NOREG, 0x20), 1);
-TEST("\xc4\xe3\x71\x22\xc2\x01", VPINSRDrrri, 0, FE_XMM0, FE_XMM1, FE_DX, 1);
-TEST("\x62\xf3\x75\x00\x22\xc2\x01", VPINSRDrrri, 0, FE_XMM0, FE_XMM17, FE_DX, 1);
-TEST("\xc4\xe3\x71\x22\x42\x20\x01", VPINSRDrrmi, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, 0x20), 1);
-TEST("\x62\xf3\x75\x00\x22\x42\x08\x01", VPINSRDrrmi, 0, FE_XMM0, FE_XMM17, FE_MEM(FE_DX, 0, FE_NOREG, 0x20), 1);
-TEST("\xc4\xe3\xf1\x22\xc2\x01", VPINSRQrrri, 0, FE_XMM0, FE_XMM1, FE_DX, 1);
-TEST("\x62\xf3\xf5\x00\x22\xc2\x01", VPINSRQrrri, 0, FE_XMM0, FE_XMM17, FE_DX, 1);
-TEST("\xc4\xe3\xf1\x22\x42\x20\x01", VPINSRQrrmi, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, 0x20), 1);
-TEST("\x62\xf3\xf5\x00\x22\x42\x04\x01", VPINSRQrrmi, 0, FE_XMM0, FE_XMM17, FE_MEM(FE_DX, 0, FE_NOREG, 0x20), 1);
-TEST("\xc4\xe3\x79\x14\xca\x01", VPEXTRBrri, 0, FE_DX, FE_XMM1, 1);
-TEST("\x62\xe3\x7d\x08\x14\xca\x01", VPEXTRBrri, 0, FE_DX, FE_XMM17, 1);
-TEST("\xc4\xe3\x79\x14\x4a\x20\x01", VPEXTRBmri, 0, FE_MEM(FE_DX, 0, FE_NOREG, 0x20), FE_XMM1, 1);
-TEST("\x62\xe3\x7d\x08\x14\x4a\x20\x01", VPEXTRBmri, 0, FE_MEM(FE_DX, 0, FE_NOREG, 0x20), FE_XMM17, 1);
-TEST("\xc5\xf9\xc5\xd1\x01", VPEXTRWrri, 0, FE_DX, FE_XMM1, 1);
-TEST("\x62\xb1\x7d\x08\xc5\xd1\x01", VPEXTRWrri, 0, FE_DX, FE_XMM17, 1);
-TEST("\xc4\xe3\x79\x15\x4a\x20\x01", VPEXTRWmri, 0, FE_MEM(FE_DX, 0, FE_NOREG, 0x20), FE_XMM1, 1);
-TEST("\x62\xe3\x7d\x08\x15\x4a\x10\x01", VPEXTRWmri, 0, FE_MEM(FE_DX, 0, FE_NOREG, 0x20), FE_XMM17, 1);
-TEST("\xc4\xe3\x79\x16\xca\x01", VPEXTRDrri, 0, FE_DX, FE_XMM1, 1);
-TEST("\x62\xe3\x7d\x08\x16\xca\x01", VPEXTRDrri, 0, FE_DX, FE_XMM17, 1);
-TEST("\xc4\xe3\x79\x16\x4a\x20\x01", VPEXTRDmri, 0, FE_MEM(FE_DX, 0, FE_NOREG, 0x20), FE_XMM1, 1);
-TEST("\x62\xe3\x7d\x08\x16\x4a\x08\x01", VPEXTRDmri, 0, FE_MEM(FE_DX, 0, FE_NOREG, 0x20), FE_XMM17, 1);
-TEST("\xc4\xe3\xf9\x16\xca\x01", VPEXTRQrri, 0, FE_DX, FE_XMM1, 1);
-TEST("\x62\xe3\xfd\x08\x16\xca\x01", VPEXTRQrri, 0, FE_DX, FE_XMM17, 1);
-TEST("\xc4\xe3\xf9\x16\x4a\x20\x01", VPEXTRQmri, 0, FE_MEM(FE_DX, 0, FE_NOREG, 0x20), FE_XMM1, 1);
-TEST("\x62\xe3\xfd\x08\x16\x4a\x04\x01", VPEXTRQmri, 0, FE_MEM(FE_DX, 0, FE_NOREG, 0x20), FE_XMM17, 1);
-TEST("\xc4\xe2\x79\x78\xc8", VPBROADCASTB128rr, 0, FE_XMM1, FE_XMM0);
-TEST("\x62\xe2\x7d\x08\x78\xc8", VPBROADCASTB128rr, 0, FE_XMM17, FE_XMM0);
-TEST("\xc4\xe2\x7d\x78\xc8", VPBROADCASTB256rr, 0, FE_XMM1, FE_XMM0);
-TEST("\x62\xe2\x7d\x28\x78\xc8", VPBROADCASTB256rr, 0, FE_XMM17, FE_XMM0);
-TEST("\x62\xf2\x7d\x48\x78\xc8", VPBROADCASTB512rr, 0, FE_XMM1, FE_XMM0);
-TEST("\x62\xe2\x7d\x48\x78\xc8", VPBROADCASTB512rr, 0, FE_XMM17, FE_XMM0);
-TEST("\xc4\xe2\x79\x78\x4a\x20", VPBROADCASTB128rm, 0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, 0x20));
-TEST("\x62\xe2\x7d\x08\x78\x4a\x20", VPBROADCASTB128rm, 0, FE_XMM17, FE_MEM(FE_DX, 0, FE_NOREG, 0x20));
-TEST("\xc4\xe2\x7d\x78\x4a\x20", VPBROADCASTB256rm, 0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, 0x20));
-TEST("\x62\xe2\x7d\x28\x78\x4a\x20", VPBROADCASTB256rm, 0, FE_XMM17, FE_MEM(FE_DX, 0, FE_NOREG, 0x20));
-TEST("\x62\xf2\x7d\x48\x78\x4a\x20", VPBROADCASTB512rm, 0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, 0x20));
-TEST("\x62\xe2\x7d\x48\x78\x4a\x20", VPBROADCASTB512rm, 0, FE_XMM17, FE_MEM(FE_DX, 0, FE_NOREG, 0x20));
-TEST("\xc4\xe2\x79\x79\xc8", VPBROADCASTW128rr, 0, FE_XMM1, FE_XMM0);
-TEST("\x62\xe2\x7d\x08\x79\xc8", VPBROADCASTW128rr, 0, FE_XMM17, FE_XMM0);
-TEST("\xc4\xe2\x7d\x79\xc8", VPBROADCASTW256rr, 0, FE_XMM1, FE_XMM0);
-TEST("\x62\xe2\x7d\x28\x79\xc8", VPBROADCASTW256rr, 0, FE_XMM17, FE_XMM0);
-TEST("\x62\xf2\x7d\x48\x79\xc8", VPBROADCASTW512rr, 0, FE_XMM1, FE_XMM0);
-TEST("\x62\xe2\x7d\x48\x79\xc8", VPBROADCASTW512rr, 0, FE_XMM17, FE_XMM0);
-TEST("\xc4\xe2\x79\x79\x4a\x20", VPBROADCASTW128rm, 0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, 0x20));
-TEST("\x62\xe2\x7d\x08\x79\x4a\x10", VPBROADCASTW128rm, 0, FE_XMM17, FE_MEM(FE_DX, 0, FE_NOREG, 0x20));
-TEST("\xc4\xe2\x7d\x79\x4a\x20", VPBROADCASTW256rm, 0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, 0x20));
-TEST("\x62\xe2\x7d\x28\x79\x4a\x10", VPBROADCASTW256rm, 0, FE_XMM17, FE_MEM(FE_DX, 0, FE_NOREG, 0x20));
-TEST("\x62\xf2\x7d\x48\x79\x4a\x10", VPBROADCASTW512rm, 0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, 0x20));
-TEST("\x62\xe2\x7d\x48\x79\x4a\x10", VPBROADCASTW512rm, 0, FE_XMM17, FE_MEM(FE_DX, 0, FE_NOREG, 0x20));
-TEST("\xc4\xe2\x79\x58\xc8", VPBROADCASTD128rr, 0, FE_XMM1, FE_XMM0);
-TEST("\x62\xe2\x7d\x08\x58\xc8", VPBROADCASTD128rr, 0, FE_XMM17, FE_XMM0);
-TEST("\xc4\xe2\x7d\x58\xc8", VPBROADCASTD256rr, 0, FE_XMM1, FE_XMM0);
-TEST("\x62\xe2\x7d\x28\x58\xc8", VPBROADCASTD256rr, 0, FE_XMM17, FE_XMM0);
-TEST("\x62\xf2\x7d\x48\x58\xc8", VPBROADCASTD512rr, 0, FE_XMM1, FE_XMM0);
-TEST("\x62\xe2\x7d\x48\x58\xc8", VPBROADCASTD512rr, 0, FE_XMM17, FE_XMM0);
-TEST("\xc4\xe2\x79\x58\x4a\x20", VPBROADCASTD128rm, 0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, 0x20));
-TEST("\x62\xe2\x7d\x08\x58\x4a\x08", VPBROADCASTD128rm, 0, FE_XMM17, FE_MEM(FE_DX, 0, FE_NOREG, 0x20));
-TEST("\xc4\xe2\x7d\x58\x4a\x20", VPBROADCASTD256rm, 0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, 0x20));
-TEST("\x62\xe2\x7d\x28\x58\x4a\x08", VPBROADCASTD256rm, 0, FE_XMM17, FE_MEM(FE_DX, 0, FE_NOREG, 0x20));
-TEST("\x62\xf2\x7d\x48\x58\x4a\x08", VPBROADCASTD512rm, 0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, 0x20));
-TEST("\x62\xe2\x7d\x48\x58\x4a\x08", VPBROADCASTD512rm, 0, FE_XMM17, FE_MEM(FE_DX, 0, FE_NOREG, 0x20));
-TEST("\xc4\xe2\x79\x59\xc8", VPBROADCASTQ128rr, 0, FE_XMM1, FE_XMM0);
-TEST("\x62\xe2\xfd\x08\x59\xc8", VPBROADCASTQ128rr, 0, FE_XMM17, FE_XMM0);
-TEST("\xc4\xe2\x7d\x59\xc8", VPBROADCASTQ256rr, 0, FE_XMM1, FE_XMM0);
-TEST("\x62\xe2\xfd\x28\x59\xc8", VPBROADCASTQ256rr, 0, FE_XMM17, FE_XMM0);
-TEST("\x62\xf2\xfd\x48\x59\xc8", VPBROADCASTQ512rr, 0, FE_XMM1, FE_XMM0);
-TEST("\x62\xe2\xfd\x48\x59\xc8", VPBROADCASTQ512rr, 0, FE_XMM17, FE_XMM0);
-TEST("\xc4\xe2\x79\x59\x4a\x20", VPBROADCASTQ128rm, 0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, 0x20));
-TEST("\x62\xe2\xfd\x08\x59\x4a\x04", VPBROADCASTQ128rm, 0, FE_XMM17, FE_MEM(FE_DX, 0, FE_NOREG, 0x20));
-TEST("\xc4\xe2\x7d\x59\x4a\x20", VPBROADCASTQ256rm, 0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, 0x20));
-TEST("\x62\xe2\xfd\x28\x59\x4a\x04", VPBROADCASTQ256rm, 0, FE_XMM17, FE_MEM(FE_DX, 0, FE_NOREG, 0x20));
-TEST("\x62\xf2\xfd\x48\x59\x4a\x04", VPBROADCASTQ512rm, 0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, 0x20));
-TEST("\x62\xe2\xfd\x48\x59\x4a\x04", VPBROADCASTQ512rm, 0, FE_XMM17, FE_MEM(FE_DX, 0, FE_NOREG, 0x20));
-TEST("\xc4\xe2\x7d\x5a\x4a\x20", VBROADCASTI128rm, 0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, 0x20));
-TEST("", VBROADCASTI128rm, 0, FE_XMM17, FE_MEM(FE_DX, 0, FE_NOREG, 0x20)); // no EVEX version exists
-TEST("\x62\xf2\x7d\x28\x5a\x4a\x02", VBROADCASTI32X4_256rm, 0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, 0x20));
-TEST("\x62\xe2\x7d\x28\x5a\x4a\x02", VBROADCASTI32X4_256rm, 0, FE_XMM17, FE_MEM(FE_DX, 0, FE_NOREG, 0x20));
-TEST("\x62\xf2\x7d\x48\x5a\x4a\x02", VBROADCASTI32X4_512rm, 0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, 0x20));
-TEST("\x62\xe2\x7d\x48\x5a\x4a\x02", VBROADCASTI32X4_512rm, 0, FE_XMM17, FE_MEM(FE_DX, 0, FE_NOREG, 0x20));
-TEST("\x62\xf2\xfd\x28\x5a\x4a\x02", VBROADCASTI64X2_256rm, 0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, 0x20));
-TEST("\x62\xe2\xfd\x28\x5a\x4a\x02", VBROADCASTI64X2_256rm, 0, FE_XMM17, FE_MEM(FE_DX, 0, FE_NOREG, 0x20));
-TEST("\x62\xf2\xfd\x48\x5a\x4a\x02", VBROADCASTI64X2_512rm, 0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, 0x20));
-TEST("\x62\xe2\xfd\x48\x5a\x4a\x02", VBROADCASTI64X2_512rm, 0, FE_XMM17, FE_MEM(FE_DX, 0, FE_NOREG, 0x20));
-TEST("\x62\xf2\x7d\x48\x5b\x4a\x01", VBROADCASTI32X8_512rm, 0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, 0x20));
-TEST("\x62\xe2\x7d\x48\x5b\x4a\x01", VBROADCASTI32X8_512rm, 0, FE_XMM17, FE_MEM(FE_DX, 0, FE_NOREG, 0x20));
-TEST("\x62\xf2\xfd\x48\x5b\x4a\x01", VBROADCASTI64X4_512rm, 0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, 0x20));
-TEST("\x62\xe2\xfd\x48\x5b\x4a\x01", VBROADCASTI64X4_512rm, 0, FE_XMM17, FE_MEM(FE_DX, 0, FE_NOREG, 0x20));
-TEST("\x62\xf2\x7d\x08\x7a\xca", VPBROADCASTB_GP128rr, 0, FE_XMM1, FE_DX);
-TEST("\x62\xe2\x7d\x08\x7a\xca", VPBROADCASTB_GP128rr, 0, FE_XMM17, FE_DX);
-TEST("\x62\xf2\x7d\x28\x7a\xca", VPBROADCASTB_GP256rr, 0, FE_XMM1, FE_DX);
-TEST("\x62\xe2\x7d\x28\x7a\xca", VPBROADCASTB_GP256rr, 0, FE_XMM17, FE_DX);
-TEST("\x62\xf2\x7d\x48\x7a\xca", VPBROADCASTB_GP512rr, 0, FE_XMM1, FE_DX);
-TEST("\x62\xe2\x7d\x48\x7a\xca", VPBROADCASTB_GP512rr, 0, FE_XMM17, FE_DX);
-TEST("\x62\xf2\x7d\x08\x7b\xca", VPBROADCASTW_GP128rr, 0, FE_XMM1, FE_DX);
-TEST("\x62\xe2\x7d\x08\x7b\xca", VPBROADCASTW_GP128rr, 0, FE_XMM17, FE_DX);
-TEST("\x62\xf2\x7d\x28\x7b\xca", VPBROADCASTW_GP256rr, 0, FE_XMM1, FE_DX);
-TEST("\x62\xe2\x7d\x28\x7b\xca", VPBROADCASTW_GP256rr, 0, FE_XMM17, FE_DX);
-TEST("\x62\xf2\x7d\x48\x7b\xca", VPBROADCASTW_GP512rr, 0, FE_XMM1, FE_DX);
-TEST("\x62\xe2\x7d\x48\x7b\xca", VPBROADCASTW_GP512rr, 0, FE_XMM17, FE_DX);
-TEST("\x62\xf2\x7d\x08\x7c\xca", VPBROADCASTD_GP128rr, 0, FE_XMM1, FE_DX);
-TEST("\x62\xe2\x7d\x08\x7c\xca", VPBROADCASTD_GP128rr, 0, FE_XMM17, FE_DX);
-TEST("\x62\xf2\x7d\x28\x7c\xca", VPBROADCASTD_GP256rr, 0, FE_XMM1, FE_DX);
-TEST("\x62\xe2\x7d\x28\x7c\xca", VPBROADCASTD_GP256rr, 0, FE_XMM17, FE_DX);
-TEST("\x62\xf2\x7d\x48\x7c\xca", VPBROADCASTD_GP512rr, 0, FE_XMM1, FE_DX);
-TEST("\x62\xe2\x7d\x48\x7c\xca", VPBROADCASTD_GP512rr, 0, FE_XMM17, FE_DX);
-TEST("\x62\xf2\xfd\x08\x7c\xca", VPBROADCASTQ_GP128rr, 0, FE_XMM1, FE_DX);
-TEST("\x62\xe2\xfd\x08\x7c\xca", VPBROADCASTQ_GP128rr, 0, FE_XMM17, FE_DX);
-TEST("\x62\xf2\xfd\x28\x7c\xca", VPBROADCASTQ_GP256rr, 0, FE_XMM1, FE_DX);
-TEST("\x62\xe2\xfd\x28\x7c\xca", VPBROADCASTQ_GP256rr, 0, FE_XMM17, FE_DX);
-TEST("\x62\xf2\xfd\x48\x7c\xca", VPBROADCASTQ_GP512rr, 0, FE_XMM1, FE_DX);
-TEST("\x62\xe2\xfd\x48\x7c\xca", VPBROADCASTQ_GP512rr, 0, FE_XMM17, FE_DX);
+TEST("\xc5\xfa\x7e\xc1", VMOVQrr, 0, FE_XMM0, FE_XMM1)
+TEST("\x62\xb1\xfe\x08\x7e\xc1", VMOVQrr, 0, FE_XMM0, FE_XMM17)
+TEST("\xc5\xf9\x7e\xc8", VMOVD_X2Grr, 0, FE_AX, FE_XMM1)
+TEST("\x62\xe1\x7d\x08\x7e\xc8", VMOVD_X2Grr, 0, FE_AX, FE_XMM17)
+TEST("\xc5\xf9\x7e\x08", VMOVDmr, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0), FE_XMM1)
+TEST("\x62\xe1\x7d\x08\x7e\x08", VMOVDmr, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0), FE_XMM17)
+TEST("\xc5\xf9\x6e\xc8", VMOVD_G2Xrr, 0, FE_XMM1, FE_AX)
+TEST("\x62\xe1\x7d\x08\x6e\xc8", VMOVD_G2Xrr, 0, FE_XMM17, FE_AX)
+TEST("\xc5\xf9\x6e\x08", VMOVDrm, 0, FE_XMM1, FE_MEM(FE_AX, 0, FE_NOREG, 0))
+TEST("\x62\xe1\x7d\x08\x6e\x08", VMOVDrm, 0, FE_XMM17, FE_MEM(FE_AX, 0, FE_NOREG, 0))
+TEST("\xc4\xe1\xf9\x7e\xc8", VMOVQ_X2Grr, 0, FE_AX, FE_XMM1)
+TEST("\x62\xe1\xfd\x08\x7e\xc8", VMOVQ_X2Grr, 0, FE_AX, FE_XMM17)
+TEST("\xc5\xf9\xd6\x08", VMOVQmr, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0), FE_XMM1)
+TEST("\x62\xe1\xfd\x08\xd6\x08", VMOVQmr, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0), FE_XMM17)
+TEST("\xc4\xe1\xf9\x6e\xc8", VMOVQ_G2Xrr, 0, FE_XMM1, FE_AX)
+TEST("\x62\xe1\xfd\x08\x6e\xc8", VMOVQ_G2Xrr, 0, FE_XMM17, FE_AX)
+TEST("\xc5\xfa\x7e\x08", VMOVQrm, 0, FE_XMM1, FE_MEM(FE_AX, 0, FE_NOREG, 0))
+TEST("\x62\xe1\xfe\x08\x7e\x08", VMOVQrm, 0, FE_XMM17, FE_MEM(FE_AX, 0, FE_NOREG, 0))
+TEST("\xc4\xe3\x71\x20\xc2\x01", VPINSRBrrri, 0, FE_XMM0, FE_XMM1, FE_DX, 1)
+TEST("\x62\xf3\x75\x00\x20\xc2\x01", VPINSRBrrri, 0, FE_XMM0, FE_XMM17, FE_DX, 1)
+TEST("\xc4\xe3\x71\x20\x42\x20\x01", VPINSRBrrmi, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, 0x20), 1)
+TEST("\x62\xf3\x75\x00\x20\x42\x20\x01", VPINSRBrrmi, 0, FE_XMM0, FE_XMM17, FE_MEM(FE_DX, 0, FE_NOREG, 0x20), 1)
+TEST("\xc5\xf1\xc4\xc2\x01", VPINSRWrrri, 0, FE_XMM0, FE_XMM1, FE_DX, 1)
+TEST("\x62\xf1\x75\x00\xc4\xc2\x01", VPINSRWrrri, 0, FE_XMM0, FE_XMM17, FE_DX, 1)
+TEST("\xc5\xf1\xc4\x42\x20\x01", VPINSRWrrmi, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, 0x20), 1)
+TEST("\x62\xf1\x75\x00\xc4\x42\x10\x01", VPINSRWrrmi, 0, FE_XMM0, FE_XMM17, FE_MEM(FE_DX, 0, FE_NOREG, 0x20), 1)
+TEST("\xc4\xe3\x71\x22\xc2\x01", VPINSRDrrri, 0, FE_XMM0, FE_XMM1, FE_DX, 1)
+TEST("\x62\xf3\x75\x00\x22\xc2\x01", VPINSRDrrri, 0, FE_XMM0, FE_XMM17, FE_DX, 1)
+TEST("\xc4\xe3\x71\x22\x42\x20\x01", VPINSRDrrmi, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, 0x20), 1)
+TEST("\x62\xf3\x75\x00\x22\x42\x08\x01", VPINSRDrrmi, 0, FE_XMM0, FE_XMM17, FE_MEM(FE_DX, 0, FE_NOREG, 0x20), 1)
+TEST("\xc4\xe3\xf1\x22\xc2\x01", VPINSRQrrri, 0, FE_XMM0, FE_XMM1, FE_DX, 1)
+TEST("\x62\xf3\xf5\x00\x22\xc2\x01", VPINSRQrrri, 0, FE_XMM0, FE_XMM17, FE_DX, 1)
+TEST("\xc4\xe3\xf1\x22\x42\x20\x01", VPINSRQrrmi, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, 0x20), 1)
+TEST("\x62\xf3\xf5\x00\x22\x42\x04\x01", VPINSRQrrmi, 0, FE_XMM0, FE_XMM17, FE_MEM(FE_DX, 0, FE_NOREG, 0x20), 1)
+TEST("\xc4\xe3\x79\x14\xca\x01", VPEXTRBrri, 0, FE_DX, FE_XMM1, 1)
+TEST("\x62\xe3\x7d\x08\x14\xca\x01", VPEXTRBrri, 0, FE_DX, FE_XMM17, 1)
+TEST("\xc4\xe3\x79\x14\x4a\x20\x01", VPEXTRBmri, 0, FE_MEM(FE_DX, 0, FE_NOREG, 0x20), FE_XMM1, 1)
+TEST("\x62\xe3\x7d\x08\x14\x4a\x20\x01", VPEXTRBmri, 0, FE_MEM(FE_DX, 0, FE_NOREG, 0x20), FE_XMM17, 1)
+TEST("\xc5\xf9\xc5\xd1\x01", VPEXTRWrri, 0, FE_DX, FE_XMM1, 1)
+TEST("\x62\xb1\x7d\x08\xc5\xd1\x01", VPEXTRWrri, 0, FE_DX, FE_XMM17, 1)
+TEST("\xc4\xe3\x79\x15\x4a\x20\x01", VPEXTRWmri, 0, FE_MEM(FE_DX, 0, FE_NOREG, 0x20), FE_XMM1, 1)
+TEST("\x62\xe3\x7d\x08\x15\x4a\x10\x01", VPEXTRWmri, 0, FE_MEM(FE_DX, 0, FE_NOREG, 0x20), FE_XMM17, 1)
+TEST("\xc4\xe3\x79\x16\xca\x01", VPEXTRDrri, 0, FE_DX, FE_XMM1, 1)
+TEST("\x62\xe3\x7d\x08\x16\xca\x01", VPEXTRDrri, 0, FE_DX, FE_XMM17, 1)
+TEST("\xc4\xe3\x79\x16\x4a\x20\x01", VPEXTRDmri, 0, FE_MEM(FE_DX, 0, FE_NOREG, 0x20), FE_XMM1, 1)
+TEST("\x62\xe3\x7d\x08\x16\x4a\x08\x01", VPEXTRDmri, 0, FE_MEM(FE_DX, 0, FE_NOREG, 0x20), FE_XMM17, 1)
+TEST("\xc4\xe3\xf9\x16\xca\x01", VPEXTRQrri, 0, FE_DX, FE_XMM1, 1)
+TEST("\x62\xe3\xfd\x08\x16\xca\x01", VPEXTRQrri, 0, FE_DX, FE_XMM17, 1)
+TEST("\xc4\xe3\xf9\x16\x4a\x20\x01", VPEXTRQmri, 0, FE_MEM(FE_DX, 0, FE_NOREG, 0x20), FE_XMM1, 1)
+TEST("\x62\xe3\xfd\x08\x16\x4a\x04\x01", VPEXTRQmri, 0, FE_MEM(FE_DX, 0, FE_NOREG, 0x20), FE_XMM17, 1)
+TEST("\xc4\xe2\x79\x78\xc8", VPBROADCASTB128rr, 0, FE_XMM1, FE_XMM0)
+TEST("\x62\xe2\x7d\x08\x78\xc8", VPBROADCASTB128rr, 0, FE_XMM17, FE_XMM0)
+TEST("\xc4\xe2\x7d\x78\xc8", VPBROADCASTB256rr, 0, FE_XMM1, FE_XMM0)
+TEST("\x62\xe2\x7d\x28\x78\xc8", VPBROADCASTB256rr, 0, FE_XMM17, FE_XMM0)
+TEST("\x62\xf2\x7d\x48\x78\xc8", VPBROADCASTB512rr, 0, FE_XMM1, FE_XMM0)
+TEST("\x62\xe2\x7d\x48\x78\xc8", VPBROADCASTB512rr, 0, FE_XMM17, FE_XMM0)
+TEST("\xc4\xe2\x79\x78\x4a\x20", VPBROADCASTB128rm, 0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, 0x20))
+TEST("\x62\xe2\x7d\x08\x78\x4a\x20", VPBROADCASTB128rm, 0, FE_XMM17, FE_MEM(FE_DX, 0, FE_NOREG, 0x20))
+TEST("\xc4\xe2\x7d\x78\x4a\x20", VPBROADCASTB256rm, 0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, 0x20))
+TEST("\x62\xe2\x7d\x28\x78\x4a\x20", VPBROADCASTB256rm, 0, FE_XMM17, FE_MEM(FE_DX, 0, FE_NOREG, 0x20))
+TEST("\x62\xf2\x7d\x48\x78\x4a\x20", VPBROADCASTB512rm, 0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, 0x20))
+TEST("\x62\xe2\x7d\x48\x78\x4a\x20", VPBROADCASTB512rm, 0, FE_XMM17, FE_MEM(FE_DX, 0, FE_NOREG, 0x20))
+TEST("\xc4\xe2\x79\x79\xc8", VPBROADCASTW128rr, 0, FE_XMM1, FE_XMM0)
+TEST("\x62\xe2\x7d\x08\x79\xc8", VPBROADCASTW128rr, 0, FE_XMM17, FE_XMM0)
+TEST("\xc4\xe2\x7d\x79\xc8", VPBROADCASTW256rr, 0, FE_XMM1, FE_XMM0)
+TEST("\x62\xe2\x7d\x28\x79\xc8", VPBROADCASTW256rr, 0, FE_XMM17, FE_XMM0)
+TEST("\x62\xf2\x7d\x48\x79\xc8", VPBROADCASTW512rr, 0, FE_XMM1, FE_XMM0)
+TEST("\x62\xe2\x7d\x48\x79\xc8", VPBROADCASTW512rr, 0, FE_XMM17, FE_XMM0)
+TEST("\xc4\xe2\x79\x79\x4a\x20", VPBROADCASTW128rm, 0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, 0x20))
+TEST("\x62\xe2\x7d\x08\x79\x4a\x10", VPBROADCASTW128rm, 0, FE_XMM17, FE_MEM(FE_DX, 0, FE_NOREG, 0x20))
+TEST("\xc4\xe2\x7d\x79\x4a\x20", VPBROADCASTW256rm, 0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, 0x20))
+TEST("\x62\xe2\x7d\x28\x79\x4a\x10", VPBROADCASTW256rm, 0, FE_XMM17, FE_MEM(FE_DX, 0, FE_NOREG, 0x20))
+TEST("\x62\xf2\x7d\x48\x79\x4a\x10", VPBROADCASTW512rm, 0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, 0x20))
+TEST("\x62\xe2\x7d\x48\x79\x4a\x10", VPBROADCASTW512rm, 0, FE_XMM17, FE_MEM(FE_DX, 0, FE_NOREG, 0x20))
+TEST("\xc4\xe2\x79\x58\xc8", VPBROADCASTD128rr, 0, FE_XMM1, FE_XMM0)
+TEST("\x62\xe2\x7d\x08\x58\xc8", VPBROADCASTD128rr, 0, FE_XMM17, FE_XMM0)
+TEST("\xc4\xe2\x7d\x58\xc8", VPBROADCASTD256rr, 0, FE_XMM1, FE_XMM0)
+TEST("\x62\xe2\x7d\x28\x58\xc8", VPBROADCASTD256rr, 0, FE_XMM17, FE_XMM0)
+TEST("\x62\xf2\x7d\x48\x58\xc8", VPBROADCASTD512rr, 0, FE_XMM1, FE_XMM0)
+TEST("\x62\xe2\x7d\x48\x58\xc8", VPBROADCASTD512rr, 0, FE_XMM17, FE_XMM0)
+TEST("\xc4\xe2\x79\x58\x4a\x20", VPBROADCASTD128rm, 0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, 0x20))
+TEST("\x62\xe2\x7d\x08\x58\x4a\x08", VPBROADCASTD128rm, 0, FE_XMM17, FE_MEM(FE_DX, 0, FE_NOREG, 0x20))
+TEST("\xc4\xe2\x7d\x58\x4a\x20", VPBROADCASTD256rm, 0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, 0x20))
+TEST("\x62\xe2\x7d\x28\x58\x4a\x08", VPBROADCASTD256rm, 0, FE_XMM17, FE_MEM(FE_DX, 0, FE_NOREG, 0x20))
+TEST("\x62\xf2\x7d\x48\x58\x4a\x08", VPBROADCASTD512rm, 0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, 0x20))
+TEST("\x62\xe2\x7d\x48\x58\x4a\x08", VPBROADCASTD512rm, 0, FE_XMM17, FE_MEM(FE_DX, 0, FE_NOREG, 0x20))
+TEST("\xc4\xe2\x79\x59\xc8", VPBROADCASTQ128rr, 0, FE_XMM1, FE_XMM0)
+TEST("\x62\xe2\xfd\x08\x59\xc8", VPBROADCASTQ128rr, 0, FE_XMM17, FE_XMM0)
+TEST("\xc4\xe2\x7d\x59\xc8", VPBROADCASTQ256rr, 0, FE_XMM1, FE_XMM0)
+TEST("\x62\xe2\xfd\x28\x59\xc8", VPBROADCASTQ256rr, 0, FE_XMM17, FE_XMM0)
+TEST("\x62\xf2\xfd\x48\x59\xc8", VPBROADCASTQ512rr, 0, FE_XMM1, FE_XMM0)
+TEST("\x62\xe2\xfd\x48\x59\xc8", VPBROADCASTQ512rr, 0, FE_XMM17, FE_XMM0)
+TEST("\xc4\xe2\x79\x59\x4a\x20", VPBROADCASTQ128rm, 0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, 0x20))
+TEST("\x62\xe2\xfd\x08\x59\x4a\x04", VPBROADCASTQ128rm, 0, FE_XMM17, FE_MEM(FE_DX, 0, FE_NOREG, 0x20))
+TEST("\xc4\xe2\x7d\x59\x4a\x20", VPBROADCASTQ256rm, 0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, 0x20))
+TEST("\x62\xe2\xfd\x28\x59\x4a\x04", VPBROADCASTQ256rm, 0, FE_XMM17, FE_MEM(FE_DX, 0, FE_NOREG, 0x20))
+TEST("\x62\xf2\xfd\x48\x59\x4a\x04", VPBROADCASTQ512rm, 0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, 0x20))
+TEST("\x62\xe2\xfd\x48\x59\x4a\x04", VPBROADCASTQ512rm, 0, FE_XMM17, FE_MEM(FE_DX, 0, FE_NOREG, 0x20))
+TEST("\xc4\xe2\x7d\x5a\x4a\x20", VBROADCASTI128rm, 0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, 0x20))
+TEST("", VBROADCASTI128rm, 0, FE_XMM17, FE_MEM(FE_DX, 0, FE_NOREG, 0x20)) // no EVEX version exists
+TEST("\x62\xf2\x7d\x28\x5a\x4a\x02", VBROADCASTI32X4_256rm, 0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, 0x20))
+TEST("\x62\xe2\x7d\x28\x5a\x4a\x02", VBROADCASTI32X4_256rm, 0, FE_XMM17, FE_MEM(FE_DX, 0, FE_NOREG, 0x20))
+TEST("\x62\xf2\x7d\x48\x5a\x4a\x02", VBROADCASTI32X4_512rm, 0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, 0x20))
+TEST("\x62\xe2\x7d\x48\x5a\x4a\x02", VBROADCASTI32X4_512rm, 0, FE_XMM17, FE_MEM(FE_DX, 0, FE_NOREG, 0x20))
+TEST("\x62\xf2\xfd\x28\x5a\x4a\x02", VBROADCASTI64X2_256rm, 0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, 0x20))
+TEST("\x62\xe2\xfd\x28\x5a\x4a\x02", VBROADCASTI64X2_256rm, 0, FE_XMM17, FE_MEM(FE_DX, 0, FE_NOREG, 0x20))
+TEST("\x62\xf2\xfd\x48\x5a\x4a\x02", VBROADCASTI64X2_512rm, 0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, 0x20))
+TEST("\x62\xe2\xfd\x48\x5a\x4a\x02", VBROADCASTI64X2_512rm, 0, FE_XMM17, FE_MEM(FE_DX, 0, FE_NOREG, 0x20))
+TEST("\x62\xf2\x7d\x48\x5b\x4a\x01", VBROADCASTI32X8_512rm, 0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, 0x20))
+TEST("\x62\xe2\x7d\x48\x5b\x4a\x01", VBROADCASTI32X8_512rm, 0, FE_XMM17, FE_MEM(FE_DX, 0, FE_NOREG, 0x20))
+TEST("\x62\xf2\xfd\x48\x5b\x4a\x01", VBROADCASTI64X4_512rm, 0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, 0x20))
+TEST("\x62\xe2\xfd\x48\x5b\x4a\x01", VBROADCASTI64X4_512rm, 0, FE_XMM17, FE_MEM(FE_DX, 0, FE_NOREG, 0x20))
+TEST("\x62\xf2\x7d\x08\x7a\xca", VPBROADCASTB_GP128rr, 0, FE_XMM1, FE_DX)
+TEST("\x62\xe2\x7d\x08\x7a\xca", VPBROADCASTB_GP128rr, 0, FE_XMM17, FE_DX)
+TEST("\x62\xf2\x7d\x28\x7a\xca", VPBROADCASTB_GP256rr, 0, FE_XMM1, FE_DX)
+TEST("\x62\xe2\x7d\x28\x7a\xca", VPBROADCASTB_GP256rr, 0, FE_XMM17, FE_DX)
+TEST("\x62\xf2\x7d\x48\x7a\xca", VPBROADCASTB_GP512rr, 0, FE_XMM1, FE_DX)
+TEST("\x62\xe2\x7d\x48\x7a\xca", VPBROADCASTB_GP512rr, 0, FE_XMM17, FE_DX)
+TEST("\x62\xf2\x7d\x08\x7b\xca", VPBROADCASTW_GP128rr, 0, FE_XMM1, FE_DX)
+TEST("\x62\xe2\x7d\x08\x7b\xca", VPBROADCASTW_GP128rr, 0, FE_XMM17, FE_DX)
+TEST("\x62\xf2\x7d\x28\x7b\xca", VPBROADCASTW_GP256rr, 0, FE_XMM1, FE_DX)
+TEST("\x62\xe2\x7d\x28\x7b\xca", VPBROADCASTW_GP256rr, 0, FE_XMM17, FE_DX)
+TEST("\x62\xf2\x7d\x48\x7b\xca", VPBROADCASTW_GP512rr, 0, FE_XMM1, FE_DX)
+TEST("\x62\xe2\x7d\x48\x7b\xca", VPBROADCASTW_GP512rr, 0, FE_XMM17, FE_DX)
+TEST("\x62\xf2\x7d\x08\x7c\xca", VPBROADCASTD_GP128rr, 0, FE_XMM1, FE_DX)
+TEST("\x62\xe2\x7d\x08\x7c\xca", VPBROADCASTD_GP128rr, 0, FE_XMM17, FE_DX)
+TEST("\x62\xf2\x7d\x28\x7c\xca", VPBROADCASTD_GP256rr, 0, FE_XMM1, FE_DX)
+TEST("\x62\xe2\x7d\x28\x7c\xca", VPBROADCASTD_GP256rr, 0, FE_XMM17, FE_DX)
+TEST("\x62\xf2\x7d\x48\x7c\xca", VPBROADCASTD_GP512rr, 0, FE_XMM1, FE_DX)
+TEST("\x62\xe2\x7d\x48\x7c\xca", VPBROADCASTD_GP512rr, 0, FE_XMM17, FE_DX)
+TEST("\x62\xf2\xfd\x08\x7c\xca", VPBROADCASTQ_GP128rr, 0, FE_XMM1, FE_DX)
+TEST("\x62\xe2\xfd\x08\x7c\xca", VPBROADCASTQ_GP128rr, 0, FE_XMM17, FE_DX)
+TEST("\x62\xf2\xfd\x28\x7c\xca", VPBROADCASTQ_GP256rr, 0, FE_XMM1, FE_DX)
+TEST("\x62\xe2\xfd\x28\x7c\xca", VPBROADCASTQ_GP256rr, 0, FE_XMM17, FE_DX)
+TEST("\x62\xf2\xfd\x48\x7c\xca", VPBROADCASTQ_GP512rr, 0, FE_XMM1, FE_DX)
+TEST("\x62\xe2\xfd\x48\x7c\xca", VPBROADCASTQ_GP512rr, 0, FE_XMM17, FE_DX)
 // Part 5: masks
-TEST("\x62\xf1\x74\x09\x58\xc2", VADDPS128rrr_mask, FLAGMASK(0, FE_K1), FE_XMM0, FE_XMM1, FE_XMM2);
-TEST("\x62\xf1\x74\x89\x58\xc2", VADDPS128rrr_maskz, FLAGMASK(0, FE_K1), FE_XMM0, FE_XMM1, FE_XMM2);
-TEST("\x62\xf1\x74\x0a\x58\xc2", VADDPS128rrr_mask, FLAGMASK(0, FE_K2), FE_XMM0, FE_XMM1, FE_XMM2);
-TEST("\x62\xf1\x74\x8a\x58\xc2", VADDPS128rrr_maskz, FLAGMASK(0, FE_K2), FE_XMM0, FE_XMM1, FE_XMM2);
-TEST("\x62\xf1\x74\x0b\x58\xc2", VADDPS128rrr_mask, FLAGMASK(0, FE_K3), FE_XMM0, FE_XMM1, FE_XMM2);
-TEST("\x62\xf1\x74\x8b\x58\xc2", VADDPS128rrr_maskz, FLAGMASK(0, FE_K3), FE_XMM0, FE_XMM1, FE_XMM2);
-TEST("\x62\xf1\x74\x0c\x58\xc2", VADDPS128rrr_mask, FLAGMASK(0, FE_K4), FE_XMM0, FE_XMM1, FE_XMM2);
-TEST("\x62\xf1\x74\x8c\x58\xc2", VADDPS128rrr_maskz, FLAGMASK(0, FE_K4), FE_XMM0, FE_XMM1, FE_XMM2);
-TEST("\x62\xf1\x74\x0d\x58\xc2", VADDPS128rrr_mask, FLAGMASK(0, FE_K5), FE_XMM0, FE_XMM1, FE_XMM2);
-TEST("\x62\xf1\x74\x8d\x58\xc2", VADDPS128rrr_maskz, FLAGMASK(0, FE_K5), FE_XMM0, FE_XMM1, FE_XMM2);
-TEST("\x62\xf1\x74\x0e\x58\xc2", VADDPS128rrr_mask, FLAGMASK(0, FE_K6), FE_XMM0, FE_XMM1, FE_XMM2);
-TEST("\x62\xf1\x74\x8e\x58\xc2", VADDPS128rrr_maskz, FLAGMASK(0, FE_K6), FE_XMM0, FE_XMM1, FE_XMM2);
-TEST("\x62\xf1\x74\x0f\x58\xc2", VADDPS128rrr_mask, FLAGMASK(0, FE_K7), FE_XMM0, FE_XMM1, FE_XMM2);
-TEST("\x62\xf1\x74\x8f\x58\xc2", VADDPS128rrr_maskz, FLAGMASK(0, FE_K7), FE_XMM0, FE_XMM1, FE_XMM2);
+TEST("\x62\xf1\x74\x09\x58\xc2", VADDPS128rrr_mask, FLAGMASK(0, FE_K1), FE_XMM0, FE_XMM1, FE_XMM2)
+TEST("\x62\xf1\x74\x89\x58\xc2", VADDPS128rrr_maskz, FLAGMASK(0, FE_K1), FE_XMM0, FE_XMM1, FE_XMM2)
+TEST("\x62\xf1\x74\x0a\x58\xc2", VADDPS128rrr_mask, FLAGMASK(0, FE_K2), FE_XMM0, FE_XMM1, FE_XMM2)
+TEST("\x62\xf1\x74\x8a\x58\xc2", VADDPS128rrr_maskz, FLAGMASK(0, FE_K2), FE_XMM0, FE_XMM1, FE_XMM2)
+TEST("\x62\xf1\x74\x0b\x58\xc2", VADDPS128rrr_mask, FLAGMASK(0, FE_K3), FE_XMM0, FE_XMM1, FE_XMM2)
+TEST("\x62\xf1\x74\x8b\x58\xc2", VADDPS128rrr_maskz, FLAGMASK(0, FE_K3), FE_XMM0, FE_XMM1, FE_XMM2)
+TEST("\x62\xf1\x74\x0c\x58\xc2", VADDPS128rrr_mask, FLAGMASK(0, FE_K4), FE_XMM0, FE_XMM1, FE_XMM2)
+TEST("\x62\xf1\x74\x8c\x58\xc2", VADDPS128rrr_maskz, FLAGMASK(0, FE_K4), FE_XMM0, FE_XMM1, FE_XMM2)
+TEST("\x62\xf1\x74\x0d\x58\xc2", VADDPS128rrr_mask, FLAGMASK(0, FE_K5), FE_XMM0, FE_XMM1, FE_XMM2)
+TEST("\x62\xf1\x74\x8d\x58\xc2", VADDPS128rrr_maskz, FLAGMASK(0, FE_K5), FE_XMM0, FE_XMM1, FE_XMM2)
+TEST("\x62\xf1\x74\x0e\x58\xc2", VADDPS128rrr_mask, FLAGMASK(0, FE_K6), FE_XMM0, FE_XMM1, FE_XMM2)
+TEST("\x62\xf1\x74\x8e\x58\xc2", VADDPS128rrr_maskz, FLAGMASK(0, FE_K6), FE_XMM0, FE_XMM1, FE_XMM2)
+TEST("\x62\xf1\x74\x0f\x58\xc2", VADDPS128rrr_mask, FLAGMASK(0, FE_K7), FE_XMM0, FE_XMM1, FE_XMM2)
+TEST("\x62\xf1\x74\x8f\x58\xc2", VADDPS128rrr_maskz, FLAGMASK(0, FE_K7), FE_XMM0, FE_XMM1, FE_XMM2)
 // Part 6: memory operands: disp8 compression + broadcast
-TEST("\xc5\xf0\x58\x02", VADDPS128rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, 0));
-TEST("\xc5\xf0\x58\x42\x01", VADDPS128rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, 1));
-TEST("\xc5\xf0\x58\x42\xff", VADDPS128rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, -1));
-TEST("\xc5\xf0\x58\x42\x10", VADDPS128rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, 0x10));
-TEST("\xc5\xf0\x58\x42\xf0", VADDPS128rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, -0x10));
-TEST("\xc5\xf0\x58\x82\xf0\x07\x00\x00", VADDPS128rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, 0x7f0));
-TEST("\xc5\xf0\x58\x82\x00\x08\x00\x00", VADDPS128rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, 0x800));
-TEST("\xc5\xf0\x58\x82\x00\xf8\xff\xff", VADDPS128rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, -0x800));
-TEST("\xc5\xf0\x58\x82\xf0\xf7\xff\xff", VADDPS128rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, -0x810));
-TEST("\x62\xf1\x74\x89\x58\x02", VADDPS128rrm_maskz, FLAGMASK(0, FE_K1), FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, 0));
-TEST("\x62\xf1\x74\x89\x58\x82\x01\x00\x00\x00", VADDPS128rrm_maskz, FLAGMASK(0, FE_K1), FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, 1));
-TEST("\x62\xf1\x74\x89\x58\x82\xff\xff\xff\xff", VADDPS128rrm_maskz, FLAGMASK(0, FE_K1), FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, -1));
-TEST("\x62\xf1\x74\x89\x58\x42\x01", VADDPS128rrm_maskz, FLAGMASK(0, FE_K1), FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, 0x10));
-TEST("\x62\xf1\x74\x89\x58\x42\xff", VADDPS128rrm_maskz, FLAGMASK(0, FE_K1), FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, -0x10));
-TEST("\x62\xf1\x74\x89\x58\x42\x7f", VADDPS128rrm_maskz, FLAGMASK(0, FE_K1), FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, 0x7f0));
-TEST("\x62\xf1\x74\x89\x58\x82\x00\x08\x00\x00", VADDPS128rrm_maskz, FLAGMASK(0, FE_K1), FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, 0x800));
-TEST("\x62\xf1\x74\x89\x58\x42\x80", VADDPS128rrm_maskz, FLAGMASK(0, FE_K1), FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, -0x800));
-TEST("\x62\xf1\x74\x89\x58\x82\xf0\xf7\xff\xff", VADDPS128rrm_maskz, FLAGMASK(0, FE_K1), FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, -0x810));
-TEST("\x62\xf1\x74\x18\x58\x02", VADDPS128rrb, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, 0));
-TEST("\x62\xf1\x74\x18\x58\x82\x01\x00\x00\x00", VADDPS128rrb, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, 1));
-TEST("\x62\xf1\x74\x18\x58\x82\xff\xff\xff\xff", VADDPS128rrb, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, -1));
-TEST("\x62\xf1\x74\x18\x58\x42\x01", VADDPS128rrb, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, 0x4));
-TEST("\x62\xf1\x74\x18\x58\x42\xff", VADDPS128rrb, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, -0x4));
-TEST("\x62\xf1\x74\x18\x58\x42\x7f", VADDPS128rrb, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, 0x1fc));
-TEST("\x62\xf1\x74\x18\x58\x82\x00\x02\x00\x00", VADDPS128rrb, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, 0x200));
-TEST("\x62\xf1\x74\x18\x58\x42\x80", VADDPS128rrb, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, -0x200));
-TEST("\x62\xf1\x74\x18\x58\x82\xfc\xfd\xff\xff", VADDPS128rrb, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, -0x204));
-TEST("\x62\xf1\x74\x99\x58\x02", VADDPS128rrb_maskz, FLAGMASK(0, FE_K1), FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, 0));
-TEST("\x62\xf1\x74\x99\x58\x82\x01\x00\x00\x00", VADDPS128rrb_maskz, FLAGMASK(0, FE_K1), FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, 1));
-TEST("\x62\xf1\x74\x99\x58\x82\xff\xff\xff\xff", VADDPS128rrb_maskz, FLAGMASK(0, FE_K1), FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, -1));
-TEST("\x62\xf1\x74\x99\x58\x42\x01", VADDPS128rrb_maskz, FLAGMASK(0, FE_K1), FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, 0x4));
-TEST("\x62\xf1\x74\x99\x58\x42\xff", VADDPS128rrb_maskz, FLAGMASK(0, FE_K1), FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, -0x4));
-TEST("\x62\xf1\x74\x99\x58\x42\x7f", VADDPS128rrb_maskz, FLAGMASK(0, FE_K1), FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, 0x1fc));
-TEST("\x62\xf1\x74\x99\x58\x82\x00\x02\x00\x00", VADDPS128rrb_maskz, FLAGMASK(0, FE_K1), FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, 0x200));
-TEST("\x62\xf1\x74\x99\x58\x42\x80", VADDPS128rrb_maskz, FLAGMASK(0, FE_K1), FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, -0x200));
-TEST("\x62\xf1\x74\x99\x58\x82\xfc\xfd\xff\xff", VADDPS128rrb_maskz, FLAGMASK(0, FE_K1), FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, -0x204));
-TEST("\xc5\xf4\x58\x02", VADDPS256rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, 0));
-TEST("\xc5\xf4\x58\x42\x01", VADDPS256rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, 1));
-TEST("\xc5\xf4\x58\x42\xff", VADDPS256rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, -1));
-TEST("\xc5\xf4\x58\x42\x20", VADDPS256rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, 0x20));
-TEST("\xc5\xf4\x58\x42\xe0", VADDPS256rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, -0x20));
-TEST("\xc5\xf4\x58\x82\xe0\x0f\x00\x00", VADDPS256rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, 0xfe0));
-TEST("\xc5\xf4\x58\x82\x00\x10\x00\x00", VADDPS256rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, 0x1000));
-TEST("\xc5\xf4\x58\x82\x00\xf0\xff\xff", VADDPS256rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, -0x1000));
-TEST("\xc5\xf4\x58\x82\xe0\xef\xff\xff", VADDPS256rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, -0x1020));
-TEST("\x62\xf1\x74\xa9\x58\x02", VADDPS256rrm_maskz, FLAGMASK(0, FE_K1), FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, 0));
-TEST("\x62\xf1\x74\xa9\x58\x82\x01\x00\x00\x00", VADDPS256rrm_maskz, FLAGMASK(0, FE_K1), FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, 1));
-TEST("\x62\xf1\x74\xa9\x58\x82\xff\xff\xff\xff", VADDPS256rrm_maskz, FLAGMASK(0, FE_K1), FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, -1));
-TEST("\x62\xf1\x74\xa9\x58\x42\x01", VADDPS256rrm_maskz, FLAGMASK(0, FE_K1), FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, 0x20));
-TEST("\x62\xf1\x74\xa9\x58\x42\xff", VADDPS256rrm_maskz, FLAGMASK(0, FE_K1), FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, -0x20));
-TEST("\x62\xf1\x74\xa9\x58\x42\x7f", VADDPS256rrm_maskz, FLAGMASK(0, FE_K1), FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, 0xfe0));
-TEST("\x62\xf1\x74\xa9\x58\x82\x00\x10\x00\x00", VADDPS256rrm_maskz, FLAGMASK(0, FE_K1), FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, 0x1000));
-TEST("\x62\xf1\x74\xa9\x58\x42\x80", VADDPS256rrm_maskz, FLAGMASK(0, FE_K1), FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, -0x1000));
-TEST("\x62\xf1\x74\xa9\x58\x82\xe0\xef\xff\xff", VADDPS256rrm_maskz, FLAGMASK(0, FE_K1), FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, -0x1020));
-TEST("\x62\xf1\x74\x38\x58\x02", VADDPS256rrb, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, 0));
-TEST("\x62\xf1\x74\x38\x58\x82\x01\x00\x00\x00", VADDPS256rrb, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, 1));
-TEST("\x62\xf1\x74\x38\x58\x82\xff\xff\xff\xff", VADDPS256rrb, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, -1));
-TEST("\x62\xf1\x74\x38\x58\x42\x01", VADDPS256rrb, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, 0x4));
-TEST("\x62\xf1\x74\x38\x58\x42\xff", VADDPS256rrb, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, -0x4));
-TEST("\x62\xf1\x74\x38\x58\x42\x7f", VADDPS256rrb, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, 0x1fc));
-TEST("\x62\xf1\x74\x38\x58\x82\x00\x02\x00\x00", VADDPS256rrb, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, 0x200));
-TEST("\x62\xf1\x74\x38\x58\x42\x80", VADDPS256rrb, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, -0x200));
-TEST("\x62\xf1\x74\x38\x58\x82\xfc\xfd\xff\xff", VADDPS256rrb, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, -0x204));
-TEST("\x62\xf1\x74\xb9\x58\x02", VADDPS256rrb_maskz, FLAGMASK(0, FE_K1), FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, 0));
-TEST("\x62\xf1\x74\xb9\x58\x82\x01\x00\x00\x00", VADDPS256rrb_maskz, FLAGMASK(0, FE_K1), FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, 1));
-TEST("\x62\xf1\x74\xb9\x58\x82\xff\xff\xff\xff", VADDPS256rrb_maskz, FLAGMASK(0, FE_K1), FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, -1));
-TEST("\x62\xf1\x74\xb9\x58\x42\x01", VADDPS256rrb_maskz, FLAGMASK(0, FE_K1), FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, 0x4));
-TEST("\x62\xf1\x74\xb9\x58\x42\xff", VADDPS256rrb_maskz, FLAGMASK(0, FE_K1), FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, -0x4));
-TEST("\x62\xf1\x74\xb9\x58\x42\x7f", VADDPS256rrb_maskz, FLAGMASK(0, FE_K1), FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, 0x1fc));
-TEST("\x62\xf1\x74\xb9\x58\x82\x00\x02\x00\x00", VADDPS256rrb_maskz, FLAGMASK(0, FE_K1), FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, 0x200));
-TEST("\x62\xf1\x74\xb9\x58\x42\x80", VADDPS256rrb_maskz, FLAGMASK(0, FE_K1), FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, -0x200));
-TEST("\x62\xf1\x74\xb9\x58\x82\xfc\xfd\xff\xff", VADDPS256rrb_maskz, FLAGMASK(0, FE_K1), FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, -0x204));
-TEST("\x62\xf1\x74\x48\x58\x02", VADDPS512rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, 0));
-TEST("\x62\xf1\x74\x48\x58\x82\x01\x00\x00\x00", VADDPS512rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, 1));
-TEST("\x62\xf1\x74\x48\x58\x82\xff\xff\xff\xff", VADDPS512rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, -1));
-TEST("\x62\xf1\x74\x48\x58\x42\x01", VADDPS512rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, 0x40));
-TEST("\x62\xf1\x74\x48\x58\x42\xff", VADDPS512rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, -0x40));
-TEST("\x62\xf1\x74\x48\x58\x42\x7f", VADDPS512rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, 0x1fc0));
-TEST("\x62\xf1\x74\x48\x58\x82\x00\x20\x00\x00", VADDPS512rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, 0x2000));
-TEST("\x62\xf1\x74\x48\x58\x42\x80", VADDPS512rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, -0x2000));
-TEST("\x62\xf1\x74\x48\x58\x82\xc0\xdf\xff\xff", VADDPS512rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, -0x2040));
-TEST("\x62\xf1\x74\xc9\x58\x02", VADDPS512rrm_maskz, FLAGMASK(0, FE_K1), FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, 0));
-TEST("\x62\xf1\x74\xc9\x58\x82\x01\x00\x00\x00", VADDPS512rrm_maskz, FLAGMASK(0, FE_K1), FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, 1));
-TEST("\x62\xf1\x74\xc9\x58\x82\xff\xff\xff\xff", VADDPS512rrm_maskz, FLAGMASK(0, FE_K1), FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, -1));
-TEST("\x62\xf1\x74\xc9\x58\x42\x01", VADDPS512rrm_maskz, FLAGMASK(0, FE_K1), FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, 0x40));
-TEST("\x62\xf1\x74\xc9\x58\x42\xff", VADDPS512rrm_maskz, FLAGMASK(0, FE_K1), FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, -0x40));
-TEST("\x62\xf1\x74\xc9\x58\x42\x7f", VADDPS512rrm_maskz, FLAGMASK(0, FE_K1), FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, 0x1fc0));
-TEST("\x62\xf1\x74\xc9\x58\x82\x00\x20\x00\x00", VADDPS512rrm_maskz, FLAGMASK(0, FE_K1), FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, 0x2000));
-TEST("\x62\xf1\x74\xc9\x58\x42\x80", VADDPS512rrm_maskz, FLAGMASK(0, FE_K1), FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, -0x2000));
-TEST("\x62\xf1\x74\xc9\x58\x82\xc0\xdf\xff\xff", VADDPS512rrm_maskz, FLAGMASK(0, FE_K1), FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, -0x2040));
-TEST("\x62\xf1\x74\x58\x58\x02", VADDPS512rrb, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, 0));
-TEST("\x62\xf1\x74\x58\x58\x82\x01\x00\x00\x00", VADDPS512rrb, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, 1));
-TEST("\x62\xf1\x74\x58\x58\x82\xff\xff\xff\xff", VADDPS512rrb, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, -1));
-TEST("\x62\xf1\x74\x58\x58\x42\x01", VADDPS512rrb, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, 0x4));
-TEST("\x62\xf1\x74\x58\x58\x42\xff", VADDPS512rrb, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, -0x4));
-TEST("\x62\xf1\x74\x58\x58\x42\x7f", VADDPS512rrb, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, 0x1fc));
-TEST("\x62\xf1\x74\x58\x58\x82\x00\x02\x00\x00", VADDPS512rrb, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, 0x200));
-TEST("\x62\xf1\x74\x58\x58\x42\x80", VADDPS512rrb, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, -0x200));
-TEST("\x62\xf1\x74\x58\x58\x82\xfc\xfd\xff\xff", VADDPS512rrb, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, -0x204));
-TEST("\x62\xf1\x74\xd9\x58\x02", VADDPS512rrb_maskz, FLAGMASK(0, FE_K1), FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, 0));
-TEST("\x62\xf1\x74\xd9\x58\x82\x01\x00\x00\x00", VADDPS512rrb_maskz, FLAGMASK(0, FE_K1), FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, 1));
-TEST("\x62\xf1\x74\xd9\x58\x82\xff\xff\xff\xff", VADDPS512rrb_maskz, FLAGMASK(0, FE_K1), FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, -1));
-TEST("\x62\xf1\x74\xd9\x58\x42\x01", VADDPS512rrb_maskz, FLAGMASK(0, FE_K1), FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, 0x4));
-TEST("\x62\xf1\x74\xd9\x58\x42\xff", VADDPS512rrb_maskz, FLAGMASK(0, FE_K1), FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, -0x4));
-TEST("\x62\xf1\x74\xd9\x58\x42\x7f", VADDPS512rrb_maskz, FLAGMASK(0, FE_K1), FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, 0x1fc));
-TEST("\x62\xf1\x74\xd9\x58\x82\x00\x02\x00\x00", VADDPS512rrb_maskz, FLAGMASK(0, FE_K1), FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, 0x200));
-TEST("\x62\xf1\x74\xd9\x58\x42\x80", VADDPS512rrb_maskz, FLAGMASK(0, FE_K1), FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, -0x200));
-TEST("\x62\xf1\x74\xd9\x58\x82\xfc\xfd\xff\xff", VADDPS512rrb_maskz, FLAGMASK(0, FE_K1), FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, -0x204));
+TEST("\xc5\xf0\x58\x02", VADDPS128rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, 0))
+TEST("\xc5\xf0\x58\x42\x01", VADDPS128rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, 1))
+TEST("\xc5\xf0\x58\x42\xff", VADDPS128rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, -1))
+TEST("\xc5\xf0\x58\x42\x10", VADDPS128rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, 0x10))
+TEST("\xc5\xf0\x58\x42\xf0", VADDPS128rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, -0x10))
+TEST("\xc5\xf0\x58\x82\xf0\x07\x00\x00", VADDPS128rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, 0x7f0))
+TEST("\xc5\xf0\x58\x82\x00\x08\x00\x00", VADDPS128rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, 0x800))
+TEST("\xc5\xf0\x58\x82\x00\xf8\xff\xff", VADDPS128rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, -0x800))
+TEST("\xc5\xf0\x58\x82\xf0\xf7\xff\xff", VADDPS128rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, -0x810))
+TEST("\x62\xf1\x74\x89\x58\x02", VADDPS128rrm_maskz, FLAGMASK(0, FE_K1), FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, 0))
+TEST("\x62\xf1\x74\x89\x58\x82\x01\x00\x00\x00", VADDPS128rrm_maskz, FLAGMASK(0, FE_K1), FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, 1))
+TEST("\x62\xf1\x74\x89\x58\x82\xff\xff\xff\xff", VADDPS128rrm_maskz, FLAGMASK(0, FE_K1), FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, -1))
+TEST("\x62\xf1\x74\x89\x58\x42\x01", VADDPS128rrm_maskz, FLAGMASK(0, FE_K1), FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, 0x10))
+TEST("\x62\xf1\x74\x89\x58\x42\xff", VADDPS128rrm_maskz, FLAGMASK(0, FE_K1), FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, -0x10))
+TEST("\x62\xf1\x74\x89\x58\x42\x7f", VADDPS128rrm_maskz, FLAGMASK(0, FE_K1), FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, 0x7f0))
+TEST("\x62\xf1\x74\x89\x58\x82\x00\x08\x00\x00", VADDPS128rrm_maskz, FLAGMASK(0, FE_K1), FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, 0x800))
+TEST("\x62\xf1\x74\x89\x58\x42\x80", VADDPS128rrm_maskz, FLAGMASK(0, FE_K1), FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, -0x800))
+TEST("\x62\xf1\x74\x89\x58\x82\xf0\xf7\xff\xff", VADDPS128rrm_maskz, FLAGMASK(0, FE_K1), FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, -0x810))
+TEST("\x62\xf1\x74\x18\x58\x02", VADDPS128rrb, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, 0))
+TEST("\x62\xf1\x74\x18\x58\x82\x01\x00\x00\x00", VADDPS128rrb, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, 1))
+TEST("\x62\xf1\x74\x18\x58\x82\xff\xff\xff\xff", VADDPS128rrb, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, -1))
+TEST("\x62\xf1\x74\x18\x58\x42\x01", VADDPS128rrb, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, 0x4))
+TEST("\x62\xf1\x74\x18\x58\x42\xff", VADDPS128rrb, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, -0x4))
+TEST("\x62\xf1\x74\x18\x58\x42\x7f", VADDPS128rrb, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, 0x1fc))
+TEST("\x62\xf1\x74\x18\x58\x82\x00\x02\x00\x00", VADDPS128rrb, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, 0x200))
+TEST("\x62\xf1\x74\x18\x58\x42\x80", VADDPS128rrb, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, -0x200))
+TEST("\x62\xf1\x74\x18\x58\x82\xfc\xfd\xff\xff", VADDPS128rrb, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, -0x204))
+TEST("\x62\xf1\x74\x99\x58\x02", VADDPS128rrb_maskz, FLAGMASK(0, FE_K1), FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, 0))
+TEST("\x62\xf1\x74\x99\x58\x82\x01\x00\x00\x00", VADDPS128rrb_maskz, FLAGMASK(0, FE_K1), FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, 1))
+TEST("\x62\xf1\x74\x99\x58\x82\xff\xff\xff\xff", VADDPS128rrb_maskz, FLAGMASK(0, FE_K1), FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, -1))
+TEST("\x62\xf1\x74\x99\x58\x42\x01", VADDPS128rrb_maskz, FLAGMASK(0, FE_K1), FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, 0x4))
+TEST("\x62\xf1\x74\x99\x58\x42\xff", VADDPS128rrb_maskz, FLAGMASK(0, FE_K1), FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, -0x4))
+TEST("\x62\xf1\x74\x99\x58\x42\x7f", VADDPS128rrb_maskz, FLAGMASK(0, FE_K1), FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, 0x1fc))
+TEST("\x62\xf1\x74\x99\x58\x82\x00\x02\x00\x00", VADDPS128rrb_maskz, FLAGMASK(0, FE_K1), FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, 0x200))
+TEST("\x62\xf1\x74\x99\x58\x42\x80", VADDPS128rrb_maskz, FLAGMASK(0, FE_K1), FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, -0x200))
+TEST("\x62\xf1\x74\x99\x58\x82\xfc\xfd\xff\xff", VADDPS128rrb_maskz, FLAGMASK(0, FE_K1), FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, -0x204))
+TEST("\xc5\xf4\x58\x02", VADDPS256rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, 0))
+TEST("\xc5\xf4\x58\x42\x01", VADDPS256rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, 1))
+TEST("\xc5\xf4\x58\x42\xff", VADDPS256rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, -1))
+TEST("\xc5\xf4\x58\x42\x20", VADDPS256rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, 0x20))
+TEST("\xc5\xf4\x58\x42\xe0", VADDPS256rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, -0x20))
+TEST("\xc5\xf4\x58\x82\xe0\x0f\x00\x00", VADDPS256rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, 0xfe0))
+TEST("\xc5\xf4\x58\x82\x00\x10\x00\x00", VADDPS256rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, 0x1000))
+TEST("\xc5\xf4\x58\x82\x00\xf0\xff\xff", VADDPS256rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, -0x1000))
+TEST("\xc5\xf4\x58\x82\xe0\xef\xff\xff", VADDPS256rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, -0x1020))
+TEST("\x62\xf1\x74\xa9\x58\x02", VADDPS256rrm_maskz, FLAGMASK(0, FE_K1), FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, 0))
+TEST("\x62\xf1\x74\xa9\x58\x82\x01\x00\x00\x00", VADDPS256rrm_maskz, FLAGMASK(0, FE_K1), FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, 1))
+TEST("\x62\xf1\x74\xa9\x58\x82\xff\xff\xff\xff", VADDPS256rrm_maskz, FLAGMASK(0, FE_K1), FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, -1))
+TEST("\x62\xf1\x74\xa9\x58\x42\x01", VADDPS256rrm_maskz, FLAGMASK(0, FE_K1), FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, 0x20))
+TEST("\x62\xf1\x74\xa9\x58\x42\xff", VADDPS256rrm_maskz, FLAGMASK(0, FE_K1), FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, -0x20))
+TEST("\x62\xf1\x74\xa9\x58\x42\x7f", VADDPS256rrm_maskz, FLAGMASK(0, FE_K1), FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, 0xfe0))
+TEST("\x62\xf1\x74\xa9\x58\x82\x00\x10\x00\x00", VADDPS256rrm_maskz, FLAGMASK(0, FE_K1), FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, 0x1000))
+TEST("\x62\xf1\x74\xa9\x58\x42\x80", VADDPS256rrm_maskz, FLAGMASK(0, FE_K1), FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, -0x1000))
+TEST("\x62\xf1\x74\xa9\x58\x82\xe0\xef\xff\xff", VADDPS256rrm_maskz, FLAGMASK(0, FE_K1), FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, -0x1020))
+TEST("\x62\xf1\x74\x38\x58\x02", VADDPS256rrb, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, 0))
+TEST("\x62\xf1\x74\x38\x58\x82\x01\x00\x00\x00", VADDPS256rrb, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, 1))
+TEST("\x62\xf1\x74\x38\x58\x82\xff\xff\xff\xff", VADDPS256rrb, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, -1))
+TEST("\x62\xf1\x74\x38\x58\x42\x01", VADDPS256rrb, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, 0x4))
+TEST("\x62\xf1\x74\x38\x58\x42\xff", VADDPS256rrb, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, -0x4))
+TEST("\x62\xf1\x74\x38\x58\x42\x7f", VADDPS256rrb, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, 0x1fc))
+TEST("\x62\xf1\x74\x38\x58\x82\x00\x02\x00\x00", VADDPS256rrb, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, 0x200))
+TEST("\x62\xf1\x74\x38\x58\x42\x80", VADDPS256rrb, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, -0x200))
+TEST("\x62\xf1\x74\x38\x58\x82\xfc\xfd\xff\xff", VADDPS256rrb, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, -0x204))
+TEST("\x62\xf1\x74\xb9\x58\x02", VADDPS256rrb_maskz, FLAGMASK(0, FE_K1), FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, 0))
+TEST("\x62\xf1\x74\xb9\x58\x82\x01\x00\x00\x00", VADDPS256rrb_maskz, FLAGMASK(0, FE_K1), FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, 1))
+TEST("\x62\xf1\x74\xb9\x58\x82\xff\xff\xff\xff", VADDPS256rrb_maskz, FLAGMASK(0, FE_K1), FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, -1))
+TEST("\x62\xf1\x74\xb9\x58\x42\x01", VADDPS256rrb_maskz, FLAGMASK(0, FE_K1), FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, 0x4))
+TEST("\x62\xf1\x74\xb9\x58\x42\xff", VADDPS256rrb_maskz, FLAGMASK(0, FE_K1), FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, -0x4))
+TEST("\x62\xf1\x74\xb9\x58\x42\x7f", VADDPS256rrb_maskz, FLAGMASK(0, FE_K1), FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, 0x1fc))
+TEST("\x62\xf1\x74\xb9\x58\x82\x00\x02\x00\x00", VADDPS256rrb_maskz, FLAGMASK(0, FE_K1), FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, 0x200))
+TEST("\x62\xf1\x74\xb9\x58\x42\x80", VADDPS256rrb_maskz, FLAGMASK(0, FE_K1), FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, -0x200))
+TEST("\x62\xf1\x74\xb9\x58\x82\xfc\xfd\xff\xff", VADDPS256rrb_maskz, FLAGMASK(0, FE_K1), FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, -0x204))
+TEST("\x62\xf1\x74\x48\x58\x02", VADDPS512rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, 0))
+TEST("\x62\xf1\x74\x48\x58\x82\x01\x00\x00\x00", VADDPS512rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, 1))
+TEST("\x62\xf1\x74\x48\x58\x82\xff\xff\xff\xff", VADDPS512rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, -1))
+TEST("\x62\xf1\x74\x48\x58\x42\x01", VADDPS512rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, 0x40))
+TEST("\x62\xf1\x74\x48\x58\x42\xff", VADDPS512rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, -0x40))
+TEST("\x62\xf1\x74\x48\x58\x42\x7f", VADDPS512rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, 0x1fc0))
+TEST("\x62\xf1\x74\x48\x58\x82\x00\x20\x00\x00", VADDPS512rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, 0x2000))
+TEST("\x62\xf1\x74\x48\x58\x42\x80", VADDPS512rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, -0x2000))
+TEST("\x62\xf1\x74\x48\x58\x82\xc0\xdf\xff\xff", VADDPS512rrm, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, -0x2040))
+TEST("\x62\xf1\x74\xc9\x58\x02", VADDPS512rrm_maskz, FLAGMASK(0, FE_K1), FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, 0))
+TEST("\x62\xf1\x74\xc9\x58\x82\x01\x00\x00\x00", VADDPS512rrm_maskz, FLAGMASK(0, FE_K1), FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, 1))
+TEST("\x62\xf1\x74\xc9\x58\x82\xff\xff\xff\xff", VADDPS512rrm_maskz, FLAGMASK(0, FE_K1), FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, -1))
+TEST("\x62\xf1\x74\xc9\x58\x42\x01", VADDPS512rrm_maskz, FLAGMASK(0, FE_K1), FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, 0x40))
+TEST("\x62\xf1\x74\xc9\x58\x42\xff", VADDPS512rrm_maskz, FLAGMASK(0, FE_K1), FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, -0x40))
+TEST("\x62\xf1\x74\xc9\x58\x42\x7f", VADDPS512rrm_maskz, FLAGMASK(0, FE_K1), FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, 0x1fc0))
+TEST("\x62\xf1\x74\xc9\x58\x82\x00\x20\x00\x00", VADDPS512rrm_maskz, FLAGMASK(0, FE_K1), FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, 0x2000))
+TEST("\x62\xf1\x74\xc9\x58\x42\x80", VADDPS512rrm_maskz, FLAGMASK(0, FE_K1), FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, -0x2000))
+TEST("\x62\xf1\x74\xc9\x58\x82\xc0\xdf\xff\xff", VADDPS512rrm_maskz, FLAGMASK(0, FE_K1), FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, -0x2040))
+TEST("\x62\xf1\x74\x58\x58\x02", VADDPS512rrb, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, 0))
+TEST("\x62\xf1\x74\x58\x58\x82\x01\x00\x00\x00", VADDPS512rrb, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, 1))
+TEST("\x62\xf1\x74\x58\x58\x82\xff\xff\xff\xff", VADDPS512rrb, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, -1))
+TEST("\x62\xf1\x74\x58\x58\x42\x01", VADDPS512rrb, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, 0x4))
+TEST("\x62\xf1\x74\x58\x58\x42\xff", VADDPS512rrb, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, -0x4))
+TEST("\x62\xf1\x74\x58\x58\x42\x7f", VADDPS512rrb, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, 0x1fc))
+TEST("\x62\xf1\x74\x58\x58\x82\x00\x02\x00\x00", VADDPS512rrb, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, 0x200))
+TEST("\x62\xf1\x74\x58\x58\x42\x80", VADDPS512rrb, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, -0x200))
+TEST("\x62\xf1\x74\x58\x58\x82\xfc\xfd\xff\xff", VADDPS512rrb, 0, FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, -0x204))
+TEST("\x62\xf1\x74\xd9\x58\x02", VADDPS512rrb_maskz, FLAGMASK(0, FE_K1), FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, 0))
+TEST("\x62\xf1\x74\xd9\x58\x82\x01\x00\x00\x00", VADDPS512rrb_maskz, FLAGMASK(0, FE_K1), FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, 1))
+TEST("\x62\xf1\x74\xd9\x58\x82\xff\xff\xff\xff", VADDPS512rrb_maskz, FLAGMASK(0, FE_K1), FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, -1))
+TEST("\x62\xf1\x74\xd9\x58\x42\x01", VADDPS512rrb_maskz, FLAGMASK(0, FE_K1), FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, 0x4))
+TEST("\x62\xf1\x74\xd9\x58\x42\xff", VADDPS512rrb_maskz, FLAGMASK(0, FE_K1), FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, -0x4))
+TEST("\x62\xf1\x74\xd9\x58\x42\x7f", VADDPS512rrb_maskz, FLAGMASK(0, FE_K1), FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, 0x1fc))
+TEST("\x62\xf1\x74\xd9\x58\x82\x00\x02\x00\x00", VADDPS512rrb_maskz, FLAGMASK(0, FE_K1), FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, 0x200))
+TEST("\x62\xf1\x74\xd9\x58\x42\x80", VADDPS512rrb_maskz, FLAGMASK(0, FE_K1), FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, -0x200))
+TEST("\x62\xf1\x74\xd9\x58\x82\xfc\xfd\xff\xff", VADDPS512rrb_maskz, FLAGMASK(0, FE_K1), FE_XMM0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, -0x204))
 // Part 7: ER/SAE
-TEST("\x62\xf1\x74\x48\x58\xc2", VADDPS512rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2);
-TEST("\x62\xf1\x74\x18\x58\xc2", VADDPS512rrr_er, FE_RC_RN, FE_XMM0, FE_XMM1, FE_XMM2);
-TEST("\x62\xf1\x74\x38\x58\xc2", VADDPS512rrr_er, FE_RC_RD, FE_XMM0, FE_XMM1, FE_XMM2);
-TEST("\x62\xf1\x74\x58\x58\xc2", VADDPS512rrr_er, FE_RC_RU, FE_XMM0, FE_XMM1, FE_XMM2);
-TEST("\x62\xf1\x74\x78\x58\xc2", VADDPS512rrr_er, FE_RC_RZ, FE_XMM0, FE_XMM1, FE_XMM2);
+TEST("\x62\xf1\x74\x48\x58\xc2", VADDPS512rrr, 0, FE_XMM0, FE_XMM1, FE_XMM2)
+TEST("\x62\xf1\x74\x18\x58\xc2", VADDPS512rrr_er, FE_RC_RN, FE_XMM0, FE_XMM1, FE_XMM2)
+TEST("\x62\xf1\x74\x38\x58\xc2", VADDPS512rrr_er, FE_RC_RD, FE_XMM0, FE_XMM1, FE_XMM2)
+TEST("\x62\xf1\x74\x58\x58\xc2", VADDPS512rrr_er, FE_RC_RU, FE_XMM0, FE_XMM1, FE_XMM2)
+TEST("\x62\xf1\x74\x78\x58\xc2", VADDPS512rrr_er, FE_RC_RZ, FE_XMM0, FE_XMM1, FE_XMM2)
 // Part 8: VSIB
-TEST("", VPGATHERDD128rm, FLAGMASK(0, FE_K0), FE_XMM0, FE_MEMV(FE_AX, 1, FE_XMM1, 0)); // k0 not allowed
-TEST("\x62\xf2\x7d\x09\x90\x04\x08", VPGATHERDD128rm, FLAGMASK(0, FE_K1), FE_XMM0, FE_MEMV(FE_AX, 1, FE_XMM1, 0));
-TEST("\x62\xf2\x7d\x09\x90\x44\x08\x04", VPGATHERDD128rm, FLAGMASK(0, FE_K1), FE_XMM0, FE_MEMV(FE_AX, 1, FE_XMM1, 0x10));
-TEST("\x62\xf2\x7d\x09\x90\x84\x08\x11\x00\x00\x00", VPGATHERDD128rm, FLAGMASK(0, FE_K1), FE_XMM0, FE_MEMV(FE_AX, 1, FE_XMM1, 0x11));
-TEST("\x62\xf2\x7d\x09\x90\x04\x0d\x00\x00\x00\x00", VPGATHERDD128rm, FLAGMASK(0, FE_K1), FE_XMM0, FE_MEMV(FE_NOREG, 1, FE_XMM1, 0));
-TEST("\x62\xf2\x7d\x09\x90\x84\xc8\x11\x00\x00\x00", VPGATHERDD128rm, FLAGMASK(0, FE_K1), FE_XMM0, FE_MEMV(FE_AX, 8, FE_XMM1, 0x11));
-TEST("\x62\xf2\x7d\x09\x90\x04\xcd\x00\x00\x00\x00", VPGATHERDD128rm, FLAGMASK(0, FE_K1), FE_XMM0, FE_MEMV(FE_NOREG, 8, FE_XMM1, 0));
-TEST("\x62\xf2\x7d\x09\x90\x04\x08", VPGATHERDD128rm, FLAGMASK(0, FE_K1), FE_XMM0, FE_MEMV(FE_AX, 1, FE_XMM1, 0));
-TEST("\x62\xd2\x7d\x09\x90\x04\x08", VPGATHERDD128rm, FLAGMASK(0, FE_K1), FE_XMM0, FE_MEMV(FE_R8, 1, FE_XMM1, 0));
-TEST("\x62\xb2\x7d\x09\x90\x04\x08", VPGATHERDD128rm, FLAGMASK(0, FE_K1), FE_XMM0, FE_MEMV(FE_AX, 1, FE_XMM9, 0));
-TEST("\x62\x92\x7d\x09\x90\x04\x08", VPGATHERDD128rm, FLAGMASK(0, FE_K1), FE_XMM0, FE_MEMV(FE_R8, 1, FE_XMM9, 0));
-TEST("\x62\xf2\x7d\x01\x90\x04\x08", VPGATHERDD128rm, FLAGMASK(0, FE_K1), FE_XMM0, FE_MEMV(FE_AX, 1, FE_XMM17, 0));
-TEST("\x62\xd2\x7d\x01\x90\x04\x08", VPGATHERDD128rm, FLAGMASK(0, FE_K1), FE_XMM0, FE_MEMV(FE_R8, 1, FE_XMM17, 0));
-TEST("\x62\xb2\x7d\x01\x90\x04\x08", VPGATHERDD128rm, FLAGMASK(0, FE_K1), FE_XMM0, FE_MEMV(FE_AX, 1, FE_XMM25, 0));
-TEST("\x62\x92\x7d\x01\x90\x04\x08", VPGATHERDD128rm, FLAGMASK(0, FE_K1), FE_XMM0, FE_MEMV(FE_R8, 1, FE_XMM25, 0));
-TEST("\x62\x72\x7d\x09\x90\x04\x08", VPGATHERDD128rm, FLAGMASK(0, FE_K1), FE_XMM8, FE_MEMV(FE_AX, 1, FE_XMM1, 0));
-TEST("\x62\x52\x7d\x09\x90\x04\x08", VPGATHERDD128rm, FLAGMASK(0, FE_K1), FE_XMM8, FE_MEMV(FE_R8, 1, FE_XMM1, 0));
-TEST("\x62\x32\x7d\x09\x90\x04\x08", VPGATHERDD128rm, FLAGMASK(0, FE_K1), FE_XMM8, FE_MEMV(FE_AX, 1, FE_XMM9, 0));
-TEST("\x62\x12\x7d\x09\x90\x04\x08", VPGATHERDD128rm, FLAGMASK(0, FE_K1), FE_XMM8, FE_MEMV(FE_R8, 1, FE_XMM9, 0));
-TEST("\x62\x72\x7d\x01\x90\x04\x08", VPGATHERDD128rm, FLAGMASK(0, FE_K1), FE_XMM8, FE_MEMV(FE_AX, 1, FE_XMM17, 0));
-TEST("\x62\x52\x7d\x01\x90\x04\x08", VPGATHERDD128rm, FLAGMASK(0, FE_K1), FE_XMM8, FE_MEMV(FE_R8, 1, FE_XMM17, 0));
-TEST("\x62\x32\x7d\x01\x90\x04\x08", VPGATHERDD128rm, FLAGMASK(0, FE_K1), FE_XMM8, FE_MEMV(FE_AX, 1, FE_XMM25, 0));
-TEST("\x62\x12\x7d\x01\x90\x04\x08", VPGATHERDD128rm, FLAGMASK(0, FE_K1), FE_XMM8, FE_MEMV(FE_R8, 1, FE_XMM25, 0));
-TEST("\x62\xe2\x7d\x09\x90\x04\x08", VPGATHERDD128rm, FLAGMASK(0, FE_K1), FE_XMM16, FE_MEMV(FE_AX, 1, FE_XMM1, 0));
-TEST("\x62\xc2\x7d\x09\x90\x04\x08", VPGATHERDD128rm, FLAGMASK(0, FE_K1), FE_XMM16, FE_MEMV(FE_R8, 1, FE_XMM1, 0));
-TEST("\x62\xa2\x7d\x09\x90\x04\x08", VPGATHERDD128rm, FLAGMASK(0, FE_K1), FE_XMM16, FE_MEMV(FE_AX, 1, FE_XMM9, 0));
-TEST("\x62\x82\x7d\x09\x90\x04\x08", VPGATHERDD128rm, FLAGMASK(0, FE_K1), FE_XMM16, FE_MEMV(FE_R8, 1, FE_XMM9, 0));
-TEST("\x62\xe2\x7d\x01\x90\x04\x08", VPGATHERDD128rm, FLAGMASK(0, FE_K1), FE_XMM16, FE_MEMV(FE_AX, 1, FE_XMM17, 0));
-TEST("\x62\xc2\x7d\x01\x90\x04\x08", VPGATHERDD128rm, FLAGMASK(0, FE_K1), FE_XMM16, FE_MEMV(FE_R8, 1, FE_XMM17, 0));
-TEST("\x62\xa2\x7d\x01\x90\x04\x08", VPGATHERDD128rm, FLAGMASK(0, FE_K1), FE_XMM16, FE_MEMV(FE_AX, 1, FE_XMM25, 0));
-TEST("\x62\x82\x7d\x01\x90\x04\x08", VPGATHERDD128rm, FLAGMASK(0, FE_K1), FE_XMM16, FE_MEMV(FE_R8, 1, FE_XMM25, 0));
-TEST("\x62\x62\x7d\x09\x90\x04\x08", VPGATHERDD128rm, FLAGMASK(0, FE_K1), FE_XMM24, FE_MEMV(FE_AX, 1, FE_XMM1, 0));
-TEST("\x62\x42\x7d\x09\x90\x04\x08", VPGATHERDD128rm, FLAGMASK(0, FE_K1), FE_XMM24, FE_MEMV(FE_R8, 1, FE_XMM1, 0));
-TEST("\x62\x22\x7d\x09\x90\x04\x08", VPGATHERDD128rm, FLAGMASK(0, FE_K1), FE_XMM24, FE_MEMV(FE_AX, 1, FE_XMM9, 0));
-TEST("\x62\x02\x7d\x09\x90\x04\x08", VPGATHERDD128rm, FLAGMASK(0, FE_K1), FE_XMM24, FE_MEMV(FE_R8, 1, FE_XMM9, 0));
-TEST("\x62\x62\x7d\x01\x90\x04\x08", VPGATHERDD128rm, FLAGMASK(0, FE_K1), FE_XMM24, FE_MEMV(FE_AX, 1, FE_XMM17, 0));
-TEST("\x62\x42\x7d\x01\x90\x04\x08", VPGATHERDD128rm, FLAGMASK(0, FE_K1), FE_XMM24, FE_MEMV(FE_R8, 1, FE_XMM17, 0));
-TEST("\x62\x22\x7d\x01\x90\x04\x08", VPGATHERDD128rm, FLAGMASK(0, FE_K1), FE_XMM24, FE_MEMV(FE_AX, 1, FE_XMM25, 0));
-TEST("\x62\x02\x7d\x01\x90\x04\x08", VPGATHERDD128rm, FLAGMASK(0, FE_K1), FE_XMM24, FE_MEMV(FE_R8, 1, FE_XMM25, 0));
+TEST("", VPGATHERDD128rm, FLAGMASK(0, FE_K0), FE_XMM0, FE_MEMV(FE_AX, 1, FE_XMM1, 0)) // k0 not allowed
+TEST("\x62\xf2\x7d\x09\x90\x04\x08", VPGATHERDD128rm, FLAGMASK(0, FE_K1), FE_XMM0, FE_MEMV(FE_AX, 1, FE_XMM1, 0))
+TEST("\x62\xf2\x7d\x09\x90\x44\x08\x04", VPGATHERDD128rm, FLAGMASK(0, FE_K1), FE_XMM0, FE_MEMV(FE_AX, 1, FE_XMM1, 0x10))
+TEST("\x62\xf2\x7d\x09\x90\x84\x08\x11\x00\x00\x00", VPGATHERDD128rm, FLAGMASK(0, FE_K1), FE_XMM0, FE_MEMV(FE_AX, 1, FE_XMM1, 0x11))
+TEST("\x62\xf2\x7d\x09\x90\x04\x0d\x00\x00\x00\x00", VPGATHERDD128rm, FLAGMASK(0, FE_K1), FE_XMM0, FE_MEMV(FE_NOREG, 1, FE_XMM1, 0))
+TEST("\x62\xf2\x7d\x09\x90\x84\xc8\x11\x00\x00\x00", VPGATHERDD128rm, FLAGMASK(0, FE_K1), FE_XMM0, FE_MEMV(FE_AX, 8, FE_XMM1, 0x11))
+TEST("\x62\xf2\x7d\x09\x90\x04\xcd\x00\x00\x00\x00", VPGATHERDD128rm, FLAGMASK(0, FE_K1), FE_XMM0, FE_MEMV(FE_NOREG, 8, FE_XMM1, 0))
+TEST("\x62\xf2\x7d\x09\x90\x04\x08", VPGATHERDD128rm, FLAGMASK(0, FE_K1), FE_XMM0, FE_MEMV(FE_AX, 1, FE_XMM1, 0))
+TEST("\x62\xd2\x7d\x09\x90\x04\x08", VPGATHERDD128rm, FLAGMASK(0, FE_K1), FE_XMM0, FE_MEMV(FE_R8, 1, FE_XMM1, 0))
+TEST("\x62\xb2\x7d\x09\x90\x04\x08", VPGATHERDD128rm, FLAGMASK(0, FE_K1), FE_XMM0, FE_MEMV(FE_AX, 1, FE_XMM9, 0))
+TEST("\x62\x92\x7d\x09\x90\x04\x08", VPGATHERDD128rm, FLAGMASK(0, FE_K1), FE_XMM0, FE_MEMV(FE_R8, 1, FE_XMM9, 0))
+TEST("\x62\xf2\x7d\x01\x90\x04\x08", VPGATHERDD128rm, FLAGMASK(0, FE_K1), FE_XMM0, FE_MEMV(FE_AX, 1, FE_XMM17, 0))
+TEST("\x62\xd2\x7d\x01\x90\x04\x08", VPGATHERDD128rm, FLAGMASK(0, FE_K1), FE_XMM0, FE_MEMV(FE_R8, 1, FE_XMM17, 0))
+TEST("\x62\xb2\x7d\x01\x90\x04\x08", VPGATHERDD128rm, FLAGMASK(0, FE_K1), FE_XMM0, FE_MEMV(FE_AX, 1, FE_XMM25, 0))
+TEST("\x62\x92\x7d\x01\x90\x04\x08", VPGATHERDD128rm, FLAGMASK(0, FE_K1), FE_XMM0, FE_MEMV(FE_R8, 1, FE_XMM25, 0))
+TEST("\x62\x72\x7d\x09\x90\x04\x08", VPGATHERDD128rm, FLAGMASK(0, FE_K1), FE_XMM8, FE_MEMV(FE_AX, 1, FE_XMM1, 0))
+TEST("\x62\x52\x7d\x09\x90\x04\x08", VPGATHERDD128rm, FLAGMASK(0, FE_K1), FE_XMM8, FE_MEMV(FE_R8, 1, FE_XMM1, 0))
+TEST("\x62\x32\x7d\x09\x90\x04\x08", VPGATHERDD128rm, FLAGMASK(0, FE_K1), FE_XMM8, FE_MEMV(FE_AX, 1, FE_XMM9, 0))
+TEST("\x62\x12\x7d\x09\x90\x04\x08", VPGATHERDD128rm, FLAGMASK(0, FE_K1), FE_XMM8, FE_MEMV(FE_R8, 1, FE_XMM9, 0))
+TEST("\x62\x72\x7d\x01\x90\x04\x08", VPGATHERDD128rm, FLAGMASK(0, FE_K1), FE_XMM8, FE_MEMV(FE_AX, 1, FE_XMM17, 0))
+TEST("\x62\x52\x7d\x01\x90\x04\x08", VPGATHERDD128rm, FLAGMASK(0, FE_K1), FE_XMM8, FE_MEMV(FE_R8, 1, FE_XMM17, 0))
+TEST("\x62\x32\x7d\x01\x90\x04\x08", VPGATHERDD128rm, FLAGMASK(0, FE_K1), FE_XMM8, FE_MEMV(FE_AX, 1, FE_XMM25, 0))
+TEST("\x62\x12\x7d\x01\x90\x04\x08", VPGATHERDD128rm, FLAGMASK(0, FE_K1), FE_XMM8, FE_MEMV(FE_R8, 1, FE_XMM25, 0))
+TEST("\x62\xe2\x7d\x09\x90\x04\x08", VPGATHERDD128rm, FLAGMASK(0, FE_K1), FE_XMM16, FE_MEMV(FE_AX, 1, FE_XMM1, 0))
+TEST("\x62\xc2\x7d\x09\x90\x04\x08", VPGATHERDD128rm, FLAGMASK(0, FE_K1), FE_XMM16, FE_MEMV(FE_R8, 1, FE_XMM1, 0))
+TEST("\x62\xa2\x7d\x09\x90\x04\x08", VPGATHERDD128rm, FLAGMASK(0, FE_K1), FE_XMM16, FE_MEMV(FE_AX, 1, FE_XMM9, 0))
+TEST("\x62\x82\x7d\x09\x90\x04\x08", VPGATHERDD128rm, FLAGMASK(0, FE_K1), FE_XMM16, FE_MEMV(FE_R8, 1, FE_XMM9, 0))
+TEST("\x62\xe2\x7d\x01\x90\x04\x08", VPGATHERDD128rm, FLAGMASK(0, FE_K1), FE_XMM16, FE_MEMV(FE_AX, 1, FE_XMM17, 0))
+TEST("\x62\xc2\x7d\x01\x90\x04\x08", VPGATHERDD128rm, FLAGMASK(0, FE_K1), FE_XMM16, FE_MEMV(FE_R8, 1, FE_XMM17, 0))
+TEST("\x62\xa2\x7d\x01\x90\x04\x08", VPGATHERDD128rm, FLAGMASK(0, FE_K1), FE_XMM16, FE_MEMV(FE_AX, 1, FE_XMM25, 0))
+TEST("\x62\x82\x7d\x01\x90\x04\x08", VPGATHERDD128rm, FLAGMASK(0, FE_K1), FE_XMM16, FE_MEMV(FE_R8, 1, FE_XMM25, 0))
+TEST("\x62\x62\x7d\x09\x90\x04\x08", VPGATHERDD128rm, FLAGMASK(0, FE_K1), FE_XMM24, FE_MEMV(FE_AX, 1, FE_XMM1, 0))
+TEST("\x62\x42\x7d\x09\x90\x04\x08", VPGATHERDD128rm, FLAGMASK(0, FE_K1), FE_XMM24, FE_MEMV(FE_R8, 1, FE_XMM1, 0))
+TEST("\x62\x22\x7d\x09\x90\x04\x08", VPGATHERDD128rm, FLAGMASK(0, FE_K1), FE_XMM24, FE_MEMV(FE_AX, 1, FE_XMM9, 0))
+TEST("\x62\x02\x7d\x09\x90\x04\x08", VPGATHERDD128rm, FLAGMASK(0, FE_K1), FE_XMM24, FE_MEMV(FE_R8, 1, FE_XMM9, 0))
+TEST("\x62\x62\x7d\x01\x90\x04\x08", VPGATHERDD128rm, FLAGMASK(0, FE_K1), FE_XMM24, FE_MEMV(FE_AX, 1, FE_XMM17, 0))
+TEST("\x62\x42\x7d\x01\x90\x04\x08", VPGATHERDD128rm, FLAGMASK(0, FE_K1), FE_XMM24, FE_MEMV(FE_R8, 1, FE_XMM17, 0))
+TEST("\x62\x22\x7d\x01\x90\x04\x08", VPGATHERDD128rm, FLAGMASK(0, FE_K1), FE_XMM24, FE_MEMV(FE_AX, 1, FE_XMM25, 0))
+TEST("\x62\x02\x7d\x01\x90\x04\x08", VPGATHERDD128rm, FLAGMASK(0, FE_K1), FE_XMM24, FE_MEMV(FE_R8, 1, FE_XMM25, 0))
 
 // VCVTTPD2DQ has different W bit for VEX/EVEX, so fallback is implemented using
 // REXW flip. Test that this works.
-TEST("\xc4\x41\x79\xe6\xf7", VCVTTPD2DQ128rr, 0, FE_XMM14, FE_XMM15);
-TEST("\xc4\x41\x7d\xe6\xf7", VCVTTPD2DQ256rr, 0, FE_XMM14, FE_XMM15);
-TEST("\x62\x51\xfd\x48\xe6\xf7", VCVTTPD2DQ512rr, 0, FE_XMM14, FE_XMM15);
-TEST("\x62\x51\xfd\x18\xe6\xf7", VCVTTPD2DQ512rr_sae, 0, FE_XMM14, FE_XMM15);
-TEST("\xc4\x01\x79\xe6\x74\x37\x40", VCVTTPD2DQ128rm, 0, FE_XMM14, FE_MEM(FE_R15, 1, FE_R14, 0x40));
-TEST("\xc4\x01\x7d\xe6\x74\x37\x40", VCVTTPD2DQ256rm, 0, FE_XMM14, FE_MEM(FE_R15, 1, FE_R14, 0x40));
-TEST("\x62\x11\xfd\x48\xe6\x74\x37\x01", VCVTTPD2DQ512rm, 0, FE_XMM14, FE_MEM(FE_R15, 1, FE_R14, 0x40));
-TEST("\x62\x11\xfd\x18\xe6\x74\x37\x08", VCVTTPD2DQ128rb, 0, FE_XMM14, FE_MEM(FE_R15, 1, FE_R14, 0x40));
-TEST("\x62\x11\xfd\x38\xe6\x74\x37\x08", VCVTTPD2DQ256rb, 0, FE_XMM14, FE_MEM(FE_R15, 1, FE_R14, 0x40));
-TEST("\x62\x11\xfd\x58\xe6\x74\x37\x08", VCVTTPD2DQ512rb, 0, FE_XMM14, FE_MEM(FE_R15, 1, FE_R14, 0x40));
-TEST("\x62\x51\xfd\x09\xe6\xf7", VCVTTPD2DQ128rr_mask, FLAGMASK(0, FE_K1), FE_XMM14, FE_XMM15);
-TEST("\x62\x51\xfd\x29\xe6\xf7", VCVTTPD2DQ256rr_mask, FLAGMASK(0, FE_K1), FE_XMM14, FE_XMM15);
-TEST("\x62\x51\xfd\x49\xe6\xf7", VCVTTPD2DQ512rr_mask, FLAGMASK(0, FE_K1), FE_XMM14, FE_XMM15);
-TEST("\x62\x51\xfd\x19\xe6\xf7", VCVTTPD2DQ512rr_mask_sae, FLAGMASK(0, FE_K1), FE_XMM14, FE_XMM15);
-TEST("\x62\x11\xfd\x09\xe6\x74\x37\x04", VCVTTPD2DQ128rm_mask, FLAGMASK(0, FE_K1), FE_XMM14, FE_MEM(FE_R15, 1, FE_R14, 0x40));
-TEST("\x62\x11\xfd\x29\xe6\x74\x37\x02", VCVTTPD2DQ256rm_mask, FLAGMASK(0, FE_K1), FE_XMM14, FE_MEM(FE_R15, 1, FE_R14, 0x40));
-TEST("\x62\x11\xfd\x49\xe6\x74\x37\x01", VCVTTPD2DQ512rm_mask, FLAGMASK(0, FE_K1), FE_XMM14, FE_MEM(FE_R15, 1, FE_R14, 0x40));
-TEST("\x62\x11\xfd\x19\xe6\x74\x37\x08", VCVTTPD2DQ128rb_mask, FLAGMASK(0, FE_K1), FE_XMM14, FE_MEM(FE_R15, 1, FE_R14, 0x40));
-TEST("\x62\x11\xfd\x39\xe6\x74\x37\x08", VCVTTPD2DQ256rb_mask, FLAGMASK(0, FE_K1), FE_XMM14, FE_MEM(FE_R15, 1, FE_R14, 0x40));
-TEST("\x62\x11\xfd\x59\xe6\x74\x37\x08", VCVTTPD2DQ512rb_mask, FLAGMASK(0, FE_K1), FE_XMM14, FE_MEM(FE_R15, 1, FE_R14, 0x40));
-TEST("\x62\x51\xfd\x89\xe6\xf7", VCVTTPD2DQ128rr_maskz, FLAGMASK(0, FE_K1), FE_XMM14, FE_XMM15);
-TEST("\x62\x51\xfd\xa9\xe6\xf7", VCVTTPD2DQ256rr_maskz, FLAGMASK(0, FE_K1), FE_XMM14, FE_XMM15);
-TEST("\x62\x51\xfd\xc9\xe6\xf7", VCVTTPD2DQ512rr_maskz, FLAGMASK(0, FE_K1), FE_XMM14, FE_XMM15);
-TEST("\x62\x51\xfd\x99\xe6\xf7", VCVTTPD2DQ512rr_maskz_sae, FLAGMASK(0, FE_K1), FE_XMM14, FE_XMM15);
-TEST("\x62\x11\xfd\x89\xe6\x74\x37\x04", VCVTTPD2DQ128rm_maskz, FLAGMASK(0, FE_K1), FE_XMM14, FE_MEM(FE_R15, 1, FE_R14, 0x40));
-TEST("\x62\x11\xfd\xa9\xe6\x74\x37\x02", VCVTTPD2DQ256rm_maskz, FLAGMASK(0, FE_K1), FE_XMM14, FE_MEM(FE_R15, 1, FE_R14, 0x40));
-TEST("\x62\x11\xfd\xc9\xe6\x74\x37\x01", VCVTTPD2DQ512rm_maskz, FLAGMASK(0, FE_K1), FE_XMM14, FE_MEM(FE_R15, 1, FE_R14, 0x40));
-TEST("\x62\x11\xfd\x99\xe6\x74\x37\x08", VCVTTPD2DQ128rb_maskz, FLAGMASK(0, FE_K1), FE_XMM14, FE_MEM(FE_R15, 1, FE_R14, 0x40));
-TEST("\x62\x11\xfd\xb9\xe6\x74\x37\x08", VCVTTPD2DQ256rb_maskz, FLAGMASK(0, FE_K1), FE_XMM14, FE_MEM(FE_R15, 1, FE_R14, 0x40));
-TEST("\x62\x11\xfd\xd9\xe6\x74\x37\x08", VCVTTPD2DQ512rb_maskz, FLAGMASK(0, FE_K1), FE_XMM14, FE_MEM(FE_R15, 1, FE_R14, 0x40));
+TEST("\xc4\x41\x79\xe6\xf7", VCVTTPD2DQ128rr, 0, FE_XMM14, FE_XMM15)
+TEST("\xc4\x41\x7d\xe6\xf7", VCVTTPD2DQ256rr, 0, FE_XMM14, FE_XMM15)
+TEST("\x62\x51\xfd\x48\xe6\xf7", VCVTTPD2DQ512rr, 0, FE_XMM14, FE_XMM15)
+TEST("\x62\x51\xfd\x18\xe6\xf7", VCVTTPD2DQ512rr_sae, 0, FE_XMM14, FE_XMM15)
+TEST("\xc4\x01\x79\xe6\x74\x37\x40", VCVTTPD2DQ128rm, 0, FE_XMM14, FE_MEM(FE_R15, 1, FE_R14, 0x40))
+TEST("\xc4\x01\x7d\xe6\x74\x37\x40", VCVTTPD2DQ256rm, 0, FE_XMM14, FE_MEM(FE_R15, 1, FE_R14, 0x40))
+TEST("\x62\x11\xfd\x48\xe6\x74\x37\x01", VCVTTPD2DQ512rm, 0, FE_XMM14, FE_MEM(FE_R15, 1, FE_R14, 0x40))
+TEST("\x62\x11\xfd\x18\xe6\x74\x37\x08", VCVTTPD2DQ128rb, 0, FE_XMM14, FE_MEM(FE_R15, 1, FE_R14, 0x40))
+TEST("\x62\x11\xfd\x38\xe6\x74\x37\x08", VCVTTPD2DQ256rb, 0, FE_XMM14, FE_MEM(FE_R15, 1, FE_R14, 0x40))
+TEST("\x62\x11\xfd\x58\xe6\x74\x37\x08", VCVTTPD2DQ512rb, 0, FE_XMM14, FE_MEM(FE_R15, 1, FE_R14, 0x40))
+TEST("\x62\x51\xfd\x09\xe6\xf7", VCVTTPD2DQ128rr_mask, FLAGMASK(0, FE_K1), FE_XMM14, FE_XMM15)
+TEST("\x62\x51\xfd\x29\xe6\xf7", VCVTTPD2DQ256rr_mask, FLAGMASK(0, FE_K1), FE_XMM14, FE_XMM15)
+TEST("\x62\x51\xfd\x49\xe6\xf7", VCVTTPD2DQ512rr_mask, FLAGMASK(0, FE_K1), FE_XMM14, FE_XMM15)
+TEST("\x62\x51\xfd\x19\xe6\xf7", VCVTTPD2DQ512rr_mask_sae, FLAGMASK(0, FE_K1), FE_XMM14, FE_XMM15)
+TEST("\x62\x11\xfd\x09\xe6\x74\x37\x04", VCVTTPD2DQ128rm_mask, FLAGMASK(0, FE_K1), FE_XMM14, FE_MEM(FE_R15, 1, FE_R14, 0x40))
+TEST("\x62\x11\xfd\x29\xe6\x74\x37\x02", VCVTTPD2DQ256rm_mask, FLAGMASK(0, FE_K1), FE_XMM14, FE_MEM(FE_R15, 1, FE_R14, 0x40))
+TEST("\x62\x11\xfd\x49\xe6\x74\x37\x01", VCVTTPD2DQ512rm_mask, FLAGMASK(0, FE_K1), FE_XMM14, FE_MEM(FE_R15, 1, FE_R14, 0x40))
+TEST("\x62\x11\xfd\x19\xe6\x74\x37\x08", VCVTTPD2DQ128rb_mask, FLAGMASK(0, FE_K1), FE_XMM14, FE_MEM(FE_R15, 1, FE_R14, 0x40))
+TEST("\x62\x11\xfd\x39\xe6\x74\x37\x08", VCVTTPD2DQ256rb_mask, FLAGMASK(0, FE_K1), FE_XMM14, FE_MEM(FE_R15, 1, FE_R14, 0x40))
+TEST("\x62\x11\xfd\x59\xe6\x74\x37\x08", VCVTTPD2DQ512rb_mask, FLAGMASK(0, FE_K1), FE_XMM14, FE_MEM(FE_R15, 1, FE_R14, 0x40))
+TEST("\x62\x51\xfd\x89\xe6\xf7", VCVTTPD2DQ128rr_maskz, FLAGMASK(0, FE_K1), FE_XMM14, FE_XMM15)
+TEST("\x62\x51\xfd\xa9\xe6\xf7", VCVTTPD2DQ256rr_maskz, FLAGMASK(0, FE_K1), FE_XMM14, FE_XMM15)
+TEST("\x62\x51\xfd\xc9\xe6\xf7", VCVTTPD2DQ512rr_maskz, FLAGMASK(0, FE_K1), FE_XMM14, FE_XMM15)
+TEST("\x62\x51\xfd\x99\xe6\xf7", VCVTTPD2DQ512rr_maskz_sae, FLAGMASK(0, FE_K1), FE_XMM14, FE_XMM15)
+TEST("\x62\x11\xfd\x89\xe6\x74\x37\x04", VCVTTPD2DQ128rm_maskz, FLAGMASK(0, FE_K1), FE_XMM14, FE_MEM(FE_R15, 1, FE_R14, 0x40))
+TEST("\x62\x11\xfd\xa9\xe6\x74\x37\x02", VCVTTPD2DQ256rm_maskz, FLAGMASK(0, FE_K1), FE_XMM14, FE_MEM(FE_R15, 1, FE_R14, 0x40))
+TEST("\x62\x11\xfd\xc9\xe6\x74\x37\x01", VCVTTPD2DQ512rm_maskz, FLAGMASK(0, FE_K1), FE_XMM14, FE_MEM(FE_R15, 1, FE_R14, 0x40))
+TEST("\x62\x11\xfd\x99\xe6\x74\x37\x08", VCVTTPD2DQ128rb_maskz, FLAGMASK(0, FE_K1), FE_XMM14, FE_MEM(FE_R15, 1, FE_R14, 0x40))
+TEST("\x62\x11\xfd\xb9\xe6\x74\x37\x08", VCVTTPD2DQ256rb_maskz, FLAGMASK(0, FE_K1), FE_XMM14, FE_MEM(FE_R15, 1, FE_R14, 0x40))
+TEST("\x62\x11\xfd\xd9\xe6\x74\x37\x08", VCVTTPD2DQ512rb_maskz, FLAGMASK(0, FE_K1), FE_XMM14, FE_MEM(FE_R15, 1, FE_R14, 0x40))
 
-TEST("\xc4\x42\x7d\x19\xf7", VBROADCASTSD256rr, 0, FE_XMM14, FE_XMM15);
-TEST("\xc4\x02\x7d\x19\x74\x37\x40", VBROADCASTSD256rm, 0, FE_XMM14, FE_MEM(FE_R15, 1, FE_R14, 0x40));
-TEST("\x62\x82\xfd\x28\x19\x44\x37\x08", VBROADCASTSD256rm, 0, FE_XMM16, FE_MEM(FE_R15, 1, FE_R14, 0x40));
+TEST("\xc4\x42\x7d\x19\xf7", VBROADCASTSD256rr, 0, FE_XMM14, FE_XMM15)
+TEST("\xc4\x02\x7d\x19\x74\x37\x40", VBROADCASTSD256rm, 0, FE_XMM14, FE_MEM(FE_R15, 1, FE_R14, 0x40))
+TEST("\x62\x82\xfd\x28\x19\x44\x37\x08", VBROADCASTSD256rm, 0, FE_XMM16, FE_MEM(FE_R15, 1, FE_R14, 0x40))
 
 // VMOVDDUP has special tuple size for L0.
-TEST("\xc5\xfb\x12\x48\x08", VMOVDDUP128rm, 0, FE_XMM1, FE_MEM(FE_AX, 0, FE_NOREG, 0x8));
-TEST("\x62\xf1\xff\x09\x12\x48\x01", VMOVDDUP128rm_mask, FLAGMASK(0, FE_K1), FE_XMM1, FE_MEM(FE_AX, 0, FE_NOREG, 0x8));
-TEST("\xc5\xfb\x12\xc8", VMOVDDUP128rr, 0, FE_XMM1, FE_XMM0);
-TEST("\x62\xf1\xff\x09\x12\xc8", VMOVDDUP128rr_mask, FLAGMASK(0, FE_K1), FE_XMM1, FE_XMM0);
-TEST("\xc5\xff\x12\x48\x20", VMOVDDUP256rm, 0, FE_XMM1, FE_MEM(FE_AX, 0, FE_NOREG, 0x20));
-TEST("\x62\xf1\xff\x29\x12\x48\x01", VMOVDDUP256rm_mask, FLAGMASK(0, FE_K1), FE_XMM1, FE_MEM(FE_AX, 0, FE_NOREG, 0x20));
-TEST("\xc5\xff\x12\xc8", VMOVDDUP256rr, 0, FE_XMM1, FE_XMM0);
-TEST("\x62\xf1\xff\x29\x12\xc8", VMOVDDUP256rr_mask, FLAGMASK(0, FE_K1), FE_XMM1, FE_XMM0);
-TEST("\x62\xf1\xff\x48\x12\x48\x01", VMOVDDUP512rm, 0, FE_XMM1, FE_MEM(FE_AX, 0, FE_NOREG, 0x40));
-TEST("\x62\xf1\xff\x49\x12\x48\x01", VMOVDDUP512rm_mask, FLAGMASK(0, FE_K1), FE_XMM1, FE_MEM(FE_AX, 0, FE_NOREG, 0x40));
-TEST("\x62\xf1\xff\x48\x12\xc8", VMOVDDUP512rr, 0, FE_XMM1, FE_XMM0);
-TEST("\x62\xf1\xff\x49\x12\xc8", VMOVDDUP512rr_mask, FLAGMASK(0, FE_K1), FE_XMM1, FE_XMM0);
+TEST("\xc5\xfb\x12\x48\x08", VMOVDDUP128rm, 0, FE_XMM1, FE_MEM(FE_AX, 0, FE_NOREG, 0x8))
+TEST("\x62\xf1\xff\x09\x12\x48\x01", VMOVDDUP128rm_mask, FLAGMASK(0, FE_K1), FE_XMM1, FE_MEM(FE_AX, 0, FE_NOREG, 0x8))
+TEST("\xc5\xfb\x12\xc8", VMOVDDUP128rr, 0, FE_XMM1, FE_XMM0)
+TEST("\x62\xf1\xff\x09\x12\xc8", VMOVDDUP128rr_mask, FLAGMASK(0, FE_K1), FE_XMM1, FE_XMM0)
+TEST("\xc5\xff\x12\x48\x20", VMOVDDUP256rm, 0, FE_XMM1, FE_MEM(FE_AX, 0, FE_NOREG, 0x20))
+TEST("\x62\xf1\xff\x29\x12\x48\x01", VMOVDDUP256rm_mask, FLAGMASK(0, FE_K1), FE_XMM1, FE_MEM(FE_AX, 0, FE_NOREG, 0x20))
+TEST("\xc5\xff\x12\xc8", VMOVDDUP256rr, 0, FE_XMM1, FE_XMM0)
+TEST("\x62\xf1\xff\x29\x12\xc8", VMOVDDUP256rr_mask, FLAGMASK(0, FE_K1), FE_XMM1, FE_XMM0)
+TEST("\x62\xf1\xff\x48\x12\x48\x01", VMOVDDUP512rm, 0, FE_XMM1, FE_MEM(FE_AX, 0, FE_NOREG, 0x40))
+TEST("\x62\xf1\xff\x49\x12\x48\x01", VMOVDDUP512rm_mask, FLAGMASK(0, FE_K1), FE_XMM1, FE_MEM(FE_AX, 0, FE_NOREG, 0x40))
+TEST("\x62\xf1\xff\x48\x12\xc8", VMOVDDUP512rr, 0, FE_XMM1, FE_XMM0)
+TEST("\x62\xf1\xff\x49\x12\xc8", VMOVDDUP512rr_mask, FLAGMASK(0, FE_K1), FE_XMM1, FE_XMM0)
 
 // VPCOMPRESS and VPEXPAND have different scale size
-TEST("\x62\xf2\x7d\x08\x63\x40\x20", VPCOMPRESSB128mr, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0x20), FE_XMM0);
-TEST("\x62\xf2\x7d\x28\x63\x40\x20", VPCOMPRESSB256mr, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0x20), FE_XMM0);
-TEST("\x62\xf2\x7d\x48\x63\x40\x20", VPCOMPRESSB512mr, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0x20), FE_XMM0);
-TEST("\x62\xf2\xfd\x08\x63\x40\x10", VPCOMPRESSW128mr, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0x20), FE_XMM0);
-TEST("\x62\xf2\xfd\x28\x63\x40\x10", VPCOMPRESSW256mr, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0x20), FE_XMM0);
-TEST("\x62\xf2\xfd\x48\x63\x40\x10", VPCOMPRESSW512mr, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0x20), FE_XMM0);
-TEST("\x62\xf2\x7d\x08\x8b\x40\x08", VPCOMPRESSD128mr, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0x20), FE_XMM0);
-TEST("\x62\xf2\x7d\x28\x8b\x40\x08", VPCOMPRESSD256mr, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0x20), FE_XMM0);
-TEST("\x62\xf2\x7d\x48\x8b\x40\x08", VPCOMPRESSD512mr, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0x20), FE_XMM0);
-TEST("\x62\xf2\xfd\x08\x8b\x40\x04", VPCOMPRESSQ128mr, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0x20), FE_XMM0);
-TEST("\x62\xf2\xfd\x28\x8b\x40\x04", VPCOMPRESSQ256mr, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0x20), FE_XMM0);
-TEST("\x62\xf2\xfd\x48\x8b\x40\x04", VPCOMPRESSQ512mr, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0x20), FE_XMM0);
-TEST("\x62\xf2\x7d\x08\x62\x40\x20", VPEXPANDB128rm, 0, FE_XMM0, FE_MEM(FE_AX, 0, FE_NOREG, 0x20));
-TEST("\x62\xf2\x7d\x28\x62\x40\x20", VPEXPANDB256rm, 0, FE_XMM0, FE_MEM(FE_AX, 0, FE_NOREG, 0x20));
-TEST("\x62\xf2\x7d\x48\x62\x40\x20", VPEXPANDB512rm, 0, FE_XMM0, FE_MEM(FE_AX, 0, FE_NOREG, 0x20));
-TEST("\x62\xf2\xfd\x08\x62\x40\x10", VPEXPANDW128rm, 0, FE_XMM0, FE_MEM(FE_AX, 0, FE_NOREG, 0x20));
-TEST("\x62\xf2\xfd\x28\x62\x40\x10", VPEXPANDW256rm, 0, FE_XMM0, FE_MEM(FE_AX, 0, FE_NOREG, 0x20));
-TEST("\x62\xf2\xfd\x48\x62\x40\x10", VPEXPANDW512rm, 0, FE_XMM0, FE_MEM(FE_AX, 0, FE_NOREG, 0x20));
-TEST("\x62\xf2\x7d\x08\x89\x40\x08", VPEXPANDD128rm, 0, FE_XMM0, FE_MEM(FE_AX, 0, FE_NOREG, 0x20));
-TEST("\x62\xf2\x7d\x28\x89\x40\x08", VPEXPANDD256rm, 0, FE_XMM0, FE_MEM(FE_AX, 0, FE_NOREG, 0x20));
-TEST("\x62\xf2\x7d\x48\x89\x40\x08", VPEXPANDD512rm, 0, FE_XMM0, FE_MEM(FE_AX, 0, FE_NOREG, 0x20));
-TEST("\x62\xf2\xfd\x08\x89\x40\x04", VPEXPANDQ128rm, 0, FE_XMM0, FE_MEM(FE_AX, 0, FE_NOREG, 0x20));
-TEST("\x62\xf2\xfd\x28\x89\x40\x04", VPEXPANDQ256rm, 0, FE_XMM0, FE_MEM(FE_AX, 0, FE_NOREG, 0x20));
-TEST("\x62\xf2\xfd\x48\x89\x40\x04", VPEXPANDQ512rm, 0, FE_XMM0, FE_MEM(FE_AX, 0, FE_NOREG, 0x20));
+TEST("\x62\xf2\x7d\x08\x63\x40\x20", VPCOMPRESSB128mr, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0x20), FE_XMM0)
+TEST("\x62\xf2\x7d\x28\x63\x40\x20", VPCOMPRESSB256mr, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0x20), FE_XMM0)
+TEST("\x62\xf2\x7d\x48\x63\x40\x20", VPCOMPRESSB512mr, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0x20), FE_XMM0)
+TEST("\x62\xf2\xfd\x08\x63\x40\x10", VPCOMPRESSW128mr, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0x20), FE_XMM0)
+TEST("\x62\xf2\xfd\x28\x63\x40\x10", VPCOMPRESSW256mr, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0x20), FE_XMM0)
+TEST("\x62\xf2\xfd\x48\x63\x40\x10", VPCOMPRESSW512mr, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0x20), FE_XMM0)
+TEST("\x62\xf2\x7d\x08\x8b\x40\x08", VPCOMPRESSD128mr, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0x20), FE_XMM0)
+TEST("\x62\xf2\x7d\x28\x8b\x40\x08", VPCOMPRESSD256mr, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0x20), FE_XMM0)
+TEST("\x62\xf2\x7d\x48\x8b\x40\x08", VPCOMPRESSD512mr, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0x20), FE_XMM0)
+TEST("\x62\xf2\xfd\x08\x8b\x40\x04", VPCOMPRESSQ128mr, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0x20), FE_XMM0)
+TEST("\x62\xf2\xfd\x28\x8b\x40\x04", VPCOMPRESSQ256mr, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0x20), FE_XMM0)
+TEST("\x62\xf2\xfd\x48\x8b\x40\x04", VPCOMPRESSQ512mr, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0x20), FE_XMM0)
+TEST("\x62\xf2\x7d\x08\x62\x40\x20", VPEXPANDB128rm, 0, FE_XMM0, FE_MEM(FE_AX, 0, FE_NOREG, 0x20))
+TEST("\x62\xf2\x7d\x28\x62\x40\x20", VPEXPANDB256rm, 0, FE_XMM0, FE_MEM(FE_AX, 0, FE_NOREG, 0x20))
+TEST("\x62\xf2\x7d\x48\x62\x40\x20", VPEXPANDB512rm, 0, FE_XMM0, FE_MEM(FE_AX, 0, FE_NOREG, 0x20))
+TEST("\x62\xf2\xfd\x08\x62\x40\x10", VPEXPANDW128rm, 0, FE_XMM0, FE_MEM(FE_AX, 0, FE_NOREG, 0x20))
+TEST("\x62\xf2\xfd\x28\x62\x40\x10", VPEXPANDW256rm, 0, FE_XMM0, FE_MEM(FE_AX, 0, FE_NOREG, 0x20))
+TEST("\x62\xf2\xfd\x48\x62\x40\x10", VPEXPANDW512rm, 0, FE_XMM0, FE_MEM(FE_AX, 0, FE_NOREG, 0x20))
+TEST("\x62\xf2\x7d\x08\x89\x40\x08", VPEXPANDD128rm, 0, FE_XMM0, FE_MEM(FE_AX, 0, FE_NOREG, 0x20))
+TEST("\x62\xf2\x7d\x28\x89\x40\x08", VPEXPANDD256rm, 0, FE_XMM0, FE_MEM(FE_AX, 0, FE_NOREG, 0x20))
+TEST("\x62\xf2\x7d\x48\x89\x40\x08", VPEXPANDD512rm, 0, FE_XMM0, FE_MEM(FE_AX, 0, FE_NOREG, 0x20))
+TEST("\x62\xf2\xfd\x08\x89\x40\x04", VPEXPANDQ128rm, 0, FE_XMM0, FE_MEM(FE_AX, 0, FE_NOREG, 0x20))
+TEST("\x62\xf2\xfd\x28\x89\x40\x04", VPEXPANDQ256rm, 0, FE_XMM0, FE_MEM(FE_AX, 0, FE_NOREG, 0x20))
+TEST("\x62\xf2\xfd\x48\x89\x40\x04", VPEXPANDQ512rm, 0, FE_XMM0, FE_MEM(FE_AX, 0, FE_NOREG, 0x20))
 
 // Mask can also be destination
-TEST("\x62\xf1\x74\x08\xc2\xc2\x01", VCMPPS128krri, 0, FE_K0, FE_XMM1, FE_XMM2, 1);
-TEST("\x62\xf1\x74\x09\xc2\xc2\x01", VCMPPS128krri_mask, FLAGMASK(0, FE_K1), FE_K0, FE_XMM1, FE_XMM2, 1);
-TEST("\x62\xf1\x74\x08\xc2\x02\x01", VCMPPS128krmi, 0, FE_K0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, 0), 1);
-TEST("\x62\xf1\x74\x09\xc2\x02\x01", VCMPPS128krmi_mask, FLAGMASK(0, FE_K1), FE_K0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, 0), 1);
-TEST("\x62\xf1\x74\x08\xc2\x42\x08\x01", VCMPPS128krmi, 0, FE_K0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, 0x80), 1);
-TEST("\x62\xf1\x74\x09\xc2\x42\x08\x01", VCMPPS128krmi_mask, FLAGMASK(0, FE_K1), FE_K0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, 0x80), 1);
-TEST("\x62\xf1\x74\x18\xc2\x42\x20\x01", VCMPPS128krbi, 0, FE_K0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, 0x80), 1);
-TEST("\x62\xf1\x74\x19\xc2\x42\x20\x01", VCMPPS128krbi_mask, FLAGMASK(0, FE_K1), FE_K0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, 0x80), 1);
-TEST("\x62\xf1\x74\x28\xc2\xc2\x01", VCMPPS256krri, 0, FE_K0, FE_XMM1, FE_XMM2, 1);
-TEST("\x62\xf1\x74\x29\xc2\xc2\x01", VCMPPS256krri_mask, FLAGMASK(0, FE_K1), FE_K0, FE_XMM1, FE_XMM2, 1);
-TEST("\x62\xf1\x74\x28\xc2\x02\x01", VCMPPS256krmi, 0, FE_K0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, 0), 1);
-TEST("\x62\xf1\x74\x29\xc2\x02\x01", VCMPPS256krmi_mask, FLAGMASK(0, FE_K1), FE_K0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, 0), 1);
-TEST("\x62\xf1\x74\x28\xc2\x42\x04\x01", VCMPPS256krmi, 0, FE_K0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, 0x80), 1);
-TEST("\x62\xf1\x74\x29\xc2\x42\x04\x01", VCMPPS256krmi_mask, FLAGMASK(0, FE_K1), FE_K0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, 0x80), 1);
-TEST("\x62\xf1\x74\x38\xc2\x42\x20\x01", VCMPPS256krbi, 0, FE_K0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, 0x80), 1);
-TEST("\x62\xf1\x74\x39\xc2\x42\x20\x01", VCMPPS256krbi_mask, FLAGMASK(0, FE_K1), FE_K0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, 0x80), 1);
-TEST("\x62\xf1\x74\x48\xc2\xc2\x01", VCMPPS512krri, 0, FE_K0, FE_XMM1, FE_XMM2, 1);
-TEST("\x62\xf1\x74\x49\xc2\xc2\x01", VCMPPS512krri_mask, FLAGMASK(0, FE_K1), FE_K0, FE_XMM1, FE_XMM2, 1);
-TEST("\x62\xf1\x74\x48\xc2\x02\x01", VCMPPS512krmi, 0, FE_K0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, 0), 1);
-TEST("\x62\xf1\x74\x49\xc2\x02\x01", VCMPPS512krmi_mask, FLAGMASK(0, FE_K1), FE_K0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, 0), 1);
-TEST("\x62\xf1\x74\x48\xc2\x42\x02\x01", VCMPPS512krmi, 0, FE_K0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, 0x80), 1);
-TEST("\x62\xf1\x74\x49\xc2\x42\x02\x01", VCMPPS512krmi_mask, FLAGMASK(0, FE_K1), FE_K0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, 0x80), 1);
-TEST("\x62\xf1\x74\x58\xc2\x42\x20\x01", VCMPPS512krbi, 0, FE_K0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, 0x80), 1);
-TEST("\x62\xf1\x74\x59\xc2\x42\x20\x01", VCMPPS512krbi_mask, FLAGMASK(0, FE_K1), FE_K0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, 0x80), 1);
-TEST("\x62\xf1\x74\x18\xc2\xc2\x01", VCMPPS512krri_sae, 0, FE_K0, FE_XMM1, FE_XMM2, 1);
-TEST("\x62\xf1\x74\x19\xc2\xc2\x01", VCMPPS512krri_mask_sae, FLAGMASK(0, FE_K1), FE_K0, FE_XMM1, FE_XMM2, 1);
-TEST("\x62\xf1\x76\x08\xc2\xc2\x01", VCMPSSkrri, 0, FE_K0, FE_XMM1, FE_XMM2, 1);
-TEST("\x62\xf1\x76\x09\xc2\xc2\x01", VCMPSSkrri_mask, FLAGMASK(0, FE_K1), FE_K0, FE_XMM1, FE_XMM2, 1);
-TEST("\x62\xf1\x76\x18\xc2\xc2\x01", VCMPSSkrri_sae, 0, FE_K0, FE_XMM1, FE_XMM2, 1);
-TEST("\x62\xf1\x76\x19\xc2\xc2\x01", VCMPSSkrri_mask_sae, FLAGMASK(0, FE_K1), FE_K0, FE_XMM1, FE_XMM2, 1);
+TEST("\x62\xf1\x74\x08\xc2\xc2\x01", VCMPPS128krri, 0, FE_K0, FE_XMM1, FE_XMM2, 1)
+TEST("\x62\xf1\x74\x09\xc2\xc2\x01", VCMPPS128krri_mask, FLAGMASK(0, FE_K1), FE_K0, FE_XMM1, FE_XMM2, 1)
+TEST("\x62\xf1\x74\x08\xc2\x02\x01", VCMPPS128krmi, 0, FE_K0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, 0), 1)
+TEST("\x62\xf1\x74\x09\xc2\x02\x01", VCMPPS128krmi_mask, FLAGMASK(0, FE_K1), FE_K0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, 0), 1)
+TEST("\x62\xf1\x74\x08\xc2\x42\x08\x01", VCMPPS128krmi, 0, FE_K0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, 0x80), 1)
+TEST("\x62\xf1\x74\x09\xc2\x42\x08\x01", VCMPPS128krmi_mask, FLAGMASK(0, FE_K1), FE_K0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, 0x80), 1)
+TEST("\x62\xf1\x74\x18\xc2\x42\x20\x01", VCMPPS128krbi, 0, FE_K0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, 0x80), 1)
+TEST("\x62\xf1\x74\x19\xc2\x42\x20\x01", VCMPPS128krbi_mask, FLAGMASK(0, FE_K1), FE_K0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, 0x80), 1)
+TEST("\x62\xf1\x74\x28\xc2\xc2\x01", VCMPPS256krri, 0, FE_K0, FE_XMM1, FE_XMM2, 1)
+TEST("\x62\xf1\x74\x29\xc2\xc2\x01", VCMPPS256krri_mask, FLAGMASK(0, FE_K1), FE_K0, FE_XMM1, FE_XMM2, 1)
+TEST("\x62\xf1\x74\x28\xc2\x02\x01", VCMPPS256krmi, 0, FE_K0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, 0), 1)
+TEST("\x62\xf1\x74\x29\xc2\x02\x01", VCMPPS256krmi_mask, FLAGMASK(0, FE_K1), FE_K0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, 0), 1)
+TEST("\x62\xf1\x74\x28\xc2\x42\x04\x01", VCMPPS256krmi, 0, FE_K0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, 0x80), 1)
+TEST("\x62\xf1\x74\x29\xc2\x42\x04\x01", VCMPPS256krmi_mask, FLAGMASK(0, FE_K1), FE_K0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, 0x80), 1)
+TEST("\x62\xf1\x74\x38\xc2\x42\x20\x01", VCMPPS256krbi, 0, FE_K0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, 0x80), 1)
+TEST("\x62\xf1\x74\x39\xc2\x42\x20\x01", VCMPPS256krbi_mask, FLAGMASK(0, FE_K1), FE_K0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, 0x80), 1)
+TEST("\x62\xf1\x74\x48\xc2\xc2\x01", VCMPPS512krri, 0, FE_K0, FE_XMM1, FE_XMM2, 1)
+TEST("\x62\xf1\x74\x49\xc2\xc2\x01", VCMPPS512krri_mask, FLAGMASK(0, FE_K1), FE_K0, FE_XMM1, FE_XMM2, 1)
+TEST("\x62\xf1\x74\x48\xc2\x02\x01", VCMPPS512krmi, 0, FE_K0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, 0), 1)
+TEST("\x62\xf1\x74\x49\xc2\x02\x01", VCMPPS512krmi_mask, FLAGMASK(0, FE_K1), FE_K0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, 0), 1)
+TEST("\x62\xf1\x74\x48\xc2\x42\x02\x01", VCMPPS512krmi, 0, FE_K0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, 0x80), 1)
+TEST("\x62\xf1\x74\x49\xc2\x42\x02\x01", VCMPPS512krmi_mask, FLAGMASK(0, FE_K1), FE_K0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, 0x80), 1)
+TEST("\x62\xf1\x74\x58\xc2\x42\x20\x01", VCMPPS512krbi, 0, FE_K0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, 0x80), 1)
+TEST("\x62\xf1\x74\x59\xc2\x42\x20\x01", VCMPPS512krbi_mask, FLAGMASK(0, FE_K1), FE_K0, FE_XMM1, FE_MEM(FE_DX, 0, FE_NOREG, 0x80), 1)
+TEST("\x62\xf1\x74\x18\xc2\xc2\x01", VCMPPS512krri_sae, 0, FE_K0, FE_XMM1, FE_XMM2, 1)
+TEST("\x62\xf1\x74\x19\xc2\xc2\x01", VCMPPS512krri_mask_sae, FLAGMASK(0, FE_K1), FE_K0, FE_XMM1, FE_XMM2, 1)
+TEST("\x62\xf1\x76\x08\xc2\xc2\x01", VCMPSSkrri, 0, FE_K0, FE_XMM1, FE_XMM2, 1)
+TEST("\x62\xf1\x76\x09\xc2\xc2\x01", VCMPSSkrri_mask, FLAGMASK(0, FE_K1), FE_K0, FE_XMM1, FE_XMM2, 1)
+TEST("\x62\xf1\x76\x18\xc2\xc2\x01", VCMPSSkrri_sae, 0, FE_K0, FE_XMM1, FE_XMM2, 1)
+TEST("\x62\xf1\x76\x19\xc2\xc2\x01", VCMPSSkrri_mask_sae, FLAGMASK(0, FE_K1), FE_K0, FE_XMM1, FE_XMM2, 1)
 
 // Mask instructions
-TEST("\xc5\xcd\x41\xef", KANDBkkk, 0, FE_K5, FE_K6, FE_K7);
-TEST("\xc5\xcc\x41\xef", KANDWkkk, 0, FE_K5, FE_K6, FE_K7);
-TEST("\xc4\xe1\xcd\x41\xef", KANDDkkk, 0, FE_K5, FE_K6, FE_K7);
-TEST("\xc4\xe1\xcc\x41\xef", KANDQkkk, 0, FE_K5, FE_K6, FE_K7);
-TEST("\xc5\xcd\x42\xef", KANDNBkkk, 0, FE_K5, FE_K6, FE_K7);
-TEST("\xc5\xcc\x42\xef", KANDNWkkk, 0, FE_K5, FE_K6, FE_K7);
-TEST("\xc4\xe1\xcd\x42\xef", KANDNDkkk, 0, FE_K5, FE_K6, FE_K7);
-TEST("\xc4\xe1\xcc\x42\xef", KANDNQkkk, 0, FE_K5, FE_K6, FE_K7);
-TEST("\xc5\xf9\x44\xee", KNOTBkk, 0, FE_K5, FE_K6);
-TEST("\xc5\xf8\x44\xee", KNOTWkk, 0, FE_K5, FE_K6);
-TEST("\xc4\xe1\xf9\x44\xee", KNOTDkk, 0, FE_K5, FE_K6);
-TEST("\xc4\xe1\xf8\x44\xee", KNOTQkk, 0, FE_K5, FE_K6);
-TEST("\xc5\xcd\x45\xef", KORBkkk, 0, FE_K5, FE_K6, FE_K7);
-TEST("\xc5\xcc\x45\xef", KORWkkk, 0, FE_K5, FE_K6, FE_K7);
-TEST("\xc4\xe1\xcd\x45\xef", KORDkkk, 0, FE_K5, FE_K6, FE_K7);
-TEST("\xc4\xe1\xcc\x45\xef", KORQkkk, 0, FE_K5, FE_K6, FE_K7);
-TEST("\xc5\xcd\x46\xef", KXNORBkkk, 0, FE_K5, FE_K6, FE_K7);
-TEST("\xc5\xcc\x46\xef", KXNORWkkk, 0, FE_K5, FE_K6, FE_K7);
-TEST("\xc4\xe1\xcd\x46\xef", KXNORDkkk, 0, FE_K5, FE_K6, FE_K7);
-TEST("\xc4\xe1\xcc\x46\xef", KXNORQkkk, 0, FE_K5, FE_K6, FE_K7);
-TEST("\xc5\xcd\x47\xef", KXORBkkk, 0, FE_K5, FE_K6, FE_K7);
-TEST("\xc5\xcc\x47\xef", KXORWkkk, 0, FE_K5, FE_K6, FE_K7);
-TEST("\xc4\xe1\xcd\x47\xef", KXORDkkk, 0, FE_K5, FE_K6, FE_K7);
-TEST("\xc4\xe1\xcc\x47\xef", KXORQkkk, 0, FE_K5, FE_K6, FE_K7);
-TEST("\xc5\xcd\x4a\xef", KADDBkkk, 0, FE_K5, FE_K6, FE_K7);
-TEST("\xc5\xcc\x4a\xef", KADDWkkk, 0, FE_K5, FE_K6, FE_K7);
-TEST("\xc4\xe1\xcd\x4a\xef", KADDDkkk, 0, FE_K5, FE_K6, FE_K7);
-TEST("\xc4\xe1\xcc\x4a\xef", KADDQkkk, 0, FE_K5, FE_K6, FE_K7);
-TEST("\xc5\xcd\x4b\xef", KUNPCKBWkkk, 0, FE_K5, FE_K6, FE_K7);
-TEST("\xc5\xcc\x4b\xef", KUNPCKWDkkk, 0, FE_K5, FE_K6, FE_K7);
-TEST("\xc4\xe1\xcc\x4b\xef", KUNPCKDQkkk, 0, FE_K5, FE_K6, FE_K7);
-TEST("\xc5\xf9\x98\xee", KORTESTBkk, 0, FE_K5, FE_K6);
-TEST("\xc5\xf8\x98\xee", KORTESTWkk, 0, FE_K5, FE_K6);
-TEST("\xc4\xe1\xf9\x98\xee", KORTESTDkk, 0, FE_K5, FE_K6);
-TEST("\xc4\xe1\xf8\x98\xee", KORTESTQkk, 0, FE_K5, FE_K6);
-TEST("\xc5\xf9\x90\xee", KMOVBkk, 0, FE_K5, FE_K6);
-TEST("\xc5\xf8\x90\xee", KMOVWkk, 0, FE_K5, FE_K6);
-TEST("\xc4\xe1\xf9\x90\xee", KMOVDkk, 0, FE_K5, FE_K6);
-TEST("\xc4\xe1\xf8\x90\xee", KMOVQkk, 0, FE_K5, FE_K6);
-TEST("\xc5\xf9\x90\x7a\x10", KMOVBkm, 0, FE_K7, FE_MEM(FE_DX, 0, FE_NOREG, 0x10));
-TEST("\xc5\xf8\x90\x7a\x10", KMOVWkm, 0, FE_K7, FE_MEM(FE_DX, 0, FE_NOREG, 0x10));
-TEST("\xc4\xe1\xf9\x90\x7a\x10", KMOVDkm, 0, FE_K7, FE_MEM(FE_DX, 0, FE_NOREG, 0x10));
-TEST("\xc4\xe1\xf8\x90\x7a\x10", KMOVQkm, 0, FE_K7, FE_MEM(FE_DX, 0, FE_NOREG, 0x10));
-TEST("\xc5\xf9\x91\x7a\x10", KMOVBmk, 0, FE_MEM(FE_DX, 0, FE_NOREG, 0x10), FE_K7);
-TEST("\xc5\xf8\x91\x7a\x10", KMOVWmk, 0, FE_MEM(FE_DX, 0, FE_NOREG, 0x10), FE_K7);
-TEST("\xc4\xe1\xf9\x91\x7a\x10", KMOVDmk, 0, FE_MEM(FE_DX, 0, FE_NOREG, 0x10), FE_K7);
-TEST("\xc4\xe1\xf8\x91\x7a\x10", KMOVQmk, 0, FE_MEM(FE_DX, 0, FE_NOREG, 0x10), FE_K7);
-TEST("\xc5\xf9\x92\xe8", KMOVBkr, 0, FE_K5, FE_AX);
-TEST("\xc5\xf8\x92\xe8", KMOVWkr, 0, FE_K5, FE_AX);
-TEST("\xc5\xfb\x92\xe8", KMOVDkr, 0, FE_K5, FE_AX);
-TEST("\xc4\xe1\xfb\x92\xe8", KMOVQkr, 0, FE_K5, FE_AX);
-TEST("\xc5\xf9\x93\xc7", KMOVBrk, 0, FE_AX, FE_K7);
-TEST("\xc5\xf8\x93\xc7", KMOVWrk, 0, FE_AX, FE_K7);
-TEST("\xc5\xfb\x93\xc7", KMOVDrk, 0, FE_AX, FE_K7);
-TEST("\xc4\xe1\xfb\x93\xc7", KMOVQrk, 0, FE_AX, FE_K7);
-TEST("\xc5\xf9\x99\xee", KTESTBkk, 0, FE_K5, FE_K6);
-TEST("\xc5\xf8\x99\xee", KTESTWkk, 0, FE_K5, FE_K6);
-TEST("\xc4\xe1\xf9\x99\xee", KTESTDkk, 0, FE_K5, FE_K6);
-TEST("\xc4\xe1\xf8\x99\xee", KTESTQkk, 0, FE_K5, FE_K6);
-TEST("\xc4\xe3\x79\x30\xee\x0b", KSHIFTRBkki, 0, FE_K5, FE_K6, 11);
-TEST("\xc4\xe3\xf9\x30\xee\x0b", KSHIFTRWkki, 0, FE_K5, FE_K6, 11);
-TEST("\xc4\xe3\x79\x31\xee\x0b", KSHIFTRDkki, 0, FE_K5, FE_K6, 11);
-TEST("\xc4\xe3\xf9\x31\xee\x0b", KSHIFTRQkki, 0, FE_K5, FE_K6, 11);
-TEST("\xc4\xe3\x79\x32\xee\x0b", KSHIFTLBkki, 0, FE_K5, FE_K6, 11);
-TEST("\xc4\xe3\xf9\x32\xee\x0b", KSHIFTLWkki, 0, FE_K5, FE_K6, 11);
-TEST("\xc4\xe3\x79\x33\xee\x0b", KSHIFTLDkki, 0, FE_K5, FE_K6, 11);
-TEST("\xc4\xe3\xf9\x33\xee\x0b", KSHIFTLQkki, 0, FE_K5, FE_K6, 11);
+TEST("\xc5\xcd\x41\xef", KANDBkkk, 0, FE_K5, FE_K6, FE_K7)
+TEST("\xc5\xcc\x41\xef", KANDWkkk, 0, FE_K5, FE_K6, FE_K7)
+TEST("\xc4\xe1\xcd\x41\xef", KANDDkkk, 0, FE_K5, FE_K6, FE_K7)
+TEST("\xc4\xe1\xcc\x41\xef", KANDQkkk, 0, FE_K5, FE_K6, FE_K7)
+TEST("\xc5\xcd\x42\xef", KANDNBkkk, 0, FE_K5, FE_K6, FE_K7)
+TEST("\xc5\xcc\x42\xef", KANDNWkkk, 0, FE_K5, FE_K6, FE_K7)
+TEST("\xc4\xe1\xcd\x42\xef", KANDNDkkk, 0, FE_K5, FE_K6, FE_K7)
+TEST("\xc4\xe1\xcc\x42\xef", KANDNQkkk, 0, FE_K5, FE_K6, FE_K7)
+TEST("\xc5\xf9\x44\xee", KNOTBkk, 0, FE_K5, FE_K6)
+TEST("\xc5\xf8\x44\xee", KNOTWkk, 0, FE_K5, FE_K6)
+TEST("\xc4\xe1\xf9\x44\xee", KNOTDkk, 0, FE_K5, FE_K6)
+TEST("\xc4\xe1\xf8\x44\xee", KNOTQkk, 0, FE_K5, FE_K6)
+TEST("\xc5\xcd\x45\xef", KORBkkk, 0, FE_K5, FE_K6, FE_K7)
+TEST("\xc5\xcc\x45\xef", KORWkkk, 0, FE_K5, FE_K6, FE_K7)
+TEST("\xc4\xe1\xcd\x45\xef", KORDkkk, 0, FE_K5, FE_K6, FE_K7)
+TEST("\xc4\xe1\xcc\x45\xef", KORQkkk, 0, FE_K5, FE_K6, FE_K7)
+TEST("\xc5\xcd\x46\xef", KXNORBkkk, 0, FE_K5, FE_K6, FE_K7)
+TEST("\xc5\xcc\x46\xef", KXNORWkkk, 0, FE_K5, FE_K6, FE_K7)
+TEST("\xc4\xe1\xcd\x46\xef", KXNORDkkk, 0, FE_K5, FE_K6, FE_K7)
+TEST("\xc4\xe1\xcc\x46\xef", KXNORQkkk, 0, FE_K5, FE_K6, FE_K7)
+TEST("\xc5\xcd\x47\xef", KXORBkkk, 0, FE_K5, FE_K6, FE_K7)
+TEST("\xc5\xcc\x47\xef", KXORWkkk, 0, FE_K5, FE_K6, FE_K7)
+TEST("\xc4\xe1\xcd\x47\xef", KXORDkkk, 0, FE_K5, FE_K6, FE_K7)
+TEST("\xc4\xe1\xcc\x47\xef", KXORQkkk, 0, FE_K5, FE_K6, FE_K7)
+TEST("\xc5\xcd\x4a\xef", KADDBkkk, 0, FE_K5, FE_K6, FE_K7)
+TEST("\xc5\xcc\x4a\xef", KADDWkkk, 0, FE_K5, FE_K6, FE_K7)
+TEST("\xc4\xe1\xcd\x4a\xef", KADDDkkk, 0, FE_K5, FE_K6, FE_K7)
+TEST("\xc4\xe1\xcc\x4a\xef", KADDQkkk, 0, FE_K5, FE_K6, FE_K7)
+TEST("\xc5\xcd\x4b\xef", KUNPCKBWkkk, 0, FE_K5, FE_K6, FE_K7)
+TEST("\xc5\xcc\x4b\xef", KUNPCKWDkkk, 0, FE_K5, FE_K6, FE_K7)
+TEST("\xc4\xe1\xcc\x4b\xef", KUNPCKDQkkk, 0, FE_K5, FE_K6, FE_K7)
+TEST("\xc5\xf9\x98\xee", KORTESTBkk, 0, FE_K5, FE_K6)
+TEST("\xc5\xf8\x98\xee", KORTESTWkk, 0, FE_K5, FE_K6)
+TEST("\xc4\xe1\xf9\x98\xee", KORTESTDkk, 0, FE_K5, FE_K6)
+TEST("\xc4\xe1\xf8\x98\xee", KORTESTQkk, 0, FE_K5, FE_K6)
+TEST("\xc5\xf9\x90\xee", KMOVBkk, 0, FE_K5, FE_K6)
+TEST("\xc5\xf8\x90\xee", KMOVWkk, 0, FE_K5, FE_K6)
+TEST("\xc4\xe1\xf9\x90\xee", KMOVDkk, 0, FE_K5, FE_K6)
+TEST("\xc4\xe1\xf8\x90\xee", KMOVQkk, 0, FE_K5, FE_K6)
+TEST("\xc5\xf9\x90\x7a\x10", KMOVBkm, 0, FE_K7, FE_MEM(FE_DX, 0, FE_NOREG, 0x10))
+TEST("\xc5\xf8\x90\x7a\x10", KMOVWkm, 0, FE_K7, FE_MEM(FE_DX, 0, FE_NOREG, 0x10))
+TEST("\xc4\xe1\xf9\x90\x7a\x10", KMOVDkm, 0, FE_K7, FE_MEM(FE_DX, 0, FE_NOREG, 0x10))
+TEST("\xc4\xe1\xf8\x90\x7a\x10", KMOVQkm, 0, FE_K7, FE_MEM(FE_DX, 0, FE_NOREG, 0x10))
+TEST("\xc5\xf9\x91\x7a\x10", KMOVBmk, 0, FE_MEM(FE_DX, 0, FE_NOREG, 0x10), FE_K7)
+TEST("\xc5\xf8\x91\x7a\x10", KMOVWmk, 0, FE_MEM(FE_DX, 0, FE_NOREG, 0x10), FE_K7)
+TEST("\xc4\xe1\xf9\x91\x7a\x10", KMOVDmk, 0, FE_MEM(FE_DX, 0, FE_NOREG, 0x10), FE_K7)
+TEST("\xc4\xe1\xf8\x91\x7a\x10", KMOVQmk, 0, FE_MEM(FE_DX, 0, FE_NOREG, 0x10), FE_K7)
+TEST("\xc5\xf9\x92\xe8", KMOVBkr, 0, FE_K5, FE_AX)
+TEST("\xc5\xf8\x92\xe8", KMOVWkr, 0, FE_K5, FE_AX)
+TEST("\xc5\xfb\x92\xe8", KMOVDkr, 0, FE_K5, FE_AX)
+TEST("\xc4\xe1\xfb\x92\xe8", KMOVQkr, 0, FE_K5, FE_AX)
+TEST("\xc5\xf9\x93\xc7", KMOVBrk, 0, FE_AX, FE_K7)
+TEST("\xc5\xf8\x93\xc7", KMOVWrk, 0, FE_AX, FE_K7)
+TEST("\xc5\xfb\x93\xc7", KMOVDrk, 0, FE_AX, FE_K7)
+TEST("\xc4\xe1\xfb\x93\xc7", KMOVQrk, 0, FE_AX, FE_K7)
+TEST("\xc5\xf9\x99\xee", KTESTBkk, 0, FE_K5, FE_K6)
+TEST("\xc5\xf8\x99\xee", KTESTWkk, 0, FE_K5, FE_K6)
+TEST("\xc4\xe1\xf9\x99\xee", KTESTDkk, 0, FE_K5, FE_K6)
+TEST("\xc4\xe1\xf8\x99\xee", KTESTQkk, 0, FE_K5, FE_K6)
+TEST("\xc4\xe3\x79\x30\xee\x0b", KSHIFTRBkki, 0, FE_K5, FE_K6, 11)
+TEST("\xc4\xe3\xf9\x30\xee\x0b", KSHIFTRWkki, 0, FE_K5, FE_K6, 11)
+TEST("\xc4\xe3\x79\x31\xee\x0b", KSHIFTRDkki, 0, FE_K5, FE_K6, 11)
+TEST("\xc4\xe3\xf9\x31\xee\x0b", KSHIFTRQkki, 0, FE_K5, FE_K6, 11)
+TEST("\xc4\xe3\x79\x32\xee\x0b", KSHIFTLBkki, 0, FE_K5, FE_K6, 11)
+TEST("\xc4\xe3\xf9\x32\xee\x0b", KSHIFTLWkki, 0, FE_K5, FE_K6, 11)
+TEST("\xc4\xe3\x79\x33\xee\x0b", KSHIFTLDkki, 0, FE_K5, FE_K6, 11)
+TEST("\xc4\xe3\xf9\x33\xee\x0b", KSHIFTLQkki, 0, FE_K5, FE_K6, 11)
 
 // Test REX prefix
-TEST("\x00\x01", ADD8mr, 0, FE_MEM(FE_CX, 0, FE_NOREG, 0), FE_AX);
-TEST("\x00\x21", ADD8mr, 0, FE_MEM(FE_CX, 0, FE_NOREG, 0), FE_AH);
-TEST("\x40\x00\x21", ADD8mr, 0, FE_MEM(FE_CX, 0, FE_NOREG, 0), FE_SP);
-TEST("\x41\x00\x01", ADD8mr, 0, FE_MEM(FE_R9, 0, FE_NOREG, 0), FE_AX);
-TEST("", ADD8mr, 0, FE_MEM(FE_R9, 0, FE_NOREG, 0), FE_AH);
-TEST("\x41\x00\x21", ADD8mr, 0, FE_MEM(FE_R9, 0, FE_NOREG, 0), FE_SP);
-TEST("\x44\x00\x01", ADD8mr, 0, FE_MEM(FE_CX, 0, FE_NOREG, 0), FE_R8);
-TEST("\x45\x00\x01", ADD8mr, 0, FE_MEM(FE_R9, 0, FE_NOREG, 0), FE_R8);
-TEST("", ADD8mr, 0, FE_MEM(FE_R9, 0, FE_NOREG, 0), FE_AH);
-TEST("\x00\x04\x11", ADD8mr, 0, FE_MEM(FE_CX, 1, FE_DX, 0), FE_AX);
-TEST("\x00\x24\x11", ADD8mr, 0, FE_MEM(FE_CX, 1, FE_DX, 0), FE_AH);
-TEST("\x40\x00\x24\x11", ADD8mr, 0, FE_MEM(FE_CX, 1, FE_DX, 0), FE_SP);
-TEST("\x41\x00\x04\x11", ADD8mr, 0, FE_MEM(FE_R9, 1, FE_DX, 0), FE_AX);
-TEST("\x41\x00\x24\x11", ADD8mr, 0, FE_MEM(FE_R9, 1, FE_DX, 0), FE_SP);
-TEST("", ADD8mr, 0, FE_MEM(FE_R9, 1, FE_DX, 0), FE_AH);
-TEST("\x42\x00\x04\x11", ADD8mr, 0, FE_MEM(FE_CX, 1, FE_R10, 0), FE_AX);
-TEST("\x42\x00\x24\x11", ADD8mr, 0, FE_MEM(FE_CX, 1, FE_R10, 0), FE_SP);
-TEST("", ADD8mr, 0, FE_MEM(FE_CX, 1, FE_R10, 0), FE_AH);
-TEST("\x43\x00\x04\x11", ADD8mr, 0, FE_MEM(FE_R9, 1, FE_R10, 0), FE_AX);
-TEST("\x43\x00\x24\x11", ADD8mr, 0, FE_MEM(FE_R9, 1, FE_R10, 0), FE_SP);
-TEST("", ADD8mr, 0, FE_MEM(FE_R9, 1, FE_R10, 0), FE_AH);
-TEST("\x44\x00\x04\x11", ADD8mr, 0, FE_MEM(FE_CX, 1, FE_DX, 0), FE_R8);
-TEST("\x45\x00\x04\x11", ADD8mr, 0, FE_MEM(FE_R9, 1, FE_DX, 0), FE_R8);
-TEST("\x46\x00\x04\x11", ADD8mr, 0, FE_MEM(FE_CX, 1, FE_R10, 0), FE_R8);
-TEST("\x47\x00\x04\x11", ADD8mr, 0, FE_MEM(FE_R9, 1, FE_R10, 0), FE_R8);
-TEST("\x00\xc1", ADD8rr, 0, FE_CX, FE_AX);
-TEST("\x00\xc5", ADD8rr, 0, FE_CH, FE_AX);
-TEST("\x40\x00\xc5", ADD8rr, 0, FE_BP, FE_AX);
-TEST("\x41\x00\xc1", ADD8rr, 0, FE_R9, FE_AX);
-TEST("\x00\xe1", ADD8rr, 0, FE_CX, FE_AH);
-TEST("\x00\xe5", ADD8rr, 0, FE_CH, FE_AH);
-TEST("", ADD8rr, 0, FE_BP, FE_AH);
-TEST("", ADD8rr, 0, FE_R9, FE_AH);
-TEST("\x40\x00\xe1", ADD8rr, 0, FE_CX, FE_SP);
-TEST("", ADD8rr, 0, FE_CH, FE_SP);
-TEST("\x40\x00\xe5", ADD8rr, 0, FE_BP, FE_SP);
-TEST("\x41\x00\xe1", ADD8rr, 0, FE_R9, FE_SP);
-TEST("\x44\x00\xc1", ADD8rr, 0, FE_CX, FE_R8);
-TEST("", ADD8rr, 0, FE_CH, FE_R8);
-TEST("\x44\x00\xc5", ADD8rr, 0, FE_BP, FE_R8);
-TEST("\x45\x00\xc1", ADD8rr, 0, FE_R9, FE_R8);
-TEST("\x01\x01", ADD32mr, 0, FE_MEM(FE_CX, 0, FE_NOREG, 0), FE_AX);
-TEST("\x41\x01\x01", ADD32mr, 0, FE_MEM(FE_R9, 0, FE_NOREG, 0), FE_AX);
-TEST("\x44\x01\x01", ADD32mr, 0, FE_MEM(FE_CX, 0, FE_NOREG, 0), FE_R8);
-TEST("\x45\x01\x01", ADD32mr, 0, FE_MEM(FE_R9, 0, FE_NOREG, 0), FE_R8);
-TEST("\x01\x04\x11", ADD32mr, 0, FE_MEM(FE_CX, 1, FE_DX, 0), FE_AX);
-TEST("\x41\x01\x04\x11", ADD32mr, 0, FE_MEM(FE_R9, 1, FE_DX, 0), FE_AX);
-TEST("\x42\x01\x04\x11", ADD32mr, 0, FE_MEM(FE_CX, 1, FE_R10, 0), FE_AX);
-TEST("\x43\x01\x04\x11", ADD32mr, 0, FE_MEM(FE_R9, 1, FE_R10, 0), FE_AX);
-TEST("\x44\x01\x04\x11", ADD32mr, 0, FE_MEM(FE_CX, 1, FE_DX, 0), FE_R8);
-TEST("\x45\x01\x04\x11", ADD32mr, 0, FE_MEM(FE_R9, 1, FE_DX, 0), FE_R8);
-TEST("\x46\x01\x04\x11", ADD32mr, 0, FE_MEM(FE_CX, 1, FE_R10, 0), FE_R8);
-TEST("\x47\x01\x04\x11", ADD32mr, 0, FE_MEM(FE_R9, 1, FE_R10, 0), FE_R8);
-TEST("\x48\x01\x01", ADD64mr, 0, FE_MEM(FE_CX, 0, FE_NOREG, 0), FE_AX);
-TEST("\x49\x01\x01", ADD64mr, 0, FE_MEM(FE_R9, 0, FE_NOREG, 0), FE_AX);
-TEST("\x4c\x01\x01", ADD64mr, 0, FE_MEM(FE_CX, 0, FE_NOREG, 0), FE_R8);
-TEST("\x4d\x01\x01", ADD64mr, 0, FE_MEM(FE_R9, 0, FE_NOREG, 0), FE_R8);
-TEST("\x48\x01\x04\x11", ADD64mr, 0, FE_MEM(FE_CX, 1, FE_DX, 0), FE_AX);
-TEST("\x49\x01\x04\x11", ADD64mr, 0, FE_MEM(FE_R9, 1, FE_DX, 0), FE_AX);
-TEST("\x4a\x01\x04\x11", ADD64mr, 0, FE_MEM(FE_CX, 1, FE_R10, 0), FE_AX);
-TEST("\x4b\x01\x04\x11", ADD64mr, 0, FE_MEM(FE_R9, 1, FE_R10, 0), FE_AX);
-TEST("\x4c\x01\x04\x11", ADD64mr, 0, FE_MEM(FE_CX, 1, FE_DX, 0), FE_R8);
-TEST("\x4d\x01\x04\x11", ADD64mr, 0, FE_MEM(FE_R9, 1, FE_DX, 0), FE_R8);
-TEST("\x4e\x01\x04\x11", ADD64mr, 0, FE_MEM(FE_CX, 1, FE_R10, 0), FE_R8);
-TEST("\x4f\x01\x04\x11", ADD64mr, 0, FE_MEM(FE_R9, 1, FE_R10, 0), FE_R8);
-TEST("\x01\xc1", ADD32rr, 0, FE_CX, FE_AX);
-TEST("\x41\x01\xc1", ADD32rr, 0, FE_R9, FE_AX);
-TEST("\x44\x01\xc1", ADD32rr, 0, FE_CX, FE_R8);
-TEST("\x45\x01\xc1", ADD32rr, 0, FE_R9, FE_R8);
-TEST("\x48\x01\xc1", ADD64rr, 0, FE_CX, FE_AX);
-TEST("\x49\x01\xc1", ADD64rr, 0, FE_R9, FE_AX);
-TEST("\x4c\x01\xc1", ADD64rr, 0, FE_CX, FE_R8);
-TEST("\x4d\x01\xc1", ADD64rr, 0, FE_R9, FE_R8);
+TEST("\x00\x01", ADD8mr, 0, FE_MEM(FE_CX, 0, FE_NOREG, 0), FE_AX)
+TEST("\x00\x21", ADD8mr, 0, FE_MEM(FE_CX, 0, FE_NOREG, 0), FE_AH)
+TEST("\x40\x00\x21", ADD8mr, 0, FE_MEM(FE_CX, 0, FE_NOREG, 0), FE_SP)
+TEST("\x41\x00\x01", ADD8mr, 0, FE_MEM(FE_R9, 0, FE_NOREG, 0), FE_AX)
+TEST("", ADD8mr, 0, FE_MEM(FE_R9, 0, FE_NOREG, 0), FE_AH)
+TEST("\x41\x00\x21", ADD8mr, 0, FE_MEM(FE_R9, 0, FE_NOREG, 0), FE_SP)
+TEST("\x44\x00\x01", ADD8mr, 0, FE_MEM(FE_CX, 0, FE_NOREG, 0), FE_R8)
+TEST("\x45\x00\x01", ADD8mr, 0, FE_MEM(FE_R9, 0, FE_NOREG, 0), FE_R8)
+TEST("", ADD8mr, 0, FE_MEM(FE_R9, 0, FE_NOREG, 0), FE_AH)
+TEST("\x00\x04\x11", ADD8mr, 0, FE_MEM(FE_CX, 1, FE_DX, 0), FE_AX)
+TEST("\x00\x24\x11", ADD8mr, 0, FE_MEM(FE_CX, 1, FE_DX, 0), FE_AH)
+TEST("\x40\x00\x24\x11", ADD8mr, 0, FE_MEM(FE_CX, 1, FE_DX, 0), FE_SP)
+TEST("\x41\x00\x04\x11", ADD8mr, 0, FE_MEM(FE_R9, 1, FE_DX, 0), FE_AX)
+TEST("\x41\x00\x24\x11", ADD8mr, 0, FE_MEM(FE_R9, 1, FE_DX, 0), FE_SP)
+TEST("", ADD8mr, 0, FE_MEM(FE_R9, 1, FE_DX, 0), FE_AH)
+TEST("\x42\x00\x04\x11", ADD8mr, 0, FE_MEM(FE_CX, 1, FE_R10, 0), FE_AX)
+TEST("\x42\x00\x24\x11", ADD8mr, 0, FE_MEM(FE_CX, 1, FE_R10, 0), FE_SP)
+TEST("", ADD8mr, 0, FE_MEM(FE_CX, 1, FE_R10, 0), FE_AH)
+TEST("\x43\x00\x04\x11", ADD8mr, 0, FE_MEM(FE_R9, 1, FE_R10, 0), FE_AX)
+TEST("\x43\x00\x24\x11", ADD8mr, 0, FE_MEM(FE_R9, 1, FE_R10, 0), FE_SP)
+TEST("", ADD8mr, 0, FE_MEM(FE_R9, 1, FE_R10, 0), FE_AH)
+TEST("\x44\x00\x04\x11", ADD8mr, 0, FE_MEM(FE_CX, 1, FE_DX, 0), FE_R8)
+TEST("\x45\x00\x04\x11", ADD8mr, 0, FE_MEM(FE_R9, 1, FE_DX, 0), FE_R8)
+TEST("\x46\x00\x04\x11", ADD8mr, 0, FE_MEM(FE_CX, 1, FE_R10, 0), FE_R8)
+TEST("\x47\x00\x04\x11", ADD8mr, 0, FE_MEM(FE_R9, 1, FE_R10, 0), FE_R8)
+TEST("\x00\xc1", ADD8rr, 0, FE_CX, FE_AX)
+TEST("\x00\xc5", ADD8rr, 0, FE_CH, FE_AX)
+TEST("\x40\x00\xc5", ADD8rr, 0, FE_BP, FE_AX)
+TEST("\x41\x00\xc1", ADD8rr, 0, FE_R9, FE_AX)
+TEST("\x00\xe1", ADD8rr, 0, FE_CX, FE_AH)
+TEST("\x00\xe5", ADD8rr, 0, FE_CH, FE_AH)
+TEST("", ADD8rr, 0, FE_BP, FE_AH)
+TEST("", ADD8rr, 0, FE_R9, FE_AH)
+TEST("\x40\x00\xe1", ADD8rr, 0, FE_CX, FE_SP)
+TEST("", ADD8rr, 0, FE_CH, FE_SP)
+TEST("\x40\x00\xe5", ADD8rr, 0, FE_BP, FE_SP)
+TEST("\x41\x00\xe1", ADD8rr, 0, FE_R9, FE_SP)
+TEST("\x44\x00\xc1", ADD8rr, 0, FE_CX, FE_R8)
+TEST("", ADD8rr, 0, FE_CH, FE_R8)
+TEST("\x44\x00\xc5", ADD8rr, 0, FE_BP, FE_R8)
+TEST("\x45\x00\xc1", ADD8rr, 0, FE_R9, FE_R8)
+TEST("\x01\x01", ADD32mr, 0, FE_MEM(FE_CX, 0, FE_NOREG, 0), FE_AX)
+TEST("\x41\x01\x01", ADD32mr, 0, FE_MEM(FE_R9, 0, FE_NOREG, 0), FE_AX)
+TEST("\x44\x01\x01", ADD32mr, 0, FE_MEM(FE_CX, 0, FE_NOREG, 0), FE_R8)
+TEST("\x45\x01\x01", ADD32mr, 0, FE_MEM(FE_R9, 0, FE_NOREG, 0), FE_R8)
+TEST("\x01\x04\x11", ADD32mr, 0, FE_MEM(FE_CX, 1, FE_DX, 0), FE_AX)
+TEST("\x41\x01\x04\x11", ADD32mr, 0, FE_MEM(FE_R9, 1, FE_DX, 0), FE_AX)
+TEST("\x42\x01\x04\x11", ADD32mr, 0, FE_MEM(FE_CX, 1, FE_R10, 0), FE_AX)
+TEST("\x43\x01\x04\x11", ADD32mr, 0, FE_MEM(FE_R9, 1, FE_R10, 0), FE_AX)
+TEST("\x44\x01\x04\x11", ADD32mr, 0, FE_MEM(FE_CX, 1, FE_DX, 0), FE_R8)
+TEST("\x45\x01\x04\x11", ADD32mr, 0, FE_MEM(FE_R9, 1, FE_DX, 0), FE_R8)
+TEST("\x46\x01\x04\x11", ADD32mr, 0, FE_MEM(FE_CX, 1, FE_R10, 0), FE_R8)
+TEST("\x47\x01\x04\x11", ADD32mr, 0, FE_MEM(FE_R9, 1, FE_R10, 0), FE_R8)
+TEST("\x48\x01\x01", ADD64mr, 0, FE_MEM(FE_CX, 0, FE_NOREG, 0), FE_AX)
+TEST("\x49\x01\x01", ADD64mr, 0, FE_MEM(FE_R9, 0, FE_NOREG, 0), FE_AX)
+TEST("\x4c\x01\x01", ADD64mr, 0, FE_MEM(FE_CX, 0, FE_NOREG, 0), FE_R8)
+TEST("\x4d\x01\x01", ADD64mr, 0, FE_MEM(FE_R9, 0, FE_NOREG, 0), FE_R8)
+TEST("\x48\x01\x04\x11", ADD64mr, 0, FE_MEM(FE_CX, 1, FE_DX, 0), FE_AX)
+TEST("\x49\x01\x04\x11", ADD64mr, 0, FE_MEM(FE_R9, 1, FE_DX, 0), FE_AX)
+TEST("\x4a\x01\x04\x11", ADD64mr, 0, FE_MEM(FE_CX, 1, FE_R10, 0), FE_AX)
+TEST("\x4b\x01\x04\x11", ADD64mr, 0, FE_MEM(FE_R9, 1, FE_R10, 0), FE_AX)
+TEST("\x4c\x01\x04\x11", ADD64mr, 0, FE_MEM(FE_CX, 1, FE_DX, 0), FE_R8)
+TEST("\x4d\x01\x04\x11", ADD64mr, 0, FE_MEM(FE_R9, 1, FE_DX, 0), FE_R8)
+TEST("\x4e\x01\x04\x11", ADD64mr, 0, FE_MEM(FE_CX, 1, FE_R10, 0), FE_R8)
+TEST("\x4f\x01\x04\x11", ADD64mr, 0, FE_MEM(FE_R9, 1, FE_R10, 0), FE_R8)
+TEST("\x01\xc1", ADD32rr, 0, FE_CX, FE_AX)
+TEST("\x41\x01\xc1", ADD32rr, 0, FE_R9, FE_AX)
+TEST("\x44\x01\xc1", ADD32rr, 0, FE_CX, FE_R8)
+TEST("\x45\x01\xc1", ADD32rr, 0, FE_R9, FE_R8)
+TEST("\x48\x01\xc1", ADD64rr, 0, FE_CX, FE_AX)
+TEST("\x49\x01\xc1", ADD64rr, 0, FE_R9, FE_AX)
+TEST("\x4c\x01\xc1", ADD64rr, 0, FE_CX, FE_R8)
+TEST("\x4d\x01\xc1", ADD64rr, 0, FE_R9, FE_R8)
 
 // Test ModRM encoding
-TEST("\x01\x00", ADD32mr, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0), FE_AX);
-TEST("\x01\x04\x24", ADD32mr, 0, FE_MEM(FE_SP, 0, FE_NOREG, 0), FE_AX);
-TEST("\x01\x45\x00", ADD32mr, 0, FE_MEM(FE_BP, 0, FE_NOREG, 0), FE_AX);
-TEST("\x41\x01\x45\x00", ADD32mr, 0, FE_MEM(FE_R13, 0, FE_NOREG, 0), FE_AX);
-TEST("\x41\x01\x45\x80", ADD32mr, 0, FE_MEM(FE_R13, 0, FE_NOREG, -0x80), FE_AX);
-TEST("\x41\x01\x85\x80\x00\x00\x00", ADD32mr, 0, FE_MEM(FE_R13, 0, FE_NOREG, 0x80), FE_AX);
-TEST("\x01\x04\x25\x01\x00\x00\x00", ADD32mr, 0, FE_MEM(FE_NOREG, 0, FE_NOREG, 0x1), FE_AX);
-TEST("\x01\x04\x25\x00\x00\x00\x00", ADD32mr, 0, FE_MEM(FE_NOREG, 0, FE_NOREG, 0), FE_AX);
-TEST("", ADD32mr, 0, FE_MEM(FE_NOREG, 0, FE_AX, 0), FE_AX);
-TEST("", ADD32mr, 0, FE_MEM(FE_NOREG, 3, FE_AX, 0), FE_AX);
-TEST("", ADD32mr, 0, FE_MEM(FE_NOREG, 5, FE_AX, 0), FE_AX);
-TEST("", ADD32mr, 0, FE_MEM(FE_NOREG, 9, FE_AX, 0), FE_AX);
-TEST("", ADD32mr, 0, FE_MEM(FE_NOREG, 15, FE_AX, 0), FE_AX);
-TEST("", ADD32mr, 0, FE_MEM(FE_NOREG, 1, FE_NOREG, 0), FE_AX);
-TEST("", ADD32mr, 0, FE_MEM(FE_NOREG, 2, FE_NOREG, 0), FE_AX);
-TEST("", ADD32mr, 0, FE_MEM(FE_NOREG, 3, FE_NOREG, 0), FE_AX);
-TEST("", ADD32mr, 0, FE_MEM(FE_NOREG, 4, FE_NOREG, 0), FE_AX);
-TEST("", ADD32mr, 0, FE_MEM(FE_NOREG, 8, FE_NOREG, 0), FE_AX);
-TEST("", ADD32mr, 0, FE_MEM(FE_NOREG, 15, FE_NOREG, 0), FE_AX);
-TEST("\x01\x04\x05\x00\x00\x00\x00", ADD32mr, 0, FE_MEM(FE_NOREG, 1, FE_AX, 0), FE_AX);
-TEST("\x01\x04\xc5\x00\x00\x00\x00", ADD32mr, 0, FE_MEM(FE_NOREG, 8, FE_AX, 0), FE_AX);
-TEST("", ADD32mr, 0, FE_MEM(FE_NOREG, 8, FE_SP, 0), FE_AX);
-TEST("\x42\x01\x04\x05\x00\x00\x00\x00", ADD32mr, 0, FE_MEM(FE_NOREG, 1, FE_R8, 0), FE_AX);
+TEST("\x01\x00", ADD32mr, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0), FE_AX)
+TEST("\x01\x04\x24", ADD32mr, 0, FE_MEM(FE_SP, 0, FE_NOREG, 0), FE_AX)
+TEST("\x01\x45\x00", ADD32mr, 0, FE_MEM(FE_BP, 0, FE_NOREG, 0), FE_AX)
+TEST("\x41\x01\x45\x00", ADD32mr, 0, FE_MEM(FE_R13, 0, FE_NOREG, 0), FE_AX)
+TEST("\x41\x01\x45\x80", ADD32mr, 0, FE_MEM(FE_R13, 0, FE_NOREG, -0x80), FE_AX)
+TEST("\x41\x01\x85\x80\x00\x00\x00", ADD32mr, 0, FE_MEM(FE_R13, 0, FE_NOREG, 0x80), FE_AX)
+TEST("\x01\x04\x25\x01\x00\x00\x00", ADD32mr, 0, FE_MEM(FE_NOREG, 0, FE_NOREG, 0x1), FE_AX)
+TEST("\x01\x04\x25\x00\x00\x00\x00", ADD32mr, 0, FE_MEM(FE_NOREG, 0, FE_NOREG, 0), FE_AX)
+TEST("", ADD32mr, 0, FE_MEM(FE_NOREG, 0, FE_AX, 0), FE_AX)
+TEST("", ADD32mr, 0, FE_MEM(FE_NOREG, 3, FE_AX, 0), FE_AX)
+TEST("", ADD32mr, 0, FE_MEM(FE_NOREG, 5, FE_AX, 0), FE_AX)
+TEST("", ADD32mr, 0, FE_MEM(FE_NOREG, 9, FE_AX, 0), FE_AX)
+TEST("", ADD32mr, 0, FE_MEM(FE_NOREG, 15, FE_AX, 0), FE_AX)
+TEST("", ADD32mr, 0, FE_MEM(FE_NOREG, 1, FE_NOREG, 0), FE_AX)
+TEST("", ADD32mr, 0, FE_MEM(FE_NOREG, 2, FE_NOREG, 0), FE_AX)
+TEST("", ADD32mr, 0, FE_MEM(FE_NOREG, 3, FE_NOREG, 0), FE_AX)
+TEST("", ADD32mr, 0, FE_MEM(FE_NOREG, 4, FE_NOREG, 0), FE_AX)
+TEST("", ADD32mr, 0, FE_MEM(FE_NOREG, 8, FE_NOREG, 0), FE_AX)
+TEST("", ADD32mr, 0, FE_MEM(FE_NOREG, 15, FE_NOREG, 0), FE_AX)
+TEST("\x01\x04\x05\x00\x00\x00\x00", ADD32mr, 0, FE_MEM(FE_NOREG, 1, FE_AX, 0), FE_AX)
+TEST("\x01\x04\xc5\x00\x00\x00\x00", ADD32mr, 0, FE_MEM(FE_NOREG, 8, FE_AX, 0), FE_AX)
+TEST("", ADD32mr, 0, FE_MEM(FE_NOREG, 8, FE_SP, 0), FE_AX)
+TEST("\x42\x01\x04\x05\x00\x00\x00\x00", ADD32mr, 0, FE_MEM(FE_NOREG, 1, FE_R8, 0), FE_AX)
 // RIP-relative addressing, adds instruction size to offset.
-TEST("\x01\x05\x01\x00\x00\x00", ADD32mr, 0, FE_MEM(FE_IP, 0, FE_NOREG, 0x7), FE_AX);
-TEST("", ADD32mr, 0, FE_MEM(FE_IP, 1, FE_AX, 0x7), FE_AX);
-TEST("\x0f\xaf\x05\xf9\xff\xff\xff", IMUL32rm, 0, FE_AX, FE_MEM(FE_IP, 0, FE_NOREG, 0));
-TEST("\x6b\x05\xf9\xff\xff\xff\x02", IMUL32rmi, 0, FE_AX, FE_MEM(FE_IP, 0, FE_NOREG, 0), 2);
-TEST("\x66\x6b\x05\xf8\xff\xff\xff\x02", IMUL16rmi, 0, FE_AX, FE_MEM(FE_IP, 0, FE_NOREG, 0), 2);
-TEST("\x69\x05\xf6\xff\xff\xff\x80\x00\x00\x00", IMUL32rmi, 0, FE_AX, FE_MEM(FE_IP, 0, FE_NOREG, 0), 0x80);
-TEST("\x66\x69\x05\xf7\xff\xff\xff\x80\x00", IMUL16rmi, 0, FE_AX, FE_MEM(FE_IP, 0, FE_NOREG, 0), 0x80);
+TEST("\x01\x05\x01\x00\x00\x00", ADD32mr, 0, FE_MEM(FE_IP, 0, FE_NOREG, 0x7), FE_AX)
+TEST("", ADD32mr, 0, FE_MEM(FE_IP, 1, FE_AX, 0x7), FE_AX)
+TEST("\x0f\xaf\x05\xf9\xff\xff\xff", IMUL32rm, 0, FE_AX, FE_MEM(FE_IP, 0, FE_NOREG, 0))
+TEST("\x6b\x05\xf9\xff\xff\xff\x02", IMUL32rmi, 0, FE_AX, FE_MEM(FE_IP, 0, FE_NOREG, 0), 2)
+TEST("\x66\x6b\x05\xf8\xff\xff\xff\x02", IMUL16rmi, 0, FE_AX, FE_MEM(FE_IP, 0, FE_NOREG, 0), 2)
+TEST("\x69\x05\xf6\xff\xff\xff\x80\x00\x00\x00", IMUL32rmi, 0, FE_AX, FE_MEM(FE_IP, 0, FE_NOREG, 0), 0x80)
+TEST("\x66\x69\x05\xf7\xff\xff\xff\x80\x00", IMUL16rmi, 0, FE_AX, FE_MEM(FE_IP, 0, FE_NOREG, 0), 0x80)
 // Test RIP-relative addressing with various prefixes
-TEST("\x01\x05\x0a\x00\x00\x00", ADD32mr, 0, FE_MEM(FE_IP, 0, FE_NOREG, 0x10), FE_AX);
-TEST("\x44\x01\x05\x09\x00\x00\x00", ADD32mr, 0, FE_MEM(FE_IP, 0, FE_NOREG, 0x10), FE_R8);
-TEST("\x67\x01\x05\x09\x00\x00\x00", ADD32mr, FE_ADDR32, FE_MEM(FE_IP, 0, FE_NOREG, 0x10), FE_AX);
-TEST("\x67\x44\x01\x05\x08\x00\x00\x00", ADD32mr, FE_ADDR32, FE_MEM(FE_IP, 0, FE_NOREG, 0x10), FE_R8);
-TEST("\x64\x01\x05\x09\x00\x00\x00", ADD32mr, FE_SEG(FE_FS), FE_MEM(FE_IP, 0, FE_NOREG, 0x10), FE_AX);
-TEST("\x64\x44\x01\x05\x08\x00\x00\x00", ADD32mr, FE_SEG(FE_FS), FE_MEM(FE_IP, 0, FE_NOREG, 0x10), FE_R8);
-TEST("\x64\x67\x01\x05\x08\x00\x00\x00", ADD32mr, FE_ADDR32|FE_SEG(FE_FS), FE_MEM(FE_IP, 0, FE_NOREG, 0x10), FE_AX);
-TEST("\x64\x67\x44\x01\x05\x07\x00\x00\x00", ADD32mr, FE_ADDR32|FE_SEG(FE_FS), FE_MEM(FE_IP, 0, FE_NOREG, 0x10), FE_R8);
-TEST("\x66\x01\x05\x09\x00\x00\x00", ADD16mr, 0, FE_MEM(FE_IP, 0, FE_NOREG, 0x10), FE_AX);
-TEST("\x66\x44\x01\x05\x08\x00\x00\x00", ADD16mr, 0, FE_MEM(FE_IP, 0, FE_NOREG, 0x10), FE_R8);
-TEST("\x67\x66\x01\x05\x08\x00\x00\x00", ADD16mr, FE_ADDR32, FE_MEM(FE_IP, 0, FE_NOREG, 0x10), FE_AX);
-TEST("\x67\x66\x44\x01\x05\x07\x00\x00\x00", ADD16mr, FE_ADDR32, FE_MEM(FE_IP, 0, FE_NOREG, 0x10), FE_R8);
-TEST("\x64\x66\x01\x05\x08\x00\x00\x00", ADD16mr, FE_SEG(FE_FS), FE_MEM(FE_IP, 0, FE_NOREG, 0x10), FE_AX);
-TEST("\x64\x66\x44\x01\x05\x07\x00\x00\x00", ADD16mr, FE_SEG(FE_FS), FE_MEM(FE_IP, 0, FE_NOREG, 0x10), FE_R8);
-TEST("\x64\x67\x66\x01\x05\x07\x00\x00\x00", ADD16mr, FE_ADDR32|FE_SEG(FE_FS), FE_MEM(FE_IP, 0, FE_NOREG, 0x10), FE_AX);
-TEST("\x64\x67\x66\x44\x01\x05\x06\x00\x00\x00", ADD16mr, FE_ADDR32|FE_SEG(FE_FS), FE_MEM(FE_IP, 0, FE_NOREG, 0x10), FE_R8);
-TEST("\xf0\x01\x05\x09\x00\x00\x00", LOCK_ADD32mr, 0, FE_MEM(FE_IP, 0, FE_NOREG, 0x10), FE_AX);
-TEST("\xf0\x44\x01\x05\x08\x00\x00\x00", LOCK_ADD32mr, 0, FE_MEM(FE_IP, 0, FE_NOREG, 0x10), FE_R8);
-TEST("\x67\xf0\x01\x05\x08\x00\x00\x00", LOCK_ADD32mr, FE_ADDR32, FE_MEM(FE_IP, 0, FE_NOREG, 0x10), FE_AX);
-TEST("\x67\xf0\x44\x01\x05\x07\x00\x00\x00", LOCK_ADD32mr, FE_ADDR32, FE_MEM(FE_IP, 0, FE_NOREG, 0x10), FE_R8);
-TEST("\x64\xf0\x01\x05\x08\x00\x00\x00", LOCK_ADD32mr, FE_SEG(FE_FS), FE_MEM(FE_IP, 0, FE_NOREG, 0x10), FE_AX);
-TEST("\x64\xf0\x44\x01\x05\x07\x00\x00\x00", LOCK_ADD32mr, FE_SEG(FE_FS), FE_MEM(FE_IP, 0, FE_NOREG, 0x10), FE_R8);
-TEST("\x64\x67\xf0\x01\x05\x07\x00\x00\x00", LOCK_ADD32mr, FE_ADDR32|FE_SEG(FE_FS), FE_MEM(FE_IP, 0, FE_NOREG, 0x10), FE_AX);
-TEST("\x64\x67\xf0\x44\x01\x05\x06\x00\x00\x00", LOCK_ADD32mr, FE_ADDR32|FE_SEG(FE_FS), FE_MEM(FE_IP, 0, FE_NOREG, 0x10), FE_R8);
-TEST("\xf0\x66\x01\x05\x08\x00\x00\x00", LOCK_ADD16mr, 0, FE_MEM(FE_IP, 0, FE_NOREG, 0x10), FE_AX);
-TEST("\xf0\x66\x44\x01\x05\x07\x00\x00\x00", LOCK_ADD16mr, 0, FE_MEM(FE_IP, 0, FE_NOREG, 0x10), FE_R8);
-TEST("\x67\xf0\x66\x01\x05\x07\x00\x00\x00", LOCK_ADD16mr, FE_ADDR32, FE_MEM(FE_IP, 0, FE_NOREG, 0x10), FE_AX);
-TEST("\x67\xf0\x66\x44\x01\x05\x06\x00\x00\x00", LOCK_ADD16mr, FE_ADDR32, FE_MEM(FE_IP, 0, FE_NOREG, 0x10), FE_R8);
-TEST("\x64\xf0\x66\x01\x05\x07\x00\x00\x00", LOCK_ADD16mr, FE_SEG(FE_FS), FE_MEM(FE_IP, 0, FE_NOREG, 0x10), FE_AX);
-TEST("\x64\xf0\x66\x44\x01\x05\x06\x00\x00\x00", LOCK_ADD16mr, FE_SEG(FE_FS), FE_MEM(FE_IP, 0, FE_NOREG, 0x10), FE_R8);
-TEST("\x64\x67\xf0\x66\x01\x05\x06\x00\x00\x00", LOCK_ADD16mr, FE_ADDR32|FE_SEG(FE_FS), FE_MEM(FE_IP, 0, FE_NOREG, 0x10), FE_AX);
-TEST("\x64\x67\xf0\x66\x44\x01\x05\x05\x00\x00\x00", LOCK_ADD16mr, FE_ADDR32|FE_SEG(FE_FS), FE_MEM(FE_IP, 0, FE_NOREG, 0x10), FE_R8);
-TEST("\xc5\xf9\x6e\x05\x08\x00\x00\x00", VMOVDrm, 0, FE_XMM0, FE_MEM(FE_IP, 0, FE_NOREG, 0x10));
-TEST("\xc4\xe1\xf9\x6e\x05\x07\x00\x00\x00", VMOVQ_G2Xrm, 0, FE_XMM0, FE_MEM(FE_IP, 0, FE_NOREG, 0x10));
-TEST("\x67\xc5\xf9\x6e\x05\x07\x00\x00\x00", VMOVDrm, FE_ADDR32, FE_XMM0, FE_MEM(FE_IP, 0, FE_NOREG, 0x10));
-TEST("\x67\xc4\xe1\xf9\x6e\x05\x06\x00\x00\x00", VMOVQ_G2Xrm, FE_ADDR32, FE_XMM0, FE_MEM(FE_IP, 0, FE_NOREG, 0x10));
-TEST("\x64\xc5\xf9\x6e\x05\x07\x00\x00\x00", VMOVDrm, FE_SEG(FE_FS), FE_XMM0, FE_MEM(FE_IP, 0, FE_NOREG, 0x10));
-TEST("\x64\xc4\xe1\xf9\x6e\x05\x06\x00\x00\x00", VMOVQ_G2Xrm, FE_SEG(FE_FS), FE_XMM0, FE_MEM(FE_IP, 0, FE_NOREG, 0x10));
-TEST("\x64\x67\xc5\xf9\x6e\x05\x06\x00\x00\x00", VMOVDrm, FE_ADDR32|FE_SEG(FE_FS), FE_XMM0, FE_MEM(FE_IP, 0, FE_NOREG, 0x10));
-TEST("\x64\x67\xc4\xe1\xf9\x6e\x05\x05\x00\x00\x00", VMOVQ_G2Xrm, FE_ADDR32|FE_SEG(FE_FS), FE_XMM0, FE_MEM(FE_IP, 0, FE_NOREG, 0x10));
-TEST("\x62\xe1\x7d\x08\x6e\x05\x06\x00\x00\x00", VMOVDrm, 0, FE_XMM16, FE_MEM(FE_IP, 0, FE_NOREG, 0x10));
-TEST("\x67\x62\xe1\x7d\x08\x6e\x05\x05\x00\x00\x00", VMOVDrm, FE_ADDR32, FE_XMM16, FE_MEM(FE_IP, 0, FE_NOREG, 0x10));
-TEST("\x64\x62\xe1\x7d\x08\x6e\x05\x05\x00\x00\x00", VMOVDrm, FE_SEG(FE_FS), FE_XMM16, FE_MEM(FE_IP, 0, FE_NOREG, 0x10));
-TEST("\x64\x67\x62\xe1\x7d\x08\x6e\x05\x04\x00\x00\x00", VMOVDrm, FE_ADDR32|FE_SEG(FE_FS), FE_XMM16, FE_MEM(FE_IP, 0, FE_NOREG, 0x10));
+TEST("\x01\x05\x0a\x00\x00\x00", ADD32mr, 0, FE_MEM(FE_IP, 0, FE_NOREG, 0x10), FE_AX)
+TEST("\x44\x01\x05\x09\x00\x00\x00", ADD32mr, 0, FE_MEM(FE_IP, 0, FE_NOREG, 0x10), FE_R8)
+TEST("\x67\x01\x05\x09\x00\x00\x00", ADD32mr, FE_ADDR32, FE_MEM(FE_IP, 0, FE_NOREG, 0x10), FE_AX)
+TEST("\x67\x44\x01\x05\x08\x00\x00\x00", ADD32mr, FE_ADDR32, FE_MEM(FE_IP, 0, FE_NOREG, 0x10), FE_R8)
+TEST("\x64\x01\x05\x09\x00\x00\x00", ADD32mr, FE_SEG(FE_FS), FE_MEM(FE_IP, 0, FE_NOREG, 0x10), FE_AX)
+TEST("\x64\x44\x01\x05\x08\x00\x00\x00", ADD32mr, FE_SEG(FE_FS), FE_MEM(FE_IP, 0, FE_NOREG, 0x10), FE_R8)
+TEST("\x64\x67\x01\x05\x08\x00\x00\x00", ADD32mr, FE_ADDR32|FE_SEG(FE_FS), FE_MEM(FE_IP, 0, FE_NOREG, 0x10), FE_AX)
+TEST("\x64\x67\x44\x01\x05\x07\x00\x00\x00", ADD32mr, FE_ADDR32|FE_SEG(FE_FS), FE_MEM(FE_IP, 0, FE_NOREG, 0x10), FE_R8)
+TEST("\x66\x01\x05\x09\x00\x00\x00", ADD16mr, 0, FE_MEM(FE_IP, 0, FE_NOREG, 0x10), FE_AX)
+TEST("\x66\x44\x01\x05\x08\x00\x00\x00", ADD16mr, 0, FE_MEM(FE_IP, 0, FE_NOREG, 0x10), FE_R8)
+TEST("\x67\x66\x01\x05\x08\x00\x00\x00", ADD16mr, FE_ADDR32, FE_MEM(FE_IP, 0, FE_NOREG, 0x10), FE_AX)
+TEST("\x67\x66\x44\x01\x05\x07\x00\x00\x00", ADD16mr, FE_ADDR32, FE_MEM(FE_IP, 0, FE_NOREG, 0x10), FE_R8)
+TEST("\x64\x66\x01\x05\x08\x00\x00\x00", ADD16mr, FE_SEG(FE_FS), FE_MEM(FE_IP, 0, FE_NOREG, 0x10), FE_AX)
+TEST("\x64\x66\x44\x01\x05\x07\x00\x00\x00", ADD16mr, FE_SEG(FE_FS), FE_MEM(FE_IP, 0, FE_NOREG, 0x10), FE_R8)
+TEST("\x64\x67\x66\x01\x05\x07\x00\x00\x00", ADD16mr, FE_ADDR32|FE_SEG(FE_FS), FE_MEM(FE_IP, 0, FE_NOREG, 0x10), FE_AX)
+TEST("\x64\x67\x66\x44\x01\x05\x06\x00\x00\x00", ADD16mr, FE_ADDR32|FE_SEG(FE_FS), FE_MEM(FE_IP, 0, FE_NOREG, 0x10), FE_R8)
+TEST("\xf0\x01\x05\x09\x00\x00\x00", LOCK_ADD32mr, 0, FE_MEM(FE_IP, 0, FE_NOREG, 0x10), FE_AX)
+TEST("\xf0\x44\x01\x05\x08\x00\x00\x00", LOCK_ADD32mr, 0, FE_MEM(FE_IP, 0, FE_NOREG, 0x10), FE_R8)
+TEST("\x67\xf0\x01\x05\x08\x00\x00\x00", LOCK_ADD32mr, FE_ADDR32, FE_MEM(FE_IP, 0, FE_NOREG, 0x10), FE_AX)
+TEST("\x67\xf0\x44\x01\x05\x07\x00\x00\x00", LOCK_ADD32mr, FE_ADDR32, FE_MEM(FE_IP, 0, FE_NOREG, 0x10), FE_R8)
+TEST("\x64\xf0\x01\x05\x08\x00\x00\x00", LOCK_ADD32mr, FE_SEG(FE_FS), FE_MEM(FE_IP, 0, FE_NOREG, 0x10), FE_AX)
+TEST("\x64\xf0\x44\x01\x05\x07\x00\x00\x00", LOCK_ADD32mr, FE_SEG(FE_FS), FE_MEM(FE_IP, 0, FE_NOREG, 0x10), FE_R8)
+TEST("\x64\x67\xf0\x01\x05\x07\x00\x00\x00", LOCK_ADD32mr, FE_ADDR32|FE_SEG(FE_FS), FE_MEM(FE_IP, 0, FE_NOREG, 0x10), FE_AX)
+TEST("\x64\x67\xf0\x44\x01\x05\x06\x00\x00\x00", LOCK_ADD32mr, FE_ADDR32|FE_SEG(FE_FS), FE_MEM(FE_IP, 0, FE_NOREG, 0x10), FE_R8)
+TEST("\xf0\x66\x01\x05\x08\x00\x00\x00", LOCK_ADD16mr, 0, FE_MEM(FE_IP, 0, FE_NOREG, 0x10), FE_AX)
+TEST("\xf0\x66\x44\x01\x05\x07\x00\x00\x00", LOCK_ADD16mr, 0, FE_MEM(FE_IP, 0, FE_NOREG, 0x10), FE_R8)
+TEST("\x67\xf0\x66\x01\x05\x07\x00\x00\x00", LOCK_ADD16mr, FE_ADDR32, FE_MEM(FE_IP, 0, FE_NOREG, 0x10), FE_AX)
+TEST("\x67\xf0\x66\x44\x01\x05\x06\x00\x00\x00", LOCK_ADD16mr, FE_ADDR32, FE_MEM(FE_IP, 0, FE_NOREG, 0x10), FE_R8)
+TEST("\x64\xf0\x66\x01\x05\x07\x00\x00\x00", LOCK_ADD16mr, FE_SEG(FE_FS), FE_MEM(FE_IP, 0, FE_NOREG, 0x10), FE_AX)
+TEST("\x64\xf0\x66\x44\x01\x05\x06\x00\x00\x00", LOCK_ADD16mr, FE_SEG(FE_FS), FE_MEM(FE_IP, 0, FE_NOREG, 0x10), FE_R8)
+TEST("\x64\x67\xf0\x66\x01\x05\x06\x00\x00\x00", LOCK_ADD16mr, FE_ADDR32|FE_SEG(FE_FS), FE_MEM(FE_IP, 0, FE_NOREG, 0x10), FE_AX)
+TEST("\x64\x67\xf0\x66\x44\x01\x05\x05\x00\x00\x00", LOCK_ADD16mr, FE_ADDR32|FE_SEG(FE_FS), FE_MEM(FE_IP, 0, FE_NOREG, 0x10), FE_R8)
+TEST("\xc5\xf9\x6e\x05\x08\x00\x00\x00", VMOVDrm, 0, FE_XMM0, FE_MEM(FE_IP, 0, FE_NOREG, 0x10))
+TEST("\xc4\xe1\xf9\x6e\x05\x07\x00\x00\x00", VMOVQ_G2Xrm, 0, FE_XMM0, FE_MEM(FE_IP, 0, FE_NOREG, 0x10))
+TEST("\x67\xc5\xf9\x6e\x05\x07\x00\x00\x00", VMOVDrm, FE_ADDR32, FE_XMM0, FE_MEM(FE_IP, 0, FE_NOREG, 0x10))
+TEST("\x67\xc4\xe1\xf9\x6e\x05\x06\x00\x00\x00", VMOVQ_G2Xrm, FE_ADDR32, FE_XMM0, FE_MEM(FE_IP, 0, FE_NOREG, 0x10))
+TEST("\x64\xc5\xf9\x6e\x05\x07\x00\x00\x00", VMOVDrm, FE_SEG(FE_FS), FE_XMM0, FE_MEM(FE_IP, 0, FE_NOREG, 0x10))
+TEST("\x64\xc4\xe1\xf9\x6e\x05\x06\x00\x00\x00", VMOVQ_G2Xrm, FE_SEG(FE_FS), FE_XMM0, FE_MEM(FE_IP, 0, FE_NOREG, 0x10))
+TEST("\x64\x67\xc5\xf9\x6e\x05\x06\x00\x00\x00", VMOVDrm, FE_ADDR32|FE_SEG(FE_FS), FE_XMM0, FE_MEM(FE_IP, 0, FE_NOREG, 0x10))
+TEST("\x64\x67\xc4\xe1\xf9\x6e\x05\x05\x00\x00\x00", VMOVQ_G2Xrm, FE_ADDR32|FE_SEG(FE_FS), FE_XMM0, FE_MEM(FE_IP, 0, FE_NOREG, 0x10))
+TEST("\x62\xe1\x7d\x08\x6e\x05\x06\x00\x00\x00", VMOVDrm, 0, FE_XMM16, FE_MEM(FE_IP, 0, FE_NOREG, 0x10))
+TEST("\x67\x62\xe1\x7d\x08\x6e\x05\x05\x00\x00\x00", VMOVDrm, FE_ADDR32, FE_XMM16, FE_MEM(FE_IP, 0, FE_NOREG, 0x10))
+TEST("\x64\x62\xe1\x7d\x08\x6e\x05\x05\x00\x00\x00", VMOVDrm, FE_SEG(FE_FS), FE_XMM16, FE_MEM(FE_IP, 0, FE_NOREG, 0x10))
+TEST("\x64\x67\x62\xe1\x7d\x08\x6e\x05\x04\x00\x00\x00", VMOVDrm, FE_ADDR32|FE_SEG(FE_FS), FE_XMM16, FE_MEM(FE_IP, 0, FE_NOREG, 0x10))
 
-TEST("\x01\x00", ADD32mr, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0), FE_AX);
-TEST("\x01\x01", ADD32mr, 0, FE_MEM(FE_CX, 0, FE_NOREG, 0), FE_AX);
-TEST("\x01\x02", ADD32mr, 0, FE_MEM(FE_DX, 0, FE_NOREG, 0), FE_AX);
-TEST("\x01\x03", ADD32mr, 0, FE_MEM(FE_BX, 0, FE_NOREG, 0), FE_AX);
-TEST("\x01\x04\x80", ADD32mr, 0, FE_MEM(FE_AX, 4, FE_AX, 0), FE_AX);
-TEST("\x01\x04\x81", ADD32mr, 0, FE_MEM(FE_CX, 4, FE_AX, 0), FE_AX);
-TEST("\x01\x04\x82", ADD32mr, 0, FE_MEM(FE_DX, 4, FE_AX, 0), FE_AX);
-TEST("\x01\x04\x83", ADD32mr, 0, FE_MEM(FE_BX, 4, FE_AX, 0), FE_AX);
-TEST("\x01\x04\x84", ADD32mr, 0, FE_MEM(FE_SP, 4, FE_AX, 0), FE_AX);
-TEST("\x01\x04\x85\x11\x22\x33\x44", ADD32mr, 0, FE_MEM(FE_NOREG, 4, FE_AX, 0x44332211), FE_AX);
-TEST("\x01\x04\x86", ADD32mr, 0, FE_MEM(FE_SI, 4, FE_AX, 0), FE_AX);
-TEST("\x01\x04\x87", ADD32mr, 0, FE_MEM(FE_DI, 4, FE_AX, 0), FE_AX);
-TEST("\x01\x04\x88", ADD32mr, 0, FE_MEM(FE_AX, 4, FE_CX, 0), FE_AX);
-TEST("\x01\x04\x89", ADD32mr, 0, FE_MEM(FE_CX, 4, FE_CX, 0), FE_AX);
-TEST("\x01\x04\x8a", ADD32mr, 0, FE_MEM(FE_DX, 4, FE_CX, 0), FE_AX);
-TEST("\x01\x04\x8b", ADD32mr, 0, FE_MEM(FE_BX, 4, FE_CX, 0), FE_AX);
-TEST("\x01\x04\x8c", ADD32mr, 0, FE_MEM(FE_SP, 4, FE_CX, 0), FE_AX);
-TEST("\x01\x04\x8d\x11\x22\x33\x44", ADD32mr, 0, FE_MEM(FE_NOREG, 4, FE_CX, 0x44332211), FE_AX);
-TEST("\x01\x04\x8e", ADD32mr, 0, FE_MEM(FE_SI, 4, FE_CX, 0), FE_AX);
-TEST("\x01\x04\x8f", ADD32mr, 0, FE_MEM(FE_DI, 4, FE_CX, 0), FE_AX);
-TEST("\x01\x04\x90", ADD32mr, 0, FE_MEM(FE_AX, 4, FE_DX, 0), FE_AX);
-TEST("\x01\x04\x91", ADD32mr, 0, FE_MEM(FE_CX, 4, FE_DX, 0), FE_AX);
-TEST("\x01\x04\x92", ADD32mr, 0, FE_MEM(FE_DX, 4, FE_DX, 0), FE_AX);
-TEST("\x01\x04\x93", ADD32mr, 0, FE_MEM(FE_BX, 4, FE_DX, 0), FE_AX);
-TEST("\x01\x04\x94", ADD32mr, 0, FE_MEM(FE_SP, 4, FE_DX, 0), FE_AX);
-TEST("\x01\x04\x95\x11\x22\x33\x44", ADD32mr, 0, FE_MEM(FE_NOREG, 4, FE_DX, 0x44332211), FE_AX);
-TEST("\x01\x04\x96", ADD32mr, 0, FE_MEM(FE_SI, 4, FE_DX, 0), FE_AX);
-TEST("\x01\x04\x97", ADD32mr, 0, FE_MEM(FE_DI, 4, FE_DX, 0), FE_AX);
-TEST("\x01\x04\x98", ADD32mr, 0, FE_MEM(FE_AX, 4, FE_BX, 0), FE_AX);
-TEST("\x01\x04\x99", ADD32mr, 0, FE_MEM(FE_CX, 4, FE_BX, 0), FE_AX);
-TEST("\x01\x04\x9a", ADD32mr, 0, FE_MEM(FE_DX, 4, FE_BX, 0), FE_AX);
-TEST("\x01\x04\x9b", ADD32mr, 0, FE_MEM(FE_BX, 4, FE_BX, 0), FE_AX);
-TEST("\x01\x04\x9c", ADD32mr, 0, FE_MEM(FE_SP, 4, FE_BX, 0), FE_AX);
-TEST("\x01\x04\x9d\x11\x22\x33\x44", ADD32mr, 0, FE_MEM(FE_NOREG, 4, FE_BX, 0x44332211), FE_AX);
-TEST("\x01\x04\x9e", ADD32mr, 0, FE_MEM(FE_SI, 4, FE_BX, 0), FE_AX);
-TEST("\x01\x04\x9f", ADD32mr, 0, FE_MEM(FE_DI, 4, FE_BX, 0), FE_AX);
-TEST("", ADD32mr, 0, FE_MEM(FE_AX, 4, FE_SP, 0), FE_AX);
-TEST("", ADD32mr, 0, FE_MEM(FE_CX, 4, FE_SP, 0), FE_AX);
-TEST("", ADD32mr, 0, FE_MEM(FE_DX, 4, FE_SP, 0), FE_AX);
-TEST("", ADD32mr, 0, FE_MEM(FE_BX, 4, FE_SP, 0), FE_AX);
-TEST("", ADD32mr, 0, FE_MEM(FE_SP, 4, FE_SP, 0), FE_AX);
-TEST("", ADD32mr, 0, FE_MEM(FE_NOREG, 4, FE_SP, 0x44332211), FE_AX);
-TEST("", ADD32mr, 0, FE_MEM(FE_SI, 4, FE_SP, 0), FE_AX);
-TEST("", ADD32mr, 0, FE_MEM(FE_DI, 4, FE_SP, 0), FE_AX);
-TEST("\x01\x04\xa8", ADD32mr, 0, FE_MEM(FE_AX, 4, FE_BP, 0), FE_AX);
-TEST("\x01\x04\xa9", ADD32mr, 0, FE_MEM(FE_CX, 4, FE_BP, 0), FE_AX);
-TEST("\x01\x04\xaa", ADD32mr, 0, FE_MEM(FE_DX, 4, FE_BP, 0), FE_AX);
-TEST("\x01\x04\xab", ADD32mr, 0, FE_MEM(FE_BX, 4, FE_BP, 0), FE_AX);
-TEST("\x01\x04\xac", ADD32mr, 0, FE_MEM(FE_SP, 4, FE_BP, 0), FE_AX);
-TEST("\x01\x04\xad\x11\x22\x33\x44", ADD32mr, 0, FE_MEM(FE_NOREG, 4, FE_BP, 0x44332211), FE_AX);
-TEST("\x01\x04\xae", ADD32mr, 0, FE_MEM(FE_SI, 4, FE_BP, 0), FE_AX);
-TEST("\x01\x04\xaf", ADD32mr, 0, FE_MEM(FE_DI, 4, FE_BP, 0), FE_AX);
-TEST("\x01\x04\xb0", ADD32mr, 0, FE_MEM(FE_AX, 4, FE_SI, 0), FE_AX);
-TEST("\x01\x04\xb1", ADD32mr, 0, FE_MEM(FE_CX, 4, FE_SI, 0), FE_AX);
-TEST("\x01\x04\xb2", ADD32mr, 0, FE_MEM(FE_DX, 4, FE_SI, 0), FE_AX);
-TEST("\x01\x04\xb3", ADD32mr, 0, FE_MEM(FE_BX, 4, FE_SI, 0), FE_AX);
-TEST("\x01\x04\xb4", ADD32mr, 0, FE_MEM(FE_SP, 4, FE_SI, 0), FE_AX);
-TEST("\x01\x04\xb5\x11\x22\x33\x44", ADD32mr, 0, FE_MEM(FE_NOREG, 4, FE_SI, 0x44332211), FE_AX);
-TEST("\x01\x04\xb6", ADD32mr, 0, FE_MEM(FE_SI, 4, FE_SI, 0), FE_AX);
-TEST("\x01\x04\xb7", ADD32mr, 0, FE_MEM(FE_DI, 4, FE_SI, 0), FE_AX);
-TEST("\x01\x04\xb8", ADD32mr, 0, FE_MEM(FE_AX, 4, FE_DI, 0), FE_AX);
-TEST("\x01\x04\xb9", ADD32mr, 0, FE_MEM(FE_CX, 4, FE_DI, 0), FE_AX);
-TEST("\x01\x04\xba", ADD32mr, 0, FE_MEM(FE_DX, 4, FE_DI, 0), FE_AX);
-TEST("\x01\x04\xbb", ADD32mr, 0, FE_MEM(FE_BX, 4, FE_DI, 0), FE_AX);
-TEST("\x01\x04\xbc", ADD32mr, 0, FE_MEM(FE_SP, 4, FE_DI, 0), FE_AX);
-TEST("\x01\x04\xbd\x11\x22\x33\x44", ADD32mr, 0, FE_MEM(FE_NOREG, 4, FE_DI, 0x44332211), FE_AX);
-TEST("\x01\x04\xbe", ADD32mr, 0, FE_MEM(FE_SI, 4, FE_DI, 0), FE_AX);
-TEST("\x01\x04\xbf", ADD32mr, 0, FE_MEM(FE_DI, 4, FE_DI, 0), FE_AX);
-TEST("\x01\x05\x11\x22\x33\x44", ADD32mr, 0, FE_MEM(FE_IP, 0, FE_NOREG, 0x44332217), FE_AX);
-TEST("\x01\x06", ADD32mr, 0, FE_MEM(FE_SI, 0, FE_NOREG, 0), FE_AX);
-TEST("\x01\x07", ADD32mr, 0, FE_MEM(FE_DI, 0, FE_NOREG, 0), FE_AX);
-TEST("\x01\x40\x99", ADD32mr, 0, FE_MEM(FE_AX, 0, FE_NOREG, -0x67), FE_AX);
-TEST("\x01\x41\x99", ADD32mr, 0, FE_MEM(FE_CX, 0, FE_NOREG, -0x67), FE_AX);
-TEST("\x01\x42\x99", ADD32mr, 0, FE_MEM(FE_DX, 0, FE_NOREG, -0x67), FE_AX);
-TEST("\x01\x43\x99", ADD32mr, 0, FE_MEM(FE_BX, 0, FE_NOREG, -0x67), FE_AX);
-TEST("\x01\x44\x80\x99", ADD32mr, 0, FE_MEM(FE_AX, 4, FE_AX, -0x67), FE_AX);
-TEST("\x01\x44\x81\x99", ADD32mr, 0, FE_MEM(FE_CX, 4, FE_AX, -0x67), FE_AX);
-TEST("\x01\x44\x82\x99", ADD32mr, 0, FE_MEM(FE_DX, 4, FE_AX, -0x67), FE_AX);
-TEST("\x01\x44\x83\x99", ADD32mr, 0, FE_MEM(FE_BX, 4, FE_AX, -0x67), FE_AX);
-TEST("\x01\x44\x84\x99", ADD32mr, 0, FE_MEM(FE_SP, 4, FE_AX, -0x67), FE_AX);
-TEST("\x01\x44\x85\x99", ADD32mr, 0, FE_MEM(FE_BP, 4, FE_AX, -0x67), FE_AX);
-TEST("\x01\x44\x86\x99", ADD32mr, 0, FE_MEM(FE_SI, 4, FE_AX, -0x67), FE_AX);
-TEST("\x01\x44\x87\x99", ADD32mr, 0, FE_MEM(FE_DI, 4, FE_AX, -0x67), FE_AX);
-TEST("\x01\x44\x88\x99", ADD32mr, 0, FE_MEM(FE_AX, 4, FE_CX, -0x67), FE_AX);
-TEST("\x01\x44\x89\x99", ADD32mr, 0, FE_MEM(FE_CX, 4, FE_CX, -0x67), FE_AX);
-TEST("\x01\x44\x8a\x99", ADD32mr, 0, FE_MEM(FE_DX, 4, FE_CX, -0x67), FE_AX);
-TEST("\x01\x44\x8b\x99", ADD32mr, 0, FE_MEM(FE_BX, 4, FE_CX, -0x67), FE_AX);
-TEST("\x01\x44\x8c\x99", ADD32mr, 0, FE_MEM(FE_SP, 4, FE_CX, -0x67), FE_AX);
-TEST("\x01\x44\x8d\x99", ADD32mr, 0, FE_MEM(FE_BP, 4, FE_CX, -0x67), FE_AX);
-TEST("\x01\x44\x8e\x99", ADD32mr, 0, FE_MEM(FE_SI, 4, FE_CX, -0x67), FE_AX);
-TEST("\x01\x44\x8f\x99", ADD32mr, 0, FE_MEM(FE_DI, 4, FE_CX, -0x67), FE_AX);
-TEST("\x01\x44\x90\x99", ADD32mr, 0, FE_MEM(FE_AX, 4, FE_DX, -0x67), FE_AX);
-TEST("\x01\x44\x91\x99", ADD32mr, 0, FE_MEM(FE_CX, 4, FE_DX, -0x67), FE_AX);
-TEST("\x01\x44\x92\x99", ADD32mr, 0, FE_MEM(FE_DX, 4, FE_DX, -0x67), FE_AX);
-TEST("\x01\x44\x93\x99", ADD32mr, 0, FE_MEM(FE_BX, 4, FE_DX, -0x67), FE_AX);
-TEST("\x01\x44\x94\x99", ADD32mr, 0, FE_MEM(FE_SP, 4, FE_DX, -0x67), FE_AX);
-TEST("\x01\x44\x95\x99", ADD32mr, 0, FE_MEM(FE_BP, 4, FE_DX, -0x67), FE_AX);
-TEST("\x01\x44\x96\x99", ADD32mr, 0, FE_MEM(FE_SI, 4, FE_DX, -0x67), FE_AX);
-TEST("\x01\x44\x97\x99", ADD32mr, 0, FE_MEM(FE_DI, 4, FE_DX, -0x67), FE_AX);
-TEST("\x01\x44\x98\x99", ADD32mr, 0, FE_MEM(FE_AX, 4, FE_BX, -0x67), FE_AX);
-TEST("\x01\x44\x99\x99", ADD32mr, 0, FE_MEM(FE_CX, 4, FE_BX, -0x67), FE_AX);
-TEST("\x01\x44\x9a\x99", ADD32mr, 0, FE_MEM(FE_DX, 4, FE_BX, -0x67), FE_AX);
-TEST("\x01\x44\x9b\x99", ADD32mr, 0, FE_MEM(FE_BX, 4, FE_BX, -0x67), FE_AX);
-TEST("\x01\x44\x9c\x99", ADD32mr, 0, FE_MEM(FE_SP, 4, FE_BX, -0x67), FE_AX);
-TEST("\x01\x44\x9d\x99", ADD32mr, 0, FE_MEM(FE_BP, 4, FE_BX, -0x67), FE_AX);
-TEST("\x01\x44\x9e\x99", ADD32mr, 0, FE_MEM(FE_SI, 4, FE_BX, -0x67), FE_AX);
-TEST("\x01\x44\x9f\x99", ADD32mr, 0, FE_MEM(FE_DI, 4, FE_BX, -0x67), FE_AX);
-TEST("", ADD32mr, 0, FE_MEM(FE_AX, 4, FE_SP, -0x67), FE_AX);
-TEST("", ADD32mr, 0, FE_MEM(FE_CX, 4, FE_SP, -0x67), FE_AX);
-TEST("", ADD32mr, 0, FE_MEM(FE_DX, 4, FE_SP, -0x67), FE_AX);
-TEST("", ADD32mr, 0, FE_MEM(FE_BX, 4, FE_SP, -0x67), FE_AX);
-TEST("", ADD32mr, 0, FE_MEM(FE_SP, 4, FE_SP, -0x67), FE_AX);
-TEST("", ADD32mr, 0, FE_MEM(FE_BP, 4, FE_SP, -0x67), FE_AX);
-TEST("", ADD32mr, 0, FE_MEM(FE_SI, 4, FE_SP, -0x67), FE_AX);
-TEST("", ADD32mr, 0, FE_MEM(FE_DI, 4, FE_SP, -0x67), FE_AX);
-TEST("\x01\x44\xa8\x99", ADD32mr, 0, FE_MEM(FE_AX, 4, FE_BP, -0x67), FE_AX);
-TEST("\x01\x44\xa9\x99", ADD32mr, 0, FE_MEM(FE_CX, 4, FE_BP, -0x67), FE_AX);
-TEST("\x01\x44\xaa\x99", ADD32mr, 0, FE_MEM(FE_DX, 4, FE_BP, -0x67), FE_AX);
-TEST("\x01\x44\xab\x99", ADD32mr, 0, FE_MEM(FE_BX, 4, FE_BP, -0x67), FE_AX);
-TEST("\x01\x44\xac\x99", ADD32mr, 0, FE_MEM(FE_SP, 4, FE_BP, -0x67), FE_AX);
-TEST("\x01\x44\xad\x99", ADD32mr, 0, FE_MEM(FE_BP, 4, FE_BP, -0x67), FE_AX);
-TEST("\x01\x44\xae\x99", ADD32mr, 0, FE_MEM(FE_SI, 4, FE_BP, -0x67), FE_AX);
-TEST("\x01\x44\xaf\x99", ADD32mr, 0, FE_MEM(FE_DI, 4, FE_BP, -0x67), FE_AX);
-TEST("\x01\x44\xb0\x99", ADD32mr, 0, FE_MEM(FE_AX, 4, FE_SI, -0x67), FE_AX);
-TEST("\x01\x44\xb1\x99", ADD32mr, 0, FE_MEM(FE_CX, 4, FE_SI, -0x67), FE_AX);
-TEST("\x01\x44\xb2\x99", ADD32mr, 0, FE_MEM(FE_DX, 4, FE_SI, -0x67), FE_AX);
-TEST("\x01\x44\xb3\x99", ADD32mr, 0, FE_MEM(FE_BX, 4, FE_SI, -0x67), FE_AX);
-TEST("\x01\x44\xb4\x99", ADD32mr, 0, FE_MEM(FE_SP, 4, FE_SI, -0x67), FE_AX);
-TEST("\x01\x44\xb5\x99", ADD32mr, 0, FE_MEM(FE_BP, 4, FE_SI, -0x67), FE_AX);
-TEST("\x01\x44\xb6\x99", ADD32mr, 0, FE_MEM(FE_SI, 4, FE_SI, -0x67), FE_AX);
-TEST("\x01\x44\xb7\x99", ADD32mr, 0, FE_MEM(FE_DI, 4, FE_SI, -0x67), FE_AX);
-TEST("\x01\x44\xb8\x99", ADD32mr, 0, FE_MEM(FE_AX, 4, FE_DI, -0x67), FE_AX);
-TEST("\x01\x44\xb9\x99", ADD32mr, 0, FE_MEM(FE_CX, 4, FE_DI, -0x67), FE_AX);
-TEST("\x01\x44\xba\x99", ADD32mr, 0, FE_MEM(FE_DX, 4, FE_DI, -0x67), FE_AX);
-TEST("\x01\x44\xbb\x99", ADD32mr, 0, FE_MEM(FE_BX, 4, FE_DI, -0x67), FE_AX);
-TEST("\x01\x44\xbc\x99", ADD32mr, 0, FE_MEM(FE_SP, 4, FE_DI, -0x67), FE_AX);
-TEST("\x01\x44\xbd\x99", ADD32mr, 0, FE_MEM(FE_BP, 4, FE_DI, -0x67), FE_AX);
-TEST("\x01\x44\xbe\x99", ADD32mr, 0, FE_MEM(FE_SI, 4, FE_DI, -0x67), FE_AX);
-TEST("\x01\x44\xbf\x99", ADD32mr, 0, FE_MEM(FE_DI, 4, FE_DI, -0x67), FE_AX);
-TEST("\x01\x45\x99", ADD32mr, 0, FE_MEM(FE_BP, 0, FE_NOREG, -0x67), FE_AX);
-TEST("\x01\x46\x99", ADD32mr, 0, FE_MEM(FE_SI, 0, FE_NOREG, -0x67), FE_AX);
-TEST("\x01\x47\x99", ADD32mr, 0, FE_MEM(FE_DI, 0, FE_NOREG, -0x67), FE_AX);
-TEST("\x01\x80\x11\x22\x33\x44", ADD32mr, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0x44332211), FE_AX);
-TEST("\x01\x81\x11\x22\x33\x44", ADD32mr, 0, FE_MEM(FE_CX, 0, FE_NOREG, 0x44332211), FE_AX);
-TEST("\x01\x82\x11\x22\x33\x44", ADD32mr, 0, FE_MEM(FE_DX, 0, FE_NOREG, 0x44332211), FE_AX);
-TEST("\x01\x83\x11\x22\x33\x44", ADD32mr, 0, FE_MEM(FE_BX, 0, FE_NOREG, 0x44332211), FE_AX);
-TEST("\x01\x84\x80\x11\x22\x33\x44", ADD32mr, 0, FE_MEM(FE_AX, 4, FE_AX, 0x44332211), FE_AX);
-TEST("\x01\x84\x81\x11\x22\x33\x44", ADD32mr, 0, FE_MEM(FE_CX, 4, FE_AX, 0x44332211), FE_AX);
-TEST("\x01\x84\x82\x11\x22\x33\x44", ADD32mr, 0, FE_MEM(FE_DX, 4, FE_AX, 0x44332211), FE_AX);
-TEST("\x01\x84\x83\x11\x22\x33\x44", ADD32mr, 0, FE_MEM(FE_BX, 4, FE_AX, 0x44332211), FE_AX);
-TEST("\x01\x84\x84\x11\x22\x33\x44", ADD32mr, 0, FE_MEM(FE_SP, 4, FE_AX, 0x44332211), FE_AX);
-TEST("\x01\x84\x85\x11\x22\x33\x44", ADD32mr, 0, FE_MEM(FE_BP, 4, FE_AX, 0x44332211), FE_AX);
-TEST("\x01\x84\x86\x11\x22\x33\x44", ADD32mr, 0, FE_MEM(FE_SI, 4, FE_AX, 0x44332211), FE_AX);
-TEST("\x01\x84\x87\x11\x22\x33\x44", ADD32mr, 0, FE_MEM(FE_DI, 4, FE_AX, 0x44332211), FE_AX);
-TEST("\x01\x84\x88\x11\x22\x33\x44", ADD32mr, 0, FE_MEM(FE_AX, 4, FE_CX, 0x44332211), FE_AX);
-TEST("\x01\x84\x89\x11\x22\x33\x44", ADD32mr, 0, FE_MEM(FE_CX, 4, FE_CX, 0x44332211), FE_AX);
-TEST("\x01\x84\x8a\x11\x22\x33\x44", ADD32mr, 0, FE_MEM(FE_DX, 4, FE_CX, 0x44332211), FE_AX);
-TEST("\x01\x84\x8b\x11\x22\x33\x44", ADD32mr, 0, FE_MEM(FE_BX, 4, FE_CX, 0x44332211), FE_AX);
-TEST("\x01\x84\x8c\x11\x22\x33\x44", ADD32mr, 0, FE_MEM(FE_SP, 4, FE_CX, 0x44332211), FE_AX);
-TEST("\x01\x84\x8d\x11\x22\x33\x44", ADD32mr, 0, FE_MEM(FE_BP, 4, FE_CX, 0x44332211), FE_AX);
-TEST("\x01\x84\x8e\x11\x22\x33\x44", ADD32mr, 0, FE_MEM(FE_SI, 4, FE_CX, 0x44332211), FE_AX);
-TEST("\x01\x84\x8f\x11\x22\x33\x44", ADD32mr, 0, FE_MEM(FE_DI, 4, FE_CX, 0x44332211), FE_AX);
-TEST("\x01\x84\x90\x11\x22\x33\x44", ADD32mr, 0, FE_MEM(FE_AX, 4, FE_DX, 0x44332211), FE_AX);
-TEST("\x01\x84\x91\x11\x22\x33\x44", ADD32mr, 0, FE_MEM(FE_CX, 4, FE_DX, 0x44332211), FE_AX);
-TEST("\x01\x84\x92\x11\x22\x33\x44", ADD32mr, 0, FE_MEM(FE_DX, 4, FE_DX, 0x44332211), FE_AX);
-TEST("\x01\x84\x93\x11\x22\x33\x44", ADD32mr, 0, FE_MEM(FE_BX, 4, FE_DX, 0x44332211), FE_AX);
-TEST("\x01\x84\x94\x11\x22\x33\x44", ADD32mr, 0, FE_MEM(FE_SP, 4, FE_DX, 0x44332211), FE_AX);
-TEST("\x01\x84\x95\x11\x22\x33\x44", ADD32mr, 0, FE_MEM(FE_BP, 4, FE_DX, 0x44332211), FE_AX);
-TEST("\x01\x84\x96\x11\x22\x33\x44", ADD32mr, 0, FE_MEM(FE_SI, 4, FE_DX, 0x44332211), FE_AX);
-TEST("\x01\x84\x97\x11\x22\x33\x44", ADD32mr, 0, FE_MEM(FE_DI, 4, FE_DX, 0x44332211), FE_AX);
-TEST("\x01\x84\x98\x11\x22\x33\x44", ADD32mr, 0, FE_MEM(FE_AX, 4, FE_BX, 0x44332211), FE_AX);
-TEST("\x01\x84\x99\x11\x22\x33\x44", ADD32mr, 0, FE_MEM(FE_CX, 4, FE_BX, 0x44332211), FE_AX);
-TEST("\x01\x84\x9a\x11\x22\x33\x44", ADD32mr, 0, FE_MEM(FE_DX, 4, FE_BX, 0x44332211), FE_AX);
-TEST("\x01\x84\x9b\x11\x22\x33\x44", ADD32mr, 0, FE_MEM(FE_BX, 4, FE_BX, 0x44332211), FE_AX);
-TEST("\x01\x84\x9c\x11\x22\x33\x44", ADD32mr, 0, FE_MEM(FE_SP, 4, FE_BX, 0x44332211), FE_AX);
-TEST("\x01\x84\x9d\x11\x22\x33\x44", ADD32mr, 0, FE_MEM(FE_BP, 4, FE_BX, 0x44332211), FE_AX);
-TEST("\x01\x84\x9e\x11\x22\x33\x44", ADD32mr, 0, FE_MEM(FE_SI, 4, FE_BX, 0x44332211), FE_AX);
-TEST("\x01\x84\x9f\x11\x22\x33\x44", ADD32mr, 0, FE_MEM(FE_DI, 4, FE_BX, 0x44332211), FE_AX);
-TEST("", ADD32mr, 0, FE_MEM(FE_AX, 4, FE_SP, 0x44332211), FE_AX);
-TEST("", ADD32mr, 0, FE_MEM(FE_CX, 4, FE_SP, 0x44332211), FE_AX);
-TEST("", ADD32mr, 0, FE_MEM(FE_DX, 4, FE_SP, 0x44332211), FE_AX);
-TEST("", ADD32mr, 0, FE_MEM(FE_BX, 4, FE_SP, 0x44332211), FE_AX);
-TEST("", ADD32mr, 0, FE_MEM(FE_SP, 4, FE_SP, 0x44332211), FE_AX);
-TEST("", ADD32mr, 0, FE_MEM(FE_BP, 4, FE_SP, 0x44332211), FE_AX);
-TEST("", ADD32mr, 0, FE_MEM(FE_SI, 4, FE_SP, 0x44332211), FE_AX);
-TEST("", ADD32mr, 0, FE_MEM(FE_DI, 4, FE_SP, 0x44332211), FE_AX);
-TEST("\x01\x84\xa8\x11\x22\x33\x44", ADD32mr, 0, FE_MEM(FE_AX, 4, FE_BP, 0x44332211), FE_AX);
-TEST("\x01\x84\xa9\x11\x22\x33\x44", ADD32mr, 0, FE_MEM(FE_CX, 4, FE_BP, 0x44332211), FE_AX);
-TEST("\x01\x84\xaa\x11\x22\x33\x44", ADD32mr, 0, FE_MEM(FE_DX, 4, FE_BP, 0x44332211), FE_AX);
-TEST("\x01\x84\xab\x11\x22\x33\x44", ADD32mr, 0, FE_MEM(FE_BX, 4, FE_BP, 0x44332211), FE_AX);
-TEST("\x01\x84\xac\x11\x22\x33\x44", ADD32mr, 0, FE_MEM(FE_SP, 4, FE_BP, 0x44332211), FE_AX);
-TEST("\x01\x84\xad\x11\x22\x33\x44", ADD32mr, 0, FE_MEM(FE_BP, 4, FE_BP, 0x44332211), FE_AX);
-TEST("\x01\x84\xae\x11\x22\x33\x44", ADD32mr, 0, FE_MEM(FE_SI, 4, FE_BP, 0x44332211), FE_AX);
-TEST("\x01\x84\xaf\x11\x22\x33\x44", ADD32mr, 0, FE_MEM(FE_DI, 4, FE_BP, 0x44332211), FE_AX);
-TEST("\x01\x84\xb0\x11\x22\x33\x44", ADD32mr, 0, FE_MEM(FE_AX, 4, FE_SI, 0x44332211), FE_AX);
-TEST("\x01\x84\xb1\x11\x22\x33\x44", ADD32mr, 0, FE_MEM(FE_CX, 4, FE_SI, 0x44332211), FE_AX);
-TEST("\x01\x84\xb2\x11\x22\x33\x44", ADD32mr, 0, FE_MEM(FE_DX, 4, FE_SI, 0x44332211), FE_AX);
-TEST("\x01\x84\xb3\x11\x22\x33\x44", ADD32mr, 0, FE_MEM(FE_BX, 4, FE_SI, 0x44332211), FE_AX);
-TEST("\x01\x84\xb4\x11\x22\x33\x44", ADD32mr, 0, FE_MEM(FE_SP, 4, FE_SI, 0x44332211), FE_AX);
-TEST("\x01\x84\xb5\x11\x22\x33\x44", ADD32mr, 0, FE_MEM(FE_BP, 4, FE_SI, 0x44332211), FE_AX);
-TEST("\x01\x84\xb6\x11\x22\x33\x44", ADD32mr, 0, FE_MEM(FE_SI, 4, FE_SI, 0x44332211), FE_AX);
-TEST("\x01\x84\xb7\x11\x22\x33\x44", ADD32mr, 0, FE_MEM(FE_DI, 4, FE_SI, 0x44332211), FE_AX);
-TEST("\x01\x84\xb8\x11\x22\x33\x44", ADD32mr, 0, FE_MEM(FE_AX, 4, FE_DI, 0x44332211), FE_AX);
-TEST("\x01\x84\xb9\x11\x22\x33\x44", ADD32mr, 0, FE_MEM(FE_CX, 4, FE_DI, 0x44332211), FE_AX);
-TEST("\x01\x84\xba\x11\x22\x33\x44", ADD32mr, 0, FE_MEM(FE_DX, 4, FE_DI, 0x44332211), FE_AX);
-TEST("\x01\x84\xbb\x11\x22\x33\x44", ADD32mr, 0, FE_MEM(FE_BX, 4, FE_DI, 0x44332211), FE_AX);
-TEST("\x01\x84\xbc\x11\x22\x33\x44", ADD32mr, 0, FE_MEM(FE_SP, 4, FE_DI, 0x44332211), FE_AX);
-TEST("\x01\x84\xbd\x11\x22\x33\x44", ADD32mr, 0, FE_MEM(FE_BP, 4, FE_DI, 0x44332211), FE_AX);
-TEST("\x01\x84\xbe\x11\x22\x33\x44", ADD32mr, 0, FE_MEM(FE_SI, 4, FE_DI, 0x44332211), FE_AX);
-TEST("\x01\x84\xbf\x11\x22\x33\x44", ADD32mr, 0, FE_MEM(FE_DI, 4, FE_DI, 0x44332211), FE_AX);
-TEST("\x01\x85\x11\x22\x33\x44", ADD32mr, 0, FE_MEM(FE_BP, 0, FE_NOREG, 0x44332211), FE_AX);
-TEST("\x01\x86\x11\x22\x33\x44", ADD32mr, 0, FE_MEM(FE_SI, 0, FE_NOREG, 0x44332211), FE_AX);
-TEST("\x01\x87\x11\x22\x33\x44", ADD32mr, 0, FE_MEM(FE_DI, 0, FE_NOREG, 0x44332211), FE_AX);
-TEST("\x01\xc0", ADD32rr, 0, FE_AX, FE_AX);
-TEST("\x01\xc1", ADD32rr, 0, FE_CX, FE_AX);
-TEST("\x01\xc2", ADD32rr, 0, FE_DX, FE_AX);
-TEST("\x01\xc3", ADD32rr, 0, FE_BX, FE_AX);
-TEST("\x01\xc4", ADD32rr, 0, FE_SP, FE_AX);
-TEST("\x01\xc5", ADD32rr, 0, FE_BP, FE_AX);
-TEST("\x01\xc6", ADD32rr, 0, FE_SI, FE_AX);
-TEST("\x01\xc7", ADD32rr, 0, FE_DI, FE_AX);
+TEST("\x01\x00", ADD32mr, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0), FE_AX)
+TEST("\x01\x01", ADD32mr, 0, FE_MEM(FE_CX, 0, FE_NOREG, 0), FE_AX)
+TEST("\x01\x02", ADD32mr, 0, FE_MEM(FE_DX, 0, FE_NOREG, 0), FE_AX)
+TEST("\x01\x03", ADD32mr, 0, FE_MEM(FE_BX, 0, FE_NOREG, 0), FE_AX)
+TEST("\x01\x04\x80", ADD32mr, 0, FE_MEM(FE_AX, 4, FE_AX, 0), FE_AX)
+TEST("\x01\x04\x81", ADD32mr, 0, FE_MEM(FE_CX, 4, FE_AX, 0), FE_AX)
+TEST("\x01\x04\x82", ADD32mr, 0, FE_MEM(FE_DX, 4, FE_AX, 0), FE_AX)
+TEST("\x01\x04\x83", ADD32mr, 0, FE_MEM(FE_BX, 4, FE_AX, 0), FE_AX)
+TEST("\x01\x04\x84", ADD32mr, 0, FE_MEM(FE_SP, 4, FE_AX, 0), FE_AX)
+TEST("\x01\x04\x85\x11\x22\x33\x44", ADD32mr, 0, FE_MEM(FE_NOREG, 4, FE_AX, 0x44332211), FE_AX)
+TEST("\x01\x04\x86", ADD32mr, 0, FE_MEM(FE_SI, 4, FE_AX, 0), FE_AX)
+TEST("\x01\x04\x87", ADD32mr, 0, FE_MEM(FE_DI, 4, FE_AX, 0), FE_AX)
+TEST("\x01\x04\x88", ADD32mr, 0, FE_MEM(FE_AX, 4, FE_CX, 0), FE_AX)
+TEST("\x01\x04\x89", ADD32mr, 0, FE_MEM(FE_CX, 4, FE_CX, 0), FE_AX)
+TEST("\x01\x04\x8a", ADD32mr, 0, FE_MEM(FE_DX, 4, FE_CX, 0), FE_AX)
+TEST("\x01\x04\x8b", ADD32mr, 0, FE_MEM(FE_BX, 4, FE_CX, 0), FE_AX)
+TEST("\x01\x04\x8c", ADD32mr, 0, FE_MEM(FE_SP, 4, FE_CX, 0), FE_AX)
+TEST("\x01\x04\x8d\x11\x22\x33\x44", ADD32mr, 0, FE_MEM(FE_NOREG, 4, FE_CX, 0x44332211), FE_AX)
+TEST("\x01\x04\x8e", ADD32mr, 0, FE_MEM(FE_SI, 4, FE_CX, 0), FE_AX)
+TEST("\x01\x04\x8f", ADD32mr, 0, FE_MEM(FE_DI, 4, FE_CX, 0), FE_AX)
+TEST("\x01\x04\x90", ADD32mr, 0, FE_MEM(FE_AX, 4, FE_DX, 0), FE_AX)
+TEST("\x01\x04\x91", ADD32mr, 0, FE_MEM(FE_CX, 4, FE_DX, 0), FE_AX)
+TEST("\x01\x04\x92", ADD32mr, 0, FE_MEM(FE_DX, 4, FE_DX, 0), FE_AX)
+TEST("\x01\x04\x93", ADD32mr, 0, FE_MEM(FE_BX, 4, FE_DX, 0), FE_AX)
+TEST("\x01\x04\x94", ADD32mr, 0, FE_MEM(FE_SP, 4, FE_DX, 0), FE_AX)
+TEST("\x01\x04\x95\x11\x22\x33\x44", ADD32mr, 0, FE_MEM(FE_NOREG, 4, FE_DX, 0x44332211), FE_AX)
+TEST("\x01\x04\x96", ADD32mr, 0, FE_MEM(FE_SI, 4, FE_DX, 0), FE_AX)
+TEST("\x01\x04\x97", ADD32mr, 0, FE_MEM(FE_DI, 4, FE_DX, 0), FE_AX)
+TEST("\x01\x04\x98", ADD32mr, 0, FE_MEM(FE_AX, 4, FE_BX, 0), FE_AX)
+TEST("\x01\x04\x99", ADD32mr, 0, FE_MEM(FE_CX, 4, FE_BX, 0), FE_AX)
+TEST("\x01\x04\x9a", ADD32mr, 0, FE_MEM(FE_DX, 4, FE_BX, 0), FE_AX)
+TEST("\x01\x04\x9b", ADD32mr, 0, FE_MEM(FE_BX, 4, FE_BX, 0), FE_AX)
+TEST("\x01\x04\x9c", ADD32mr, 0, FE_MEM(FE_SP, 4, FE_BX, 0), FE_AX)
+TEST("\x01\x04\x9d\x11\x22\x33\x44", ADD32mr, 0, FE_MEM(FE_NOREG, 4, FE_BX, 0x44332211), FE_AX)
+TEST("\x01\x04\x9e", ADD32mr, 0, FE_MEM(FE_SI, 4, FE_BX, 0), FE_AX)
+TEST("\x01\x04\x9f", ADD32mr, 0, FE_MEM(FE_DI, 4, FE_BX, 0), FE_AX)
+TEST("", ADD32mr, 0, FE_MEM(FE_AX, 4, FE_SP, 0), FE_AX)
+TEST("", ADD32mr, 0, FE_MEM(FE_CX, 4, FE_SP, 0), FE_AX)
+TEST("", ADD32mr, 0, FE_MEM(FE_DX, 4, FE_SP, 0), FE_AX)
+TEST("", ADD32mr, 0, FE_MEM(FE_BX, 4, FE_SP, 0), FE_AX)
+TEST("", ADD32mr, 0, FE_MEM(FE_SP, 4, FE_SP, 0), FE_AX)
+TEST("", ADD32mr, 0, FE_MEM(FE_NOREG, 4, FE_SP, 0x44332211), FE_AX)
+TEST("", ADD32mr, 0, FE_MEM(FE_SI, 4, FE_SP, 0), FE_AX)
+TEST("", ADD32mr, 0, FE_MEM(FE_DI, 4, FE_SP, 0), FE_AX)
+TEST("\x01\x04\xa8", ADD32mr, 0, FE_MEM(FE_AX, 4, FE_BP, 0), FE_AX)
+TEST("\x01\x04\xa9", ADD32mr, 0, FE_MEM(FE_CX, 4, FE_BP, 0), FE_AX)
+TEST("\x01\x04\xaa", ADD32mr, 0, FE_MEM(FE_DX, 4, FE_BP, 0), FE_AX)
+TEST("\x01\x04\xab", ADD32mr, 0, FE_MEM(FE_BX, 4, FE_BP, 0), FE_AX)
+TEST("\x01\x04\xac", ADD32mr, 0, FE_MEM(FE_SP, 4, FE_BP, 0), FE_AX)
+TEST("\x01\x04\xad\x11\x22\x33\x44", ADD32mr, 0, FE_MEM(FE_NOREG, 4, FE_BP, 0x44332211), FE_AX)
+TEST("\x01\x04\xae", ADD32mr, 0, FE_MEM(FE_SI, 4, FE_BP, 0), FE_AX)
+TEST("\x01\x04\xaf", ADD32mr, 0, FE_MEM(FE_DI, 4, FE_BP, 0), FE_AX)
+TEST("\x01\x04\xb0", ADD32mr, 0, FE_MEM(FE_AX, 4, FE_SI, 0), FE_AX)
+TEST("\x01\x04\xb1", ADD32mr, 0, FE_MEM(FE_CX, 4, FE_SI, 0), FE_AX)
+TEST("\x01\x04\xb2", ADD32mr, 0, FE_MEM(FE_DX, 4, FE_SI, 0), FE_AX)
+TEST("\x01\x04\xb3", ADD32mr, 0, FE_MEM(FE_BX, 4, FE_SI, 0), FE_AX)
+TEST("\x01\x04\xb4", ADD32mr, 0, FE_MEM(FE_SP, 4, FE_SI, 0), FE_AX)
+TEST("\x01\x04\xb5\x11\x22\x33\x44", ADD32mr, 0, FE_MEM(FE_NOREG, 4, FE_SI, 0x44332211), FE_AX)
+TEST("\x01\x04\xb6", ADD32mr, 0, FE_MEM(FE_SI, 4, FE_SI, 0), FE_AX)
+TEST("\x01\x04\xb7", ADD32mr, 0, FE_MEM(FE_DI, 4, FE_SI, 0), FE_AX)
+TEST("\x01\x04\xb8", ADD32mr, 0, FE_MEM(FE_AX, 4, FE_DI, 0), FE_AX)
+TEST("\x01\x04\xb9", ADD32mr, 0, FE_MEM(FE_CX, 4, FE_DI, 0), FE_AX)
+TEST("\x01\x04\xba", ADD32mr, 0, FE_MEM(FE_DX, 4, FE_DI, 0), FE_AX)
+TEST("\x01\x04\xbb", ADD32mr, 0, FE_MEM(FE_BX, 4, FE_DI, 0), FE_AX)
+TEST("\x01\x04\xbc", ADD32mr, 0, FE_MEM(FE_SP, 4, FE_DI, 0), FE_AX)
+TEST("\x01\x04\xbd\x11\x22\x33\x44", ADD32mr, 0, FE_MEM(FE_NOREG, 4, FE_DI, 0x44332211), FE_AX)
+TEST("\x01\x04\xbe", ADD32mr, 0, FE_MEM(FE_SI, 4, FE_DI, 0), FE_AX)
+TEST("\x01\x04\xbf", ADD32mr, 0, FE_MEM(FE_DI, 4, FE_DI, 0), FE_AX)
+TEST("\x01\x05\x11\x22\x33\x44", ADD32mr, 0, FE_MEM(FE_IP, 0, FE_NOREG, 0x44332217), FE_AX)
+TEST("\x01\x06", ADD32mr, 0, FE_MEM(FE_SI, 0, FE_NOREG, 0), FE_AX)
+TEST("\x01\x07", ADD32mr, 0, FE_MEM(FE_DI, 0, FE_NOREG, 0), FE_AX)
+TEST("\x01\x40\x99", ADD32mr, 0, FE_MEM(FE_AX, 0, FE_NOREG, -0x67), FE_AX)
+TEST("\x01\x41\x99", ADD32mr, 0, FE_MEM(FE_CX, 0, FE_NOREG, -0x67), FE_AX)
+TEST("\x01\x42\x99", ADD32mr, 0, FE_MEM(FE_DX, 0, FE_NOREG, -0x67), FE_AX)
+TEST("\x01\x43\x99", ADD32mr, 0, FE_MEM(FE_BX, 0, FE_NOREG, -0x67), FE_AX)
+TEST("\x01\x44\x80\x99", ADD32mr, 0, FE_MEM(FE_AX, 4, FE_AX, -0x67), FE_AX)
+TEST("\x01\x44\x81\x99", ADD32mr, 0, FE_MEM(FE_CX, 4, FE_AX, -0x67), FE_AX)
+TEST("\x01\x44\x82\x99", ADD32mr, 0, FE_MEM(FE_DX, 4, FE_AX, -0x67), FE_AX)
+TEST("\x01\x44\x83\x99", ADD32mr, 0, FE_MEM(FE_BX, 4, FE_AX, -0x67), FE_AX)
+TEST("\x01\x44\x84\x99", ADD32mr, 0, FE_MEM(FE_SP, 4, FE_AX, -0x67), FE_AX)
+TEST("\x01\x44\x85\x99", ADD32mr, 0, FE_MEM(FE_BP, 4, FE_AX, -0x67), FE_AX)
+TEST("\x01\x44\x86\x99", ADD32mr, 0, FE_MEM(FE_SI, 4, FE_AX, -0x67), FE_AX)
+TEST("\x01\x44\x87\x99", ADD32mr, 0, FE_MEM(FE_DI, 4, FE_AX, -0x67), FE_AX)
+TEST("\x01\x44\x88\x99", ADD32mr, 0, FE_MEM(FE_AX, 4, FE_CX, -0x67), FE_AX)
+TEST("\x01\x44\x89\x99", ADD32mr, 0, FE_MEM(FE_CX, 4, FE_CX, -0x67), FE_AX)
+TEST("\x01\x44\x8a\x99", ADD32mr, 0, FE_MEM(FE_DX, 4, FE_CX, -0x67), FE_AX)
+TEST("\x01\x44\x8b\x99", ADD32mr, 0, FE_MEM(FE_BX, 4, FE_CX, -0x67), FE_AX)
+TEST("\x01\x44\x8c\x99", ADD32mr, 0, FE_MEM(FE_SP, 4, FE_CX, -0x67), FE_AX)
+TEST("\x01\x44\x8d\x99", ADD32mr, 0, FE_MEM(FE_BP, 4, FE_CX, -0x67), FE_AX)
+TEST("\x01\x44\x8e\x99", ADD32mr, 0, FE_MEM(FE_SI, 4, FE_CX, -0x67), FE_AX)
+TEST("\x01\x44\x8f\x99", ADD32mr, 0, FE_MEM(FE_DI, 4, FE_CX, -0x67), FE_AX)
+TEST("\x01\x44\x90\x99", ADD32mr, 0, FE_MEM(FE_AX, 4, FE_DX, -0x67), FE_AX)
+TEST("\x01\x44\x91\x99", ADD32mr, 0, FE_MEM(FE_CX, 4, FE_DX, -0x67), FE_AX)
+TEST("\x01\x44\x92\x99", ADD32mr, 0, FE_MEM(FE_DX, 4, FE_DX, -0x67), FE_AX)
+TEST("\x01\x44\x93\x99", ADD32mr, 0, FE_MEM(FE_BX, 4, FE_DX, -0x67), FE_AX)
+TEST("\x01\x44\x94\x99", ADD32mr, 0, FE_MEM(FE_SP, 4, FE_DX, -0x67), FE_AX)
+TEST("\x01\x44\x95\x99", ADD32mr, 0, FE_MEM(FE_BP, 4, FE_DX, -0x67), FE_AX)
+TEST("\x01\x44\x96\x99", ADD32mr, 0, FE_MEM(FE_SI, 4, FE_DX, -0x67), FE_AX)
+TEST("\x01\x44\x97\x99", ADD32mr, 0, FE_MEM(FE_DI, 4, FE_DX, -0x67), FE_AX)
+TEST("\x01\x44\x98\x99", ADD32mr, 0, FE_MEM(FE_AX, 4, FE_BX, -0x67), FE_AX)
+TEST("\x01\x44\x99\x99", ADD32mr, 0, FE_MEM(FE_CX, 4, FE_BX, -0x67), FE_AX)
+TEST("\x01\x44\x9a\x99", ADD32mr, 0, FE_MEM(FE_DX, 4, FE_BX, -0x67), FE_AX)
+TEST("\x01\x44\x9b\x99", ADD32mr, 0, FE_MEM(FE_BX, 4, FE_BX, -0x67), FE_AX)
+TEST("\x01\x44\x9c\x99", ADD32mr, 0, FE_MEM(FE_SP, 4, FE_BX, -0x67), FE_AX)
+TEST("\x01\x44\x9d\x99", ADD32mr, 0, FE_MEM(FE_BP, 4, FE_BX, -0x67), FE_AX)
+TEST("\x01\x44\x9e\x99", ADD32mr, 0, FE_MEM(FE_SI, 4, FE_BX, -0x67), FE_AX)
+TEST("\x01\x44\x9f\x99", ADD32mr, 0, FE_MEM(FE_DI, 4, FE_BX, -0x67), FE_AX)
+TEST("", ADD32mr, 0, FE_MEM(FE_AX, 4, FE_SP, -0x67), FE_AX)
+TEST("", ADD32mr, 0, FE_MEM(FE_CX, 4, FE_SP, -0x67), FE_AX)
+TEST("", ADD32mr, 0, FE_MEM(FE_DX, 4, FE_SP, -0x67), FE_AX)
+TEST("", ADD32mr, 0, FE_MEM(FE_BX, 4, FE_SP, -0x67), FE_AX)
+TEST("", ADD32mr, 0, FE_MEM(FE_SP, 4, FE_SP, -0x67), FE_AX)
+TEST("", ADD32mr, 0, FE_MEM(FE_BP, 4, FE_SP, -0x67), FE_AX)
+TEST("", ADD32mr, 0, FE_MEM(FE_SI, 4, FE_SP, -0x67), FE_AX)
+TEST("", ADD32mr, 0, FE_MEM(FE_DI, 4, FE_SP, -0x67), FE_AX)
+TEST("\x01\x44\xa8\x99", ADD32mr, 0, FE_MEM(FE_AX, 4, FE_BP, -0x67), FE_AX)
+TEST("\x01\x44\xa9\x99", ADD32mr, 0, FE_MEM(FE_CX, 4, FE_BP, -0x67), FE_AX)
+TEST("\x01\x44\xaa\x99", ADD32mr, 0, FE_MEM(FE_DX, 4, FE_BP, -0x67), FE_AX)
+TEST("\x01\x44\xab\x99", ADD32mr, 0, FE_MEM(FE_BX, 4, FE_BP, -0x67), FE_AX)
+TEST("\x01\x44\xac\x99", ADD32mr, 0, FE_MEM(FE_SP, 4, FE_BP, -0x67), FE_AX)
+TEST("\x01\x44\xad\x99", ADD32mr, 0, FE_MEM(FE_BP, 4, FE_BP, -0x67), FE_AX)
+TEST("\x01\x44\xae\x99", ADD32mr, 0, FE_MEM(FE_SI, 4, FE_BP, -0x67), FE_AX)
+TEST("\x01\x44\xaf\x99", ADD32mr, 0, FE_MEM(FE_DI, 4, FE_BP, -0x67), FE_AX)
+TEST("\x01\x44\xb0\x99", ADD32mr, 0, FE_MEM(FE_AX, 4, FE_SI, -0x67), FE_AX)
+TEST("\x01\x44\xb1\x99", ADD32mr, 0, FE_MEM(FE_CX, 4, FE_SI, -0x67), FE_AX)
+TEST("\x01\x44\xb2\x99", ADD32mr, 0, FE_MEM(FE_DX, 4, FE_SI, -0x67), FE_AX)
+TEST("\x01\x44\xb3\x99", ADD32mr, 0, FE_MEM(FE_BX, 4, FE_SI, -0x67), FE_AX)
+TEST("\x01\x44\xb4\x99", ADD32mr, 0, FE_MEM(FE_SP, 4, FE_SI, -0x67), FE_AX)
+TEST("\x01\x44\xb5\x99", ADD32mr, 0, FE_MEM(FE_BP, 4, FE_SI, -0x67), FE_AX)
+TEST("\x01\x44\xb6\x99", ADD32mr, 0, FE_MEM(FE_SI, 4, FE_SI, -0x67), FE_AX)
+TEST("\x01\x44\xb7\x99", ADD32mr, 0, FE_MEM(FE_DI, 4, FE_SI, -0x67), FE_AX)
+TEST("\x01\x44\xb8\x99", ADD32mr, 0, FE_MEM(FE_AX, 4, FE_DI, -0x67), FE_AX)
+TEST("\x01\x44\xb9\x99", ADD32mr, 0, FE_MEM(FE_CX, 4, FE_DI, -0x67), FE_AX)
+TEST("\x01\x44\xba\x99", ADD32mr, 0, FE_MEM(FE_DX, 4, FE_DI, -0x67), FE_AX)
+TEST("\x01\x44\xbb\x99", ADD32mr, 0, FE_MEM(FE_BX, 4, FE_DI, -0x67), FE_AX)
+TEST("\x01\x44\xbc\x99", ADD32mr, 0, FE_MEM(FE_SP, 4, FE_DI, -0x67), FE_AX)
+TEST("\x01\x44\xbd\x99", ADD32mr, 0, FE_MEM(FE_BP, 4, FE_DI, -0x67), FE_AX)
+TEST("\x01\x44\xbe\x99", ADD32mr, 0, FE_MEM(FE_SI, 4, FE_DI, -0x67), FE_AX)
+TEST("\x01\x44\xbf\x99", ADD32mr, 0, FE_MEM(FE_DI, 4, FE_DI, -0x67), FE_AX)
+TEST("\x01\x45\x99", ADD32mr, 0, FE_MEM(FE_BP, 0, FE_NOREG, -0x67), FE_AX)
+TEST("\x01\x46\x99", ADD32mr, 0, FE_MEM(FE_SI, 0, FE_NOREG, -0x67), FE_AX)
+TEST("\x01\x47\x99", ADD32mr, 0, FE_MEM(FE_DI, 0, FE_NOREG, -0x67), FE_AX)
+TEST("\x01\x80\x11\x22\x33\x44", ADD32mr, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0x44332211), FE_AX)
+TEST("\x01\x81\x11\x22\x33\x44", ADD32mr, 0, FE_MEM(FE_CX, 0, FE_NOREG, 0x44332211), FE_AX)
+TEST("\x01\x82\x11\x22\x33\x44", ADD32mr, 0, FE_MEM(FE_DX, 0, FE_NOREG, 0x44332211), FE_AX)
+TEST("\x01\x83\x11\x22\x33\x44", ADD32mr, 0, FE_MEM(FE_BX, 0, FE_NOREG, 0x44332211), FE_AX)
+TEST("\x01\x84\x80\x11\x22\x33\x44", ADD32mr, 0, FE_MEM(FE_AX, 4, FE_AX, 0x44332211), FE_AX)
+TEST("\x01\x84\x81\x11\x22\x33\x44", ADD32mr, 0, FE_MEM(FE_CX, 4, FE_AX, 0x44332211), FE_AX)
+TEST("\x01\x84\x82\x11\x22\x33\x44", ADD32mr, 0, FE_MEM(FE_DX, 4, FE_AX, 0x44332211), FE_AX)
+TEST("\x01\x84\x83\x11\x22\x33\x44", ADD32mr, 0, FE_MEM(FE_BX, 4, FE_AX, 0x44332211), FE_AX)
+TEST("\x01\x84\x84\x11\x22\x33\x44", ADD32mr, 0, FE_MEM(FE_SP, 4, FE_AX, 0x44332211), FE_AX)
+TEST("\x01\x84\x85\x11\x22\x33\x44", ADD32mr, 0, FE_MEM(FE_BP, 4, FE_AX, 0x44332211), FE_AX)
+TEST("\x01\x84\x86\x11\x22\x33\x44", ADD32mr, 0, FE_MEM(FE_SI, 4, FE_AX, 0x44332211), FE_AX)
+TEST("\x01\x84\x87\x11\x22\x33\x44", ADD32mr, 0, FE_MEM(FE_DI, 4, FE_AX, 0x44332211), FE_AX)
+TEST("\x01\x84\x88\x11\x22\x33\x44", ADD32mr, 0, FE_MEM(FE_AX, 4, FE_CX, 0x44332211), FE_AX)
+TEST("\x01\x84\x89\x11\x22\x33\x44", ADD32mr, 0, FE_MEM(FE_CX, 4, FE_CX, 0x44332211), FE_AX)
+TEST("\x01\x84\x8a\x11\x22\x33\x44", ADD32mr, 0, FE_MEM(FE_DX, 4, FE_CX, 0x44332211), FE_AX)
+TEST("\x01\x84\x8b\x11\x22\x33\x44", ADD32mr, 0, FE_MEM(FE_BX, 4, FE_CX, 0x44332211), FE_AX)
+TEST("\x01\x84\x8c\x11\x22\x33\x44", ADD32mr, 0, FE_MEM(FE_SP, 4, FE_CX, 0x44332211), FE_AX)
+TEST("\x01\x84\x8d\x11\x22\x33\x44", ADD32mr, 0, FE_MEM(FE_BP, 4, FE_CX, 0x44332211), FE_AX)
+TEST("\x01\x84\x8e\x11\x22\x33\x44", ADD32mr, 0, FE_MEM(FE_SI, 4, FE_CX, 0x44332211), FE_AX)
+TEST("\x01\x84\x8f\x11\x22\x33\x44", ADD32mr, 0, FE_MEM(FE_DI, 4, FE_CX, 0x44332211), FE_AX)
+TEST("\x01\x84\x90\x11\x22\x33\x44", ADD32mr, 0, FE_MEM(FE_AX, 4, FE_DX, 0x44332211), FE_AX)
+TEST("\x01\x84\x91\x11\x22\x33\x44", ADD32mr, 0, FE_MEM(FE_CX, 4, FE_DX, 0x44332211), FE_AX)
+TEST("\x01\x84\x92\x11\x22\x33\x44", ADD32mr, 0, FE_MEM(FE_DX, 4, FE_DX, 0x44332211), FE_AX)
+TEST("\x01\x84\x93\x11\x22\x33\x44", ADD32mr, 0, FE_MEM(FE_BX, 4, FE_DX, 0x44332211), FE_AX)
+TEST("\x01\x84\x94\x11\x22\x33\x44", ADD32mr, 0, FE_MEM(FE_SP, 4, FE_DX, 0x44332211), FE_AX)
+TEST("\x01\x84\x95\x11\x22\x33\x44", ADD32mr, 0, FE_MEM(FE_BP, 4, FE_DX, 0x44332211), FE_AX)
+TEST("\x01\x84\x96\x11\x22\x33\x44", ADD32mr, 0, FE_MEM(FE_SI, 4, FE_DX, 0x44332211), FE_AX)
+TEST("\x01\x84\x97\x11\x22\x33\x44", ADD32mr, 0, FE_MEM(FE_DI, 4, FE_DX, 0x44332211), FE_AX)
+TEST("\x01\x84\x98\x11\x22\x33\x44", ADD32mr, 0, FE_MEM(FE_AX, 4, FE_BX, 0x44332211), FE_AX)
+TEST("\x01\x84\x99\x11\x22\x33\x44", ADD32mr, 0, FE_MEM(FE_CX, 4, FE_BX, 0x44332211), FE_AX)
+TEST("\x01\x84\x9a\x11\x22\x33\x44", ADD32mr, 0, FE_MEM(FE_DX, 4, FE_BX, 0x44332211), FE_AX)
+TEST("\x01\x84\x9b\x11\x22\x33\x44", ADD32mr, 0, FE_MEM(FE_BX, 4, FE_BX, 0x44332211), FE_AX)
+TEST("\x01\x84\x9c\x11\x22\x33\x44", ADD32mr, 0, FE_MEM(FE_SP, 4, FE_BX, 0x44332211), FE_AX)
+TEST("\x01\x84\x9d\x11\x22\x33\x44", ADD32mr, 0, FE_MEM(FE_BP, 4, FE_BX, 0x44332211), FE_AX)
+TEST("\x01\x84\x9e\x11\x22\x33\x44", ADD32mr, 0, FE_MEM(FE_SI, 4, FE_BX, 0x44332211), FE_AX)
+TEST("\x01\x84\x9f\x11\x22\x33\x44", ADD32mr, 0, FE_MEM(FE_DI, 4, FE_BX, 0x44332211), FE_AX)
+TEST("", ADD32mr, 0, FE_MEM(FE_AX, 4, FE_SP, 0x44332211), FE_AX)
+TEST("", ADD32mr, 0, FE_MEM(FE_CX, 4, FE_SP, 0x44332211), FE_AX)
+TEST("", ADD32mr, 0, FE_MEM(FE_DX, 4, FE_SP, 0x44332211), FE_AX)
+TEST("", ADD32mr, 0, FE_MEM(FE_BX, 4, FE_SP, 0x44332211), FE_AX)
+TEST("", ADD32mr, 0, FE_MEM(FE_SP, 4, FE_SP, 0x44332211), FE_AX)
+TEST("", ADD32mr, 0, FE_MEM(FE_BP, 4, FE_SP, 0x44332211), FE_AX)
+TEST("", ADD32mr, 0, FE_MEM(FE_SI, 4, FE_SP, 0x44332211), FE_AX)
+TEST("", ADD32mr, 0, FE_MEM(FE_DI, 4, FE_SP, 0x44332211), FE_AX)
+TEST("\x01\x84\xa8\x11\x22\x33\x44", ADD32mr, 0, FE_MEM(FE_AX, 4, FE_BP, 0x44332211), FE_AX)
+TEST("\x01\x84\xa9\x11\x22\x33\x44", ADD32mr, 0, FE_MEM(FE_CX, 4, FE_BP, 0x44332211), FE_AX)
+TEST("\x01\x84\xaa\x11\x22\x33\x44", ADD32mr, 0, FE_MEM(FE_DX, 4, FE_BP, 0x44332211), FE_AX)
+TEST("\x01\x84\xab\x11\x22\x33\x44", ADD32mr, 0, FE_MEM(FE_BX, 4, FE_BP, 0x44332211), FE_AX)
+TEST("\x01\x84\xac\x11\x22\x33\x44", ADD32mr, 0, FE_MEM(FE_SP, 4, FE_BP, 0x44332211), FE_AX)
+TEST("\x01\x84\xad\x11\x22\x33\x44", ADD32mr, 0, FE_MEM(FE_BP, 4, FE_BP, 0x44332211), FE_AX)
+TEST("\x01\x84\xae\x11\x22\x33\x44", ADD32mr, 0, FE_MEM(FE_SI, 4, FE_BP, 0x44332211), FE_AX)
+TEST("\x01\x84\xaf\x11\x22\x33\x44", ADD32mr, 0, FE_MEM(FE_DI, 4, FE_BP, 0x44332211), FE_AX)
+TEST("\x01\x84\xb0\x11\x22\x33\x44", ADD32mr, 0, FE_MEM(FE_AX, 4, FE_SI, 0x44332211), FE_AX)
+TEST("\x01\x84\xb1\x11\x22\x33\x44", ADD32mr, 0, FE_MEM(FE_CX, 4, FE_SI, 0x44332211), FE_AX)
+TEST("\x01\x84\xb2\x11\x22\x33\x44", ADD32mr, 0, FE_MEM(FE_DX, 4, FE_SI, 0x44332211), FE_AX)
+TEST("\x01\x84\xb3\x11\x22\x33\x44", ADD32mr, 0, FE_MEM(FE_BX, 4, FE_SI, 0x44332211), FE_AX)
+TEST("\x01\x84\xb4\x11\x22\x33\x44", ADD32mr, 0, FE_MEM(FE_SP, 4, FE_SI, 0x44332211), FE_AX)
+TEST("\x01\x84\xb5\x11\x22\x33\x44", ADD32mr, 0, FE_MEM(FE_BP, 4, FE_SI, 0x44332211), FE_AX)
+TEST("\x01\x84\xb6\x11\x22\x33\x44", ADD32mr, 0, FE_MEM(FE_SI, 4, FE_SI, 0x44332211), FE_AX)
+TEST("\x01\x84\xb7\x11\x22\x33\x44", ADD32mr, 0, FE_MEM(FE_DI, 4, FE_SI, 0x44332211), FE_AX)
+TEST("\x01\x84\xb8\x11\x22\x33\x44", ADD32mr, 0, FE_MEM(FE_AX, 4, FE_DI, 0x44332211), FE_AX)
+TEST("\x01\x84\xb9\x11\x22\x33\x44", ADD32mr, 0, FE_MEM(FE_CX, 4, FE_DI, 0x44332211), FE_AX)
+TEST("\x01\x84\xba\x11\x22\x33\x44", ADD32mr, 0, FE_MEM(FE_DX, 4, FE_DI, 0x44332211), FE_AX)
+TEST("\x01\x84\xbb\x11\x22\x33\x44", ADD32mr, 0, FE_MEM(FE_BX, 4, FE_DI, 0x44332211), FE_AX)
+TEST("\x01\x84\xbc\x11\x22\x33\x44", ADD32mr, 0, FE_MEM(FE_SP, 4, FE_DI, 0x44332211), FE_AX)
+TEST("\x01\x84\xbd\x11\x22\x33\x44", ADD32mr, 0, FE_MEM(FE_BP, 4, FE_DI, 0x44332211), FE_AX)
+TEST("\x01\x84\xbe\x11\x22\x33\x44", ADD32mr, 0, FE_MEM(FE_SI, 4, FE_DI, 0x44332211), FE_AX)
+TEST("\x01\x84\xbf\x11\x22\x33\x44", ADD32mr, 0, FE_MEM(FE_DI, 4, FE_DI, 0x44332211), FE_AX)
+TEST("\x01\x85\x11\x22\x33\x44", ADD32mr, 0, FE_MEM(FE_BP, 0, FE_NOREG, 0x44332211), FE_AX)
+TEST("\x01\x86\x11\x22\x33\x44", ADD32mr, 0, FE_MEM(FE_SI, 0, FE_NOREG, 0x44332211), FE_AX)
+TEST("\x01\x87\x11\x22\x33\x44", ADD32mr, 0, FE_MEM(FE_DI, 0, FE_NOREG, 0x44332211), FE_AX)
+TEST("\x01\xc0", ADD32rr, 0, FE_AX, FE_AX)
+TEST("\x01\xc1", ADD32rr, 0, FE_CX, FE_AX)
+TEST("\x01\xc2", ADD32rr, 0, FE_DX, FE_AX)
+TEST("\x01\xc3", ADD32rr, 0, FE_BX, FE_AX)
+TEST("\x01\xc4", ADD32rr, 0, FE_SP, FE_AX)
+TEST("\x01\xc5", ADD32rr, 0, FE_BP, FE_AX)
+TEST("\x01\xc6", ADD32rr, 0, FE_SI, FE_AX)
+TEST("\x01\xc7", ADD32rr, 0, FE_DI, FE_AX)
 
 // AMX
-TEST("\xc4\xe2\x78\x49\x00", LDTILECFGm, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0));
-TEST("\xc4\xe2\x79\x49\x00", STTILECFGm, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0));
-TEST("\xc4\xe2\x78\x49\xc0", TILERELEASE, 0);
-TEST("\xc4\xe2\x7b\x49\xc0", TILEZEROr, 0, FE_TMM0);
-TEST("\xc4\xe2\x7b\x49\xc8", TILEZEROr, 0, FE_TMM1);
-TEST("\xc4\xe2\x7b\x49\xf8", TILEZEROr, 0, FE_TMM7);
-TEST("\xc4\xe2\x7b\x4b\x04\x10", TILELOADDrm, 0, FE_TMM0, FE_MEM(FE_AX, 1, FE_DX, 0));
-TEST("\xc4\xe2\x7b\x4b\x04\x20", TILELOADDrm, 0, FE_TMM0, FE_MEM(FE_AX, 0, FE_NOREG, 0)); // has SIB
-TEST("\xc4\xe2\x79\x4b\x04\x10", TILELOADDT1rm, 0, FE_TMM0, FE_MEM(FE_AX, 1, FE_DX, 0));
-TEST("\xc4\xe2\x79\x4b\x04\x20", TILELOADDT1rm, 0, FE_TMM0, FE_MEM(FE_AX, 0, FE_NOREG, 0)); // has SIB
-TEST("\xc4\xe2\x7a\x4b\x04\x10", TILESTOREDmr, 0, FE_MEM(FE_AX, 1, FE_DX, 0), FE_TMM0);
-TEST("\xc4\xe2\x7a\x4b\x04\x20", TILESTOREDmr, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0), FE_TMM0); // has SIB
+TEST("\xc4\xe2\x78\x49\x00", LDTILECFGm, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0))
+TEST("\xc4\xe2\x79\x49\x00", STTILECFGm, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0))
+TEST("\xc4\xe2\x78\x49\xc0", TILERELEASE, 0)
+TEST("\xc4\xe2\x7b\x49\xc0", TILEZEROr, 0, FE_TMM0)
+TEST("\xc4\xe2\x7b\x49\xc8", TILEZEROr, 0, FE_TMM1)
+TEST("\xc4\xe2\x7b\x49\xf8", TILEZEROr, 0, FE_TMM7)
+TEST("\xc4\xe2\x7b\x4b\x04\x10", TILELOADDrm, 0, FE_TMM0, FE_MEM(FE_AX, 1, FE_DX, 0))
+TEST("\xc4\xe2\x7b\x4b\x04\x20", TILELOADDrm, 0, FE_TMM0, FE_MEM(FE_AX, 0, FE_NOREG, 0)) // has SIB
+TEST("\xc4\xe2\x79\x4b\x04\x10", TILELOADDT1rm, 0, FE_TMM0, FE_MEM(FE_AX, 1, FE_DX, 0))
+TEST("\xc4\xe2\x79\x4b\x04\x20", TILELOADDT1rm, 0, FE_TMM0, FE_MEM(FE_AX, 0, FE_NOREG, 0)) // has SIB
+TEST("\xc4\xe2\x7a\x4b\x04\x10", TILESTOREDmr, 0, FE_MEM(FE_AX, 1, FE_DX, 0), FE_TMM0)
+TEST("\xc4\xe2\x7a\x4b\x04\x20", TILESTOREDmr, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0), FE_TMM0) // has SIB
 // TODO: enforce that all registers must be different
-//TEST("", TDPBUUDrrr, 0, FE_TMM0, FE_TMM0, FE_TMM2");
-//TEST("", TDPBUUDrrr, 0, FE_TMM2, FE_TMM0, FE_TMM2");
-//TEST("", TDPBUUDrrr, 0, FE_TMM1, FE_TMM2, FE_TMM2");
-TEST("\xc4\xe2\x6a\x5c\xc8", TDPBF16PSrrr, 0, FE_TMM1, FE_TMM0, FE_TMM2);
-TEST("\xc4\xe2\x6b\x5c\xc8", TDPFP16PSrrr, 0, FE_TMM1, FE_TMM0, FE_TMM2);
-TEST("\xc4\xe2\x68\x5e\xc8", TDPBUUDrrr, 0, FE_TMM1, FE_TMM0, FE_TMM2);
-TEST("\xc4\xe2\x69\x5e\xc8", TDPBUSDrrr, 0, FE_TMM1, FE_TMM0, FE_TMM2);
-TEST("\xc4\xe2\x6a\x5e\xc8", TDPBSUDrrr, 0, FE_TMM1, FE_TMM0, FE_TMM2);
-TEST("\xc4\xe2\x6b\x5e\xc8", TDPBSSDrrr, 0, FE_TMM1, FE_TMM0, FE_TMM2);
-TEST("\xc4\xe2\x68\x6c\xc8", TCMMRLFP16PSrrr, 0, FE_TMM1, FE_TMM0, FE_TMM2);
-TEST("\xc4\xe2\x69\x6c\xc8", TCMMIMFP16PSrrr, 0, FE_TMM1, FE_TMM0, FE_TMM2);
+//TEST("", TDPBUUDrrr, 0, FE_TMM0, FE_TMM0, FE_TMM2")
+//TEST("", TDPBUUDrrr, 0, FE_TMM2, FE_TMM0, FE_TMM2")
+//TEST("", TDPBUUDrrr, 0, FE_TMM1, FE_TMM2, FE_TMM2")
+TEST("\xc4\xe2\x6a\x5c\xc8", TDPBF16PSrrr, 0, FE_TMM1, FE_TMM0, FE_TMM2)
+TEST("\xc4\xe2\x6b\x5c\xc8", TDPFP16PSrrr, 0, FE_TMM1, FE_TMM0, FE_TMM2)
+TEST("\xc4\xe2\x68\x5e\xc8", TDPBUUDrrr, 0, FE_TMM1, FE_TMM0, FE_TMM2)
+TEST("\xc4\xe2\x69\x5e\xc8", TDPBUSDrrr, 0, FE_TMM1, FE_TMM0, FE_TMM2)
+TEST("\xc4\xe2\x6a\x5e\xc8", TDPBSUDrrr, 0, FE_TMM1, FE_TMM0, FE_TMM2)
+TEST("\xc4\xe2\x6b\x5e\xc8", TDPBSSDrrr, 0, FE_TMM1, FE_TMM0, FE_TMM2)
+TEST("\xc4\xe2\x68\x6c\xc8", TCMMRLFP16PSrrr, 0, FE_TMM1, FE_TMM0, FE_TMM2)
+TEST("\xc4\xe2\x69\x6c\xc8", TCMMIMFP16PSrrr, 0, FE_TMM1, FE_TMM0, FE_TMM2)
 
 // Test LOCK prefix
-TEST("\xf0\x87\x08", LOCK_XCHG32mr, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0), FE_CX);
-TEST("\xf0\x0f\xc1\x01", LOCK_XADD32mr, 0, FE_MEM(FE_CX, 0, FE_NOREG, 0), FE_AX);
+TEST("\xf0\x87\x08", LOCK_XCHG32mr, 0, FE_MEM(FE_AX, 0, FE_NOREG, 0), FE_CX)
+TEST("\xf0\x0f\xc1\x01", LOCK_XADD32mr, 0, FE_MEM(FE_CX, 0, FE_NOREG, 0), FE_AX)
 
 // Test long instructions
-TEST("\x64\x67\xf0\x41\x81\x84\x00\x00\xff\xff\xff\x78\x56\x34\x12", LOCK_ADD32mi, FE_ADDR32|FE_SEG(FE_FS), FE_MEM(FE_R8, 1, FE_AX, -0x100), 0x12345678);
-TEST("\x64\xf0\x66\x41\x81\x84\x00\x00\xff\xff\xff\x34\x12", LOCK_ADD16mi, FE_SEG(FE_FS), FE_MEM(FE_R8, 1, FE_AX, -0x100), 0x1234);
-TEST("\x64\x67\xf0\x41\x0f\xba\xac\x00\x00\xff\xff\xff\x78", LOCK_BTS32mi, FE_ADDR32|FE_SEG(FE_FS), FE_MEM(FE_R8, 1, FE_AX, -0x100), 0x78);
+TEST("\x64\x67\xf0\x41\x81\x84\x00\x00\xff\xff\xff\x78\x56\x34\x12", LOCK_ADD32mi, FE_ADDR32|FE_SEG(FE_FS), FE_MEM(FE_R8, 1, FE_AX, -0x100), 0x12345678)
+TEST("\x64\xf0\x66\x41\x81\x84\x00\x00\xff\xff\xff\x34\x12", LOCK_ADD16mi, FE_SEG(FE_FS), FE_MEM(FE_R8, 1, FE_AX, -0x100), 0x1234)
+TEST("\x64\x67\xf0\x41\x0f\xba\xac\x00\x00\xff\xff\xff\x78", LOCK_BTS32mi, FE_ADDR32|FE_SEG(FE_FS), FE_MEM(FE_R8, 1, FE_AX, -0x100), 0x78)
 
 // PBNDKB
-TEST("\x0f\x01\xc7", PBNDKB, 0);
+TEST("\x0f\x01\xc7", PBNDKB, 0)
 
 // SM4
-TEST("\xc4\xe2\x6a\xda\xc1", VSM4KEY4_128rrr, 0, FE_XMM0, FE_XMM2, FE_XMM1);
-TEST("\x62\xf2\x6e\x00\xda\xc1", VSM4KEY4_128rrr, 0, FE_XMM0, FE_XMM18, FE_XMM1);
-TEST("\xc4\xe2\x6e\xda\xc1", VSM4KEY4_256rrr, 0, FE_XMM0, FE_XMM2, FE_XMM1);
-TEST("\x62\xf2\x6e\x20\xda\xc1", VSM4KEY4_256rrr, 0, FE_XMM0, FE_XMM18, FE_XMM1);
-TEST("\x62\xf2\x6e\x48\xda\xc1", VSM4KEY4_512rrr, 0, FE_XMM0, FE_XMM2, FE_XMM1);
-TEST("\x62\xf2\x6e\x40\xda\xc1", VSM4KEY4_512rrr, 0, FE_XMM0, FE_XMM18, FE_XMM1);
-TEST("\xc4\xe2\x6b\xda\xc1", VSM4RNDS4_128rrr, 0, FE_XMM0, FE_XMM2, FE_XMM1);
-TEST("\x62\xf2\x6f\x00\xda\xc1", VSM4RNDS4_128rrr, 0, FE_XMM0, FE_XMM18, FE_XMM1);
-TEST("\xc4\xe2\x6f\xda\xc1", VSM4RNDS4_256rrr, 0, FE_XMM0, FE_XMM2, FE_XMM1);
-TEST("\x62\xf2\x6f\x20\xda\xc1", VSM4RNDS4_256rrr, 0, FE_XMM0, FE_XMM18, FE_XMM1);
-TEST("\x62\xf2\x6f\x48\xda\xc1", VSM4RNDS4_512rrr, 0, FE_XMM0, FE_XMM2, FE_XMM1);
-TEST("\x62\xf2\x6f\x40\xda\xc1", VSM4RNDS4_512rrr, 0, FE_XMM0, FE_XMM18, FE_XMM1);
+TEST("\xc4\xe2\x6a\xda\xc1", VSM4KEY4_128rrr, 0, FE_XMM0, FE_XMM2, FE_XMM1)
+TEST("\x62\xf2\x6e\x00\xda\xc1", VSM4KEY4_128rrr, 0, FE_XMM0, FE_XMM18, FE_XMM1)
+TEST("\xc4\xe2\x6e\xda\xc1", VSM4KEY4_256rrr, 0, FE_XMM0, FE_XMM2, FE_XMM1)
+TEST("\x62\xf2\x6e\x20\xda\xc1", VSM4KEY4_256rrr, 0, FE_XMM0, FE_XMM18, FE_XMM1)
+TEST("\x62\xf2\x6e\x48\xda\xc1", VSM4KEY4_512rrr, 0, FE_XMM0, FE_XMM2, FE_XMM1)
+TEST("\x62\xf2\x6e\x40\xda\xc1", VSM4KEY4_512rrr, 0, FE_XMM0, FE_XMM18, FE_XMM1)
+TEST("\xc4\xe2\x6b\xda\xc1", VSM4RNDS4_128rrr, 0, FE_XMM0, FE_XMM2, FE_XMM1)
+TEST("\x62\xf2\x6f\x00\xda\xc1", VSM4RNDS4_128rrr, 0, FE_XMM0, FE_XMM18, FE_XMM1)
+TEST("\xc4\xe2\x6f\xda\xc1", VSM4RNDS4_256rrr, 0, FE_XMM0, FE_XMM2, FE_XMM1)
+TEST("\x62\xf2\x6f\x20\xda\xc1", VSM4RNDS4_256rrr, 0, FE_XMM0, FE_XMM18, FE_XMM1)
+TEST("\x62\xf2\x6f\x48\xda\xc1", VSM4RNDS4_512rrr, 0, FE_XMM0, FE_XMM2, FE_XMM1)
+TEST("\x62\xf2\x6f\x40\xda\xc1", VSM4RNDS4_512rrr, 0, FE_XMM0, FE_XMM18, FE_XMM1)

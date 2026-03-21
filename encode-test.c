@@ -41,7 +41,7 @@ fail:
 
 #define TEST2(str, exp, exp_len, mnem, flags, op0, op1, op2, op3, ...) test(buf, str, FE_ ## mnem|flags, op0, op1, op2, op3, exp, exp_len)
 #define TEST1(str, exp, ...) TEST2(str, exp, sizeof(exp)-1, __VA_ARGS__, 0, 0, 0, 0, 0)
-#define TEST(exp, ...) failed |= TEST1(#__VA_ARGS__, exp, __VA_ARGS__)
+#define TEST(exp, ...) failed |= TEST1(#__VA_ARGS__, exp, __VA_ARGS__);
 
 int
 main(int argc, char** argv)

@@ -30,7 +30,7 @@ check(const uint8_t* buf, const void* exp, size_t exp_len, unsigned res, const c
             memset(buf, 0, sizeof buf); \
             unsigned res = fe64_ ## name(buf, __VA_ARGS__); \
             failed |= check(buf, exp, sizeof(exp) - 1, res, str); \
-        } while (0)
+        } while (0);
 #define TEST(exp, ...) TEST1(#__VA_ARGS__, exp, __VA_ARGS__)
 
 int
@@ -45,19 +45,19 @@ main(void) {
 #define FLAGMASK(flags, mask) flags, mask
 #include "encode-test.inc"
 
-    TEST("\x90", NOP, 0);
-    TEST("\x90", NOP, 1);
-    TEST("\x66\x90", NOP, 2);
-    TEST("\x0f\x1f\x00", NOP, 3);
-    TEST("\x0f\x1f\x40\x00", NOP, 4);
-    TEST("\x0f\x1f\x44\x00\x00", NOP, 5);
-    TEST("\x66\x0f\x1f\x44\x00\x00", NOP, 6);
-    TEST("\x0f\x1f\x80\x00\x00\x00\x00", NOP, 7);
-    TEST("\x0f\x1f\x84\x00\x00\x00\x00\x00", NOP, 8);
-    TEST("\x66\x0f\x1f\x84\x00\x00\x00\x00\x00", NOP, 9);
-    TEST("\x66\x0f\x1f\x84\x00\x00\x00\x00\x00\x90", NOP, 10);
-    TEST("\x66\x0f\x1f\x84\x00\x00\x00\x00\x00\x66\x90", NOP, 11);
-    TEST("\x66\x0f\x1f\x84\x00\x00\x00\x00\x00\x0f\x1f\x00", NOP, 12);
+    TEST("\x90", NOP, 0)
+    TEST("\x90", NOP, 1)
+    TEST("\x66\x90", NOP, 2)
+    TEST("\x0f\x1f\x00", NOP, 3)
+    TEST("\x0f\x1f\x40\x00", NOP, 4)
+    TEST("\x0f\x1f\x44\x00\x00", NOP, 5)
+    TEST("\x66\x0f\x1f\x44\x00\x00", NOP, 6)
+    TEST("\x0f\x1f\x80\x00\x00\x00\x00", NOP, 7)
+    TEST("\x0f\x1f\x84\x00\x00\x00\x00\x00", NOP, 8)
+    TEST("\x66\x0f\x1f\x84\x00\x00\x00\x00\x00", NOP, 9)
+    TEST("\x66\x0f\x1f\x84\x00\x00\x00\x00\x00\x90", NOP, 10)
+    TEST("\x66\x0f\x1f\x84\x00\x00\x00\x00\x00\x66\x90", NOP, 11)
+    TEST("\x66\x0f\x1f\x84\x00\x00\x00\x00\x00\x0f\x1f\x00", NOP, 12)
 
     puts(failed ? "Some tests FAILED" : "All tests PASSED");
     return failed ? EXIT_FAILURE : EXIT_SUCCESS;
