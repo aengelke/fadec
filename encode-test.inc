@@ -1,4 +1,4 @@
-
+// clang-format off
 TEST("\xd6", UDB, 0)
 TEST("\x0f\xff\xc0", UD0_32rr, 0, FE_AX, FE_AX)
 TEST("\x0f\xb9\xc0", UD1_32rr, 0, FE_AX, FE_AX)

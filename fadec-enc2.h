@@ -28,42 +28,44 @@ extern "C" {
 
 // Condition codes
 typedef enum FeCond {
-    FE_CC_O = 0x00000,
-    FE_CC_NO = 0x10000,
-    FE_CC_C = 0x20000,
-    FE_CC_B = FE_CC_C,
-    FE_CC_NAE = FE_CC_C,
-    FE_CC_NC = 0x30000,
-    FE_CC_AE = FE_CC_NC,
-    FE_CC_NB = FE_CC_NC,
-    FE_CC_Z = 0x40000,
-    FE_CC_E = FE_CC_Z,
-    FE_CC_NZ = 0x50000,
-    FE_CC_NE = FE_CC_NZ,
-    FE_CC_BE = 0x60000,
-    FE_CC_NA = FE_CC_BE,
-    FE_CC_A = 0x70000,
-    FE_CC_NBE = FE_CC_A,
-    FE_CC_S = 0x80000,
-    FE_CC_NS = 0x90000,
-    FE_CC_P = 0xa0000,
-    FE_CC_PE = FE_CC_P,
-    FE_CC_NP = 0xb0000,
-    FE_CC_PO = FE_CC_NP,
-    FE_CC_L = 0xc0000,
-    FE_CC_NGE = FE_CC_L,
-    FE_CC_GE = 0xd0000,
-    FE_CC_NL = FE_CC_GE,
-    FE_CC_LE = 0xe0000,
-    FE_CC_NG = FE_CC_LE,
-    FE_CC_G = 0xf0000,
-    FE_CC_NLE = FE_CC_G,
+  FE_CC_O = 0x00000,
+  FE_CC_NO = 0x10000,
+  FE_CC_C = 0x20000,
+  FE_CC_B = FE_CC_C,
+  FE_CC_NAE = FE_CC_C,
+  FE_CC_NC = 0x30000,
+  FE_CC_AE = FE_CC_NC,
+  FE_CC_NB = FE_CC_NC,
+  FE_CC_Z = 0x40000,
+  FE_CC_E = FE_CC_Z,
+  FE_CC_NZ = 0x50000,
+  FE_CC_NE = FE_CC_NZ,
+  FE_CC_BE = 0x60000,
+  FE_CC_NA = FE_CC_BE,
+  FE_CC_A = 0x70000,
+  FE_CC_NBE = FE_CC_A,
+  FE_CC_S = 0x80000,
+  FE_CC_NS = 0x90000,
+  FE_CC_P = 0xa0000,
+  FE_CC_PE = FE_CC_P,
+  FE_CC_NP = 0xb0000,
+  FE_CC_PO = FE_CC_NP,
+  FE_CC_L = 0xc0000,
+  FE_CC_NGE = FE_CC_L,
+  FE_CC_GE = 0xd0000,
+  FE_CC_NL = FE_CC_GE,
+  FE_CC_LE = 0xe0000,
+  FE_CC_NG = FE_CC_LE,
+  FE_CC_G = 0xf0000,
+  FE_CC_NLE = FE_CC_G,
 
-    FE_CC_MASK = 0xf0000
+  FE_CC_MASK = 0xf0000
 } FeCond;
 
-typedef struct FeRegGP { unsigned char idx; } FeRegGP;
-#define FE_GP(idx) (FE_STRUCT(FeRegGP) { idx })
+typedef struct FeRegGP {
+  unsigned char idx;
+} FeRegGP;
+#define FE_GP(idx) (FE_STRUCT(FeRegGP){idx})
 #define FE_AX FE_GP(0)
 #define FE_CX FE_GP(1)
 #define FE_DX FE_GP(2)
@@ -82,22 +84,28 @@ typedef struct FeRegGP { unsigned char idx; } FeRegGP;
 #define FE_R15 FE_GP(15)
 #define FE_IP FE_GP(0x20)
 #define FE_NOREG FE_GP(0x80)
-typedef struct FeRegGPH { unsigned char idx; } FeRegGPH;
-#define FE_GPH(idx) (FE_STRUCT(FeRegGPH) { idx })
+typedef struct FeRegGPH {
+  unsigned char idx;
+} FeRegGPH;
+#define FE_GPH(idx) (FE_STRUCT(FeRegGPH){idx})
 #define FE_AH FE_GPH(4)
 #define FE_CH FE_GPH(5)
 #define FE_DH FE_GPH(6)
 #define FE_BH FE_GPH(7)
-typedef struct FeRegSREG { unsigned char idx; } FeRegSREG;
-#define FE_SREG(idx) (FE_STRUCT(FeRegSREG) { idx })
+typedef struct FeRegSREG {
+  unsigned char idx;
+} FeRegSREG;
+#define FE_SREG(idx) (FE_STRUCT(FeRegSREG){idx})
 #define FE_ES FE_SREG(0)
 #define FE_CS FE_SREG(1)
 #define FE_SS FE_SREG(2)
 #define FE_DS FE_SREG(3)
 #define FE_FS FE_SREG(4)
 #define FE_GS FE_SREG(5)
-typedef struct FeRegST { unsigned char idx; } FeRegST;
-#define FE_ST(idx) (FE_STRUCT(FeRegST) { idx })
+typedef struct FeRegST {
+  unsigned char idx;
+} FeRegST;
+#define FE_ST(idx) (FE_STRUCT(FeRegST){idx})
 #define FE_ST0 FE_ST(0)
 #define FE_ST1 FE_ST(1)
 #define FE_ST2 FE_ST(2)
@@ -106,8 +114,10 @@ typedef struct FeRegST { unsigned char idx; } FeRegST;
 #define FE_ST5 FE_ST(5)
 #define FE_ST6 FE_ST(6)
 #define FE_ST7 FE_ST(7)
-typedef struct FeRegMM { unsigned char idx; } FeRegMM;
-#define FE_MM(idx) (FE_STRUCT(FeRegMM) { idx })
+typedef struct FeRegMM {
+  unsigned char idx;
+} FeRegMM;
+#define FE_MM(idx) (FE_STRUCT(FeRegMM){idx})
 #define FE_MM0 FE_MM(0)
 #define FE_MM1 FE_MM(1)
 #define FE_MM2 FE_MM(2)
@@ -116,8 +126,10 @@ typedef struct FeRegMM { unsigned char idx; } FeRegMM;
 #define FE_MM5 FE_MM(5)
 #define FE_MM6 FE_MM(6)
 #define FE_MM7 FE_MM(7)
-typedef struct FeRegXMM { unsigned char idx; } FeRegXMM;
-#define FE_XMM(idx) (FE_STRUCT(FeRegXMM) { idx })
+typedef struct FeRegXMM {
+  unsigned char idx;
+} FeRegXMM;
+#define FE_XMM(idx) (FE_STRUCT(FeRegXMM){idx})
 #define FE_XMM0 FE_XMM(0)
 #define FE_XMM1 FE_XMM(1)
 #define FE_XMM2 FE_XMM(2)
@@ -150,8 +162,10 @@ typedef struct FeRegXMM { unsigned char idx; } FeRegXMM;
 #define FE_XMM29 FE_XMM(29)
 #define FE_XMM30 FE_XMM(30)
 #define FE_XMM31 FE_XMM(31)
-typedef struct FeRegMASK { unsigned char idx; } FeRegMASK;
-#define FE_K(idx) (FE_STRUCT(FeRegMASK) { idx })
+typedef struct FeRegMASK {
+  unsigned char idx;
+} FeRegMASK;
+#define FE_K(idx) (FE_STRUCT(FeRegMASK){idx})
 #define FE_K0 FE_K(0)
 #define FE_K1 FE_K(1)
 #define FE_K2 FE_K(2)
@@ -160,8 +174,10 @@ typedef struct FeRegMASK { unsigned char idx; } FeRegMASK;
 #define FE_K5 FE_K(5)
 #define FE_K6 FE_K(6)
 #define FE_K7 FE_K(7)
-typedef struct FeRegTMM { unsigned char idx; } FeRegTMM;
-#define FE_TMM(idx) (FE_STRUCT(FeRegTMM) { idx })
+typedef struct FeRegTMM {
+  unsigned char idx;
+} FeRegTMM;
+#define FE_TMM(idx) (FE_STRUCT(FeRegTMM){idx})
 #define FE_TMM0 FE_TMM(0)
 #define FE_TMM1 FE_TMM(1)
 #define FE_TMM2 FE_TMM(2)
@@ -170,49 +186,53 @@ typedef struct FeRegTMM { unsigned char idx; } FeRegTMM;
 #define FE_TMM5 FE_TMM(5)
 #define FE_TMM6 FE_TMM(6)
 #define FE_TMM7 FE_TMM(7)
-typedef struct FeRegCR { unsigned char idx; } FeRegCR;
-#define FE_CR(idx) (FE_STRUCT(FeRegCR) { idx })
-typedef struct FeRegDR { unsigned char idx; } FeRegDR;
-#define FE_DR(idx) (FE_STRUCT(FeRegDR) { idx })
+typedef struct FeRegCR {
+  unsigned char idx;
+} FeRegCR;
+#define FE_CR(idx) (FE_STRUCT(FeRegCR){idx})
+typedef struct FeRegDR {
+  unsigned char idx;
+} FeRegDR;
+#define FE_DR(idx) (FE_STRUCT(FeRegDR){idx})
 
 // Internal only
 // Disambiguate GP and GPH -- C++ uses conversion constructors; C uses _Generic.
 #ifdef __cplusplus
 }
 namespace {
-    struct FeRegGPLH {
-        unsigned char idx;
-        FeRegGPLH(FeRegGP gp) : idx(gp.idx) {}
-        FeRegGPLH(FeRegGPH gp) : idx(gp.idx | 0x20) {}
-    };
-}
+struct FeRegGPLH {
+  unsigned char idx;
+  FeRegGPLH(FeRegGP gp) : idx(gp.idx) {}
+  FeRegGPLH(FeRegGPH gp) : idx(gp.idx | 0x20) {}
+};
+} // namespace
 extern "C" {
 #define FE_MAKE_GPLH(reg) reg
 #else
-typedef struct FeRegGPLH { unsigned char idx; } FeRegGPLH;
-#define FE_GPLH(idx) (FE_STRUCT(FeRegGPLH) { idx })
-#define FE_MAKE_GPLH(reg) FE_GPLH(_Generic((reg), FeRegGPH: 0x20, FeRegGP: 0) | (reg).idx)
+typedef struct FeRegGPLH {
+  unsigned char idx;
+} FeRegGPLH;
+#define FE_GPLH(idx) (FE_STRUCT(FeRegGPLH){idx})
+#define FE_MAKE_GPLH(reg)                                                      \
+  FE_GPLH(_Generic((reg), FeRegGPH: 0x20, FeRegGP: 0) | (reg).idx)
 #endif
 
 typedef struct FeMem {
-    uint8_t flags;
-    FeRegGP base;
-    unsigned char scale;
-    // union {
-        FeRegGP idx;
-    //     FeRegXMM idx_xmm;
-    // };
-    int32_t off;
+  uint8_t flags;
+  FeRegGP base;
+  unsigned char scale;
+  FeRegGP idx;
+  int32_t off;
 } FeMem;
-#define FE_MEM(base,sc,idx,off) (FE_STRUCT(FeMem) { 0, base, sc, idx, off })
+#define FE_MEM(base, sc, idx, off) (FE_STRUCT(FeMem){0, base, sc, idx, off})
 typedef struct FeMemV {
-    uint8_t flags;
-    FeRegGP base;
-    unsigned char scale;
-    FeRegXMM idx;
-    int32_t off;
+  uint8_t flags;
+  FeRegGP base;
+  unsigned char scale;
+  FeRegXMM idx;
+  int32_t off;
 } FeMemV;
-#define FE_MEMV(base,sc,idx,off) (FE_STRUCT(FeMemV) { 0, base, sc, idx, off })
+#define FE_MEMV(base, sc, idx, off) (FE_STRUCT(FeMemV){0, base, sc, idx, off})
 
 // NOP is special: flags is interpreted as the length in bytes, 0 = 1 byte, too.
 unsigned fe64_NOP(uint8_t* buf, unsigned flags);

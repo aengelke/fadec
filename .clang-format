@@ -1,0 +1,12 @@
+BasedOnStyle: llvm
+PointerAlignment: Left
+AllowShortCaseLabelsOnASingleLine: true
+AlwaysBreakTemplateDeclarations: true
+IncludeBlocks: Merge
+IncludeCategories:
+  - Regex: '^"'
+    Priority: 2
+  - Regex: '^<[^.]*>$'
+    Priority: 3
+  - Regex: '^<.*\.h>$'
+    Priority: 4
