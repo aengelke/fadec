@@ -726,12 +726,9 @@ TEST64("\x67\xa0\x44\x33\x22", "PARTIAL")
 TEST("\x66\xc8\x00\x00\x00", "enterw 0x0, 0x0")
 TEST("\x66\xc8\x00\x0f\x00", "enterw 0xf00, 0x0")
 TEST("\x66\xc8\x00\x00\x01", "enterw 0x0, 0x1")
-TEST32("\xc8\x00\x00\x00", "enter 0x0, 0x0")
-TEST32("\xc8\x00\x0f\x00", "enter 0xf00, 0x0")
-TEST32("\xc8\x00\x00\x01", "enter 0x0, 0x1")
-TEST64("\xc8\x00\x00\x00", "enter 0x0, 0x0")
-TEST64("\xc8\x00\x0f\x00", "enter 0xf00, 0x0")
-TEST64("\xc8\x00\x00\x01", "enter 0x0, 0x1")
+TEST("\xc8\x00\x00\x00", "enter 0x0, 0x0")
+TEST("\xc8\x00\x0f\x00", "enter 0xf00, 0x0")
+TEST("\xc8\x00\x00\x01", "enter 0x0, 0x1")
 
 TEST64("\xd3\xe0", "shl eax, cl")
 TEST64("\xd0\x3e", "sar byte ptr [rsi], 0x1")
@@ -796,11 +793,8 @@ TEST64("\x66\xeb\x00", "jmp 0x3")
 TEST64("\x66\xeb\xff", "jmp 0x2")
 TEST("\x66\xe9\x00", "PARTIAL")
 TEST("\x66\xe9", "PARTIAL")
-TEST32("\xc7\xf8\xd3\x9c\xff\xff", "xbegin 0xffff9cd9")
-TEST32("\x66\xc7\xf8\xd3\x9c", "xbegin 0xffff9cd8")
-TEST64("\xc7\xf8\xd3\x9c\xff\xff", "xbegin 0xffffffffffff9cd9")
-TEST64("\x66\xc7\xf8\xd3\x9c", "xbegin 0xffffffffffff9cd8")
-
+TEST3264("\xc7\xf8\xd3\x9c\xff\xff", "xbegin 0xffff9cd9", "xbegin 0xffffffffffff9cd9")
+TEST3264("\x66\xc7\xf8\xd3\x9c", "xbegin 0xffff9cd8", "xbegin 0xffffffffffff9cd8")
 
 TEST("\xa5", "movsd")
 TEST("\x66\xa5", "movsw")
@@ -827,22 +821,14 @@ TEST("\x0f\xbf\xc2", "movsx eax, dx")
 TEST64("\x48\x0f\xbf\xc2", "movsx rax, dx")
 TEST64("\x48\x63\xc2", "movsx rax, edx")
 
-TEST32("\x66\xc3", "retw")
-TEST32("\x66\xc2\x00\x00", "retw 0x0")
-TEST32("\x66\xc2\x0d\x00", "retw 0xd")
-TEST32("\x66\xc2\x0d\xff", "retw 0xff0d")
-TEST64("\x66\xc3", "ret")
-TEST64("\x66\xc2\x00\x00", "ret 0x0")
-TEST64("\x66\xc2\x0d\x00", "ret 0xd")
-TEST64("\x66\xc2\x0d\xff", "ret 0xff0d")
-TEST32("\xc3", "ret")
-TEST32("\xc2\x00\x00", "ret 0x0")
-TEST32("\xc2\x0d\x00", "ret 0xd")
-TEST32("\xc2\x0d\xff", "ret 0xff0d")
-TEST64("\xc3", "ret")
-TEST64("\xc2\x00\x00", "ret 0x0")
-TEST64("\xc2\x0d\x00", "ret 0xd")
-TEST64("\xc2\x0d\xff", "ret 0xff0d")
+TEST3264("\x66\xc3", "retw", "ret")
+TEST3264("\x66\xc2\x00\x00", "retw 0x0", "ret 0x0")
+TEST3264("\x66\xc2\x0d\x00", "retw 0xd", "ret 0xd")
+TEST3264("\x66\xc2\x0d\xff", "retw 0xff0d", "ret 0xff0d")
+TEST("\xc3", "ret")
+TEST("\xc2\x00\x00", "ret 0x0")
+TEST("\xc2\x0d\x00", "ret 0xd")
+TEST("\xc2\x0d\xff", "ret 0xff0d")
 TEST("\xca\x00\x00", "retfd 0x0")
 TEST("\xca\x0d\x00", "retfd 0xd")
 TEST("\xca\x0d\xff", "retfd 0xff0d")
@@ -899,12 +885,9 @@ TEST("\x0f\xc7\xf8", "rdseed eax")
 TEST64("\x48\x0f\xc7\xf8", "rdseed rax")
 TEST("\x66\x0f\xc7\xf8", "rdseed ax")
 TEST64("\x66\x48\x0f\xc7\xf8", "rdseed rax")
-TEST32("\xf3\x0f\xc7\xf8", "rdpid eax")
-TEST32("\x66\xf3\x0f\xc7\xf8", "rdpid eax")
-TEST32("\xf3\x66\x0f\xc7\xf8", "rdpid eax")
-TEST64("\xf3\x0f\xc7\xf8", "rdpid rax")
-TEST64("\x66\xf3\x0f\xc7\xf8", "rdpid rax")
-TEST64("\xf3\x66\x0f\xc7\xf8", "rdpid rax")
+TEST("\xf3\x0f\xc7\xf8", "rdpid @ax")
+TEST("\x66\xf3\x0f\xc7\xf8", "rdpid @ax")
+TEST("\xf3\x66\x0f\xc7\xf8", "rdpid @ax")
 TEST64("\xf3\x0f\xc7\x00", "UD")
 TEST64("\x0f\xc7\x30", "vmptrld qword ptr [rax]")
 TEST64("\x66\x0f\xc7\x30", "vmclear qword ptr [rax]")
@@ -1665,7 +1648,7 @@ TEST3264("\x3e\x2e\xff\xe0", "jmp eax", "notrack jmp rax")
 TEST3264("\x3e\x2e\x26\xff\xe0", "jmp eax", "notrack jmp rax")
 TEST3264("\x26\x3e\x2e\xff\xe0", "jmp eax", "notrack jmp rax")
 TEST3264("\x64\x3e\xff\xe0", "notrack jmp eax", "jmp rax")
-TEST3264("\x64\x3e\xff\xe0", "notrack jmp eax", "jmp rax")
+TEST3264("\x65\x3e\xff\xe0", "notrack jmp eax", "jmp rax")
 TEST("\x3e\xff\xd0", "notrack call @ax")
 TEST("\x2e\x3e\xff\xd0", "notrack call @ax")
 TEST("\x26\x2e\x3e\xff\xd0", "notrack call @ax")
@@ -1677,7 +1660,7 @@ TEST3264("\x3e\x2e\xff\xd0", "call eax", "notrack call rax")
 TEST3264("\x3e\x2e\x26\xff\xd0", "call eax", "notrack call rax")
 TEST3264("\x26\x3e\x2e\xff\xd0", "call eax", "notrack call rax")
 TEST3264("\x64\x3e\xff\xd0", "notrack call eax", "call rax")
-TEST3264("\x64\x3e\xff\xd0", "notrack call eax", "call rax")
+TEST3264("\x65\x3e\xff\xd0", "notrack call eax", "call rax")
 TEST("\x3e\x78\x00", "hint-taken js 0x3")
 TEST("\x2e\x3e\x78\x00", "hint-taken js 0x4")
 TEST("\x26\x2e\x3e\x78\x00", "hint-taken js 0x5")
@@ -1689,7 +1672,7 @@ TEST3264("\x3e\x2e\x78\x00", "js 0x4", "hint-taken js 0x4")
 TEST3264("\x3e\x2e\x26\x78\x00", "js 0x5", "hint-taken js 0x5")
 TEST3264("\x26\x3e\x2e\x78\x00", "js 0x5", "hint-taken js 0x5")
 TEST3264("\x64\x3e\x78\x00", "hint-taken js 0x4", "js 0x4")
-TEST3264("\x64\x3e\x78\x00", "hint-taken js 0x4", "js 0x4")
+TEST3264("\x65\x3e\x78\x00", "hint-taken js 0x4", "js 0x4")
 
 // MPX
 #if 0
@@ -1804,7 +1787,8 @@ TEST("\x62\xf1\x74\x48\x58\xc2", "vaddps zmm0, zmm1, zmm2")
 TEST("\x62\xf1\x74\x49\x58\xc2", "vaddps zmm0{k1}, zmm1, zmm2")
 TEST("\x62\xf1\x74\xc9\x58\xc2", "vaddps zmm0{k1}{z}, zmm1, zmm2")
 TEST("\x62\xf1\x74\xc8\x58\xc2", "UD") // EVEX.z = 1
-TEST("\x62\xf1\x74\x68\x58\xc2", "UD") // EVEX.L'Lb = 110    TEST32("\x62\xf1\x74\x08\x58\x00", "vaddps xmm0, xmm1, xmmword ptr [eax]")
+TEST("\x62\xf1\x74\x68\x58\xc2", "UD") // EVEX.L'Lb = 110
+TEST32("\x62\xf1\x74\x08\x58\x00", "vaddps xmm0, xmm1, xmmword ptr [eax]")
 TEST32("\x67\x62\xf1\x74\x08\x58\x00", "vaddps xmm0, xmm1, xmmword ptr [bx+1*si]")
 TEST64("\x62\xf1\x74\x08\x58\x00", "vaddps xmm0, xmm1, xmmword ptr [rax]")
 TEST64("\x67\x62\xf1\x74\x08\x58\x00", "vaddps xmm0, xmm1, xmmword ptr [eax]")
@@ -2317,6 +2301,34 @@ TEST32("\x67\x62\xf1\x74\xf8\x58\x80\x01\x00", "UD") // EVEX.L'L = 11
 TEST64("\x62\xf1\x74\xf8\x58\x80\x01\x00\x00\x00", "UD") // EVEX.L'L = 11
 TEST64("\x67\x62\xf1\x74\xf8\x58\x80\x01\x00\x00\x00", "UD") // EVEX.L'L = 11
 
+// EVEX maps
+TEST("\x62\xf1\x70\x08\x58\xc2", "UD") // EVEX bit 10 must be 1
+TEST("\x62", "PARTIAL") // EVEX map 0
+TEST("\x62\xf0", "PARTIAL") // EVEX map 0
+TEST("\x62\xf0\x74", "PARTIAL") // EVEX map 0
+TEST("\x62\xf0\x74\x08", "PARTIAL") // EVEX map 0
+TEST("\x62\xf0\x74\x08\x58", "UD") // EVEX map 0
+TEST("\x62\xf0\x74\x08\x58\xc2", "UD") // EVEX map 0
+TEST("\x62\xf1", "PARTIAL") // EVEX map 1
+TEST("\x62\xf1\x74", "PARTIAL") // EVEX map 1
+TEST("\x62\xf1\x74\x08", "PARTIAL") // EVEX map 1
+TEST("\x62\xf1\x74\x08\x58", "PARTIAL") // EVEX map 1
+TEST("\x62\xf1\x74\x08\x58\xc2", "vaddps xmm0, xmm1, xmm2") // EVEX map 1
+TEST("\x62\xf2\x74\x08\x58\xc2", "UD") // EVEX map 2
+TEST("\x62\xf3\x74\x08\x58\xc2", "UD") // EVEX map 3
+TEST("\x62\xf4\x74\x08\x58\xc2", "UD") // EVEX map 4
+TEST("\x62\xf5\x74\x08\x58\xc2", "vaddph xmm0, xmm1, xmm2") // EVEX map 5
+TEST("\x62\xf6\x74\x08\x58\xc2", "UD") // EVEX map 6
+TEST("\x62\xf7\x74\x08\x58\xc2", "UD") // EVEX map 7
+TEST("\x62\xf8\x74\x08\x58\xc2", "UD") // EVEX map 8
+TEST("\x62\xf9\x74\x08\x58\xc2", "UD") // EVEX map 9
+TEST("\x62\xfa\x74\x08\x58\xc2", "UD") // EVEX map 10
+TEST("\x62\xfb\x74\x08\x58\xc2", "UD") // EVEX map 11
+TEST("\x62\xfc\x74\x08\x58\xc2", "UD") // EVEX map 12
+TEST("\x62\xfd\x74\x08\x58\xc2", "UD") // EVEX map 13
+TEST("\x62\xfe\x74\x08\x58\xc2", "UD") // EVEX map 14
+TEST("\x62\xff\x74\x08\x58\xc2", "UD") // EVEX map 15
+
 // Test register extensions encoded in EVEX prefixs
 TEST3264("\x62\xf1\x74\x08\x58\xc2", "vaddps xmm0, xmm1, xmm2", "vaddps xmm0, xmm1, xmm2")
 TEST3264("\x62\xd1\x74\x08\x58\xc2", "vaddps xmm0, xmm1, xmm2", "vaddps xmm0, xmm1, xmm10")
@@ -2721,6 +2733,7 @@ TEST64("\x62\x72\xfe\x08\x39\xc1", "UD") // EVEX.R for mask is UD
 TEST("\x62\xf2\x7d\x0a\xa2\xcc", "UD") // Must have memory operand
 TEST("\x62\xf2\x7d\x0a\xa2\x01", "UD") // Must have SIB byte
 TEST("\x62\xf2\x7d\x08\xa2\x0c\xe7", "UD") // EVEX.aaa = 000
+TEST("\x62\xf2\x7d\x8a\xa2\x0c\xe7", "UD") // EVEX.z != 0
 TEST3264("\x67\x62\xf2\x7d\x0a\xa2\x0c\xe7", "UD", "vscatterdps dword ptr [edi+8*xmm4]{k2}, xmm1") // VISB and 16-bit addrsize is UD
 TEST("\x62\xf2\x7d\x0a\xa2\x0c\xe7", "vscatterdps dword ptr [@di+8*xmm4]{k2}, xmm1")
 TEST3264("\x62\xd2\x7d\x0a\xa2\x0c\xe7", "vscatterdps dword ptr [edi+8*xmm4]{k2}, xmm1", "vscatterdps dword ptr [r15+8*xmm4]{k2}, xmm1")

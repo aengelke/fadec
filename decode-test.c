@@ -7,17 +7,22 @@
 
 int main(void) {
   static const struct TestCase {
-    uint8_t buf[22];
+    uint8_t buf[21];
     uint8_t buf_len;
     uint8_t mode;
+    uint8_t addr;
     const char* exp;
   } cases[] = {
-#define TEST1(mode, buf, exp) {buf, sizeof(buf) - 1, mode, exp},
+#define TEST1(mode, buf, exp) {buf, sizeof(buf) - 1, mode, 0, exp},
 #define TEST32(buf, exp) TEST1(32, buf, exp)
 #define TEST64(buf, exp) TEST1(64, buf, exp)
 #define TEST3264(buf, exp32, exp64) TEST32(buf, exp32) TEST64(buf, exp64)
 #define TEST(buf, exp) TEST32(buf, exp) TEST64(buf, exp)
 #include "decode-test.inc"
+      // Test legacy absolute address mode.
+      {"\x70\x00", 2, 64, /*addr=*/128, "jo 0x82"},
+      // Test invalid mode.
+      {"", 0, 16, 0, ""},
   };
 
   unsigned failed = 0;
@@ -25,7 +30,7 @@ int main(void) {
   for (const struct TestCase* tc = cases; tc != end; tc++) {
     FdInstr instr;
     char fmt[128] = {0};
-    int retval = fd_decode(tc->buf, tc->buf_len, tc->mode, 0, &instr);
+    int retval = fd_decode(tc->buf, tc->buf_len, tc->mode, tc->addr, &instr);
 
     if (retval == FD_ERR_INTERNAL)
       continue; // not compiled with this arch-mode (32/64 bit)

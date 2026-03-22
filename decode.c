@@ -7,11 +7,11 @@
 #ifdef __GNUC__
 #define LIKELY(x) __builtin_expect((x), 1)
 #define UNLIKELY(x) __builtin_expect((x), 0)
-#define ASSUME(x)                                                              \
-  do {                                                                         \
-    if (!(x))                                                                  \
-      __builtin_unreachable();                                                 \
-  } while (0)
+#if __has_builtin(__builtin_assume)
+#define ASSUME(x) __builtin_assume(x)
+#else
+#define ASSUME(x) (void)((x) ? (void)0 : __builtin_unreachable())
+#endif
 #else
 #define LIKELY(x) (x)
 #define UNLIKELY(x) (x)
@@ -206,14 +206,12 @@ int fd_decode(const uint8_t* buffer, size_t len_sz, int mode_int,
     goto direct;
   }
 
-  if (UNLIKELY(off >= len))
+  if (UNLIKELY(off + 1 >= len))
     return FD_ERR_PARTIAL;
 
   unsigned opcode_escape = 0;
   uint8_t mandatory_prefix = 0; // without escape/VEX/EVEX, this is ignored.
   if (buffer[off] == 0x0f) {
-    if (UNLIKELY(off + 1 >= len))
-      return FD_ERR_PARTIAL;
     if (buffer[off + 1] == 0x38)
       opcode_escape = 2;
     else if (buffer[off + 1] == 0x3a)
@@ -225,12 +223,9 @@ int fd_decode(const uint8_t* buffer, size_t len_sz, int mode_int,
     // If there is no REP/REPNZ prefix offer 66h as mandatory prefix. If
     // there is a REP prefix, then the 66h prefix is ignored here.
     mandatory_prefix = prefix_rep ? prefix_rep ^ 0xf1 : !!prefixes[PF_66];
-  } else if (UNLIKELY((unsigned)buffer[off] - 0xc4 < 2 ||
-                      buffer[off] == 0x62)) {
+  } else {
     unsigned vex_prefix = buffer[off];
     // VEX (C4/C5) or EVEX (62)
-    if (UNLIKELY(off + 1 >= len))
-      return FD_ERR_PARTIAL;
     if (UNLIKELY(mode == DECODE_32 && buffer[off + 1] < 0xc0)) {
       off++;
       table_entry = table_walk(table_entry, 0);
@@ -267,7 +262,7 @@ int fd_decode(const uint8_t* buffer, size_t len_sz, int mode_int,
       if (UNLIKELY(opcode_escape == 0)) {
         int prefix_len = vex_prefix == 0x62 ? 4 : 3;
         // Pretend to decode the prefix plus one opcode byte.
-        return off + prefix_len > len ? FD_ERR_PARTIAL : FD_ERR_UD;
+        return off + prefix_len >= len ? FD_ERR_PARTIAL : FD_ERR_UD;
       }
 
       // Load third byte of VEX prefix
@@ -572,7 +567,7 @@ direct:
         if (UNLIKELY((off += 1) > len))
           return FD_ERR_PARTIAL;
         instr->disp = (int8_t)LOAD_LE_1(dispbase) * (1 << dispscale);
-      } else if (op_byte & 0x80 || (op_byte < 0x40 && base == 5)) {
+      } else if (op_byte & 0x80 || base == 5) {
         if (UNLIKELY((off += 4) > len))
           return FD_ERR_PARTIAL;
         instr->disp = (int32_t)LOAD_LE_4(dispbase);
@@ -662,7 +657,7 @@ direct:
       reg &= 0x7f;
     operand->reg = reg >> 4;
     instr->imm = reg & 0x0f;
-  } else if (imm_control != 0) {
+  } else {
     // 4/5 = immediate, operand-sized/8 bit
     // 6/7 = offset, operand-sized/8 bit (used for jumps/calls)
     int imm_byte = imm_control & 1;
@@ -705,7 +700,7 @@ direct:
       else if (imm_size == 6)
         instr->imm = LOAD_LE_4(&buffer[off]) | LOAD_LE_2(&buffer[off + 4])
                                                    << 32;
-      else if (imm_size == 8)
+      else
         instr->imm = (int64_t)LOAD_LE_8(&buffer[off]);
       off += imm_size;
     }
