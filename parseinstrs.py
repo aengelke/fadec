@@ -262,6 +262,9 @@ class InstrDesc(NamedTuple):
         if (self.flags & {"SZ8", "INSTR_WIDTH"} or
             mnem in ("MOVSX", "MOVZX", "XCHG_NOP", "3DNOW")):
             extraflags["legacy"] = 1
+            # No instruction with a broadcast has the legacy bit set.
+            if "BCST" in self.flags:
+                raise Exception("EVEX broadcast incompatible with legacy bit")
             # INSTR_WIDTH defaults to zero, so only enable when SZ8 is unset
             if "INSTR_WIDTH" in self.flags and "SZ8" not in self.flags:
                 extraflags["instr_width"] = 1

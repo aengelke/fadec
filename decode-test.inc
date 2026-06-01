@@ -1807,6 +1807,7 @@ TEST64("\x67\x62\xf1\x74\x88\x58\x00", "UD") // EVEX.z = 1
 TEST32("\x62\xf1\x74\x18\x58\x00", "vaddps xmm0, xmm1, dword ptr [eax]{1to4}")
 TEST32("\x67\x62\xf1\x74\x18\x58\x00", "vaddps xmm0, xmm1, dword ptr [bx+1*si]{1to4}")
 TEST64("\x62\xf1\x74\x18\x58\x00", "vaddps xmm0, xmm1, dword ptr [rax]{1to4}")
+TEST64("\x3e\x62\xf1\x74\x18\x58\x00", "vaddps xmm0, xmm1, dword ptr [rax]{1to4}")
 TEST64("\x67\x62\xf1\x74\x18\x58\x00", "vaddps xmm0, xmm1, dword ptr [eax]{1to4}")
 TEST32("\x62\xf1\x74\x1a\x58\x00", "vaddps xmm0{k2}, xmm1, dword ptr [eax]{1to4}")
 TEST32("\x67\x62\xf1\x74\x1a\x58\x00", "vaddps xmm0{k2}, xmm1, dword ptr [bx+1*si]{1to4}")

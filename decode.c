@@ -348,6 +348,7 @@ direct:
 
   instr->type = desc->type;
   instr->addrsz = addr_size;
+  instr->operandsz = 0;
   instr->flags = ((prefix_rep + 1) & 6) + (mode == DECODE_64 ? FD_FLAG_64 : 0);
   instr->address = address;
 
@@ -483,7 +484,7 @@ direct:
             dispscale = 1;
           else
             dispscale = prefix_rex & PREFIX_REXW ? 3 : 2;
-          instr->segment |= dispscale << 6; // Store broadcast size
+          instr->operandsz = dispscale; // Store broadcast size.
           op_modrm->type = FD_OT_MEMBCST;
         } else {
           dispscale = op_modrm->size - 1;
@@ -760,9 +761,8 @@ skip_modrm:
         return FD_ERR_UD;
     }
 
+    // Instructions with the legacy bit have no broadcast, so ok to overwrite.
     instr->operandsz = UNLIKELY(DESC_INSTR_WIDTH(desc)) ? op_size - 1 : 0;
-  } else {
-    instr->operandsz = 0;
   }
 
   instr->size = off;

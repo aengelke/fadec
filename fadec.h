@@ -99,20 +99,53 @@ typedef enum {
 
 /** Internal use only. **/
 typedef struct {
+  // bit 0-2: type
+  // bit 3-7: (unused, zero assumed)
   uint8_t type;
+  // bit 0-3: size log2
+  // bit 4-7: (unused, zero assumed)
   uint8_t size;
+  // FD_OT_REG: bit 0-5: register
+  // FD_OT_REG: bit 6-7: (unused, zero assumed)
+  // FD_OT_MEM{,BCST}: bit 0-5: base register
+  // FD_OT_MEM{,BCST}: bit 6-7: (unused, zero assumed)
+  // FD_OT_{NONE,IMM,OFF}: bit 0-7: (unused, zero ignored)
   uint8_t reg;
+  // FD_OT_NONE: bit 0-7: (unused, zero ignored)
+  // FD_OT_REG: bit 0-3: register type
+  // FD_OT_REG: bit 4-7: (unused, zero assumed)
+  // FD_OT_MEM{,BCST}: bit 0-5: index register
+  // FD_OT_MEM{,BCST}: bit 6-7: scale log2
+  // FD_OT_{NONE,IMM,OFF}: bit 0-7: (unused, zero ignored)
   uint8_t misc;
 } FdOp;
 
 /** Never(!) access struct fields directly. Use the macros defined below. **/
 typedef struct {
   uint16_t type;
+  // bit 0: lock prefix
+  // bit 1: repnz prefix
+  // bit 2: rep prefix
+  // bit 3-6: (unused, zero ignored)
+  // bit 7: 64-bit
   uint8_t flags;
+  // bit 0-5: segment reg
+  // bit 6: 3e
+  // bit 7: (unused, zero ignored)
   uint8_t segment;
+  // bit 0-1: address size attribute log2
+  // bit 2-7: (unused, zero assumed)
   uint8_t addrsz;
+  // bit 0-1: operand size attribute (legacy only) or broadcast size log2;
+  // bit 2-7: (unused, zero assumed)
   uint8_t operandsz;
+  // bit 0-3: instruction size
+  // bit 4-7: (unused, zero assumed)
   uint8_t size;
+  // bit 0-2: mask register
+  // bit 3: (unused, zero ignored)
+  // bit 4-6: round control
+  // bit 7: mask zero
   uint8_t evex;
 
   FdOp operands[4];
@@ -270,7 +303,7 @@ const char* fdi_name(FdInstrType ty);
 #define FD_OP_BCSTSZ(instr, idx) (1 << FD_OP_BCSTSZLG(instr, idx))
 /** Get logarithmic memory broadcast size (1 = 2-byte; 2=4-byte; 3=8-byte).
  * Only valid if  FD_OP_TYPE == FD_OT_MEMBCST **/
-#define FD_OP_BCSTSZLG(instr, idx) ((instr)->segment >> 6)
+#define FD_OP_BCSTSZLG(instr, idx) ((instr)->operandsz)
 /** Gets the (sign-extended) encoded constant for an immediate operand.
  * Only valid if  FD_OP_TYPE == FD_OT_IMM  or  FD_OP_TYPE == FD_OT_OFF  **/
 #define FD_OP_IMM(instr, idx) ((instr)->imm)
