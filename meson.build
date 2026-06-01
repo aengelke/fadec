@@ -124,3 +124,7 @@ pkg.generate(libraries: libfadec,
              name: 'fadec',
              filebase: 'fadec',
              description: 'Fast Decoder for x86-32 and x86-64')
+
+if cc.has_function('clock_gettime')
+  executable('decode-profile', 'decode-profile.c', dependencies: fadec, c_args: ['-D_GNU_SOURCE'])
+endif
