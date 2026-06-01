@@ -198,6 +198,18 @@ void fd_format(const FdInstr* instr, char* buf, size_t len);
  **/
 void fd_format_abs(const FdInstr* instr, uint64_t addr, char* buf, size_t len);
 
+/** Write the null-terminated name of a register into a buffer. May only be
+ * called on registers that actually exist (e.g., GPH reg 0 or CR reg 1 are
+ * undefined).
+ *
+ * \param ty The register type.
+ * \param idx The register index.
+ * \param sizelog The logarithmic size (0 is 1 byte, 1 is 2 bytes, etc.).
+ * \param buf16 Output buffer, must be at least 16 bytes.
+ * \return The size of the string.
+ **/
+unsigned fd_format_reg(FdRegType ty, FdReg idx, unsigned sizelog, char* buf16);
+
 /** Get the stringified name of an instruction type.
  * NOTE: API stability is currently not guaranteed for this function; changes
  * to the signature and/or the returned string can be expected. E.g., a future

@@ -5,7 +5,30 @@
 #include <stdlib.h>
 #include <string.h>
 
+#define TEST_FMTREG(exp, ...) test_fmtreg(#__VA_ARGS__, exp, __VA_ARGS__)
+static unsigned test_fmtreg(const char* str, const char* exp, FdRegType ty,
+                            FdReg idx, unsigned sizelog) {
+  char fmt[16];
+  unsigned len = fd_format_reg(ty, idx, sizelog, fmt);
+  if (!strcmp(fmt, exp) && len == strlen(fmt))
+    return 0;
+  printf("Failed fd_format_reg case: \"%s\" != \"%s\" (%s)\n", exp, fmt, str);
+  return 1;
+}
+
 int main(void) {
+  unsigned failed = 0;
+
+  failed += TEST_FMTREG("al", FD_RT_GPL, FD_REG_AX, 0);
+  failed += TEST_FMTREG("ah", FD_RT_GPH, FD_REG_AH, 0);
+  failed += TEST_FMTREG("ax", FD_RT_GPL, FD_REG_AX, 1);
+  failed += TEST_FMTREG("eax", FD_RT_GPL, FD_REG_AX, 2);
+  failed += TEST_FMTREG("rax", FD_RT_GPL, FD_REG_AX, 3);
+  failed += TEST_FMTREG("xmm0", FD_RT_VEC, FD_REG_R0, 3);
+  failed += TEST_FMTREG("xmm0", FD_RT_VEC, FD_REG_R0, 4);
+  failed += TEST_FMTREG("ymm0", FD_RT_VEC, FD_REG_R0, 5);
+  failed += TEST_FMTREG("zmm0", FD_RT_VEC, FD_REG_R0, 6);
+
   static const struct TestCase {
     uint8_t buf[21];
     uint8_t buf_len;
@@ -25,7 +48,6 @@ int main(void) {
       {"", 0, 16, 0, ""},
   };
 
-  unsigned failed = 0;
   const struct TestCase* end = cases + sizeof(cases) / sizeof(cases[0]);
   for (const struct TestCase* tc = cases; tc != end; tc++) {
     FdInstr instr;

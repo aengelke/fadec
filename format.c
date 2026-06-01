@@ -160,6 +160,12 @@ static char* fd_strpcatreg(char* restrict dst, size_t rt, size_t ri,
   return dst + *name;
 }
 
+unsigned fd_format_reg(FdRegType ty, FdReg idx, unsigned sizelog, char* buf16) {
+  unsigned len = fd_strpcatreg(buf16, ty, idx, sizelog) - buf16;
+  buf16[len] = '\0';
+  return len;
+}
+
 const char* fdi_name(FdInstrType ty) {
   (void)ty;
   return "(invalid)";
