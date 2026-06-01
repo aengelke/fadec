@@ -1091,7 +1091,7 @@ def unique(it):
         raise Exception(f"multiple values: {vals}")
     return next(iter(vals))
 
-def encode2_gen_legacy(variant: EncodeVariant, opsize: int, supports_high_regs: list[int], imm_expr: str, imm_size_expr: str, has_idx: bool) -> str:
+def encode2_gen_legacy(variant: EncodeVariant, opsize: int, supports_high_regs: list[int], imm_expr: str, imm_size_expr, has_idx: bool) -> str:
     opcode = variant.opcode
     desc = variant.desc
     flags = ENCODINGS[variant.desc.encoding]
@@ -1136,7 +1136,7 @@ def encode2_gen_legacy(variant: EncodeVariant, opsize: int, supports_high_regs: 
     if opcode.rexw == "1":
         code += f"  buf[idx++] = rex;\n"
     elif len(rex_values) == 1:
-        code += f"  buf[idx] = {next(iter(rex_values))};\n  idx += rex != 0;\n"
+        code += f"  buf[idx] = {next(iter(rex_values)):#x};\n  idx += rex != 0;\n"
     elif len(rex_values) == 2:
         code += f"  buf[idx] = 0x40|rex;\n  idx += rex != 0;\n"
     elif rex_expr: # memory, multiplication is expensive
@@ -1162,8 +1162,12 @@ def encode2_gen_legacy(variant: EncodeVariant, opsize: int, supports_high_regs: 
             assert "VSIB" not in desc.flags
             assert opcode.modrm[2] is None
             modrm = f"op{flags.modrm_idx^3}"
-            code += f"  idx = enc_mem(buf+idx, idx+{imm_size_expr}, {modrm}, {modreg}, 0, 0);\n"
-            code += f"  if (!idx) return 0;\n  idx -= {imm_size_expr};\n"
+            if imm_size_expr:
+                code += f"  idx = enc_mem(buf+idx, idx+{imm_size_expr}, {modrm}, {modreg}, 0, 0);\n"
+                code += f"  if (!idx) return 0;\n  idx -= {imm_size_expr};\n"
+            else:
+                assert flags.imm_control < 2
+                code += f"  idx = enc_mem(buf+idx, idx, {modrm}, {modreg}, 0, 0);\n"
         else:
             if flags.modrm_idx:
                 modrm = f"op_reg_idx(op{flags.modrm_idx^3})"
@@ -1181,7 +1185,7 @@ def encode2_gen_legacy(variant: EncodeVariant, opsize: int, supports_high_regs: 
         code += f"  return idx;\n"
     return code
 
-def encode2_gen_vex(variant: EncodeVariant, imm_expr: str, imm_size_expr: str, has_idx: bool) -> str:
+def encode2_gen_vex(variant: EncodeVariant, imm_expr: str, imm_size_expr, has_idx: bool) -> str:
     opcode = variant.opcode
     flags = ENCODINGS[variant.desc.encoding]
     code = ""
@@ -1223,7 +1227,7 @@ def encode2_gen_vex(variant: EncodeVariant, imm_expr: str, imm_size_expr: str, h
         assert opcode.modrm[2] in (None, 4)
         forcesib = 1 if opcode.modrm[2] == 4 else 0 # AMX
         modrm = f"op{flags.modrm_idx^3}"
-        ripoff = imm_size_expr + ("" if not has_idx else "+idx")
+        ripoff = f"{imm_size_expr}" + ("" if not has_idx else "+idx")
         helperargs = (f"{modrm}, {modreg}, {vexop}, {ripoff}, " +
                       f"{forcesib}, {variant.evexdisp8scale}")
     else:
@@ -1332,12 +1336,11 @@ def encode2_table(entries, args):
                 conds.append(f"op_reg_idx(op{flags.vexreg_idx^3})=={flags.zeroreg_val}")
 
             imm_size = desc.imm_size(opsize//8)
-            imm_size_expr = f"{imm_size}"
             imm_expr = f"(int64_t) op{flags.imm_idx^3}"
             if flags.imm_control == 1:
                 conds.append(f"op{flags.imm_idx^3} == 1")
             elif flags.imm_control == 2:
-                imm_size_expr = "(flags & FE_ADDR32 ? 4 : 8)"
+                imm_size = "(flags & FE_ADDR32 ? 4 : 8)"
                 imm_expr = f"(int64_t) (flags & FE_ADDR32 ? (int32_t) {imm_expr} : {imm_expr})"
             elif flags.imm_control == 3:
                 imm_expr = f"op_reg_idx(op{flags.imm_idx^3}) << 4"
@@ -1357,9 +1360,9 @@ def encode2_table(entries, args):
                 code += f"  if ({'&&'.join(conds)}) {{\n"
 
             if opcode.vex:
-                code += encode2_gen_vex(variant, imm_expr, imm_size_expr, has_idx)
+                code += encode2_gen_vex(variant, imm_expr, imm_size, has_idx)
             else:
-                code += encode2_gen_legacy(variant, opsize, supports_high_regs, imm_expr, imm_size_expr, has_idx)
+                code += encode2_gen_legacy(variant, opsize, supports_high_regs, imm_expr, imm_size, has_idx)
 
             if conds:
                 code += "  }\n"
