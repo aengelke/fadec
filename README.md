@@ -170,7 +170,8 @@ The API consists of one function per instruction, as well as some macros. The AP
     - AMX instructions: no tile register may be used more than once
     - AVX-512 complex FP16 multiplication: destination must be not be equal to a source register
 - Low test coverage. (Help needed.)
-- No Python API.
+- No Python encode API.
+- No Rust API. (Help needed.)
 
 Some ISA extensions are not supported, often because they are deprecated or unsupported by recent hardware. These are unlikely to be implemented in the near future:
 

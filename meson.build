@@ -128,3 +128,17 @@ pkg.generate(libraries: libfadec,
 if cc.has_function('clock_gettime')
   executable('decode-profile', 'decode-profile.c', dependencies: fadec, c_args: ['-D_GNU_SOURCE'])
 endif
+
+if components.contains('decode')
+  py = import('python').find_installation(required: false, disabler: true)
+  # For Meson 0.63+, this can be dropped.
+  py_dep = dependency('python3', required: false, disabler: true)
+  py_mod = py.extension_module('fadec', 'python.c', dependencies: [fadec, py_dep],
+                               c_args: ['-Wno-missing-field-initializers', '-Wno-missing-prototypes'],
+                               install: true)
+  env = environment()
+  env.set('PYTHONPATH', meson.current_build_dir())
+  test('python', python3, args: ['python-test.py'], depends: [py_mod],
+       env: ['PYTHONPATH=' + meson.current_build_dir()],
+       workdir: meson.current_source_dir())
+endif

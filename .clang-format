@@ -10,3 +10,7 @@ IncludeCategories:
     Priority: 3
   - Regex: '^<.*\.h>$'
     Priority: 4
+Macros:
+  - PyObject_HEAD_INIT(type)={0},
+  - PyVarObject_HEAD_INIT(type, size)={0},
+  - PyObject_HEAD=PyObject* ob_base;

@@ -1,0 +1,18 @@
+[project]
+name = 'fadec'
+version = '1.0.0'
+description = 'Fast Decoder for x86-32 and x86-64 and Encoder for x86-64'
+requires-python = '>=3.9'
+readme = 'README.md'
+license = {file = 'LICENSE'}
+authors = [
+  {name = 'Alexis Engelke', email = 'mail@aengelke.net'},
+]
+
+[build-system]
+build-backend = 'mesonpy'
+requires = ['meson-python']
+
+[tool.meson-python.wheel]
+exclude = ['*']
+include = ['{py_platlib}/*']
