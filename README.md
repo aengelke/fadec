@@ -52,6 +52,10 @@ The API consists of two functions to decode and format instructions, as well as 
     - `buf`/`len`: buffer for formatted instruction string
 - Various accessor macros: see [fadec.h](fadec.h).
 
+### Rust Bindings
+
+The decoder has Rust bindings, see [rust/lib.rs](rust/lib.rs).
+
 ## Encoder Usage
 
 The encoder has two API variants: "v1" has a single entry point (`fe_enc64`) and the instruction is specified as integer parameter. "v2" has one entry point per instruction. v2 is currently about 3x faster than v1, but also has much larger code size (v1: <10 kiB; v2: ~3 MiB) and takes much longer to compile. It is therefore off by default and can be enabled by passing `-Dwith_encode2=true` to Meson. Both variants are supported.

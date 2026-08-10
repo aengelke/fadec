@@ -1,0 +1,20 @@
+[package]
+name = "fadec"
+version = "0.1.0"
+edition = "2024"
+description = "Fast Decoder for x86-32 and x86-64 and Encoder for x86-64"
+repository = "https://github.com/aengelke/fadec/"
+license = "BSD-3-Clause"
+keywords = ["disassembler", "decoder", "x86"]
+categories = ["no-std", "encoding"]
+build = "rust/build.rs"
+
+[lib]
+path = "rust/lib.rs"
+
+[build-dependencies]
+cmake = "0.1"
+
+[features]
+default = ["std"]
+std = []
