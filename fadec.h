@@ -195,8 +195,9 @@ void fd_format(const FdInstr* instr, char* buf, size_t len);
  * \param addr The base address to use for printing FD_OT_OFF operands.
  * \param buf The buffer to hold the formatted string.
  * \param len The length of the buffer.
+ * \return The total size of the possibly truncated string.
  **/
-void fd_format_abs(const FdInstr* instr, uint64_t addr, char* buf, size_t len);
+unsigned fd_format_abs(const FdInstr* instr, uint64_t addr, char* buf, size_t len);
 
 /** Write the null-terminated name of a register into a buffer. May only be
  * called on registers that actually exist (e.g., GPH reg 0 or CR reg 1 are

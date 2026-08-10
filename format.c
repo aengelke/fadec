@@ -572,22 +572,17 @@ void fd_format(const FdInstr* instr, char* buffer, size_t len) {
   fd_format_abs(instr, 0, buffer, len);
 }
 
-void fd_format_abs(const FdInstr* instr, uint64_t addr, char* restrict buffer,
+unsigned fd_format_abs(const FdInstr* instr, uint64_t addr, char* restrict buffer,
                    size_t len) {
   char tmp[128];
-  char* buf = buffer;
-  if (UNLIKELY(len < 128)) {
-    if (!len)
-      return;
-    buf = tmp;
-  }
-
+  char* buf = UNLIKELY(len < 128) ? tmp : buffer;
   char* end = fd_format_impl(buf, instr, addr);
-
-  if (buf != buffer) {
+  if (buf != buffer && len) {
     unsigned i;
     for (i = 0; i < (end - tmp) && i < len - 1; i++)
       buffer[i] = tmp[i];
     buffer[i] = '\0';
   }
+
+  return end - buf;
 }
