@@ -39,7 +39,8 @@
 # register operand.
 #
 # For operands, the first letter specified the operand kind. Naming is mostly
-# consistent with Intel's SDM, except for F (Intel: eflags; here: FPU).
+# consistent with Intel's SDM, except for F (Intel: eflags; here: FPU). (AMD
+# splits K into KM/KW/KR/KV.)
 #
 #                   GP  MMX XMM MSK TMM FPU CR  DR  SEG
 #   ModRM.r/m (reg) R   N   U   K   T   F   -   -   -
@@ -48,7 +49,7 @@
 #   VEX.vvvv        B   -   H   K   T   -   -   -   -
 #   imm8[7:4]       -   -   L   -   -   -   -   -   -
 #
-#   M=memory only; O=direct address
+#   M=memory only; M*=vsib memory; O=direct address
 #   I=immediate; A=address/far jmp; J=rip-relative address/jmp
 #
 # The remaining one or two letters specify the operand size:
@@ -87,7 +88,6 @@
 # - D64: defaults to 64-bit operand size in 64-bit mode (REX.W ignored).
 # - F64: forced to 64-bit operand size in 64-bit mode (66/REX.W ignored).
 #   NB: this is Intel-specific. On AMD, F64 behaves like D64.
-# - VSIB: memory operand uses VSIB encoding (SIB required, idx is vector).
 # - ENC_SEPSZ: attach size suffixes to each operand (encode only).
 # - ENC_NOSZ: do not attach size suffix (encode only).
 # - ENC_REP: supports REP prefix.
@@ -104,7 +104,7 @@
 #                                                      LOCK SZ8
 #                                                       I64 D64
 #                                                       O64 F64
-#                                                      VSIB U66
+#                                                           U66
 #                                                           I66
 # -------------------  ---- --- --- --- --- -------    ---- --- ----------
 00                     MR   Eb  Gb  -   -   ADD        LOCK SZ8 EFL=m--mmmmm
@@ -1265,14 +1265,14 @@ VEX.66.W0.0f388c/m     RVM  Vx  Hx  Mx  -   VPMASKMOVD          F=AVX2
 VEX.66.W1.0f388c/m     RVM  Vx  Hx  Mx  -   VPMASKMOVQ          F=AVX2
 VEX.66.W0.0f388e/m     MVR  Mx  Hx  Vx  -   VPMASKMOVD          F=AVX2
 VEX.66.W1.0f388e/m     MVR  Mx  Hx  Vx  -   VPMASKMOVQ          F=AVX2
-VEX.66.W0.0f3890/m     RMV  Vx  Md  Hx  -   VPGATHERDD VSIB     F=AVX2
-VEX.66.W1.0f3890/m     RMV  Vx  Mq  Hx  -   VPGATHERDQ VSIB     F=AVX2
-VEX.66.W0.0f3891/m     RMV  Vh  Md  Hh  -   VPGATHERQD VSIB     F=AVX2
-VEX.66.W1.0f3891/m     RMV  Vx  Mq  Hx  -   VPGATHERQQ VSIB     F=AVX2
-VEX.66.W0.0f3892/m     RMV  Vx  Md  Hx  -   VGATHERDPS VSIB     F=AVX2
-VEX.66.W1.0f3892/m     RMV  Vx  Mq  Hx  -   VGATHERDPD VSIB     F=AVX2
-VEX.66.W0.0f3893/m     RMV  Vh  Md  Hh  -   VGATHERQPS VSIB     F=AVX2
-VEX.66.W1.0f3893/m     RMV  Vx  Mq  Hx  -   VGATHERQPD VSIB     F=AVX2
+VEX.66.W0.0f3890/m     RMV  Vx  M*d Hx  -   VPGATHERDD          F=AVX2
+VEX.66.W1.0f3890/m     RMV  Vx  M*q Hx  -   VPGATHERDQ          F=AVX2
+VEX.66.W0.0f3891/m     RMV  Vh  M*d Hh  -   VPGATHERQD          F=AVX2
+VEX.66.W1.0f3891/m     RMV  Vx  M*q Hx  -   VPGATHERQQ          F=AVX2
+VEX.66.W0.0f3892/m     RMV  Vx  M*d Hx  -   VGATHERDPS          F=AVX2
+VEX.66.W1.0f3892/m     RMV  Vx  M*q Hx  -   VGATHERDPD          F=AVX2
+VEX.66.W0.0f3893/m     RMV  Vh  M*d Hh  -   VGATHERQPS          F=AVX2
+VEX.66.W1.0f3893/m     RMV  Vx  M*q Hx  -   VGATHERQPD          F=AVX2
 VEX.66.W0.0f3896       RVM  Vx  Hx  Wx  -   VFMADDSUB132PS      F=FMA
 VEX.66.W1.0f3896       RVM  Vx  Hx  Wx  -   VFMADDSUB132PD      F=FMA
 VEX.66.W0.0f3897       RVM  Vx  Hx  Wx  -   VFMSUBADD132PS      F=FMA
@@ -2216,10 +2216,10 @@ EVEX.66.W0.0f3a66      RMI  Kb  Wps Ib  -   EVX_FPCLASSPS+kb    F=AVX512DQ TUPLE
 EVEX.66.W1.0f3a66      RMI  Kb  Wpd Ib  -   EVX_FPCLASSPD+kb    F=AVX512DQ TUPLE_FULL_64
 EVEX.66.W0.LIG.0f3a67  RMI  Kb  Wss Ib  -   EVX_FPCLASSSS+k     F=AVX512DQ TUPLE1_SCALAR_32
 EVEX.66.W1.LIG.0f3a67  RMI  Kb  Wsd Ib  -   EVX_FPCLASSSD+k     F=AVX512DQ TUPLE1_SCALAR_64
-EVEX.66.W0.0f3892/m    RM   Vx  Md  -   -   EVX_GATHERDPS+k     F=AVX512F VSIB TUPLE1_SCALAR_32
-EVEX.66.W1.0f3892/m    RM   Vx  Mq  -   -   EVX_GATHERDPD+k     F=AVX512F VSIB TUPLE1_SCALAR_64
-EVEX.66.W0.0f3893/m    RM   Vh  Md  -   -   EVX_GATHERQPS+k     F=AVX512F VSIB TUPLE1_SCALAR_32
-EVEX.66.W1.0f3893/m    RM   Vx  Mq  -   -   EVX_GATHERQPD+k     F=AVX512F VSIB TUPLE1_SCALAR_64
+EVEX.66.W0.0f3892/m    RM   Vx  M*d -   -   EVX_GATHERDPS+k     F=AVX512F TUPLE1_SCALAR_32
+EVEX.66.W1.0f3892/m    RM   Vx  M*q -   -   EVX_GATHERDPD+k     F=AVX512F TUPLE1_SCALAR_64
+EVEX.66.W0.0f3893/m    RM   Vh  M*d -   -   EVX_GATHERQPS+k     F=AVX512F TUPLE1_SCALAR_32
+EVEX.66.W1.0f3893/m    RM   Vx  M*q -   -   EVX_GATHERQPD+k     F=AVX512F TUPLE1_SCALAR_64
 EVEX.66.W0.0f3842      RM   Vps Wps -   -   EVX_GETEXPPS+kbe    F=AVX512F TUPLE_FULL_32
 EVEX.66.W1.0f3842      RM   Vpd Wpd -   -   EVX_GETEXPPD+kbe    F=AVX512F TUPLE_FULL_64
 EVEX.66.W0.LIG.0f3843  RVM  Vdq Hdq Wss -   EVX_GETEXPSS+ke     F=AVX512F TUPLE1_SCALAR_32
@@ -2314,10 +2314,10 @@ EVEX.66.W0.0f3889/m    RM   Vx  Md  -   -   EVX_PEXPANDD+k      F=AVX512F TUPLE1
 EVEX.66.W0.0f3889/r    RM   Vx  Ux  -   -   EVX_PEXPANDD+k      F=AVX512F
 EVEX.66.W1.0f3889/m    RM   Vx  Mq  -   -   EVX_PEXPANDQ+k      F=AVX512F TUPLE1_SCALAR_64
 EVEX.66.W1.0f3889/r    RM   Vx  Ux  -   -   EVX_PEXPANDQ+k      F=AVX512F
-EVEX.66.W0.0f3890/m    RM   Vx  Md  -   -   EVX_PGATHERDD+k     F=AVX512F VSIB TUPLE1_SCALAR_32
-EVEX.66.W1.0f3890/m    RM   Vx  Mq  -   -   EVX_PGATHERDQ+k     F=AVX512F VSIB TUPLE1_SCALAR_64
-EVEX.66.W0.0f3891/m    RM   Vh  Md  -   -   EVX_PGATHERQD+k     F=AVX512F VSIB TUPLE1_SCALAR_32
-EVEX.66.W1.0f3891/m    RM   Vx  Mq  -   -   EVX_PGATHERQQ+k     F=AVX512F VSIB TUPLE1_SCALAR_64
+EVEX.66.W0.0f3890/m    RM   Vx  M*d -   -   EVX_PGATHERDD+k     F=AVX512F TUPLE1_SCALAR_32
+EVEX.66.W1.0f3890/m    RM   Vx  M*q -   -   EVX_PGATHERDQ+k     F=AVX512F TUPLE1_SCALAR_64
+EVEX.66.W0.0f3891/m    RM   Vh  M*d -   -   EVX_PGATHERQD+k     F=AVX512F TUPLE1_SCALAR_32
+EVEX.66.W1.0f3891/m    RM   Vx  M*q -   -   EVX_PGATHERQQ+k     F=AVX512F TUPLE1_SCALAR_64
 EVEX.66.W0.0f3844      RM   Vx  Wx  -   -   EVX_PLZCNTD+kb      F=AVX512CD TUPLE_FULL_32
 EVEX.66.W1.0f3844      RM   Vx  Wx  -   -   EVX_PLZCNTQ+kb      F=AVX512CD TUPLE_FULL_64
 EVEX.66.W1.0f38b4      RVM  Vx  Hx  Wx  -   EVX_PMADD52LUQ+kb   F=AVX512_IFMA TUPLE_FULL_64
@@ -2361,10 +2361,10 @@ EVEX.66.W0.0f3815      RVM  Vx  Hx  Wx  -   EVX_PROLVD+kb       F=AVX512F TUPLE_
 EVEX.66.W1.0f3815      RVM  Vx  Hx  Wx  -   EVX_PROLVQ+kb       F=AVX512F TUPLE_FULL_64
 EVEX.66.W0.0f72/1      VMI  Hx  Wx  Ib  -   EVX_PROLD+kb        F=AVX512F TUPLE_FULL_32
 EVEX.66.W1.0f72/1      VMI  Hx  Wx  Ib  -   EVX_PROLQ+kb        F=AVX512F TUPLE_FULL_64
-EVEX.66.W0.0f38a0/m    MR   Md  Vx  -   -   EVX_PSCATTERDD+k    F=AVX512F VSIB TUPLE1_SCALAR_32
-EVEX.66.W1.0f38a0/m    MR   Mq  Vx  -   -   EVX_PSCATTERDQ+k    F=AVX512F VSIB TUPLE1_SCALAR_64
-EVEX.66.W0.0f38a1/m    MR   Md  Vh  -   -   EVX_PSCATTERQD+k    F=AVX512F VSIB TUPLE1_SCALAR_32
-EVEX.66.W1.0f38a1/m    MR   Mq  Vx  -   -   EVX_PSCATTERQQ+k    F=AVX512F VSIB TUPLE1_SCALAR_64
+EVEX.66.W0.0f38a0/m    MR   M*d Vx  -   -   EVX_PSCATTERDD+k    F=AVX512F TUPLE1_SCALAR_32
+EVEX.66.W1.0f38a0/m    MR   M*q Vx  -   -   EVX_PSCATTERDQ+k    F=AVX512F TUPLE1_SCALAR_64
+EVEX.66.W0.0f38a1/m    MR   M*d Vh  -   -   EVX_PSCATTERQD+k    F=AVX512F TUPLE1_SCALAR_32
+EVEX.66.W1.0f38a1/m    MR   M*q Vx  -   -   EVX_PSCATTERQQ+k    F=AVX512F TUPLE1_SCALAR_64
 EVEX.66.W1.0f3a70      RVMI Vx  Hx  Wx  Ib  EVX_PSHLDW+k        F=AVX512_VBMI2 TUPLE_FULL_MEM
 EVEX.66.W0.0f3a71      RVMI Vx  Hx  Wx  Ib  EVX_PSHLDD+kb       F=AVX512_VBMI2 TUPLE_FULL_32
 EVEX.66.W1.0f3a71      RVMI Vx  Hx  Wx  Ib  EVX_PSHLDQ+kb       F=AVX512_VBMI2 TUPLE_FULL_64
@@ -2421,10 +2421,10 @@ EVEX.66.W0.0f382c      RVM  Vps Hps Wps -   EVX_SCALEFPS+kbr    F=AVX512F TUPLE_
 EVEX.66.W1.0f382c      RVM  Vpd Hpd Wpd -   EVX_SCALEFPD+kbr    F=AVX512F TUPLE_FULL_64
 EVEX.66.W0.LIG.0f382d  RVM  Vdq Hdq Wss -   EVX_SCALEFSS+kr     F=AVX512F TUPLE1_SCALAR_32
 EVEX.66.W1.LIG.0f382d  RVM  Vdq Hdq Wsd -   EVX_SCALEFSD+kr     F=AVX512F TUPLE1_SCALAR_64
-EVEX.66.W0.0f38a2/m    MR   Md  Vx  -   -   EVX_SCATTERDPS+k    F=AVX512F VSIB TUPLE1_SCALAR_32
-EVEX.66.W1.0f38a2/m    MR   Mq  Vx  -   -   EVX_SCATTERDPD+k    F=AVX512F VSIB TUPLE1_SCALAR_64
-EVEX.66.W0.0f38a3/m    MR   Md  Vh  -   -   EVX_SCATTERQPS+k    F=AVX512F VSIB TUPLE1_SCALAR_32
-EVEX.66.W1.0f38a3/m    MR   Mq  Vx  -   -   EVX_SCATTERQPD+k    F=AVX512F VSIB TUPLE1_SCALAR_64
+EVEX.66.W0.0f38a2/m    MR   M*d Vx  -   -   EVX_SCATTERDPS+k    F=AVX512F TUPLE1_SCALAR_32
+EVEX.66.W1.0f38a2/m    MR   M*q Vx  -   -   EVX_SCATTERDPD+k    F=AVX512F TUPLE1_SCALAR_64
+EVEX.66.W0.0f38a3/m    MR   M*d Vh  -   -   EVX_SCATTERQPS+k    F=AVX512F TUPLE1_SCALAR_32
+EVEX.66.W1.0f38a3/m    MR   M*q Vx  -   -   EVX_SCATTERQPD+k    F=AVX512F TUPLE1_SCALAR_64
 EVEX.66.W0.L12.0f3a23  RVMI Vps Hps Wps Ib  EVX_SHUFF32X4+kb    F=AVX512F TUPLE_FULL_32
 EVEX.66.W1.L12.0f3a23  RVMI Vpd Hpd Wpd Ib  EVX_SHUFF64X2+kb    F=AVX512F TUPLE_FULL_64
 EVEX.66.W0.L12.0f3a43  RVMI Vx  Hx  Wx  Ib  EVX_SHUFI32X4+kb    F=AVX512F TUPLE_FULL_32

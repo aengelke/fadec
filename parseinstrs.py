@@ -92,6 +92,7 @@ OPKIND_CANONICALIZE = {
         "A": "IMM", # Direct address, far jmp
     "J": "IMM", # RIP-relative address
     "M": "MEM", # ModRM.r/m selects memory only
+        "*": "MEM", # ModRM.r/m selects VSIB memory only
         "O": "MEM", # Direct address, FD/TD encoding
     "R": "GP", # ModRM.r/m selects GP
         "B": "GP", # VEX.vvvv selects GP
@@ -174,6 +175,8 @@ class OpKind(NamedTuple):
         return OPKIND_SIZES[self.sizestr]
     @classmethod
     def parse(cls, op):
+        if op[:2] == "M*":
+            return cls("*", op[2:])
         return cls(op[0], op[1:])
 
     def __eq__(self, other):
@@ -218,6 +221,8 @@ class InstrDesc(NamedTuple):
             "r": "ER",
         }[c] for c in compactDesc])
         operands = tuple(OpKind.parse(op) for op in desc[1:5] if op != "-")
+        if any(op.regkind == "*" for op in operands):
+            flags |= frozenset(("VSIB",))
         return cls(mnem, desc[0], operands, flags)
 
     def imm_size(self, opsz):
@@ -382,7 +387,7 @@ def verifyOpcodeDesc(opcode, desc):
     fixed_mod = opcode.modrm[0]
     if opcode.extended or desc.mnemonic in ("MOV_CR2G", "MOV_DR2G", "MOV_G2CR", "MOV_G2DR"):
         fixed_mod = "r"
-    expected_modrmkinds = {None: "EQWFKT", "r": "RNUFKT", "m": "M"}[fixed_mod]
+    expected_modrmkinds = {None: "EQWFKT", "r": "RNUFKT", "m": "M*"}[fixed_mod]
     # allow F and R for zeroreg, which we overlap with vexreg
     expected_vexkinds = "BHKT" if opcode.vex else "BHRF"
     for i, opkind in enumerate(desc.operands):
@@ -457,10 +462,14 @@ def verifyOpcodeDesc(opcode, desc):
             "TUPLE_MOVDDUP":      (None, None, (  16,   32,   64)),
         }[tts[0]]
         if "BCST" in desc.flags:
+            if "VSIB" in desc.flags:
+                raise Exception(f"VSIB broadcast {opcode}, {desc}")
             if bcst is None:
                 raise Exception(f"broadcast on incompatible type {opcode}, {desc}")
             if ("BCST16" in desc.flags) != (bcst == 2):
                 raise Exception(f"bcst16 mismatch, should be {bcst} {opcode}, {desc}")
+        elif "BCST16" in desc.flags:
+            raise Exception(f"bcst16 requires bcst {opcode}, {desc}")
         # EVEX.W is used to distinguish 4/8-byte broadcast size
         if evexw and opcode.rexw != evexw:
             raise Exception(f"incompatible EVEX.W {opcode}, {desc}")
