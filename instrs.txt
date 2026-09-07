@@ -1594,7 +1594,7 @@ F3.0fc7/6m             M    Mq  -   -   -   VMXON               F=VMX EFL=0--0m0
 66.0f01cf              NP   -   -   -   -   SEAMCALL            F=SEAM
 
 # AMD CLZERO
-0f01fc                 A    Rv  -   -   -   CLZERO              F=CLZERO ONLYAMD
+NFx.0f01fc             A    Rv  -   -   -   CLZERO              F=CLZERO ONLYAMD
 
 # AMD RDPRU
 # Tested on hardware, 66 prefix also accepted. F2/F3 trigger UD.
@@ -1618,6 +1618,8 @@ NP.0f01fe              NP   -   -   -   -   INVLPGB             F=INVLPGB ONLYAM
 NP.0f01ff              NP   -   -   -   -   TLBSYNC             F=INVLPGB ONLYAMD CPL0
 
 # AMD SNP
+F3.0f01fc              NP   -   -   -   -   RMPCHKD     O64     EFL=u--umuum F=RMPDIRTY ONLYAMD CPL0
+F2.0f01fc              NP   -   -   -   -   RMPOPT      O64     EFL=-------m F=RMPOPT ONLYAMD CPL0
 F3.0f01fd              NP   -   -   -   -   RMPQUERY    O64     EFL=m--mmmm- F=RMPQUERY ONLYAMD CPL0
 F2.0f01fd              NP   -   -   -   -   RMPREAD     O64     EFL=m--mmmm- F=RMPREAD ONLYAMD CPL0
 F3.0f01fe              NP   -   -   -   -   RMPADJUST   O64     EFL=m--mmmm- F=SNP ONLYAMD CPL0

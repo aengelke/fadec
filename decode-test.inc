@@ -3234,3 +3234,13 @@ TEST("\x62\xf2\x6f\x48\xda\x01", "vsm4rnds4 zmm0, zmm2, zmmword ptr [@cx]")
 TEST("\x62\xf2\x6f\x08\xda\xc1", "vsm4rnds4 xmm0, xmm2, xmm1")
 TEST("\x62\xf2\x6f\x28\xda\xc1", "vsm4rnds4 ymm0, ymm2, ymm1")
 TEST("\x62\xf2\x6f\x48\xda\xc1", "vsm4rnds4 zmm0, zmm2, zmm1")
+
+// AMD SNP
+TEST64("\xf3\x0f\x01\xfc", "rmpchkd")
+TEST64("\xf2\x0f\x01\xfc", "rmpopt")
+TEST64("\xf3\x0f\x01\xfd", "rmpquery")
+TEST64("\xf2\x0f\x01\xfd", "rmpread")
+TEST64("\xf3\x0f\x01\xfe", "rmpadjust")
+TEST64("\xf2\x0f\x01\xfe", "rmpupdate")
+TEST64("\xf3\x0f\x01\xff", "psmash")
+TEST64("\xf2\x0f\x01\xff", "pvalidate")

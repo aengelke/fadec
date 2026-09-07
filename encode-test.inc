@@ -2194,3 +2194,13 @@ TEST("\xc4\xe2\x6f\xda\xc1", VSM4RNDS4_256rrr, 0, FE_XMM0, FE_XMM2, FE_XMM1)
 TEST("\x62\xf2\x6f\x20\xda\xc1", VSM4RNDS4_256rrr, 0, FE_XMM0, FE_XMM18, FE_XMM1)
 TEST("\x62\xf2\x6f\x48\xda\xc1", VSM4RNDS4_512rrr, 0, FE_XMM0, FE_XMM2, FE_XMM1)
 TEST("\x62\xf2\x6f\x40\xda\xc1", VSM4RNDS4_512rrr, 0, FE_XMM0, FE_XMM18, FE_XMM1)
+
+// AMD SNP
+TEST("\xf3\x0f\x01\xfc", RMPCHKD, 0)
+TEST("\xf2\x0f\x01\xfc", RMPOPT, 0)
+TEST("\xf3\x0f\x01\xfd", RMPQUERY, 0)
+TEST("\xf2\x0f\x01\xfd", RMPREAD, 0)
+TEST("\xf3\x0f\x01\xfe", RMPADJUST, 0)
+TEST("\xf2\x0f\x01\xfe", RMPUPDATE, 0)
+TEST("\xf3\x0f\x01\xff", PSMASH, 0)
+TEST("\xf2\x0f\x01\xff", PVALIDATE, 0)
