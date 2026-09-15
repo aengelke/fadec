@@ -464,7 +464,11 @@ NP.0f01d7              NP   -   -   -   -   ENCLU               F=SGX
 *0f0d/r                MR   Rv  Gv  -   -   RESERVED_NOP
 0f0e                   NP   -   -   -   -   FEMMS               ONLYAMD F=3DNOW
 # TODO: actually decode 3DNow! instructions. Given that 3DNow! no longer exists,
-# this is unlikely to happen, though.
+# this is unlikely to happen, though. For reference, these are the mnemonics:
+# 0c=PI2FW    0d=PI2FD    1c=PF2IW    1d=PF2ID    8a=PFNACC   8e=PFPNACC
+# 90=PFCMPGE  94=PFMIN    96=PFRCP    97=PFRSQRT  9a=PFSUB    9e=PFADD
+# a0=PFCMPGT  a4=PFMAX    a6=PFRCPIT1 a7=PFRSQIT1 aa=PFSUBR   ae=PFACC
+# b0=PFCMPEQ  b4=PFMUL    b6=PFRCPIT2 b7=PMULHRW  bb=PSWAPD   bf=PAVGUSB
 0f0f                   RMI  Pq  Qq  Ib  -   3DNOW               ONLYAMD F=3DNOW
 0f18/0m                M    Mb  -   -   -   PREFETCHNTA         F=SSE
 0f18/1m                M    Mb  -   -   -   PREFETCHT0          F=SSE
