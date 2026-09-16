@@ -162,6 +162,72 @@ typedef enum {
   FD_ERR_PARTIAL = -3,
 } FdErr;
 
+/** Do not depend on the actual enum values. **/
+typedef enum {
+  /** An unconditional control flow transfer. **/
+  FDE_CFUNCOND = 0x1,
+  /** A conditional control flow transfer. **/
+  FDE_CFCOND = 0x2,
+  /** Operand 0 is read. **/
+  FDE_OP0RD = 0x4,
+  /** Operand 0 is written. **/
+  FDE_OP0WR = 0x8,
+  /** Operand 1 is read. **/
+  FDE_OP1RD = 0x10,
+  /** Operand 1 is written. **/
+  FDE_OP1WR = 0x20,
+  /** Operand 2 is always read when present. **/
+  FDE_OP2RD = 0,
+  /** Operand 2 is written. (Only AVX gather instructions.) **/
+  FDE_OP2WR = 0x40,
+  /** Operand 3 is always read when present. **/
+  FDE_OP3RD = 0,
+  /** Operand 3 is never written. **/
+  FDE_OP3WR = 0x7fffffff,
+  /** CF is read. **/
+  FDE_CFRD = 0x100,
+  /** PF is read. **/
+  FDE_PFRD = 0x200,
+  /** AF is read. **/
+  FDE_AFRD = 0x400,
+  /** ZF is read. **/
+  FDE_ZFRD = 0x800,
+  /** SF is read. **/
+  FDE_SFRD = 0x1000,
+  /** OF is read. **/
+  FDE_OFRD = 0x2000,
+  /** CF is written. **/
+  FDE_CFWR = 0x4000,
+  /** PF is written. **/
+  FDE_PFWR = 0x8000,
+  /** AF is written. **/
+  FDE_AFWR = 0x10000,
+  /** ZF is written. **/
+  FDE_ZFWR = 0x20000,
+  /** SF is written. **/
+  FDE_SFWR = 0x40000,
+  /** OF is written. **/
+  FDE_OFWR = 0x80000,
+  /** Memory is read at another location than described by mem operands. **/
+  FDE_MEMRD = 0x100000,
+  /** Memory is written at another location than described by mem operands. **/
+  FDE_MEMWR = 0x200000,
+  /** AX/EAX/RAX is read implicitly. **/
+  FDE_AXRD = 0x400000,
+  /** AX/EAX/RAX is written implicitly. This may be a merging write to AX. **/
+  FDE_AXWR = 0x800000,
+  /** DX/EDX/RDX is read implicitly. **/
+  FDE_DXRD = 0x1000000,
+  /** DX/EDX/RDX is written implicitly. This may be a merging write to DX. **/
+  FDE_DXWR = 0x2000000,
+  /** SP/ESP/RSP is read implicitly. **/
+  FDE_SPRD = 0x4000000,
+  /** SP/ESP/RSP is written implicitly. **/
+  FDE_SPWR = 0x8000000,
+  /** The instruction has other effects, which are not modeled here. **/
+  FDE_OTHER = 0x10000000,
+} FdEffect;
+
 /** Decode an instruction.
  * \param buf Buffer for instruction bytes.
  * \param len Length of the buffer (in bytes). An instruction is not longer than
@@ -211,6 +277,31 @@ unsigned fd_format_abs(const FdInstr* instr, uint64_t addr, char* buf,
  * \return The size of the string.
  **/
 unsigned fd_format_reg(FdRegType ty, FdReg idx, unsigned sizelog, char* buf16);
+
+/** Approximate instruction effects as a combination of FdEffect items. Compare
+ * using(effects&FDE_EFFECT) == FDE_EFFECT  as some effects are implied and
+ * therefore have value 0 (e.g. FDE_OP3RD). Effects of non-existing operands
+ * can be reported and are to be ignored. This is only an approximation, as the
+ * actual effects can strongly depend on the instruction and micro-arch:
+ *
+ * - Many hard-to-model effects are captured under FDE_OTHER as a catch-all,
+ *   including FPU uses, string instructions, EVEX gather/scatter operations
+ *   (updates mask), I/O, and potential privilege level changes.
+ * - Some instructions have "may-write" effects: BSF/BSR with zero input doesn't
+ *   overwrite it's destination (for 32-bit operand size, the upper 32 bits
+ *   vary between micro-architectures); shifts/rotates with amount zero don't
+ *   change flags. These are currently represented inaccurately as read+write.
+ * - Operands, including implicit operands SP, AX, DX, are reported as
+ *   write-only even if only a part is modified.
+ * - Common dependency-breaking patterns (e.g. XOR reg, reg) do not report
+ *   reads, but the exact circumstances depends on the micro-architecture.
+ * - Status flag effects individually as documented, but typically, ZAPS flags
+ *   are renamed together (or, on Atom, all status flags).
+ *
+ * \param instr The instruction.
+ * \return The set of approximated instruction read/write effects.
+ **/
+uint64_t fd_effects(const FdInstr* instr);
 
 /** Get the stringified name of an instruction type.
  * NOTE: API stability is currently not guaranteed for this function; changes

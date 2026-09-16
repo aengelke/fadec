@@ -94,7 +94,7 @@ function(fadec_component)
 endfunction()
 
 if (FADEC_DECODE)
-    fadec_component(NAME decode SOURCES decode.c format.c HEADERS fadec.h)
+    fadec_component(NAME decode SOURCES decode.c effects.c format.c HEADERS fadec.h)
 endif ()
 if (FADEC_ENCODE)
     fadec_component(NAME encode SOURCES encode.c HEADERS fadec-enc.h)

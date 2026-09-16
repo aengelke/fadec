@@ -147,6 +147,7 @@ OPKIND_SIZES = {
     "zq": 8, # z-immediate, but always 8-byte operand
 }
 class OpKind(NamedTuple):
+    access: str
     regkind: str
     sizestr: str
 
@@ -176,9 +177,12 @@ class OpKind(NamedTuple):
         return OPKIND_SIZES[self.sizestr]
     @classmethod
     def parse(cls, op):
+        access = " "
+        if op[0] in "=+~!":
+            access, op = op[0], op[1:]
         if op[:2] == "M*":
-            return cls("*", op[2:])
-        return cls(op[0], op[1:])
+            return cls(access, "*", op[2:])
+        return cls(access, op[0], op[1:])
 
     def __eq__(self, other):
         # Custom equality for canonicalization of kind/size.
@@ -187,7 +191,7 @@ class OpKind(NamedTuple):
 class InstrDesc(NamedTuple):
     mnemonic: str
     encoding: str
-    operands: Tuple[str, ...]
+    operands: Tuple[OpKind, ...]
     flags: FrozenSet[str]
 
     OPKIND_REGTYS = {
@@ -490,6 +494,7 @@ def verifyOpcodeDesc(opcode, desc):
             if tupsz is not None and opsz != tupsz:
                 raise Exception(f"memory size {opsz} != {tupsz} {opcode}, {desc}")
 
+
 class Trie:
     KIND_ORDER = (EntryKind.TABLE_ROOT, EntryKind.ESCAPE, EntryKind.TABLE256,
                   EntryKind.TABLE_PREFIX, EntryKind.TABLE16,
@@ -676,6 +681,51 @@ def superstring(strs):
             merged += realstrs.pop()
     return merged
 
+def instr_effects(desc) -> FrozenSet[str]:
+    effect_targets = {
+        "?": {" ": "OTHER"},
+        "mem": {" ": "MEMRD", "=": "MEMWR", "+": "MEMRD|MEMWR"},
+        "ip": {"=": "CFUNCOND", "~": "CFCOND"},
+        "sp": {" ": "SPRD", "=": "SPWR", "+": "SPRD|SPWR"},
+        "ax": {" ": "AXRD", "=": "AXWR", "+": "AXRD|AXWR"},
+        "dx": {" ": "DXRD", "=": "DXWR", "+": "DXRD|DXWR"},
+        "fpu": {" ": "OTHER", "+": "OTHER"},
+        "of": {" ": "OFRD", "=": "OFWR", "+": "OFRD|OFWR", "~": "OFRD|OFWR"},
+        "sf": {" ": "SFRD", "=": "SFWR", "+": "SFRD|SFWR", "~": "SFRD|SFWR"},
+        "zf": {" ": "ZFRD", "=": "ZFWR", "+": "ZFRD|ZFWR", "~": "ZFRD|ZFWR"},
+        "af": {" ": "AFRD", "=": "AFWR", "+": "AFRD|AFWR", "~": "AFRD|AFWR"},
+        "pf": {" ": "PFRD", "=": "PFWR", "+": "PFRD|PFWR", "~": "PFRD|PFWR"},
+        "cf": {" ": "CFRD", "=": "CFWR", "+": "CFRD|CFWR", "~": "CFRD|CFWR"},
+        "if": {" ": "", "=": "OTHER"},
+        "df": {" ": "", "=": "OTHER"},
+    }
+    op_access = {
+        " ": ("RD",), "=": ("WR",), "+": ("RD", "WR"), "~": ("RD", "WR"), "!": ()
+    }
+    result = set()
+    for i, op in enumerate(desc.operands):
+        for access in op_access[op.access]:
+            result.add(f"OP{i}{access}")
+    parsed = []
+    effects = [flag[3:] for flag in desc.flags if flag[:3] == "RW="]
+    for e in effects[0].split(",") if effects else []:
+        effect, target = (e[0], e[1:]) if e[0] in "=+~" else (" ", e)
+        target = target if target != "flags" else "oszapcf"
+        if target[-1] == "f":
+            for flag in target[:-1]:
+                parsed.append((flag + "f", effect))
+        else:
+            parsed.append((target, effect))
+    if len(set(t for t, _ in parsed)) != len(parsed):
+        raise Exception(f"duplicate effects in {opcode}, {desc}")
+    for target, effect in parsed:
+        name = effect_targets.get(target, {}).get(effect)
+        if name is None:
+            raise Exception(f"unsupported effect {effect}{target} in {opcode}, {desc}")
+        if name:
+            result.update(name.split("|"))
+    return frozenset(result)
+
 def decode_table(entries, args):
     modes = args.modes
 
@@ -701,6 +751,7 @@ def decode_table(entries, args):
 
     # pause is hardcoded together with XCHG_NOP.
     mnems, descs, desc_map = {"PAUSE"}, [], {}
+    effect_map = defaultdict(frozenset)
     descs.append("{0}") # desc index zero is "invalid"
     for weak, opcode, desc in entries:
         ign66 = opcode.prefix in ("NP", "66", "F2", "F3")
@@ -725,6 +776,7 @@ def decode_table(entries, args):
         for i, mode in enumerate(modes):
             if "IO"[mode <= 32]+"64" not in desc.flags:
                 trie.add_opcode(opcode, desc_idx, i, weak)
+        effect_map[mnem] |= instr_effects(desc)
 
     trie.deduplicate()
     table_data, root_offsets = trie.compile()
@@ -746,6 +798,10 @@ def decode_table(entries, args):
                         .lower() for m in mnems]
     mnemonics_str = superstring(mnemonics_intel)
 
+    effect_map = {mnem: tuple(sorted(e)) for mnem, e in effect_map.items()}
+    effects_table = sorted(set(effect_map.values()))
+    effects_idx_map = {e: i for i, e in enumerate(effects_table)}
+
     if args.stats:
         print(f"Decode stats: Descs -- {len(descs)} ({8*len(descs)} bytes); ",
               f"Trie -- {2*len(table_data)} bytes, {trie.stats}; "
@@ -766,6 +822,10 @@ def decode_table(entries, args):
 {",".join(str(len(mnem)) for mnem in mnemonics_intel)}
 #elif defined(FD_DECODE_TABLE_DEFINES)
 {"".join("#define " + line for line in defines)}
+#elif defined(FD_DECODE_TABLE_EFFECTS_TABLE)
+{"\n".join("|".join(f"FDE_{n}" for n in e) + "," if e else "0," for e in effects_table)}
+#elif defined(FD_DECODE_TABLE_EFFECTS_INDICES)
+{"\n".join(f"[FDI_{mnem}] = {effects_idx_map[e]}," for mnem, e in effect_map.items())}
 #else
 #error "unspecified decode table"
 #endif

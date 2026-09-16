@@ -191,6 +191,94 @@ pub enum Mode {
     X86_64 = 64,
 }
 
+#[derive(Clone, Copy, Debug)]
+pub struct Effects(u64);
+
+impl Effects {
+    /// An unconditional control flow transfer.
+    pub const CFUNCOND: u64 = 0x1;
+    /// A conditional control flow transfer.
+    pub const CFCOND: u64 = 0x2;
+    /// Operand 0 is read.
+    pub const OP0RD: u64 = 0x4;
+    /// Operand 0 is written.
+    pub const OP0WR: u64 = 0x8;
+    /// Operand 1 is read.
+    pub const OP1RD: u64 = 0x10;
+    /// Operand 1 is written.
+    pub const OP1WR: u64 = 0x20;
+    /// Operand 2 is always read when present.
+    pub const OP2RD: u64 = 0;
+    /// Operand 2 is written. (Only AVX gather instructions.)
+    pub const OP2WR: u64 = 0x40;
+    /// Operand 3 is always read when present.
+    pub const OP3RD: u64 = 0;
+    /// Operand 3 is never written.
+    pub const OP3WR: u64 = 0x7fffffff;
+    /// CF is read.
+    pub const CFRD: u64 = 0x100;
+    /// PF is read.
+    pub const PFRD: u64 = 0x200;
+    /// AF is read.
+    pub const AFRD: u64 = 0x400;
+    /// ZF is read.
+    pub const ZFRD: u64 = 0x800;
+    /// SF is read.
+    pub const SFRD: u64 = 0x1000;
+    /// OF is read.
+    pub const OFRD: u64 = 0x2000;
+    /// CF is written.
+    pub const CFWR: u64 = 0x4000;
+    /// PF is written.
+    pub const PFWR: u64 = 0x8000;
+    /// AF is written.
+    pub const AFWR: u64 = 0x10000;
+    /// ZF is written.
+    pub const ZFWR: u64 = 0x20000;
+    /// SF is written.
+    pub const SFWR: u64 = 0x40000;
+    /// OF is written.
+    pub const OFWR: u64 = 0x80000;
+    /// Memory is read at another location than described by mem operands.
+    pub const MEMRD: u64 = 0x100000;
+    /// Memory is written at another location than described by mem operands.
+    pub const MEMWR: u64 = 0x200000;
+    /// AX/EAX/RAX is read implicitly.
+    pub const AXRD: u64 = 0x400000;
+    /// AX/EAX/RAX is written implicitly. This may be a merging write to AX.
+    pub const AXWR: u64 = 0x800000;
+    /// DX/EDX/RDX is read implicitly.
+    pub const DXRD: u64 = 0x1000000;
+    /// DX/EDX/RDX is written implicitly. This may be a merging write to DX.
+    pub const DXWR: u64 = 0x2000000;
+    /// SP/ESP/RSP is read implicitly.
+    pub const SPRD: u64 = 0x4000000;
+    /// SP/ESP/RSP is written implicitly.
+    pub const SPWR: u64 = 0x8000000;
+    /// The instruction has other effects, which are not modeled here.
+    pub const OTHER: u64 = 0x10000000;
+
+    /// Indicate whether the effect set has all specified effects.
+    ///
+    /// ```
+    /// # fn main() -> Result<(), fadec::Error> {
+    /// use fadec::{Instr, Mode, Effects};
+    /// let inst = Instr::decode(&[0x49, 0x90], Mode::X86_64)?;
+    /// assert_eq!(format!("{}", inst), "xchg r8, rax");
+    /// let effects = inst.effects();
+    /// assert!(effects.has(Effects::OP0RD));
+    /// assert!(effects.has(Effects::OP1RD));
+    /// assert!(effects.has(Effects::OP0WR | Effects::OP1WR));
+    /// assert!(!effects.has(Effects::OFWR)); // OF is not updated.
+    /// assert!(!effects.has(Effects::AXRD)); // AX is not an implicit operand.
+    /// # Ok(())
+    /// # }
+    /// ```
+    pub fn has(&self, effects: u64) -> bool {
+        self.0 & effects == effects
+    }
+}
+
 #[derive(Debug, Eq, PartialEq)]
 pub enum Error {
     /// The input is an undefined (or unsupported) instruction encoding.
@@ -218,6 +306,7 @@ impl core::fmt::Display for Error {
 unsafe extern "C" {
     fn fd_decode(buf: *const u8, len: usize, mode: i32, _: usize, out_instr: *mut Instr) -> i32;
     fn fd_format_abs(instr: *const Instr, addr: u64, buf: *mut u8, len: usize) -> u32;
+    fn fd_effects(instr: *const Instr) -> u64;
 }
 
 #[repr(C)]
@@ -259,6 +348,31 @@ impl Instr {
     pub fn decode(buf: &[u8], mode: Mode) -> Result<Instr, Error> {
         let mut instr = core::mem::MaybeUninit::<Instr>::uninit();
         unsafe { Self::decode_into(buf, mode, instr.as_mut_ptr()).map(|_| instr.assume_init()) }
+    }
+
+    /// Approximate instruction effects as a combination of FdEffect items.
+    /// Effects of non-existing operands can be reported and are to be ignored.
+    /// This is only an approximation, as the actual effects can strongly
+    /// depend on the instruction and micro-arch:
+    ///
+    /// - Many hard-to-model effects are captured under [`Effects::OTHER`] as a
+    ///   catch-all, including FPU uses, string instructions, EVEX
+    ///   gather/scatter operations(updates mask), I/O, and potential privilege
+    ///   level changes.
+    /// - Some instructions have "may-write" effects: BSF/BSR with zero input
+    ///   doesn't overwrite it's destination (for 32-bit operand size, the
+    ///   upper 32 bits vary between micro-architectures); shifts/rotates with
+    ///   amount zero don't change flags. These are currently represented
+    ///   inaccurately as read+write.
+    /// - Operands, including implicit operands SP, AX, DX, are reported as
+    ///   write-only even if only a part is modified.
+    /// - Common dependency-breaking patterns (e.g. XOR reg, reg) do not report
+    ///   reads, but the exact circumstances depends on the
+    ///   micro-architecture.
+    /// - Status flag effects individually as documented, but typically, ZAPS
+    ///   flags are renamed together (or, on Atom, all status flags).
+    pub fn effects(&self) -> Effects {
+        unsafe { Effects(fd_effects(self)) }
     }
 
     /// Gets the type/mnemonic of the instruction.
