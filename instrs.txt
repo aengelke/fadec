@@ -371,7 +371,7 @@ d3/6                   MC   +Ev  Rb  -   -   SHL                 EFL=m--mmumm RW
 d3/7                   MC   +Ev  Rb  -   -   SAR                 EFL=m--mmumm RW=~flags
 d4                     I    Ib   -   -   -   AAM         I64 SZ8 EFL=u--mmumu RW==flags,+ax
 d5                     I    Ib   -   -   -   AAD         I64 SZ8 EFL=u--mmumu RW==flags,+ax
-d6                     NP   -    -   -   -   SALC        I64     UNDOC RW=?
+d6                     NP   -    -   -   -   SALC        I64     RW=cf,=ax
 d6                     NP   -    -   -   -   UDB         O64     RW=?
 d7                     NP   -    -   -   -   XLATB+as            RW=?,mem
 #d8-df FPU Escape

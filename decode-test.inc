@@ -1,6 +1,6 @@
 // clang-format off
 TEST("\x90", "nop")
-TEST64("\xd6", "udb")
+TEST3264("\xd6", "salc", "udb")
 TEST("\x0f\xff\xc0", "ud0 eax, eax")
 TEST("\x0f\xb9\xc0", "ud1 eax, eax")
 TEST("\x0f\x0b", "ud2")
