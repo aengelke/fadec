@@ -1438,7 +1438,7 @@ d9/7m                  M    =Mw  -   -   -   FSTCW               F=387 RW=+fpu
 d9/0r                  M    Ft   -   -   -   FLD                 F=387 RW=+fpu
 d9/1r                  M    Ft   -   -   -   FXCH                F=387 RW=+fpu
 d9d0                   NP   -    -   -   -   FNOP                F=387 RW=+fpu
-d9/3r                  MA   Ft   Ft  -   -   FSTPNCE             F=387 UNDOC RW=+fpu
+d9/3r                  MA   Ft   Ft  -   -   FSTPNCE             F=387 RW=+fpu
 d9e0                   NP   -    -   -   -   FCHS                F=387 RW=+fpu
 d9e1                   NP   -    -   -   -   FABS                F=387 RW=+fpu
 d9e4                   NP   -    -   -   -   FTST                F=387 RW=+fpu
@@ -1507,8 +1507,8 @@ dc/6m                  M    Mq   -   -   -   FDIV                F=387 ENC_SEPSZ
 dc/7m                  M    Mq   -   -   -   FDIVR               F=387 ENC_SEPSZ RW=+fpu
 dc/0r                  MA   +Ft  Ft  -   -   FADD                F=387 RW=+fpu
 dc/1r                  MA   +Ft  Ft  -   -   FMUL                F=387 RW=+fpu
-dc/2r                  MA   +Ft  Ft  -   -   FCOM                F=387 UNDOC RW=+fpu
-dc/3r                  MA   +Ft  Ft  -   -   FCOMP               F=387 UNDOC RW=+fpu
+dc/2r                  MA   +Ft  Ft  -   -   FCOM                F=387 RW=+fpu
+dc/3r                  MA   +Ft  Ft  -   -   FCOMP               F=387 RW=+fpu
 dc/4r                  MA   +Ft  Ft  -   -   FSUBR               F=387 RW=+fpu
 dc/5r                  MA   +Ft  Ft  -   -   FSUB                F=387 RW=+fpu
 dc/6r                  MA   +Ft  Ft  -   -   FDIVR               F=387 RW=+fpu
@@ -1521,7 +1521,7 @@ dd/4m                  M    M    -   -   -   FRSTOR              F=387 RW=+fpu,m
 dd/6m                  M    =M   -   -   -   FSAVE               F=387 RW=+fpu,=mem
 dd/7m                  M    =Mw  -   -   -   FSTSW               F=387 RW=+fpu
 dd/0r                  M    Ft   -   -   -   FFREE               F=387 RW=+fpu
-dd/1r                  AM   Ft   Ft  -   -   FXCH                F=387 UNDOC RW=+fpu
+dd/1r                  AM   Ft   Ft  -   -   FXCH                F=387 RW=+fpu
 dd/2r                  M    +Ft  -   -   -   FST                 F=387 RW=+fpu
 dd/3r                  M    +Ft  -   -   -   FSTP                F=387 RW=+fpu
 dd/4r                  M    Ft   -   -   -   FUCOM               F=387 RW=+fpu
@@ -1550,10 +1550,10 @@ df/4m                  M    Mt   -   -   -   FBLD                F=387 RW=+fpu
 df/5m                  M    Mq   -   -   -   FILD                F=387 ENC_SEPSZ RW=+fpu
 df/6m                  M    =Mt  -   -   -   FBSTP               F=387 RW=+fpu
 df/7m                  M    =Mq  -   -   -   FISTP               F=387 ENC_SEPSZ RW=+fpu
-df/0r                  M    =Ft  -   -   -   FFREEP              F=387 UNDOC RW=+fpu
-df/1r                  AM   =Ft  Ft  -   -   FXCH                F=387 UNDOC RW=+fpu
-df/2r                  MA   =Ft  Ft  -   -   FSTP                F=387 UNDOC RW=+fpu
-df/3r                  MA   =Ft  Ft  -   -   FSTP                F=387 UNDOC RW=+fpu
+df/0r                  M    =Ft  -   -   -   FFREEP              F=387 RW=+fpu
+df/1r                  AM   =Ft  Ft  -   -   FXCH                F=387 RW=+fpu
+df/2r                  MA   =Ft  Ft  -   -   FSTP                F=387 RW=+fpu
+df/3r                  MA   =Ft  Ft  -   -   FSTP                F=387 RW=+fpu
 # FSTSW AX
 dfe0                   A    =Rw  -   -   -   FSTSW               F=387 RW=+fpu
 df/5r                  AM   Ft   Ft  -   -   FUCOMIP             F=686 EFL=0--0m0mm RW==flags,+fpu
