@@ -50,42 +50,42 @@ class InstrFlags(namedtuple("InstrFlags", INSTR_FLAGS_FIELDS)):
 
 ENCODINGS = {
     "NP": InstrFlags(),
-    "M": InstrFlags(modrm=1, modrm_idx=0^3),
-    "R": InstrFlags(modrm=1, modreg_idx=0^3), # AMX TILEZERO
-    "M1": InstrFlags(modrm=1, modrm_idx=0^3, imm_idx=1^3, imm_control=1),
-    "MI": InstrFlags(modrm=1, modrm_idx=0^3, imm_idx=1^3, imm_control=4),
-    "IM": InstrFlags(modrm=1, modrm_idx=1^3, imm_idx=0^3, imm_control=4),
-    "MC": InstrFlags(modrm=1, modrm_idx=0^3, vexreg_idx=1^3, zeroreg_val=1),
-    "MR": InstrFlags(modrm=1, modrm_idx=0^3, modreg_idx=1^3),
-    "RM": InstrFlags(modrm=1, modrm_idx=1^3, modreg_idx=0^3),
-    "RMA": InstrFlags(modrm=1, modrm_idx=1^3, modreg_idx=0^3, vexreg_idx=2^3),
-    "MRI": InstrFlags(modrm=1, modrm_idx=0^3, modreg_idx=1^3, imm_idx=2^3, imm_control=4),
-    "RMI": InstrFlags(modrm=1, modrm_idx=1^3, modreg_idx=0^3, imm_idx=2^3, imm_control=4),
-    "MRC": InstrFlags(modrm=1, modrm_idx=0^3, modreg_idx=1^3, vexreg_idx=2^3, zeroreg_val=1),
-    "AM": InstrFlags(modrm=1, modrm_idx=1^3, vexreg_idx=0^3),
-    "MA": InstrFlags(modrm=1, modrm_idx=0^3, vexreg_idx=1^3),
-    "I": InstrFlags(imm_idx=0^3, imm_control=4),
-    "IA": InstrFlags(vexreg_idx=0^3, imm_idx=1^3, imm_control=4),
-    "O": InstrFlags(modrm_idx=0^3),
-    "OI": InstrFlags(modrm_idx=0^3, imm_idx=1^3, imm_control=4),
-    "OA": InstrFlags(modrm_idx=0^3, vexreg_idx=1^3),
-    "S": InstrFlags(modreg_idx=0^3), # segment register in bits 3,4,5
-    "A": InstrFlags(vexreg_idx=0^3),
-    "D": InstrFlags(imm_idx=0^3, imm_control=6),
-    "FD": InstrFlags(vexreg_idx=0^3, imm_idx=1^3, imm_control=2),
-    "TD": InstrFlags(vexreg_idx=1^3, imm_idx=0^3, imm_control=2),
+    "M": InstrFlags(modrm=1, modrm_idx=0+1),
+    "R": InstrFlags(modrm=1, modreg_idx=0+1), # AMX TILEZERO
+    "M1": InstrFlags(modrm=1, modrm_idx=0+1, imm_idx=1+1, imm_control=1),
+    "MI": InstrFlags(modrm=1, modrm_idx=0+1, imm_idx=1+1, imm_control=4),
+    "IM": InstrFlags(modrm=1, modrm_idx=1+1, imm_idx=0+1, imm_control=4),
+    "MC": InstrFlags(modrm=1, modrm_idx=0+1, vexreg_idx=1+1, zeroreg_val=1),
+    "MR": InstrFlags(modrm=1, modrm_idx=0+1, modreg_idx=1+1),
+    "RM": InstrFlags(modrm=1, modrm_idx=1+1, modreg_idx=0+1),
+    "RMA": InstrFlags(modrm=1, modrm_idx=1+1, modreg_idx=0+1, vexreg_idx=2+1),
+    "MRI": InstrFlags(modrm=1, modrm_idx=0+1, modreg_idx=1+1, imm_idx=2+1, imm_control=4),
+    "RMI": InstrFlags(modrm=1, modrm_idx=1+1, modreg_idx=0+1, imm_idx=2+1, imm_control=4),
+    "MRC": InstrFlags(modrm=1, modrm_idx=0+1, modreg_idx=1+1, vexreg_idx=2+1, zeroreg_val=1),
+    "AM": InstrFlags(modrm=1, modrm_idx=1+1, vexreg_idx=0+1),
+    "MA": InstrFlags(modrm=1, modrm_idx=0+1, vexreg_idx=1+1),
+    "I": InstrFlags(imm_idx=0+1, imm_control=4),
+    "IA": InstrFlags(vexreg_idx=0+1, imm_idx=1+1, imm_control=4),
+    "O": InstrFlags(modrm_idx=0+1),
+    "OI": InstrFlags(modrm_idx=0+1, imm_idx=1+1, imm_control=4),
+    "OA": InstrFlags(modrm_idx=0+1, vexreg_idx=1+1),
+    "S": InstrFlags(modreg_idx=0+1), # segment register in bits 3,4,5
+    "A": InstrFlags(vexreg_idx=0+1),
+    "D": InstrFlags(imm_idx=0+1, imm_control=6),
+    "FD": InstrFlags(vexreg_idx=0+1, imm_idx=1+1, imm_control=2),
+    "TD": InstrFlags(vexreg_idx=1+1, imm_idx=0+1, imm_control=2),
 
-    "RVM": InstrFlags(modrm=1, modrm_idx=2^3, modreg_idx=0^3, vexreg_idx=1^3),
-    "RVMI": InstrFlags(modrm=1, modrm_idx=2^3, modreg_idx=0^3, vexreg_idx=1^3, imm_idx=3^3, imm_control=4),
-    "RVMR": InstrFlags(modrm=1, modrm_idx=2^3, modreg_idx=0^3, vexreg_idx=1^3, imm_idx=3^3, imm_control=3),
-    "RMV": InstrFlags(modrm=1, modrm_idx=1^3, modreg_idx=0^3, vexreg_idx=2^3),
-    "VM": InstrFlags(modrm=1, modrm_idx=1^3, vexreg_idx=0^3),
-    "VMI": InstrFlags(modrm=1, modrm_idx=1^3, vexreg_idx=0^3, imm_idx=2^3, imm_control=4),
-    "MVR": InstrFlags(modrm=1, modrm_idx=0^3, modreg_idx=2^3, vexreg_idx=1^3),
-    "MRV": InstrFlags(modrm=1, modrm_idx=0^3, modreg_idx=1^3, vexreg_idx=2^3),
+    "RVM": InstrFlags(modrm=1, modrm_idx=2+1, modreg_idx=0+1, vexreg_idx=1+1),
+    "RVMI": InstrFlags(modrm=1, modrm_idx=2+1, modreg_idx=0+1, vexreg_idx=1+1, imm_idx=3+1, imm_control=4),
+    "RVMR": InstrFlags(modrm=1, modrm_idx=2+1, modreg_idx=0+1, vexreg_idx=1+1, imm_idx=3+1, imm_control=3),
+    "RMV": InstrFlags(modrm=1, modrm_idx=1+1, modreg_idx=0+1, vexreg_idx=2+1),
+    "VM": InstrFlags(modrm=1, modrm_idx=1+1, vexreg_idx=0+1),
+    "VMI": InstrFlags(modrm=1, modrm_idx=1+1, vexreg_idx=0+1, imm_idx=2+1, imm_control=4),
+    "MVR": InstrFlags(modrm=1, modrm_idx=0+1, modreg_idx=2+1, vexreg_idx=1+1),
+    "MRV": InstrFlags(modrm=1, modrm_idx=0+1, modreg_idx=1+1, vexreg_idx=2+1),
 }
 ENCODING_OPTYS = ["modrm", "modreg", "vexreg", "imm"]
-ENCODING_OPORDER = { enc: sorted(ENCODING_OPTYS, key=lambda ty: getattr(ENCODINGS[enc], ty+"_idx")^3) for enc in ENCODINGS}
+ENCODING_OPORDER = { enc: sorted(ENCODING_OPTYS, key=lambda ty: getattr(ENCODINGS[enc], ty+"_idx")-1 & 7) for enc in ENCODINGS}
 
 OPKIND_CANONICALIZE = {
     "I": "IMM", # immediate
@@ -233,7 +233,7 @@ class InstrDesc(NamedTuple):
             return 1
         if self.mnemonic == "ENTER":
             return 3
-        return self.operands[flags.imm_idx^3].immsize(opsz)
+        return self.operands[flags.imm_idx-1].immsize(opsz)
 
     def dynsizes(self):
         dynopsz = set(op.size for op in self.operands if op.size < 0)
@@ -290,12 +290,14 @@ class InstrDesc(NamedTuple):
 
         for i, opkind in enumerate(self.operands):
             sz = self.OPKIND_SIZES[opkind.size] if opkind.size >= 0 else opkind.size
+            opname = ENCODING_OPORDER[self.encoding][i]
+            # Re-encode off-by-one into ones complement.
+            extraflags[f"{opname}_idx"] = ((getattr(flags, f"{opname}_idx") - 1) ^ 3) & 3
             if opkind.kind == "IMM":
                 if imm_byte and sz not in [1] + dynsizes[:1]:
                     raise Exception(f"imm_byte with opsize {sz} in {self}")
                 extraflags[f"imm_size"] = sz == 1 if imm_byte else sizes.index(sz)
             else:
-                opname = ENCODING_OPORDER[self.encoding][i]
                 extraflags[f"{opname}_size"] = sizes.index(sz)
                 extraflags[f"{opname}_ty"] = self.OPKIND_REGTYS[opname, opkind.kind]
 
@@ -421,16 +423,16 @@ def verifyOpcodeDesc(opcode, desc):
         raise Exception(f"(E)VEX.LIG with dynamic vector size {opcode}, {desc}")
     if "VSIB" in desc.flags and opcode.modrm[0] != "m":
         raise Exception(f"VSIB for non-memory opcode {opcode}, {desc}")
-    if opcode.vex == 2 and flags.modreg_idx and flags.modreg_idx ^ 3 != 0:
+    if opcode.vex == 2 and flags.modreg_idx and flags.modreg_idx-1 != 0:
         # EVEX.z=0 is only checked for mask operands in ModReg
-        if desc.operands[flags.modreg_idx ^ 3].kind == "MASK":
+        if desc.operands[flags.modreg_idx-1].kind == "MASK":
             raise Exception(f"ModRM.reg mask not first operand {opcode}, {desc}")
     # Verify tuple type
     if opcode.vex == 2 and opcode.modrm[0] != "r":
         tts = [s for s in desc.flags if s.startswith("TUPLE")]
         if len(tts) != 1:
             raise Exception(f"missing tuple type in {opcode}, {desc}")
-        if flags.modrm_idx == 3 ^ 3:
+        if not flags.modrm_idx:
             raise Exception(f"missing memory operand {opcode}, {desc}")
         # From Intel SDM
         bcst, evexw, vszs = {
@@ -474,7 +476,7 @@ def verifyOpcodeDesc(opcode, desc):
         if evexw and opcode.rexw != evexw:
             raise Exception(f"incompatible EVEX.W {opcode}, {desc}")
         for l, tupsz in enumerate(vszs):
-            opsz = desc.operands[flags.modrm_idx ^ 3].abssize(0, 16 << l)
+            opsz = desc.operands[flags.modrm_idx-1].abssize(0, 16 << l)
             if tupsz is not None and opsz != tupsz:
                 raise Exception(f"memory size {opsz} != {tupsz} {opcode}, {desc}")
 
@@ -882,7 +884,7 @@ def encode_mnems(entries):
             evexdisp8scale = 0
             if spec_opcode.vex == 2 and has_memory:
                 if not evexbcst:
-                    op = desc.operands[ENCODINGS[desc.encoding].modrm_idx^3]
+                    op = desc.operands[ENCODINGS[desc.encoding].modrm_idx-1]
                     size = op.abssize(opsize//8, vecsize//8)
                     evexdisp8scale = size.bit_length() - 1
                 elif "BCST16" in desc.flags:
@@ -1113,20 +1115,20 @@ def encode2_gen_legacy(variant: EncodeVariant, opsize: int, supports_high_regs: 
         rex_values.add(0x40)
     has_modreg_rex = False
     if flags.modreg_idx:
-        has_modreg_rex = desc.operands[flags.modreg_idx^3].kind in ("GP", "XMM", "CR", "DR")
+        has_modreg_rex = desc.operands[flags.modreg_idx-1].kind in ("GP", "XMM", "CR", "DR")
     if flags.modrm_idx:
         if opcode.modrm[0] == "m":
-            rex_modreg_op = f"op_reg_idx(op{flags.modreg_idx^3})" if has_modreg_rex else "0"
-            rex_expr.append(f"enc_rex_mem(op{flags.modrm_idx^3}, {rex_modreg_op})")
+            rex_modreg_op = f"op_reg_idx(op{flags.modreg_idx-1})" if has_modreg_rex else "0"
+            rex_expr.append(f"enc_rex_mem(op{flags.modrm_idx-1}, {rex_modreg_op})")
             rex_values |= {0x41, 0x42, 0x44}
-        elif desc.operands[flags.modrm_idx^3].kind in ("GP", "XMM"):
-            rex_expr.append(f"(op_reg_idx(op{flags.modrm_idx^3})&8?0x1:0)")
+        elif desc.operands[flags.modrm_idx-1].kind in ("GP", "XMM"):
+            rex_expr.append(f"(op_reg_idx(op{flags.modrm_idx-1})&8?0x1:0)")
             rex_values.add(0x41)
             if has_modreg_rex:
-                rex_expr.append(f"(op_reg_idx(op{flags.modreg_idx^3})&8?0x4:0)")
+                rex_expr.append(f"(op_reg_idx(op{flags.modreg_idx-1})&8?0x4:0)")
                 rex_values.add(0x44)
     elif has_modreg_rex: # O encoding
-        rex_expr.append(f"(op_reg_idx(op{flags.modreg_idx^3})&8?0x1:0)")
+        rex_expr.append(f"(op_reg_idx(op{flags.modreg_idx-1})&8?0x1:0)")
         rex_values.add(0x41)
 
     if rex_expr:
@@ -1164,13 +1166,13 @@ def encode2_gen_legacy(variant: EncodeVariant, opsize: int, supports_high_regs: 
 
     if flags.modrm:
         if flags.modreg_idx:
-            modreg = f"op_reg_idx(op{flags.modreg_idx^3})"
+            modreg = f"op_reg_idx(op{flags.modreg_idx-1})"
         else:
             modreg = opcode.modrm[1] or 0
         if opcode.modrm[0] == "m":
             assert "VSIB" not in desc.flags
             assert opcode.modrm[2] is None
-            modrm = f"op{flags.modrm_idx^3}"
+            modrm = f"op{flags.modrm_idx-1}"
             if imm_size_expr:
                 code += f"  idx = enc_mem(buf+idx, idx+{imm_size_expr}, {modrm}, {modreg}, 0, 0);\n"
                 code += f"  if (!idx) return 0;\n  idx -= {imm_size_expr};\n"
@@ -1179,12 +1181,12 @@ def encode2_gen_legacy(variant: EncodeVariant, opsize: int, supports_high_regs: 
                 code += f"  idx = enc_mem(buf+idx, idx, {modrm}, {modreg}, 0, 0);\n"
         else:
             if flags.modrm_idx:
-                modrm = f"op_reg_idx(op{flags.modrm_idx^3})"
+                modrm = f"op_reg_idx(op{flags.modrm_idx-1})"
             else:
                 modrm = f"{opcode.modrm[2] or 0}"
             code += f"  buf[idx++] = 0xC0|({modreg}<<3)|({modrm}&7);\n"
     elif flags.modrm_idx:
-        code += f"  buf[idx-1] |= op_reg_idx(op{flags.modrm_idx^3}) & 7;\n"
+        code += f"  buf[idx-1] |= op_reg_idx(op{flags.modrm_idx-1}) & 7;\n"
     if flags.imm_control >= 2:
         if flags.imm_control == 6:
             imm_expr += " - idx"
@@ -1220,10 +1222,10 @@ def encode2_gen_vex(variant: EncodeVariant, imm_expr: str, imm_size_expr, has_id
         helperopc += "|(op_reg_idx(opmask)&7)"
 
     if flags.modreg_idx:
-        modreg = f"op_reg_idx(op{flags.modreg_idx^3})"
+        modreg = f"op_reg_idx(op{flags.modreg_idx-1})"
     else:
         modreg = opcode.modrm[1] or 0
-    vexop = f"op_reg_idx(op{flags.vexreg_idx^3})" if flags.vexreg_idx else 0
+    vexop = f"op_reg_idx(op{flags.vexreg_idx-1})" if flags.vexreg_idx else 0
     is_memory = opcode.modrm[0] == "m"
     if not flags.modrm and opcode.modrm == (None, None, None):
         # No ModRM, prefix only (VZEROUPPER/VZEROALL)
@@ -1235,18 +1237,18 @@ def encode2_gen_vex(variant: EncodeVariant, imm_expr: str, imm_size_expr, has_id
         helperfn = "enc" + ["", "_vex", "_evex"][opcode.vex] + ["_mem", "_vsib"][vsib]
         assert opcode.modrm[2] in (None, 4)
         forcesib = 1 if opcode.modrm[2] == 4 else 0 # AMX
-        modrm = f"op{flags.modrm_idx^3}"
+        modrm = f"op{flags.modrm_idx-1}"
         ripoff = f"{imm_size_expr}" + ("" if not has_idx else "+idx")
         helperargs = (f"{modrm}, {modreg}, {vexop}, {ripoff}, " +
                       f"{forcesib}, {variant.evexdisp8scale}")
     else:
         if flags.modrm_idx:
-            modrm = f"op_reg_idx(op{flags.modrm_idx^3})"
+            modrm = f"op_reg_idx(op{flags.modrm_idx-1})"
         else:
             modrm = f"{opcode.modrm[2] or 0}"
         suffix = "_reg"
         if (opcode.vex == 2 and flags.modrm_idx and
-            variant.desc.operands[flags.modrm_idx^3].kind == "XMM"):
+            variant.desc.operands[flags.modrm_idx-1].kind == "XMM"):
             suffix = "_xmm"
         helperfn = "enc" + ["", "_vex", "_evex"][opcode.vex] + suffix
         helperargs = f"{modrm}, {modreg}, {vexop}"
@@ -1342,20 +1344,20 @@ def encode2_table(entries, args):
                 # XCHG eax, eax must not be encoded as 90 -- that'd be NOP.
                 conds.append(f"!(op_reg_idx(op0)==0&&op_reg_idx(op1)==0)")
             if flags.vexreg_idx and not opcode.vex: # vexreg w/o vex is zeroreg
-                conds.append(f"op_reg_idx(op{flags.vexreg_idx^3})=={flags.zeroreg_val}")
+                conds.append(f"op_reg_idx(op{flags.vexreg_idx-1})=={flags.zeroreg_val}")
 
             imm_size = desc.imm_size(opsize//8)
-            imm_expr = f"(int64_t) op{flags.imm_idx^3}"
+            imm_expr = f"(int64_t) op{flags.imm_idx-1}"
             if flags.imm_control == 1:
-                conds.append(f"op{flags.imm_idx^3} == 1")
+                conds.append(f"op{flags.imm_idx-1} == 1")
             elif flags.imm_control == 2:
                 imm_size = "(flags & FE_ADDR32 ? 4 : 8)"
                 imm_expr = f"(int64_t) (flags & FE_ADDR32 ? (int32_t) {imm_expr} : {imm_expr})"
             elif flags.imm_control == 3:
-                imm_expr = f"op_reg_idx(op{flags.imm_idx^3}) << 4"
-                code += f"  if (op_reg_idx(op{flags.imm_idx^3}) >= 16) return 0;\n"
+                imm_expr = f"op_reg_idx(op{flags.imm_idx-1}) << 4"
+                code += f"  if (op_reg_idx(op{flags.imm_idx-1}) >= 16) return 0;\n"
             elif flags.imm_control == 4 and imm_size == 3: # ENTER
-                code += f"  if ((uint32_t) op{flags.imm_idx^3} >= 0x1000000) return 0;\n"
+                code += f"  if ((uint32_t) op{flags.imm_idx-1} >= 0x1000000) return 0;\n"
             elif flags.imm_control == 4 and imm_size < max_imm_size:
                 conds.append(f"op_imm_n({imm_expr}, {imm_size})")
             elif flags.imm_control == 6:
