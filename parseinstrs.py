@@ -78,6 +78,7 @@ ENCODINGS = {
     "RVM": InstrFlags(modrm=1, modrm_idx=2+1, modreg_idx=0+1, vexreg_idx=1+1),
     "RVMI": InstrFlags(modrm=1, modrm_idx=2+1, modreg_idx=0+1, vexreg_idx=1+1, imm_idx=3+1, imm_control=4),
     "RVMR": InstrFlags(modrm=1, modrm_idx=2+1, modreg_idx=0+1, vexreg_idx=1+1, imm_idx=3+1, imm_control=3),
+    "RVRM": InstrFlags(modrm=1, modrm_idx=3+1, modreg_idx=0+1, vexreg_idx=1+1, imm_idx=2+1, imm_control=3),
     "RMV": InstrFlags(modrm=1, modrm_idx=1+1, modreg_idx=0+1, vexreg_idx=2+1),
     "VM": InstrFlags(modrm=1, modrm_idx=1+1, vexreg_idx=0+1),
     "VMI": InstrFlags(modrm=1, modrm_idx=1+1, vexreg_idx=0+1, imm_idx=2+1, imm_control=4),
@@ -293,6 +294,10 @@ class InstrDesc(NamedTuple):
             opname = ENCODING_OPORDER[self.encoding][i]
             # Re-encode off-by-one into ones complement.
             extraflags[f"{opname}_idx"] = ((getattr(flags, f"{opname}_idx") - 1) ^ 3) & 3
+            if self.encoding == "RVRM" and opname == "modrm":
+                # Intentionally collide modrm_idx with imm_idx, this is handled
+                # in the immediate code.
+                extraflags["modrm_idx"] = 2 ^ 3
             if opkind.kind == "IMM":
                 if imm_byte and sz not in [1] + dynsizes[:1]:
                     raise Exception(f"imm_byte with opsize {sz} in {self}")
@@ -401,6 +406,11 @@ def verifyOpcodeDesc(opcode, desc):
             raise Exception(f"vexreg operand-regkind mismatch {opcode}, {desc}")
         if oporder[i] == "imm" and opkind.regkind not in expected_immkinds:
             raise Exception(f"imm operand-regkind mismatch {opcode}, {desc}")
+    if flags.imm_control == 3:
+        if oporder[3] != "imm" and oporder[2] != "imm":
+            raise Exception(f"immreg must be operand 3 or 4 {opcode} {desc}")
+        if oporder[2] == "imm" and oporder[3] != "modrm":
+            raise Exception(f"immreg at operand 2 must precede modrm {opcode} {desc}")
     if "INSTR_WIDTH" in desc.flags and len(desc.operands) > 3:
         raise Exception(f"+w with four operands {opcode}, {desc}")
     if opcode.escape == 2 and flags.imm_control != 0:
@@ -1085,7 +1095,7 @@ def encode_table(entries, args):
                 enc_encoding = "A"
             opc_i |= ["NP", "M", "R", "M1", "MC", "MR", "RM", "RMA", "MRC",
                 "AM", "MA", "I", "O", "OA", "S", "A", "D", "FD", "TD", "IM",
-                "RVM", "RVMR", "RMV", "VM", "MVR", "MRV",
+                "RVM", "RVMR", "RVRM", "RMV", "VM", "MVR", "MRV",
             ].index(enc_encoding) << 51
             opc_i |= alt << 56
             enc_opcs.append(opc_i)

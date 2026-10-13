@@ -1597,6 +1597,49 @@ F3.0fc7/6m             M    Mq  -   -   -   VMXON               F=VMX EFL=0--0m0
 66.0f01ce              NP   -   -   -   -   SEAMOPS             F=SEAM
 66.0f01cf              NP   -   -   -   -   SEAMCALL            F=SEAM
 
+# AMD FMA4
+# VEX.W swaps the last operands. W1 is canonical for /r and has to come first.
+VEX.66.W1.0f3a5c       RVRM Vx  Hx  Lx  Wx  VFMADDSUBPS         F=FMA4 ONLYAMD
+VEX.66.W0.0f3a5c       RVMR Vx  Hx  Wx  Lx  VFMADDSUBPS         F=FMA4 ONLYAMD
+VEX.66.W1.0f3a5d       RVRM Vx  Hx  Lx  Wx  VFMADDSUBPD         F=FMA4 ONLYAMD
+VEX.66.W0.0f3a5d       RVMR Vx  Hx  Wx  Lx  VFMADDSUBPD         F=FMA4 ONLYAMD
+VEX.66.W1.0f3a5e       RVRM Vx  Hx  Lx  Wx  VFMSUBADDPS         F=FMA4 ONLYAMD
+VEX.66.W0.0f3a5e       RVMR Vx  Hx  Wx  Lx  VFMSUBADDPS         F=FMA4 ONLYAMD
+VEX.66.W1.0f3a5f       RVRM Vx  Hx  Lx  Wx  VFMSUBADDPD         F=FMA4 ONLYAMD
+VEX.66.W0.0f3a5f       RVMR Vx  Hx  Wx  Lx  VFMSUBADDPD         F=FMA4 ONLYAMD
+VEX.66.W1.0f3a68       RVRM Vx  Hx  Lx  Wx  VFMADDPS            F=FMA4 ONLYAMD
+VEX.66.W0.0f3a68       RVMR Vx  Hx  Wx  Lx  VFMADDPS            F=FMA4 ONLYAMD
+VEX.66.W1.0f3a69       RVRM Vx  Hx  Lx  Wx  VFMADDPD            F=FMA4 ONLYAMD
+VEX.66.W0.0f3a69       RVMR Vx  Hx  Wx  Lx  VFMADDPD            F=FMA4 ONLYAMD
+VEX.66.W1.LIG.0f3a6a   RVRM Vdq Hss Lss Wss VFMADDSS            F=FMA4 ONLYAMD
+VEX.66.W0.LIG.0f3a6a   RVMR Vdq Hss Wss Lss VFMADDSS            F=FMA4 ONLYAMD
+VEX.66.W1.LIG.0f3a6b   RVRM Vdq Hsd Lsd Wsd VFMADDSD            F=FMA4 ONLYAMD
+VEX.66.W0.LIG.0f3a6b   RVMR Vdq Hsd Wsd Lsd VFMADDSD            F=FMA4 ONLYAMD
+VEX.66.W1.0f3a6c       RVRM Vx  Hx  Lx  Wx  VFMSUBPS            F=FMA4 ONLYAMD
+VEX.66.W0.0f3a6c       RVMR Vx  Hx  Wx  Lx  VFMSUBPS            F=FMA4 ONLYAMD
+VEX.66.W1.0f3a6d       RVRM Vx  Hx  Lx  Wx  VFMSUBPD            F=FMA4 ONLYAMD
+VEX.66.W0.0f3a6d       RVMR Vx  Hx  Wx  Lx  VFMSUBPD            F=FMA4 ONLYAMD
+VEX.66.W1.LIG.0f3a6e   RVRM Vdq Hss Lss Wss VFMSUBSS            F=FMA4 ONLYAMD
+VEX.66.W0.LIG.0f3a6e   RVMR Vdq Hss Wss Lss VFMSUBSS            F=FMA4 ONLYAMD
+VEX.66.W1.LIG.0f3a6f   RVRM Vdq Hsd Lsd Wsd VFMSUBSD            F=FMA4 ONLYAMD
+VEX.66.W0.LIG.0f3a6f   RVMR Vdq Hsd Wsd Lsd VFMSUBSD            F=FMA4 ONLYAMD
+VEX.66.W1.0f3a78       RVRM Vx  Hx  Lx  Wx  VFNMADDPS           F=FMA4 ONLYAMD
+VEX.66.W0.0f3a78       RVMR Vx  Hx  Wx  Lx  VFNMADDPS           F=FMA4 ONLYAMD
+VEX.66.W1.0f3a79       RVRM Vx  Hx  Lx  Wx  VFNMADDPD           F=FMA4 ONLYAMD
+VEX.66.W0.0f3a79       RVMR Vx  Hx  Wx  Lx  VFNMADDPD           F=FMA4 ONLYAMD
+VEX.66.W1.LIG.0f3a7a   RVRM Vdq Hss Lss Wss VFNMADDSS           F=FMA4 ONLYAMD
+VEX.66.W0.LIG.0f3a7a   RVMR Vdq Hss Wss Lss VFNMADDSS           F=FMA4 ONLYAMD
+VEX.66.W1.LIG.0f3a7b   RVRM Vdq Hsd Lsd Wsd VFNMADDSD           F=FMA4 ONLYAMD
+VEX.66.W0.LIG.0f3a7b   RVMR Vdq Hsd Wsd Lsd VFNMADDSD           F=FMA4 ONLYAMD
+VEX.66.W1.0f3a7c       RVRM Vx  Hx  Lx  Wx  VFNMSUBPS           F=FMA4 ONLYAMD
+VEX.66.W0.0f3a7c       RVMR Vx  Hx  Wx  Lx  VFNMSUBPS           F=FMA4 ONLYAMD
+VEX.66.W1.0f3a7d       RVRM Vx  Hx  Lx  Wx  VFNMSUBPD           F=FMA4 ONLYAMD
+VEX.66.W0.0f3a7d       RVMR Vx  Hx  Wx  Lx  VFNMSUBPD           F=FMA4 ONLYAMD
+VEX.66.W1.LIG.0f3a7e   RVRM Vdq Hss Lss Wss VFNMSUBSS           F=FMA4 ONLYAMD
+VEX.66.W0.LIG.0f3a7e   RVMR Vdq Hss Wss Lss VFNMSUBSS           F=FMA4 ONLYAMD
+VEX.66.W1.LIG.0f3a7f   RVRM Vdq Hsd Lsd Wsd VFNMSUBSD           F=FMA4 ONLYAMD
+VEX.66.W0.LIG.0f3a7f   RVMR Vdq Hsd Wsd Lsd VFNMSUBSD           F=FMA4 ONLYAMD
+
 # AMD CLZERO
 NFx.0f01fc             A    Rv  -   -   -   CLZERO              F=CLZERO ONLYAMD
 

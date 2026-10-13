@@ -643,7 +643,12 @@ direct:
       instr->disp = LOAD_LE_8(&buffer[off]);
     off += moffsz;
   } else if (UNLIKELY(imm_control == 3)) {
-    // 3 = register in imm8[7:4], used for RVMR encoding with VBLENDVP[SD]
+    // 3 = register in imm8[7:4], used for RVMR encoding with VBLENDVP[SD] and
+    // AMD FMA4. For FMA4 with the unusual RVRM encoding, the ModRM.rm operand
+    // is the last operand, which we can't encode in 2 bits. Special case this
+    // here by detecting collision on operand 2 and move the ModRM.rm operand.
+    if (DESC_IMM_IDX(desc) == 2)
+      instr->operands[3] = instr->operands[2];
     FdOp* operand = &instr->operands[DESC_IMM_IDX(desc)];
     operand->type = FD_OT_REG;
     operand->size = op_size;

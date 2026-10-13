@@ -178,6 +178,5 @@ Some ISA extensions are not supported, often because they are deprecated or unsu
 - (Intel) HLE prefixes `xacquire`/`xrelease`: Intel lists HLE as deprecated. The formatter for decoded instructions is able to reconstruct these in most cases, though.
 - (Intel) Xeon Phi (KNC/KNL/KNM) extensions, including the MVEX prefix: the hardware is discontinued/no longer available.
 - (AMD) XOP: unsupported by newer hardware.
-- (AMD) FMA4: unsupported by newer hardware.
 
 If you find any other issues, please report a bug. Or, even better, send a patch fixing the issue.
