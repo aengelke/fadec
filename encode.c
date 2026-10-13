@@ -363,31 +363,32 @@ struct EncodingInfo {
 const struct EncodingInfo encoding_infos[ENC_MAX] = {
     // clang-format off
     [ENC_NP] = {0},
-    [ENC_M] = {.modrm = 0x0^3, .immidx = 1},
-    [ENC_R] = {.modreg = 0x0^3},
-    [ENC_M1] = {.modrm = 0x0^3, .immctl = 1, .immidx = 1},
-    [ENC_MC] = {.modrm = 0x0^3, .zregidx = 0x1^3, .zregval = 1},
-    [ENC_MR] = {.modrm = 0x0^3, .modreg = 0x1^3, .immidx = 2},
-    [ENC_RM] = {.modrm = 0x1^3, .modreg = 0x0^3, .immidx = 2},
-    [ENC_RMA] = {.modrm = 0x1^3, .modreg = 0x0^3, .zregidx = 0x2^3, .zregval = 0},
-    [ENC_MRC] = {.modrm = 0x0^3, .modreg = 0x1^3, .zregidx = 0x2^3, .zregval = 1},
-    [ENC_AM] = {.modrm = 0x1^3, .zregidx = 0x0^3, .zregval = 0},
-    [ENC_MA] = {.modrm = 0x0^3, .zregidx = 0x1^3, .zregval = 0},
+    [ENC_M] = {.modrm = 0x0+1, .immidx = 1},
+    // This is a little fishy, we use a zero-padded operand for rm.
+    [ENC_R] = {.modreg = 0x0+1, .modrm = 0x1+1},
+    [ENC_M1] = {.modrm = 0x0+1, .immctl = 1, .immidx = 1},
+    [ENC_MC] = {.modrm = 0x0+1, .zregidx = 0x1+1, .zregval = 1},
+    [ENC_MR] = {.modrm = 0x0+1, .modreg = 0x1+1, .immidx = 2},
+    [ENC_RM] = {.modrm = 0x1+1, .modreg = 0x0+1, .immidx = 2},
+    [ENC_RMA] = {.modrm = 0x1+1, .modreg = 0x0+1, .zregidx = 0x2+1, .zregval = 0},
+    [ENC_MRC] = {.modrm = 0x0+1, .modreg = 0x1+1, .zregidx = 0x2+1, .zregval = 1},
+    [ENC_AM] = {.modrm = 0x1+1, .zregidx = 0x0+1, .zregval = 0},
+    [ENC_MA] = {.modrm = 0x0+1, .zregidx = 0x1+1, .zregval = 0},
     [ENC_I] = {.immidx = 0},
-    [ENC_O] = {.modreg = 0x0^3, .immidx = 1},
-    [ENC_OA] = {.modreg = 0x0^3, .zregidx = 0x1^3, .zregval = 0},
+    [ENC_O] = {.modreg = 0x0+1, .immidx = 1},
+    [ENC_OA] = {.modreg = 0x0+1, .zregidx = 0x1+1, .zregval = 0},
     [ENC_S] = {0},
-    [ENC_A] = {.zregidx = 0x0^3, .zregval = 0, .immidx = 1},
+    [ENC_A] = {.zregidx = 0x0+1, .zregval = 0, .immidx = 1},
     [ENC_D] = {.immidx = 0},
-    [ENC_FD] = {.zregidx = 0x0^3, .zregval = 0, .immctl = 2, .immidx = 1},
-    [ENC_TD] = {.zregidx = 0x1^3, .zregval = 0, .immctl = 2, .immidx = 0},
-    [ENC_IM] = {.modrm = 0x1^3, .immidx = 0},
-    [ENC_RVM] = {.modrm = 0x2^3, .modreg = 0x0^3, .vexreg = 0x1^3, .immidx = 3},
-    [ENC_RVMR] = {.modrm = 0x2^3, .modreg = 0x0^3, .vexreg = 0x1^3, .immctl = 3, .immidx = 3},
-    [ENC_RMV] = {.modrm = 0x1^3, .modreg = 0x0^3, .vexreg = 0x2^3},
-    [ENC_VM] = {.modrm = 0x1^3, .vexreg = 0x0^3, .immidx = 2},
-    [ENC_MVR] = {.modrm = 0x0^3, .modreg = 0x2^3, .vexreg = 0x1^3},
-    [ENC_MRV] = {.modrm = 0x0^3, .modreg = 0x1^3, .vexreg = 0x2^3},
+    [ENC_FD] = {.zregidx = 0x0+1, .zregval = 0, .immctl = 2, .immidx = 1},
+    [ENC_TD] = {.zregidx = 0x1+1, .zregval = 0, .immctl = 2, .immidx = 0},
+    [ENC_IM] = {.modrm = 0x1+1, .immidx = 0},
+    [ENC_RVM] = {.modrm = 0x2+1, .modreg = 0x0+1, .vexreg = 0x1+1, .immidx = 3},
+    [ENC_RVMR] = {.modrm = 0x2+1, .modreg = 0x0+1, .vexreg = 0x1+1, .immctl = 3, .immidx = 3},
+    [ENC_RMV] = {.modrm = 0x1+1, .modreg = 0x0+1, .vexreg = 0x2+1},
+    [ENC_VM] = {.modrm = 0x1+1, .vexreg = 0x0+1, .immidx = 2},
+    [ENC_MVR] = {.modrm = 0x0+1, .modreg = 0x2+1, .vexreg = 0x1+1},
+    [ENC_MRV] = {.modrm = 0x0+1, .modreg = 0x1+1, .vexreg = 0x2+1},
     // clang-format on
 };
 
@@ -418,7 +419,7 @@ try_encode:;
   int64_t imm = 0xcc;
   unsigned immsz = (opc >> 47) & 0xf;
 
-  if (UNLIKELY(ei->zregidx && op_reg_idx(ops[ei->zregidx ^ 3]) != ei->zregval))
+  if (UNLIKELY(ei->zregidx && op_reg_idx(ops[ei->zregidx - 1]) != ei->zregval))
     goto next;
 
   if (UNLIKELY(enc == ENC_S)) {
@@ -474,18 +475,15 @@ try_encode:;
   if ((opc & 0xfffffff) == 0x90 && ops[0] == FE_AX)
     goto next;
 
-  if (UNLIKELY(enc == ENC_R)) {
-    if (enc_mr(buf, opc, epfx, 0, ops[0], immsz))
-      goto fail;
-  } else if (ei->modrm) {
-    FeOp modreg = ei->modreg ? ops[ei->modreg ^ 3] : (opc & 0xff00) >> 8;
+  if (ei->modrm) {
+    FeOp modreg = ei->modreg ? ops[ei->modreg - 1] : (opc & 0xff00) >> 8;
     if (ei->vexreg)
-      epfx |= ((uint64_t)op_reg_idx(ops[ei->vexreg ^ 3])) << EPFX_VVVV_IDX;
+      epfx |= ((uint64_t)op_reg_idx(ops[ei->vexreg - 1])) << EPFX_VVVV_IDX;
     // Can fail for upgrade to EVEX due to high register numbers
-    if (enc_mr(buf, opc, epfx, ops[ei->modrm ^ 3], modreg, immsz))
+    if (enc_mr(buf, opc, epfx, ops[ei->modrm - 1], modreg, immsz))
       goto next;
   } else if (ei->modreg) {
-    if (enc_o(buf, opc, epfx, ops[ei->modreg ^ 3]))
+    if (enc_o(buf, opc, epfx, ops[ei->modreg - 1]))
       goto fail;
   } else {
     if (enc_opc(buf, opc, epfx))
